@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonopolyDeal", "MonopolyDeal\MonopolyDeal\MonopolyDeal.csproj", "{1A84781F-82DE-4C96-B3E2-FCB00348CAE0}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "MonopolyDealContent", "MonopolyDeal\MonopolyDealContent\MonopolyDealContent.contentproj", "{5D367B41-DC18-43DB-9D59-2BE303B02D37}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A84781F-82DE-4C96-B3E2-FCB00348CAE0}.Debug|x86.ActiveCfg = Debug|x86
+		{1A84781F-82DE-4C96-B3E2-FCB00348CAE0}.Debug|x86.Build.0 = Debug|x86
+		{1A84781F-82DE-4C96-B3E2-FCB00348CAE0}.Release|x86.ActiveCfg = Release|x86
+		{1A84781F-82DE-4C96-B3E2-FCB00348CAE0}.Release|x86.Build.0 = Release|x86
+		{5D367B41-DC18-43DB-9D59-2BE303B02D37}.Debug|x86.ActiveCfg = Debug|x86
+		{5D367B41-DC18-43DB-9D59-2BE303B02D37}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
