@@ -1,1 +1,2 @@
 D:\Users\Robin\Desktop\Programs\C#\Game Development\MonopolyDeal\MonopolyDeal\MonopolyDealContent\obj\x86\Debug\MonopolyDealContent.contentprojResolveAssemblyReference.cache
+D:\Users\Robin\Desktop\Programs\C#\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDealContent\obj\x86\Debug\MonopolyDealContent.contentprojResolveAssemblyReference.cache
