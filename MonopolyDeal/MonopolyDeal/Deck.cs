@@ -2,26 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace MonopolyDeal
 {
     class Deck
     {
-        public List<Card> cardList = new List<Card>(); // Deck is a list of cards
+        List<Card> cardList = new List<Card>(); // Deck is a list of cards
+        String textureName = "cardback";
 
         public Deck()
         {
             // Creates 3 cards with different values for testing
             // Will eventually read in .xls spreadsheet and create each card
-            for (int i = 0;i<5;i++)
+            for (int i = 0;i<10;i++)
             {
                 Card card = new Card(i);
                 cardList.Add(card);
             }
-
-            // debug.writeLine();
-
             Shuffle(cardList); // Randomizes the cards in the deck
+
+            foreach (Card card in cardList)
+            {
+                System.Diagnostics.Debug.WriteLine(card.getValue()); // Print out list of cards in deck
+            }
             // I don't think this is right. I'm doing this late at night. Will revisit.
         }
 
