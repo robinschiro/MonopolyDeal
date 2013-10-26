@@ -8,12 +8,8 @@ namespace MonopolyDeal
 {
     class Deck
     {
-<<<<<<< HEAD
-        List<Card> cardList = new List<Card>(); // Deck is a list of cards
         String textureName = "cardback";
-=======
         public List<Card> cardList = new List<Card>(); // Deck is a list of cards
->>>>>>> 12a66ac75e37fe6e9ce4518f050daf2626baffd8
 
         public Deck()
         {
