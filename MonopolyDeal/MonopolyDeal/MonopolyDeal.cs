@@ -27,6 +27,10 @@ namespace MonopolyDeal
         // Set the coordinates to draw the sprite at.
         Vector2 spritePosition = Vector2.Zero;
 
+        Deck deck = new Deck();
+
+
+
         public MonopolyDeal()
         {
             graphics = new GraphicsDeviceManager(this);
