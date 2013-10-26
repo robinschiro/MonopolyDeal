@@ -42,9 +42,9 @@ namespace MonopolyDeal
             }
         }
 
-        public String toString()
-        {
-            return 
-        }
+        //public String toString()
+        //{
+        //    return 
+        //}
     }
 }

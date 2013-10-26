@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -19,16 +20,12 @@ namespace MonopolyDeal
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Card testCard = new Card(Card.cardType.action, "test", 15);
-
         // This is a texture we can render.
         Texture2D myTexture;
+        Texture2D myTexture2;
 
         // Set the coordinates to draw the sprite at.
         Vector2 spritePosition = Vector2.Zero;
-
-        Vector2 spriteSpeed = new Vector2(50.0f, 50.0f);
-
 
         public MonopolyDeal()
         {
@@ -44,9 +41,8 @@ namespace MonopolyDeal
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
+            IsMouseVisible = true;
         }
 
         /// <summary>
@@ -58,8 +54,8 @@ namespace MonopolyDeal
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
-            myTexture = Content.Load<Texture2D>("10million");
+            myTexture = Content.Load<Texture2D>("cardback");
+            myTexture2 = Content.Load<Texture2D>("10million");
         }
 
         /// <summary>
@@ -81,8 +77,8 @@ namespace MonopolyDeal
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == 
-                ButtonState.Pressed)
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back ==
+                Microsoft.Xna.Framework.Input.ButtonState.Pressed)
                 this.Exit();
 
             // Move the sprite around.
@@ -94,59 +90,37 @@ namespace MonopolyDeal
         // Right now, this method allows the user to move the sprite around the window with the arrow keys.
         void UpdateSprite(GameTime gameTime)
         {
-            KeyboardState keyboard = Keyboard.GetState();
+            KeyboardState keyboardState = Keyboard.GetState();
 
-            if (keyboard.IsKeyDown(Keys.Right))
+            if (keyboardState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Right))
             {
                 spritePosition.X++;
             }
-            if (keyboard.IsKeyDown(Keys.Left))
+            if (keyboardState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
             {
                 spritePosition.X--;
             }
-            if (keyboard.IsKeyDown(Keys.Up))
+            if (keyboardState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Up))
             {
                 spritePosition.Y--;
             }
-            if (keyboard.IsKeyDown(Keys.Down))
+            if (keyboardState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
             {
                 spritePosition.Y++;
             }
-            //// Move the sprite by speed, scaled by elapsed time.
-            //spritePosition +=
-            //    spriteSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            //int MaxX =
-            //    graphics.GraphicsDevice.Viewport.Width - myTexture.Width;
-            //int MinX = 0;
-            //int MaxY =
-            //    graphics.GraphicsDevice.Viewport.Height - myTexture.Height;
-            //int MinY = 0;
-
-            //// Check for bounce.
-            //if (spritePosition.X > MaxX)
-            //{
-            //    spriteSpeed.X *= -1;
-            //    spritePosition.X = MaxX;
-            //}
-
-            //else if (spritePosition.X < MinX)
-            //{
-            //    spriteSpeed.X *= -1;
-            //    spritePosition.X = MinX;
-            //}
-
-            //if (spritePosition.Y > MaxY)
-            //{
-            //    spriteSpeed.Y *= -1;
-            //    spritePosition.Y = MaxY;
-            //}
-
-            //else if (spritePosition.Y < MinY)
-            //{
-            //    spriteSpeed.Y *= -1;
-            //    spritePosition.Y = MinY;
-            //}
+            // ROBIN: Pop up a message box if the user clicks on the deck's initial position (represented by the picture of the back
+            // of a card). This is a test to see how click events can be handled in XNA.
+            // By the way, I'm starting not to like XNA; consider switching to XAML.
+            MouseState mouseState = Mouse.GetState();
+            Rectangle scaledBounds = new Rectangle(0, 0, (int)(myTexture.Width * 0.3), (int)(myTexture.Height * 0.3));
+            if (scaledBounds.Contains(new Point(mouseState.X, mouseState.Y)) && mouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            {
+                MessageBox.Show("You have clicked the area of the deck's initial position.");
+                //spriteBatch.Begin();
+                //spriteBatch.Draw(myTexture2, new Vector2(150, 150), null, Color.White, 0, new Vector2(), .3f, SpriteEffects.None, 0);
+                //spriteBatch.End();
+            }
         }
 
         /// <summary>
@@ -159,7 +133,8 @@ namespace MonopolyDeal
 
             // Draw the sprite.
             spriteBatch.Begin();
-            spriteBatch.Draw(myTexture, spritePosition, Color.White);
+            spriteBatch.Draw(myTexture, spritePosition, null, Color.White, 0, new Vector2(), .3f, SpriteEffects.None, 0);
+            spriteBatch.Draw(myTexture2, new Vector2(150, 150), null, Color.White, 0, new Vector2(), .3f, SpriteEffects.None, 0);
             spriteBatch.End();
 
             base.Draw(gameTime);
