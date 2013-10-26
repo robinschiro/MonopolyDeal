@@ -19,13 +19,14 @@ namespace MonopolyDeal
         public cardType type;
         String name;
         int value;
-        Texture2D texture;
+        String textureName;
         
-        public Card(cardType type, String name, int value) // Create a card given a type, name, and value
+        public Card(cardType type, String name, int value, String textureName) // Create a card given a type, name, and value
         {
             this.type = type;
             this.name = name;
             this.value = value;
+            this.textureName = textureName;
         }
 
         //Standard card for testing purposes
@@ -34,7 +35,6 @@ namespace MonopolyDeal
             this.type = cardType.action;
             this.name = "Test Card";
             this.value = value;
-
         }
 
 

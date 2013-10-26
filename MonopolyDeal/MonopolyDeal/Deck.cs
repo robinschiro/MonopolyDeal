@@ -7,44 +7,42 @@ namespace MonopolyDeal
 {
     class Deck
     {
-        static Random _random = new Random();
+        List<Card> cardList = new List<Card>(); // Deck is a list of cards
 
         public Deck()
         {
             // Creates 3 cards with different values for testing
             // Will eventually read in .xls spreadsheet and create each card
-            Card card1 = new Card(1);
-            Card card2 = new Card(2);
-            Card card3 = new Card(3);
-            Card[] deck = new Card[2]; // Deck is an array of cards
-            Shuffle(deck); // Randomizes the cards in the deck
+            for (int i = 0;i<5;i++)
+            {
+                Card card = new Card(i);
+                cardList.Add(card);
+            }
+
+            // debug.writeLine();
+
+            Shuffle(cardList); // Randomizes the cards in the deck
             // I don't think this is right. I'm doing this late at night. Will revisit.
         }
 
         public Card getCard(int location)
         {
-            //todo
-            return null;
+            return this.cardList[location];
         }
 
-        // Known as the Fisher-Yates Shuffle
-        public static void Shuffle<T>(T[] array)
+
+        public void Shuffle<T>(IList<T> list)
         {
-            var random = _random;
-            for (int i = array.Length; i > 1; i--)
+            Random rng = new Random();
+            int n = list.Count;
+            while (n > 1)
             {
-                // Pick random element to swap.
-                int j = random.Next(i); // 0 <= j <= i-1
-                // Swap.
-                T tmp = array[j];
-                array[j] = array[i - 1];
-                array[i - 1] = tmp;
+                n--;
+                int k = rng.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
             }
         }
-
-        //public String toString()
-        //{
-        //    return 
-        //}
     }
 }
