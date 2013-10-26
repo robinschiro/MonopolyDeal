@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Diagnostics;
 
 namespace MonopolyDeal
 {
@@ -16,7 +15,7 @@ namespace MonopolyDeal
             // Will eventually read in .xls spreadsheet and create each card
             Card card1 = new Card(1);
             Card card2 = new Card(2);
-            Card card4 = new Card(4);
+            Card card3 = new Card(3);
             Card[] deck = new Card[2]; // Deck is an array of cards
             Shuffle(deck); // Randomizes the cards in the deck
             // I don't think this is right. I'm doing this late at night. Will revisit.
