@@ -15,22 +15,31 @@ namespace MonopolyDeal
 {
     class Card
     {
-        public enum Type { money, property, action }; // Creates enum for different card types
-        public Type type;
+        public enum cardType { money, property, action }; // Creates enum for different card types
+        public cardType type;
         String name;
         int value;
+        Texture2D texture;
         
-        
-        public Card(Type type, String name, int value) // Create a card given a type, name, and value
+        public Card(cardType type, String name, int value) // Create a card given a type, name, and value
         {
             this.type = type;
             this.name = name;
             this.value = value;
         }
 
+        //Standard card for testing purposes
+        public Card(int value) // Takes in value to differentiate between cards
+        {
+            this.type = cardType.action;
+            this.name = "Test Card";
+            this.value = value;
+
+        }
+
 
         // Allows other code to read a card's properties
-        public Type getType()
+        public cardType getType()
         {
             return this.type;
         }
@@ -44,5 +53,6 @@ namespace MonopolyDeal
         {
             return this.value;
         }
+
     }
 }

@@ -77,11 +77,6 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="b&amp;orailroad.jpg">
-      <Name>b&amp;orailroad</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
     <Compile Include="balticavenue.jpg">
       <Name>balticavenue</Name>
       <Importer>TextureImporter</Importer>
@@ -334,6 +329,13 @@
     </Compile>
     <Compile Include="wildut.jpg">
       <Name>wildut</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="bandorailroad.jpg">
+      <Name>bandorailroad</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

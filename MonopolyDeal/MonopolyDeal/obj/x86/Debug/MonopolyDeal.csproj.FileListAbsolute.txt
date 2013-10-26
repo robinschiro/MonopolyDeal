@@ -135,7 +135,6 @@ C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\bin\x86\D
 C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\bin\x86\Debug\Content\4million.xnb
 C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\bin\x86\Debug\Content\5million.xnb
 C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\bin\x86\Debug\Content\atlanticavenue.xnb
-C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\bin\x86\Debug\Content\b&orailroad.xnb
 C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\bin\x86\Debug\Content\balticavenue.xnb
 C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\bin\x86\Debug\Content\boardwalk.xnb
 C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\bin\x86\Debug\Content\cardback.xnb
@@ -193,3 +192,4 @@ C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\obj\x86\D
 C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
 C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\obj\x86\Debug\MonopolyDeal.exe
 C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\obj\x86\Debug\MonopolyDeal.pdb
+C:\Users\Tyler\Documents\GitHub\MonopolyDeal\MonopolyDeal\MonopolyDeal\bin\x86\Debug\Content\bandorailroad.xnb

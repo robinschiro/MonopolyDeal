@@ -10,7 +10,7 @@ namespace MonopolyDeal
         /// </summary>
         static void Main(string[] args)
         {
-            using (Game1 game = new Game1())
+            using (MonopolyDeal game = new MonopolyDeal())
             {
                 game.Run();
             }

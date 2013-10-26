@@ -14,12 +14,12 @@ namespace MonopolyDeal
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class Game1 : Microsoft.Xna.Framework.Game
+    public class MonopolyDeal : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Card testCard = new Card(Card.Type.action, "test", 15);
+        Card testCard = new Card(Card.cardType.action, "test", 15);
 
         // This is a texture we can render.
         Texture2D myTexture;
@@ -30,7 +30,7 @@ namespace MonopolyDeal
         Vector2 spriteSpeed = new Vector2(50.0f, 50.0f);
 
 
-        public Game1()
+        public MonopolyDeal()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
