@@ -29,8 +29,6 @@ namespace MonopolyDeal
 
         Deck deck = new Deck();
 
-
-
         public MonopolyDeal()
         {
             graphics = new GraphicsDeviceManager(this);

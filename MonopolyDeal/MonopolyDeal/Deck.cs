@@ -7,7 +7,7 @@ namespace MonopolyDeal
 {
     class Deck
     {
-        List<Card> cardList = new List<Card>(); // Deck is a list of cards
+        public List<Card> cardList = new List<Card>(); // Deck is a list of cards
 
         public Deck()
         {
