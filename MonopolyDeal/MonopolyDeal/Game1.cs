@@ -19,6 +19,8 @@ namespace MonopolyDeal
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        Card testCard = new Card(Card.Type.action, "test", 15);
+
         // This is a texture we can render.
         Texture2D myTexture;
 
@@ -92,21 +94,21 @@ namespace MonopolyDeal
         // Right now, this method allows the user to move the sprite around the window with the arrow keys.
         void UpdateSprite(GameTime gameTime)
         {
-            KeyboardState test = Keyboard.GetState();
+            KeyboardState keyboard = Keyboard.GetState();
 
-            if (test.IsKeyDown(Keys.Right))
+            if (keyboard.IsKeyDown(Keys.Right))
             {
                 spritePosition.X++;
             }
-            if (test.IsKeyDown(Keys.Left))
+            if (keyboard.IsKeyDown(Keys.Left))
             {
                 spritePosition.X--;
             }
-            if (test.IsKeyDown(Keys.Up))
+            if (keyboard.IsKeyDown(Keys.Up))
             {
                 spritePosition.Y--;
             }
-            if (test.IsKeyDown(Keys.Down))
+            if (keyboard.IsKeyDown(Keys.Down))
             {
                 spritePosition.Y++;
             }
