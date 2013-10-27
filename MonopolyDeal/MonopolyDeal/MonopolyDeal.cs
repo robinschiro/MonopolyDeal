@@ -29,7 +29,8 @@ namespace MonopolyDeal
         // Set the coordinates to draw the sprite at.
         Vector2 spritePosition = Vector2.Zero;
 
-        Deck deck = new Deck();
+        // Create the deck
+        Deck deck = new Deck(); 
 
         public MonopolyDeal()
         {
@@ -47,6 +48,9 @@ namespace MonopolyDeal
         {
             base.Initialize();
             IsMouseVisible = true;
+
+            // Create a player
+            Player player1 = new Player(deck, "Player 1");
         }
 
         /// <summary>
@@ -116,11 +120,14 @@ namespace MonopolyDeal
             // ROBIN: Pop up a message box if the user clicks on the deck's initial position (represented by the picture of the back
             // of a card). This is a test to see how click events can be handled in XNA.
             // By the way, I'm starting not to like XNA; consider switching to XAML.
+
+            //TYLER: You can now move the card around and the click still works with its new position.
             MouseState mouseState = Mouse.GetState();
-            Rectangle scaledBounds = new Rectangle(0, 0, (int)(myTexture.Width * 0.3), (int)(myTexture.Height * 0.3));
+            Rectangle scaledBounds = new Rectangle((int)(spritePosition.X), (int)(spritePosition.Y), (int)(myTexture.Width * 0.3), (int)(myTexture.Height * 0.3));
             if (scaledBounds.Contains(new Point(mouseState.X, mouseState.Y)) && mouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
-                MessageBox.Show("You have clicked the area of the deck's initial position.");
+                MessageBox.Show("You have clicked the deck.");
+
                 //spriteBatch.Begin();
                 //spriteBatch.Draw(myTexture2, new Vector2(150, 150), null, Color.White, 0, new Vector2(), .3f, SpriteEffects.None, 0);
                 //spriteBatch.End();

@@ -8,7 +8,7 @@ namespace MonopolyDeal
 {
     class Deck
     {
-        String textureName = "cardback";
+        String textureName = "cardback"; // Texture of the deck object - the back of the card.
         public List<Card> cardList = new List<Card>(); // Deck is a list of cards
 
         public Deck()
@@ -26,7 +26,6 @@ namespace MonopolyDeal
             {
                 System.Diagnostics.Debug.WriteLine(card.getValue()); // Print out list of cards in deck
             }
-            // I don't think this is right. I'm doing this late at night. Will revisit.
         }
 
         public Card getCard(int location)

@@ -7,7 +7,7 @@ namespace MonopolyDeal
 {
     class Player
     {
-        const int SIZE_OF_HAND = 5;
+        const int SIZE_OF_HAND = 5; //Note to Robin: size of hand changes as cards are drawn and played. Calling this constant size of hand may not be the best thing. Maybe initial hand size or something.
 
         // This list represents the player's hand.
         public List<Card> cardsInHand = new List<Card>();
