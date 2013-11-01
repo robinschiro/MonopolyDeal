@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C# Express 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameClient", "GameClient\GameClient.csproj", "{D75E02F1-22DE-40E4-B4E3-57B0B83A5581}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameServer", "GameServer\GameServer.csproj", "{27E010EF-E204-4053-82CF-D70A886C46C6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D75E02F1-22DE-40E4-B4E3-57B0B83A5581}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D75E02F1-22DE-40E4-B4E3-57B0B83A5581}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D75E02F1-22DE-40E4-B4E3-57B0B83A5581}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D75E02F1-22DE-40E4-B4E3-57B0B83A5581}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27E010EF-E204-4053-82CF-D70A886C46C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27E010EF-E204-4053-82CF-D70A886C46C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27E010EF-E204-4053-82CF-D70A886C46C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27E010EF-E204-4053-82CF-D70A886C46C6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

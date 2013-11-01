@@ -1,0 +1,12 @@
+C:\Users\Katu\AppData\Local\Temporary Projects\PeliClient\bin\Debug\PeliClient.exe
+C:\Users\Katu\AppData\Local\Temporary Projects\PeliClient\bin\Debug\PeliClient.pdb
+C:\Users\Katu\AppData\Local\Temporary Projects\PeliClient\bin\Debug\Lidgren.Network.dll
+C:\Users\Katu\AppData\Local\Temporary Projects\PeliClient\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Katu\AppData\Local\Temporary Projects\PeliClient\obj\Debug\PeliClient.exe
+C:\Users\Katu\AppData\Local\Temporary Projects\PeliClient\obj\Debug\PeliClient.pdb
+C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\obj\Debug\PeliClient.exe
+C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\obj\Debug\PeliClient.pdb
+C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\bin\Debug\PeliClient.exe
+C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\bin\Debug\PeliClient.pdb
+C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\bin\Debug\Lidgren.Network.dll
+C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\obj\Debug\ResolveAssemblyReference.cache

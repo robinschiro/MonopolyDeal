@@ -8,7 +8,7 @@ namespace MonopolyDeal
 {
     class Deck
     {
-        String textureName = "cardback"; // Texture of the deck object - the back of the card.
+        public String textureName = "cardback"; // Texture of the deck object - the back of the card.
         public List<Card> cardList = new List<Card>(); // Deck is a list of cards
 
         public Deck()

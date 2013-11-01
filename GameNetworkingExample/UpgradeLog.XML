@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="GameNetwork">
+</Property><Property Name="Solution File" Value="D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\GameNetwork.sln">
+</Property><Property Name="User Options File" Value="D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\GameNetwork.suo">
+</Property><Property Name="Date" Value="Sunday, October 27, 2013">
+</Property><Property Name="Time" Value="16:34 PM">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="GameNetwork.sln" Description="File successfully backed up as D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\Backup\GameNetwork.sln">
+</Event><Event ErrorLevel="0" Project="" Source="GameNetwork.suo" Description="File successfully backed up as D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\Backup\GameNetwork.suo">
+</Event><Event ErrorLevel="0" Project="GameClient" Source="GameClient\GameClient.csproj" Description="Project file successfully backed up as D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\Backup\GameClient\GameClient.csproj">
+</Event><Event ErrorLevel="0" Project="GameClient" Source="GameClient\GameClient.csproj.user" Description="Project user file successfully backed up as D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\Backup\GameClient\GameClient.csproj.user">
+</Event><Event ErrorLevel="0" Project="GameClient" Source="GameClient\Program.cs" Description="File successfully backed up as D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\Backup\GameClient\Program.cs">
+</Event><Event ErrorLevel="0" Project="GameClient" Source="GameClient\Properties\AssemblyInfo.cs" Description="File successfully backed up as D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\Backup\GameClient\Properties\AssemblyInfo.cs">
+</Event><Event ErrorLevel="0" Project="GameClient" Source="GameClient\GameClient.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="GameClient" Source="GameClient\GameClient.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="GameServer" Source="GameServer\GameServer.csproj" Description="Project file successfully backed up as D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\Backup\GameServer\GameServer.csproj">
+</Event><Event ErrorLevel="0" Project="GameServer" Source="GameServer\Program.cs" Description="File successfully backed up as D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\Backup\GameServer\Program.cs">
+</Event><Event ErrorLevel="0" Project="GameServer" Source="GameServer\Properties\AssemblyInfo.cs" Description="File successfully backed up as D:\Dropbox\Programs\C#\GitHub\SampleGame\GameNetworkingExample\Backup\GameServer\Properties\AssemblyInfo.cs">
+</Event><Event ErrorLevel="0" Project="GameServer" Source="GameServer\GameServer.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="GameServer" Source="GameServer\GameServer.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="GameNetwork.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="GameNetwork.sln" Description="Converted">
+</Event><Event ErrorLevel="0" Project="GameClient" Source="GameClient\GameClient.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="GameServer" Source="GameServer\GameServer.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event></UpgradeLog>

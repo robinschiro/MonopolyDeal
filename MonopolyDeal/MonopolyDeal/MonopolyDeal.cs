@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using System.Threading;
 
 
 namespace MonopolyDeal
@@ -23,11 +24,14 @@ namespace MonopolyDeal
         SpriteBatch spriteBatch;
 
         // This is a texture we can render.
-        Texture2D myTexture;
-        Texture2D myTexture2;
+        Texture2D deckImage;
+        Texture2D randomCardImage;
+
+        // This boolean is used to record when the user clicks the deckImage.
+        bool deckImageHasBeenClicked = false;
 
         // Set the coordinates to draw the sprite at.
-        Vector2 spritePosition = Vector2.Zero;
+        Vector2 deckImagePosition = Vector2.Zero;
 
         // Create the deck
         Deck deck = new Deck(); 
@@ -62,8 +66,8 @@ namespace MonopolyDeal
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            myTexture = Content.Load<Texture2D>("cardback");
-            myTexture2 = Content.Load<Texture2D>("10million");
+            deckImage = Content.Load<Texture2D>(deck.textureName);
+            randomCardImage = Content.Load<Texture2D>("10million");
         }
 
         /// <summary>
@@ -102,19 +106,19 @@ namespace MonopolyDeal
 
             if (keyboardState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Right))
             {
-                spritePosition.X++;
+                deckImagePosition.X++;
             }
             if (keyboardState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Left))
             {
-                spritePosition.X--;
+                deckImagePosition.X--;
             }
             if (keyboardState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Up))
             {
-                spritePosition.Y--;
+                deckImagePosition.Y--;
             }
             if (keyboardState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
             {
-                spritePosition.Y++;
+                deckImagePosition.Y++;
             }
 
             // ROBIN: Pop up a message box if the user clicks on the deck's initial position (represented by the picture of the back
@@ -123,10 +127,10 @@ namespace MonopolyDeal
 
             //TYLER: You can now move the card around and the click still works with its new position.
             MouseState mouseState = Mouse.GetState();
-            Rectangle scaledBounds = new Rectangle((int)(spritePosition.X), (int)(spritePosition.Y), (int)(myTexture.Width * 0.3), (int)(myTexture.Height * 0.3));
+            Rectangle scaledBounds = new Rectangle((int)(deckImagePosition.X), (int)(deckImagePosition.Y), (int)(deckImage.Width * 0.3), (int)(deckImage.Height * 0.3));
             if (scaledBounds.Contains(new Point(mouseState.X, mouseState.Y)) && mouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
             {
-                MessageBox.Show("You have clicked the deck.");
+                //MessageBox.Show("You have clicked the deck.");
 
                 //spriteBatch.Begin();
                 //spriteBatch.Draw(myTexture2, new Vector2(150, 150), null, Color.White, 0, new Vector2(), .3f, SpriteEffects.None, 0);
@@ -144,11 +148,31 @@ namespace MonopolyDeal
 
             // Draw the sprite.
             spriteBatch.Begin();
-            spriteBatch.Draw(myTexture, spritePosition, null, Color.White, 0, new Vector2(), .3f, SpriteEffects.None, 0);
-            spriteBatch.Draw(myTexture2, new Vector2(150, 150), null, Color.White, 0, new Vector2(), .3f, SpriteEffects.None, 0);
+            spriteBatch.Draw(deckImage, deckImagePosition, null, Color.White, 0, new Vector2(), .3f, SpriteEffects.None, 0);
+            if (DeckClicked())
+            {
+                spriteBatch.Draw(randomCardImage, new Vector2(150, 150), null, Color.White, 0, new Vector2(), .3f, SpriteEffects.None, 0);
+            }
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        // Display a card when the deck is clicked. This is just a test implementation; 
+        // I'm sure there is a better way of doing this.
+        public bool DeckClicked()
+        {
+            MouseState mouseState = Mouse.GetState();
+            Rectangle deckArea = new Rectangle((int)deckImagePosition.X, (int)deckImagePosition.Y, (int)(deckImage.Width * 0.3), (int)(deckImage.Height * 0.3));
+            if (deckArea.Contains(new Point(mouseState.X, mouseState.Y)) && mouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            {
+                deckImageHasBeenClicked = !deckImageHasBeenClicked;
+
+                // Without this delay, a single click registers as multiple clicks.
+                Thread.Sleep(100);
+            }
+
+            return deckImageHasBeenClicked;            
         }
     }
 }
