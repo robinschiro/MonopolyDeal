@@ -1,6 +1,0 @@
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\bin\Release\PeliClient.exe
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\bin\Release\PeliClient.pdb
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\bin\Release\Lidgren.Network.dll
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\obj\Release\ResolveAssemblyReference.cache
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\obj\Release\PeliClient.exe
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliClient\obj\Release\PeliClient.pdb
