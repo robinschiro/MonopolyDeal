@@ -1,6 +1,0 @@
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliServer\bin\Debug\PeliServer.exe
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliServer\bin\Debug\PeliServer.pdb
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliServer\bin\Debug\Lidgren.Network.dll
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliServer\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliServer\obj\Debug\PeliServer.exe
-C:\Users\Katu\Documents\Visual Studio 2008\Projects\PeliClient\PeliServer\obj\Debug\PeliServer.pdb
