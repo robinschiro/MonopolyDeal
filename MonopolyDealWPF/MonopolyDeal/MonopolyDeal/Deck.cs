@@ -8,8 +8,8 @@ namespace MonopolyDeal
 {
     public class Deck
     {
-        public String textureName = "cardback";
-        public List<Card> cardList = new List<Card>(); // Deck is a list of cards
+        public String TextureName = "cardback";
+        public List<Card> CardList = new List<Card>(); // Deck is a list of cards
 
         public Deck()
         {
@@ -18,22 +18,16 @@ namespace MonopolyDeal
             for (int i = 0;i<10;i++)
             {
                 Card card = new Card(i);
-                cardList.Add(card);
+                CardList.Add(card);
             }
-            Shuffle(cardList); // Randomizes the cards in the deck
+            Shuffle(CardList); // Randomizes the cards in the deck
 
-            foreach (Card card in cardList)
+            foreach (Card card in CardList)
             {
                 Debug.WriteLine(card.getValue()); // Print out list of cards in deck
             }
             // I don't think this is right. I'm doing this late at night. Will revisit.
         }
-
-        public Card getCard(int location)
-        {
-            return this.cardList[location];
-        }
-
 
         public void Shuffle<T>(IList<T> list)
         {

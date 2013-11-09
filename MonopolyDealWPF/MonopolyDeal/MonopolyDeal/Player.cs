@@ -7,7 +7,7 @@ namespace MonopolyDeal
 {
     class Player
     {
-        const int SIZE_OF_HAND = 5;
+        const int INITIAL_SIZE_OF_HAND = 5;
 
         // This list represents the player's hand.
         public List<Card> cardsInHand = new List<Card>();
@@ -20,9 +20,10 @@ namespace MonopolyDeal
         public Player( Deck deck, String name )
         {
             // Initialize the player's hand
-            for (int i = 0; i < SIZE_OF_HAND; ++i)
+            for (int i = 0; i < INITIAL_SIZE_OF_HAND; ++i)
             {
-                cardsInHand.Add(deck.cardList[i]);
+                cardsInHand.Add(deck.CardList[0]);
+                deck.CardList.Remove(deck.CardList[0]);
             }
 
             this.name = name;

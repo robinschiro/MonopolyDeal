@@ -20,15 +20,19 @@ namespace MonopolyDeal
     public partial class GameWindow : Window
     {
         public Deck Deck;
-        public int NumberOfPlayers;
+        private List<Player> Players;
 
-        public GameWindow( int numberOfPlayers  = 2 )
+        public GameWindow( int numberOfPlayers = 2 )
         {
             InitializeComponent();
 
             // Initialize the deck.
             this.Deck = new Deck();
-            this.NumberOfPlayers = numberOfPlayers;
+            this.Players = new List<Player>();
+            for (int i = 0; i < numberOfPlayers; ++i)
+            {
+                Players.Add(new Player(Deck, "Player " + i));
+            }
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
