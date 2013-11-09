@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6199831C-E516-41B7-83BF-E82EEBCAA33C}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MonopolyDeal</RootNamespace>
+    <AssemblyName>MonopolyDeal</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="LaunchScreen.xaml.cs">
+      <DependentUpon>LaunchScreen.xaml</DependentUpon>
+    </Compile>
+    <Page Include="GameWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Card.cs" />
+    <Compile Include="Deck.cs" />
+    <Compile Include="GameWindow.xaml.cs">
+      <DependentUpon>GameWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="LaunchScreen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Player.cs" />
+    <Compile Include="PlayingField.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Images\MonopolyDealContent.contentproj" />
+    <None Include="Images\Thumbs.db" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\10million.jpg" />
+    <Resource Include="Images\1million.jpg" />
+    <Resource Include="Images\2million.jpg" />
+    <Resource Include="Images\3million.jpg" />
+    <Resource Include="Images\4million.jpg" />
+    <Resource Include="Images\5million.jpg" />
+    <Resource Include="Images\atlanticavenue.jpg" />
+    <Resource Include="Images\balticavenue.jpg" />
+    <Resource Include="Images\bandorailroad.jpg" />
+    <Resource Include="Images\boardwalk.jpg" />
+    <Resource Include="Images\cardback.JPG" />
+    <Resource Include="Images\connecticutavenue.jpg" />
+    <Resource Include="Images\dealbreaker.jpg" />
+    <Resource Include="Images\debtcollector.jpg" />
+    <Resource Include="Images\doubletherent.jpg" />
+    <Resource Include="Images\electriccompany.jpg" />
+    <Resource Include="Images\forceddeal.jpg" />
+    <Resource Include="Images\hotel.jpg" />
+    <Resource Include="Images\house.jpg" />
+    <Resource Include="Images\illinoisavenue.jpg" />
+    <Resource Include="Images\indianaavenue.jpg" />
+    <Resource Include="Images\itsmybirthday.jpg" />
+    <Resource Include="Images\justsayno.jpg" />
+    <Resource Include="Images\kentuckyavenue.jpg" />
+    <Resource Include="Images\marvingardens.jpg" />
+    <Resource Include="Images\mediterraneanavenue.jpg" />
+    <Content Include="Images\MonopolyDealContent.contentproj.user" />
+    <Resource Include="Images\newyorkavenue.jpg" />
+    <Resource Include="Images\northcarolinaavenue.jpg" />
+    <Resource Include="Images\orientalavenue.jpg" />
+    <Resource Include="Images\pacificavenue.jpg" />
+    <Resource Include="Images\parkplace.jpg" />
+    <Resource Include="Images\passgo.jpg" />
+    <Resource Include="Images\pennsylvaniaavenue.jpg" />
+    <Resource Include="Images\pennsylvaniarailroad.jpg" />
+    <Resource Include="Images\propertywildcard.jpg" />
+    <Resource Include="Images\readingrailroad.jpg" />
+    <Resource Include="Images\rentbg.jpg" />
+    <Resource Include="Images\rentlbbr.jpg" />
+    <Resource Include="Images\rentop.jpg" />
+    <Resource Include="Images\rentry.jpg" />
+    <Resource Include="Images\rentut.jpg" />
+    <Resource Include="Images\rentwild.jpg" />
+    <Resource Include="Images\shortline.jpg" />
+    <Resource Include="Images\slydeal.jpg" />
+    <Resource Include="Images\statesavenue.jpg" />
+    <Resource Include="Images\stcharlesplace.jpg" />
+    <Resource Include="Images\stjamesplace.jpg" />
+    <Resource Include="Images\tennesseeavenue.jpg" />
+    <Resource Include="Images\ventnoravenue.jpg" />
+    <Resource Include="Images\vermontavenue.jpg" />
+    <Resource Include="Images\virginiaavenue.jpg" />
+    <Resource Include="Images\waterworks.jpg" />
+    <Resource Include="Images\wildbg.jpg" />
+    <Resource Include="Images\wildgt.jpg" />
+    <Resource Include="Images\wildlbbr.jpg" />
+    <Resource Include="Images\wildlbt.jpg" />
+    <Resource Include="Images\wildop.jpg" />
+    <Resource Include="Images\wildry.jpg" />
+    <Resource Include="Images\wildut.jpg" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
