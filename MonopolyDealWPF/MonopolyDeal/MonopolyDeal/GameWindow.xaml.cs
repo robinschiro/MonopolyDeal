@@ -28,46 +28,55 @@ namespace MonopolyDeal
 
             // Initialize the deck.
             this.Deck = new Deck();
+
+            // Initialize the player collection.
             this.Players = new List<Player>();
             for (int i = 0; i < numberOfPlayers; ++i)
             {
                 Players.Add(new Player(Deck, "Player " + i));
             }
+
+            for (int i = 0; i < Players[0].CardsInHand.Count; ++i)
+            {
+                PlayerHand.Children.Add(Players[0].CardsInHand[i].CardImage);
+                Grid.SetColumn(Players[0].CardsInHand[i].CardImage, i);
+            }
         }
 
+        // This event is not used in the application; it was created a test a component of XAML.
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            int deltaX = 0, deltaY = 0;
+            //int deltaX = 0, deltaY = 0;
 
-            if (e.Key == Key.Left)
-            {
-                deltaX = -5;
-            }
-            if (e.Key == Key.Right)
-            {
-                deltaX = 5;
-            }
-            if (e.Key == Key.Up)
-            {
-                deltaY = -5;
-            }
-            if (e.Key == Key.Down)
-            {
-                deltaY = 5;
-            }
+            //if (e.Key == Key.Left)
+            //{
+            //    deltaX = -5;
+            //}
+            //if (e.Key == Key.Right)
+            //{
+            //    deltaX = 5;
+            //}
+            //if (e.Key == Key.Up)
+            //{
+            //    deltaY = -5;
+            //}
+            //if (e.Key == Key.Down)
+            //{
+            //    deltaY = 5;
+            //}
 
-            foreach (FrameworkElement element in this.GameCanvas.Children)
-            {
-                if ( element.IsFocused )
-                {
-                    double left = (double)element.GetValue(Canvas.LeftProperty);
-                    element.SetValue(Canvas.LeftProperty, left + deltaX);
+            //foreach (FrameworkElement element in this.GameCanvas.Children)
+            //{
+            //    if ( element.IsFocused )
+            //    {
+            //        double left = (double)element.GetValue(Canvas.LeftProperty);
+            //        element.SetValue(Canvas.LeftProperty, left + deltaX);
 
-                    double top = (double)element.GetValue(Canvas.TopProperty);
-                    element.SetValue(Canvas.TopProperty, top + deltaY);
-                }
-            }
-            e.Handled = true;
+            //        double top = (double)element.GetValue(Canvas.TopProperty);
+            //        element.SetValue(Canvas.TopProperty, top + deltaY);
+            //    }
+            //}
+            //e.Handled = true;
         }
     }
 }

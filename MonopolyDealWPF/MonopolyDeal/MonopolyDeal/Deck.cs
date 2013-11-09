@@ -8,25 +8,30 @@ namespace MonopolyDeal
 {
     public class Deck
     {
-        public String TextureName = "cardback";
-        public List<Card> CardList = new List<Card>(); // Deck is a list of cards
+        public String TextureName { get; set; }
+        public List<Card> CardList { get; set; }  // Deck is a list of cards
+        
+        // This constant is temporary; it will not be needed once we are importing values from a spreadsheet.
+        private const int TOTAL_NUMBER_OF_CARDS = 110;
 
         public Deck()
         {
             // Creates 3 cards with different values for testing
             // Will eventually read in .xls spreadsheet and create each card
-            for (int i = 0;i<10;i++)
+            CardList = new List<Card>();
+            for (int i = 0; i < TOTAL_NUMBER_OF_CARDS; i++)
             {
-                Card card = new Card(i);
-                CardList.Add(card);
+                CardList.Add(new Card(i, ".\\Images\\10million.jpg"));
             }
             Shuffle(CardList); // Randomizes the cards in the deck
 
             foreach (Card card in CardList)
             {
-                Debug.WriteLine(card.getValue()); // Print out list of cards in deck
+                Debug.WriteLine(card.Value); // Print out list of cards in deck
             }
             // I don't think this is right. I'm doing this late at night. Will revisit.
+
+            TextureName = "cardback";
         }
 
         public void Shuffle<T>(IList<T> list)

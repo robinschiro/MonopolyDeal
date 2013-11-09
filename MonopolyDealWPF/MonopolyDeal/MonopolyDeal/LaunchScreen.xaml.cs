@@ -21,6 +21,7 @@ namespace MonopolyDeal
         public LaunchScreen()
         {
             InitializeComponent();
+            this.Title = "Monopoly Deal Setup";
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
@@ -32,14 +33,23 @@ namespace MonopolyDeal
 
         private void NumberOfPlayers_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!String.IsNullOrEmpty(NumberOfPlayers.Text))
+            try
             {
+                Convert.ToInt16(NumberOfPlayers.Text);
                 OKButton.IsEnabled = true;
             }
-            else
+            catch
             {
                 OKButton.IsEnabled = false;
             }
+            //if (!String.IsNullOrEmpty(NumberOfPlayers.Text))
+            //{
+            //    OKButton.IsEnabled = true;
+            //}
+            //else
+            //{
+            //    OKButton.IsEnabled = false;
+            //}
         }
     }
 }

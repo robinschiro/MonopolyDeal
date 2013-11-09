@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 
 namespace MonopolyDeal
@@ -9,43 +11,34 @@ namespace MonopolyDeal
     public class Card
     {
         public enum cardType { money, property, action }; // Creates enum for different card types
-        public cardType type;
-        String name;
-        int value;
-        String textureName;
+        public cardType Type { get; set; }
+        public String Name { get; set; }
+        public int Value { get; set; }
+        public String TextureName { get; set; }
+        public Image CardImage { get; set; }
         
         public Card(cardType type, String name, int value, String textureName) // Create a card given a type, name, and value
         {
-            this.type = type;
-            this.name = name;
-            this.value = value;
-            this.textureName = textureName;
+            this.Type = type;
+            this.Name = name;
+            this.Value = value;
+            this.TextureName = textureName;
         }
 
         //Standard card for testing purposes
         public Card(int value) // Takes in value to differentiate between cards
         {
-            this.type = cardType.action;
-            this.name = "Test Card";
-            this.value = value;
+            this.Type = cardType.action;
+            this.Name = "Test Card";
+            this.Value = value;
         }
 
-
-        // Allows other code to read a card's properties
-        public cardType getType()
+        // Create a card from a string representing the file path to the card's image.
+        public Card(int value, String path)
         {
-            return this.type;
+            this.Value = value;
+            this.CardImage = new Image();
+            this.CardImage.Source = new BitmapImage(new Uri(path, UriKind.Relative));
         }
-        
-        public String getName()
-        {
-            return this.name;
-        }
-
-        public int getValue()
-        {
-            return this.value;
-        }
-
     }
 }

@@ -29,7 +29,23 @@
             </Setter>
         </Style>
     </Window.Resources>
-
+    
+    <Grid Name="PlayerHand">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+    </Grid>
+    
+    <!-- The following canvas serves as test code; it is not used in the applciation.    
     <Canvas Name="GameCanvas">
         <Button  Style="{DynamicResource NoChromeButton}"
                  Name="card"
@@ -53,4 +69,5 @@
         </Button>
 
     </Canvas>
+    -->
 </Window>
