@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 namespace MonopolyDeal
 {
@@ -16,20 +17,22 @@ namespace MonopolyDeal
 
         public Deck()
         {
-            // Creates 3 cards with different values for testing
+            // Creates cards with different values for testing. A card is created for each picture in the Images folder.
             // Will eventually read in .xls spreadsheet and create each card
             CardList = new List<Card>();
-            for (int i = 0; i < TOTAL_NUMBER_OF_CARDS; i++)
+            DirectoryInfo imageDirectory = new DirectoryInfo("..\\..\\Images");
+            FileInfo[] files = imageDirectory.GetFiles();
+            for (int i = 0; i < files.Length; i++)
             {
-                CardList.Add(new Card(i, ".\\Images\\10million.jpg"));
+                CardList.Add(new Card(i, ".\\Images\\" + files[i].Name));
             }
+
             Shuffle(CardList); // Randomizes the cards in the deck
 
             foreach (Card card in CardList)
             {
                 Debug.WriteLine(card.Value); // Print out list of cards in deck
             }
-            // I don't think this is right. I'm doing this late at night. Will revisit.
 
             TextureName = "cardback";
         }

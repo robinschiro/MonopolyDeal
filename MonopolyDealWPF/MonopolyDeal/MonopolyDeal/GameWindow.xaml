@@ -29,6 +29,57 @@
             </Setter>
         </Style>
     </Window.Resources>
+
+    <Grid Name="WindowGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Name="PlayingField"
+              Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+        
+
+            <Grid Name="PlayerOneHand"
+                  Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+            </Grid>
+
+            <Grid Name="PlayerTwoHand"
+                  Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+            </Grid>
+            
+        </Grid>
+    </Grid>
+
     <!-- The following canvas serves as test code; it is not used in the applciation.    
     <Canvas Name="GameCanvas">
         <Button  Style="{DynamicResource NoChromeButton}"
@@ -54,6 +105,8 @@
 
     </Canvas>
     -->
+    
+    <!-- I believe a parent grid would be easier to manage than a parent canvas. Will discuss with Tyler.
     <Canvas Height="493" Name="GameCanvas" Width="989">
         <Grid Canvas.Left="189" Canvas.Top="331" Height="150" Name="PlayerHand" Width="800
               ">
@@ -71,4 +124,5 @@
             </Grid.ColumnDefinitions>
         </Grid>
     </Canvas>
+    -->
 </Window>

@@ -38,7 +38,7 @@ namespace MonopolyDeal
 
             for (int i = 0; i < Players[0].CardsInHand.Count; ++i)
             {
-                PlayerHand.Children.Add(Players[0].CardsInHand[i].CardImage);
+                PlayerOneHand.Children.Add(Players[0].CardsInHand[i].CardImage);
                 Grid.SetColumn(Players[0].CardsInHand[i].CardImage, i);
             }
         }

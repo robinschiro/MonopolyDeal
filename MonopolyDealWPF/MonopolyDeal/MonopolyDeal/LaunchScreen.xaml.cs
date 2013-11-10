@@ -18,6 +18,8 @@ namespace MonopolyDeal
     /// </summary>
     public partial class LaunchScreen : Window
     {
+        public const int MAX_NUMBER_OF_PLAYERS = 4;
+
         public LaunchScreen()
         {
             InitializeComponent();
@@ -33,23 +35,23 @@ namespace MonopolyDeal
 
         private void NumberOfPlayers_TextChanged(object sender, TextChangedEventArgs e)
         {
+            // The outer try block is necessary because this event is initially fired before the OKButton exists.
             try
             {
-                Convert.ToInt16(NumberOfPlayers.Text);
-                OKButton.IsEnabled = true;
+                try
+                {
+                    int numberOfPlayers = Convert.ToInt16(NumberOfPlayers.Text);
+                    if (numberOfPlayers <= MAX_NUMBER_OF_PLAYERS && numberOfPlayers > 1)
+                    {
+                        OKButton.IsEnabled = true;
+                    }
+                }
+                catch
+                {
+                    OKButton.IsEnabled = false;
+                }
             }
-            catch
-            {
-                OKButton.IsEnabled = false;
-            }
-            //if (!String.IsNullOrEmpty(NumberOfPlayers.Text))
-            //{
-            //    OKButton.IsEnabled = true;
-            //}
-            //else
-            //{
-            //    OKButton.IsEnabled = false;
-            //}
+            catch { }
         }
     }
 }
