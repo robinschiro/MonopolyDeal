@@ -23,10 +23,19 @@
                                 <Setter Property="Foreground" Value="#ADADAD"/>
                                 <Setter Property="Opacity" TargetName="Chrome" Value="0.5"/>
                             </Trigger>
+                            <Trigger Property="IsMouseOver"  Value="true">
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleY="1.2" ScaleX="1.2"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 

@@ -33,6 +33,7 @@ namespace MonopolyDeal
             Close();
         }
 
+        // The OKButton is enabled only when a value between 2 - 4 is placed in the NumberOfPlayers textbox.
         private void NumberOfPlayers_TextChanged(object sender, TextChangedEventArgs e)
         {
             // The outer try block is necessary because this event is initially fired before the OKButton exists.

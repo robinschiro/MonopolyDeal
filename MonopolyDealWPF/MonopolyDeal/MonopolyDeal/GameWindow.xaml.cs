@@ -38,8 +38,11 @@ namespace MonopolyDeal
 
             for (int i = 0; i < Players[0].CardsInHand.Count; ++i)
             {
-                PlayerOneHand.Children.Add(Players[0].CardsInHand[i].CardImage);
-                Grid.SetColumn(Players[0].CardsInHand[i].CardImage, i);
+                Button cardButton = new Button();
+                cardButton.Content = Players[0].CardsInHand[i].CardImage;
+                cardButton.Style = (Style)FindResource("NoChromeButton");
+                PlayerOneHand.Children.Add(cardButton);
+                Grid.SetColumn(cardButton, i);
             }
         }
 
