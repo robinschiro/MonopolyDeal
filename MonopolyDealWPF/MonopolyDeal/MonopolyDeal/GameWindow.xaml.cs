@@ -22,6 +22,10 @@ namespace MonopolyDeal
         public Deck Deck;
         private List<Player> Players;
 
+        //Testing something called AttachedProperties. Allows function calls upon triggers. 
+        //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
+        private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
+
         public GameWindow( int numberOfPlayers = 2 )
         {
             InitializeComponent();
@@ -44,6 +48,12 @@ namespace MonopolyDeal
                 PlayerOneHand.Children.Add(cardButton);
                 Grid.SetColumn(cardButton, i);
             }
+        }
+
+        // Again, testing AttachedProperties. Will need to discuss.
+        public void setInfoBox(TriggerBase target, int location)
+        {
+            target.SetValue(InfoBoxAttachedProperty, Players[0].CardsInHand[location]);
         }
 
         // This event is not used in the application; it was created a test a component of XAML.

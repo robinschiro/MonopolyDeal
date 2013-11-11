@@ -24,6 +24,7 @@
                                 <Setter Property="Opacity" TargetName="Chrome" Value="0.5"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver"  Value="true">
+                                <Setter Property="RenderTransformOrigin" Value="0.5, 0.5"/>
                                 <Setter Property="RenderTransform">
                                     <Setter.Value>
                                         <ScaleTransform ScaleY="1.2" ScaleX="1.2"/>
@@ -40,13 +41,17 @@
     </Window.Resources>
 
     <Grid Name="WindowGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="250*" />
+            <RowDefinition Height="250*" />
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Name="PlayingField"
-              Grid.Column="1">
+              Grid.Column="1" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="2*"/>
@@ -84,8 +89,21 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
+            </Grid>       
+        </Grid>
+        <Grid Name="SideBar" 
+              Grid.RowSpan="2" HorizontalAlignment="Left"  
+              VerticalAlignment="Top" Height="486" Width="244">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <Grid Name="TopSideBar"
+                  Grid.Row="0">
             </Grid>
-            
+            <Grid Name="InfoBox"
+                  Grid.Row="1">
+            </Grid>
         </Grid>
     </Grid>
 
