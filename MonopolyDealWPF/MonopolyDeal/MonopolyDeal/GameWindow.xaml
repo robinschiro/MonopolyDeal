@@ -40,11 +40,8 @@
         </Style>
     </Window.Resources>
 
-    <Grid Name="WindowGrid">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="250*" />
-            <RowDefinition Height="250*" />
-        </Grid.RowDefinitions>
+    <Grid Name="WindowGrid"
+          Background="LightCoral">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
@@ -58,7 +55,6 @@
                 <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
         
-
             <Grid Name="PlayerOneHand"
                   Grid.Row="2">
                 <Grid.ColumnDefinitions>
@@ -91,9 +87,9 @@
                 </Grid.ColumnDefinitions>
             </Grid>       
         </Grid>
-        <Grid Name="SideBar" 
-              Grid.RowSpan="2" HorizontalAlignment="Left"  
-              VerticalAlignment="Top" Height="486" Width="244">
+        
+        <Grid Name="SideBar"
+              Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="1*" />

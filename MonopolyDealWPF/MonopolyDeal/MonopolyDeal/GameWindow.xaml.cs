@@ -42,12 +42,34 @@ namespace MonopolyDeal
 
             for (int i = 0; i < Players[0].CardsInHand.Count; ++i)
             {
-                Button cardButton = new Button();
-                cardButton.Content = Players[0].CardsInHand[i].CardImage;
-                cardButton.Style = (Style)FindResource("NoChromeButton");
-                PlayerOneHand.Children.Add(cardButton);
-                Grid.SetColumn(cardButton, i);
+                DisplayCardInHand(Players[0].CardsInHand, i);
             }
+        }
+
+        // Display a card in a player's hand.
+        // Right now, this method only works for player one's hand.
+        public void DisplayCardInHand(List<Card> cardsInHand, int position)
+        {
+            Button cardButton = new Button();
+            cardButton.Content = cardsInHand[position].CardImage;
+            cardButton.Style = (Style)FindResource("NoChromeButton");
+
+            ColumnDefinition col1 = new ColumnDefinition();
+            col1.Width = new GridLength(1, GridUnitType.Star);
+            ColumnDefinition col2 = new ColumnDefinition();
+            col2.Width = new GridLength(16, GridUnitType.Star);
+            ColumnDefinition col3 = new ColumnDefinition();
+            col3.Width = new GridLength(1, GridUnitType.Star);
+
+            Grid cardGrid = new Grid();
+            cardGrid.ColumnDefinitions.Add(col1);
+            cardGrid.ColumnDefinitions.Add(col2);
+            cardGrid.ColumnDefinitions.Add(col3);
+            cardGrid.Children.Add(cardButton);
+            Grid.SetColumn(cardButton, 1);
+
+            PlayerOneHand.Children.Add(cardGrid);
+            Grid.SetColumn(cardGrid, position);
         }
 
         // Again, testing AttachedProperties. Will need to discuss.
