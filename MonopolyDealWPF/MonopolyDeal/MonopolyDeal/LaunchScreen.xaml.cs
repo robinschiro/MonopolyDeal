@@ -28,7 +28,7 @@ namespace MonopolyDeal
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
-            GameWindow gameWindow = new GameWindow(Convert.ToInt16(NumberOfPlayers.Text));
+            GameWindow gameWindow = new GameWindow(Convert.ToInt16(NumberOfPlayers.Text), IPAddress.Text);
             gameWindow.Show();
             Close();
         }

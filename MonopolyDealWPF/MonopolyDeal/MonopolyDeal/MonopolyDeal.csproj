@@ -36,6 +36,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Lidgren.Network, Version=2012.1.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\Lidgren.Network.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -167,6 +171,12 @@
     <Resource Include="Images\wildop.jpg" />
     <Resource Include="Images\wildry.jpg" />
     <Resource Include="Images\wildut.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GameServer\GameServer.csproj">
+      <Project>{53DC5651-715E-408D-9245-2CCFB440336A}</Project>
+      <Name>GameServer</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

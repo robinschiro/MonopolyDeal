@@ -10,19 +10,19 @@
 
         <Label Content="Welcome to Monopoly Deal!" 
                Height="30"
-               Margin="12,12,12,0"
                Name="WelcomeMessage"
                VerticalAlignment="Top"
                HorizontalAlignment="Center"
                Grid.Row="0"/>
         
-        <Grid Name="PlayerSettings" Grid.Row="1" Margin="0,8,0,137">
+        <Grid Name="PlayerSettings" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
+                <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
@@ -32,6 +32,12 @@
                    HorizontalAlignment="Center"
                    Grid.Column="0"
                    Grid.Row="0"
+                   VerticalAlignment="Top"/>
+            <Label Content="IP Address of Server:"
+                   Name="IPAddressLabel"
+                   HorizontalAlignment="Center"
+                   Grid.Column="0"
+                   Grid.Row="1"
                    VerticalAlignment="Top"/>
             
             <TextBox Name="NumberOfPlayers" 
@@ -43,13 +49,23 @@
                      Width="30"
                      TextChanged="NumberOfPlayers_TextChanged"/>
             
+            <TextBox Name="IPAddress" 
+                     Grid.Column="1"
+                     Grid.Row="1"
+                     Text="localhost"
+                     VerticalAlignment="Top"
+                     HorizontalAlignment="Left"
+                     Width="100"/>
+            
             <Button Content="OK" 
-                    Grid.Row="1" Height="23" 
+                    Grid.Row="2" 
                     HorizontalAlignment="Center"
                     Name="OKButton" 
                     VerticalAlignment="Top" 
-                    Width="75" 
-                    Click="OKButton_Click" Grid.ColumnSpan="2" Margin="102,9,101,0" />
+                    Height="30"
+                    Width="75"
+                    Grid.ColumnSpan="2"
+                    Click="OKButton_Click"/>
 
         </Grid>        
     </Grid>

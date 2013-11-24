@@ -23,7 +23,7 @@
                                 <Setter Property="Foreground" Value="#ADADAD"/>
                                 <Setter Property="Opacity" TargetName="Chrome" Value="0.5"/>
                             </Trigger>
-                            <Trigger Property="IsMouseOver"  Value="true">
+                            <!--<Trigger Property="IsFocused"  Value="true">
                                 <Setter Property="RenderTransformOrigin" Value="0.5, 0.5"/>
                                 <Setter Property="RenderTransform">
                                     <Setter.Value>
@@ -31,6 +31,7 @@
                                     </Setter.Value>
                                 </Setter>
                             </Trigger>
+                            -->
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -96,9 +97,25 @@
             </Grid.RowDefinitions>
             <Grid Name="TopSideBar"
                   Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Button Name="UpdateServerButton"
+                        Content="Update Server"
+                        Click="UpdateServerButton_Click"
+                        Grid.Row="0"/>
+                <Button Name="ReceiveUpdatesButton"
+                        Content="Receive Update"
+                        Click="ReceiveUpdatesButton_Click" 
+                        Grid.Row="1"/>
             </Grid>
             <Grid Name="InfoBox"
                   Grid.Row="1">
+                <Button Name="ReinitializeConnectionButton"
+                        Content="Reinitialize Connection"
+                        Click="ReinitializeConnectionButton_Click" />
+                
             </Grid>
         </Grid>
     </Grid>
