@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GameServer;
 
-namespace MonopolyDeal
+namespace GameObjects
 {
-    class Player
+    public class Player
     {
         const int INITIAL_SIZE_OF_HAND = 5;
 

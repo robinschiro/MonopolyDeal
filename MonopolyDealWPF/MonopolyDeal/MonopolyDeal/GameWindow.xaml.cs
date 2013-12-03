@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using GameServer;
+using GameObjects;
 using Lidgren.Network;
 
 namespace MonopolyDeal
@@ -22,7 +23,7 @@ namespace MonopolyDeal
     public partial class GameWindow : Window
     {
         private Deck Deck;
-        private List<Player> Players;
+        private Player Player;
         private String ServerIP;
         private int SelectedCard;
 
@@ -33,29 +34,29 @@ namespace MonopolyDeal
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
         private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
 
-        public GameWindow(int numberOfPlayers, string ipAddress)
+        public GameWindow(string ipAddress)
         {
             InitializeComponent();
-
-            // Initialize the deck.
-            this.Deck = new Deck();
 
             this.ServerIP = ipAddress;
             this.SelectedCard = -1;
 
-            // Initialize the player collection.
-            this.Players = new List<Player>();
-            for (int i = 0; i < numberOfPlayers; ++i)
-            {
-                Players.Add(new Player(Deck, "Player " + i));
-            }
-
-            for (int i = 0; i < Players[0].CardsInHand.Count; ++i)
-            {
-                DisplayCardInHand(Players[0].CardsInHand, i);
-            }
-
+            // Connect the client to the server.
             InitializeClient();
+
+            // Initialize the deck.
+            this.Deck = new Deck();
+
+            UpdateServer();
+            ReceiveUpdate();
+
+            this.Player = new Player(Deck, "Player");
+
+            // Display the cards in this player's hand.
+            for (int i = 0; i < Player.CardsInHand.Count; ++i)
+            {
+                DisplayCardInHand(Player.CardsInHand, i);
+            }
         }
 
         private void InitializeClient()
@@ -114,10 +115,7 @@ namespace MonopolyDeal
         public void cardButton_Click(object sender, RoutedEventArgs args)
         {
             // Deselect the currently selected card.
-            if (SelectedCard != -1)
-            {
-                DeselectCard(FindButton(SelectedCard));
-            }
+            DeselectCard(FindButton(SelectedCard));
 
             // Update the value of SelectedCard.
             for (int i = 0; i < PlayerOneHand.Children.Count; ++i)
@@ -126,77 +124,113 @@ namespace MonopolyDeal
                 {
                     if (element.Name == (sender as Button).Name)
                     {
-                        SelectedCard = i;
+                        if (i != SelectedCard)
+                        {
+                            SelectedCard = i;
+                            SelectCard(sender as Button);
+                        }
+                        else
+                        {
+                            SelectedCard = -1;
+                            DeselectCard(sender as Button);
+                        }
                         break;
                     }
                 }
             }
-
-            SelectCard(sender as Button);
         }
 
         // Find a card in player one's hand given its position in the grid displaying the hand.
         private Button FindButton(int buttonIndex)
         {
-            for (int i = 0; i < PlayerOneHand.Children.Count; ++i)
+            if (SelectedCard != -1)
             {
-                foreach (FrameworkElement element in (PlayerOneHand.Children[i] as Grid).Children)
+                for (int i = 0; i < PlayerOneHand.Children.Count; ++i)
                 {
-                    if (element.Name == "CardButton" + buttonIndex)
+                    foreach (FrameworkElement element in (PlayerOneHand.Children[i] as Grid).Children)
                     {
-                        return (Button)element;
+                        if (element.Name == "CardButton" + buttonIndex)
+                        {
+                            return (Button)element;
+                        }
                     }
                 }
             }
             return null;
         }
 
-        // This increases the size of the currently selected card.
+        // Increase the size of the currently selected card.
         private void SelectCard( Button cardButton )
         {
-            ScaleTransform myScaleTransform = new ScaleTransform();
-            myScaleTransform.ScaleY = 1.2;
-            myScaleTransform.ScaleX = 1.2;
+            if (cardButton != null)
+            {
+                ScaleTransform myScaleTransform = new ScaleTransform();
+                myScaleTransform.ScaleY = 1.2;
+                myScaleTransform.ScaleX = 1.2;
 
-            cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
-            cardButton.RenderTransform = myScaleTransform;
+                cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                cardButton.RenderTransform = myScaleTransform;
+            }
         }
 
-        // This returns the previously selected card to its normal size.
+        // Set the currently selected card to its normal size.
         private void DeselectCard(Button cardButton)
         {
-            ScaleTransform myScaleTransform = new ScaleTransform();
-            myScaleTransform.ScaleY = 1;
-            myScaleTransform.ScaleX = 1;
+            if (cardButton != null)
+            {
+                ScaleTransform myScaleTransform = new ScaleTransform();
+                myScaleTransform.ScaleY = 1;
+                myScaleTransform.ScaleX = 1;
 
-            cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
-            cardButton.RenderTransform = myScaleTransform;
+                cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                cardButton.RenderTransform = myScaleTransform;
+            }
         }
 
         // Again, testing AttachedProperties. Will need to discuss.
         private void setInfoBox(TriggerBase target, int location)
         {
-            target.SetValue(InfoBoxAttachedProperty, Players[0].CardsInHand[location]);
+            target.SetValue(InfoBoxAttachedProperty, Player.CardsInHand[location]);
         }
 
         // Receive an update from the server, setting this client's SelectedCard property equal to the value
         // of the server's SelectedCard property.
         private void ReceiveUpdatesButton_Click(object sender, RoutedEventArgs e)
         {
+            ReceiveUpdate();
+        }
+
+        private void ReceiveUpdate()
+        {
             NetIncomingMessage inc;
+
             while ((inc = Client.ReadMessage()) != null)
             {
                 if (inc.MessageType == NetIncomingMessageType.Data)
                 {
                     // Deselect the currently selected card.
-                    if (SelectedCard != -1)
-                    {
-                        DeselectCard(FindButton(SelectedCard));
-                    }
-
+                    DeselectCard(FindButton(SelectedCard));
                     SelectedCard = inc.ReadInt32();
-
                     SelectCard(FindButton(SelectedCard));
+
+                    //// Read the size of the cardlist of the deck.
+                    //int size = inc.ReadInt32();
+
+                    //// Update the deck.
+                    //for (int i = 0; i < size; ++i)
+                    //{
+                    //    // This try-catch is only necessary because we are currently not updating the
+                    //    // server's deck when a change is made to the client's deck. As a result, the client's
+                    //    // deck ends up being smaller than the server's deck when the client receives an update,\
+                    //    // causing an index-out-of-bounds exception.
+                    //    try
+                    //    {
+                    //        inc.ReadAllProperties(Deck.CardList[i]);
+                    //    }
+                    //    catch { break; }
+                    //}
+                    //// I believe one of these break statements is causing the client to disconnect from the server.
+                    //break;
                 }
             }
         }
@@ -204,15 +238,40 @@ namespace MonopolyDeal
         // Set the server's SelectedCard property equal to the value of this client's SelectedCard property.
         private void UpdateServerButton_Click(object sender, RoutedEventArgs e)
         {
+            UpdateServer();
+        }
+
+        private void UpdateServer()
+        {
             // Create new message
             NetOutgoingMessage outmsg = Client.CreateMessage();
 
             // Write the value of SelectedCard into the message.
             outmsg.Write(SelectedCard);
+            
+            //// Since the server's deck should not always be updated, use an enum to notify the server 
+            //// when the deck should be updated (Similar to how the GameNetworkingExample works).
+            //// Write the values of the cards in the deck to the message.
+            //outmsg.Write(Deck.CardList.Count);
+            //foreach (Card card in Deck.CardList)
+            //{
+            //    outmsg.WriteAllProperties(card);
+            //}
 
             // Send it to server
             Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
+        }
+        
+        // 
+        private void UpdateServerDeck()
+        {
+            // Create new message
+            NetOutgoingMessage outmsg = Client.CreateMessage();
 
+            
+
+            // Send it to server
+            Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
         }
 
         // It seems that clients disconnect randomly from the server. 

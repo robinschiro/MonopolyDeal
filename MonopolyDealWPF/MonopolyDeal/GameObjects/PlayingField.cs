@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MonopolyDeal
+namespace GameObjects
 {
-    class PlayingField
+    public class PlayingField
     {
     }
 }

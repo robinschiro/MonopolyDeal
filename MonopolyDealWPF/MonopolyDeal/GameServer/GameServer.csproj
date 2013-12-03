@@ -49,6 +49,12 @@
     <Compile Include="ServerManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GameObjects\GameObjects.csproj">
+      <Project>{F91299E4-DDEF-4FE7-9ADF-0D731A7D99CB}</Project>
+      <Name>GameObjects</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

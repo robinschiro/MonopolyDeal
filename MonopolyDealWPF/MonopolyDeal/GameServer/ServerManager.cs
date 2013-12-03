@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Lidgren.Network;
+using GameObjects;
 
 
 
@@ -32,10 +33,25 @@ namespace GameServer
         static NetServer Server;
         // Configuration object
         static NetPeerConfiguration Config;
-        static int SelectedCard;
 
+        // Game objects.
+        static Deck Deck;
+        static List<Player> Players;
+        static int SelectedCard;
+        
+        [STAThread]
         static void Main(string[] args)
         {
+            // Create a new deck.
+            Deck = new Deck();
+            Deck.Test = "Server Created";
+
+            // Create a new list of players.
+            Players = new List<Player>();
+
+            // Initialize the selected card.
+            SelectedCard = -1;
+
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             Config = new NetPeerConfiguration("game");
 
@@ -241,7 +257,17 @@ namespace GameServer
                         // Create new message
                         NetOutgoingMessage outmsg = Server.CreateMessage();
 
+                        // Write the index of the selected card.
                         outmsg.Write(SelectedCard);
+
+                        //// Write the size of the deck's cardlist.
+                        //outmsg.Write(Deck.CardList.Count);
+
+                        //// Write the properties of each card in the deck.
+                        //foreach (Card card in Deck.CardList)
+                        //{
+                        //    outmsg.WriteAllProperties(card);
+                        //}
 
                         //// Write byte
                         //outmsg.Write((byte)PacketTypes.WORLDSTATE);
@@ -291,12 +317,11 @@ namespace GameServer
         public int FocusedElement { get; set; }
         public string Name { get; set; }
         public NetConnection Connection { get; set; }
-        public Character(string name, int x, int y, NetConnection conn, int focusedElement = 0)
+        public Character(string name, int x, int y, NetConnection conn)
         {
             Name = name;
             X = x;
             Y = y;
-            FocusedElement = focusedElement;
             Connection = conn;
         }
     }

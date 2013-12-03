@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MonopolyDeal
+namespace GameObjects
 {
-    class DiscardPile
+    public class DiscardPile
     {
-        public List<Card> CardList { get; set; }
+        //public List<Card> CardList { get; set; }
 
         public DiscardPile()
         {
-            this.CardList = new List<Card>();
+            //this.CardList = new List<Card>();
         }
     }
 }

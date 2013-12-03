@@ -18,8 +18,6 @@ namespace MonopolyDeal
     /// </summary>
     public partial class LaunchScreen : Window
     {
-        public const int MAX_NUMBER_OF_PLAYERS = 4;
-
         public LaunchScreen()
         {
             InitializeComponent();
@@ -28,26 +26,22 @@ namespace MonopolyDeal
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
-            GameWindow gameWindow = new GameWindow(Convert.ToInt16(NumberOfPlayers.Text), IPAddress.Text);
+            GameWindow gameWindow = new GameWindow(IPAddress.Text);
             gameWindow.Show();
             Close();
         }
 
-        // The OKButton is enabled only when a value between 2 - 4 is placed in the NumberOfPlayers textbox.
-        private void NumberOfPlayers_TextChanged(object sender, TextChangedEventArgs e)
+        // The OKButton is enabled only when text exists in the IPAddress textbox.
+        private void IPAddress_TextChanged(object sender, TextChangedEventArgs e)
         {
             // The outer try block is necessary because this event is initially fired before the OKButton exists.
             try
             {
-                try
+                if ( !String.IsNullOrWhiteSpace(IPAddress.Text) )
                 {
-                    int numberOfPlayers = Convert.ToInt16(NumberOfPlayers.Text);
-                    if (numberOfPlayers <= MAX_NUMBER_OF_PLAYERS && numberOfPlayers > 1)
-                    {
-                        OKButton.IsEnabled = true;
-                    }
+                    OKButton.IsEnabled = true;
                 }
-                catch
+                else
                 {
                     OKButton.IsEnabled = false;
                 }

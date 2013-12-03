@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using System.IO;
 
 
-namespace MonopolyDeal
+namespace GameObjects
 {
     public class Card
     {
@@ -38,7 +39,7 @@ namespace MonopolyDeal
         {
             this.Value = value;
             this.CardImage = new Image();
-            this.CardImage.Source = new BitmapImage(new Uri(path, UriKind.Relative));
+            this.CardImage.Source = new BitmapImage(new Uri(path, UriKind.Absolute));
         }
     }
 }
