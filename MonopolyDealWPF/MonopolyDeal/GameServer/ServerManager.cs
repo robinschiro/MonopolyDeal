@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Media.Imaging;
 using Lidgren.Network;
 using GameObjects;
+using System.Windows.Media;
+using System.Windows.Controls;
 
 
 
@@ -38,9 +41,9 @@ namespace GameServer
         static Deck Deck;
         static List<Player> Players;
         static int SelectedCard;
-        
+
         [STAThread]
-        static void Main(string[] args)
+        static void Main( string[] args )
         {
             // Create a new deck.
             Deck = new Deck();
@@ -105,146 +108,163 @@ namespace GameServer
                         // Here you can do new player initialisation stuff
                         case NetIncomingMessageType.ConnectionApproval:
 
-                            // Read the first byte of the packet
-                            // ( Enums can be casted to bytes, so it be used to make bytes human readable )
-                            if (inc.ReadByte() == (byte)PacketTypes.LOGIN)
+                        // Read the first byte of the packet
+                        // ( Enums can be casted to bytes, so it be used to make bytes human readable )
+                        if (inc.ReadByte() == (byte)PacketTypes.LOGIN)
+                        {
+                            Console.WriteLine("Incoming LOGIN");
+
+                            // Approve clients connection ( Its sort of agreenment. "You can be my client and i will host you" )
+                            inc.SenderConnection.Approve();
+
+                            // Init random
+                            Random r = new Random();
+
+                            // Add new character to the game.
+                            // It adds new player to the list and stores name, ( that was sent from the client )
+                            // Random x, y and stores client IP+Port
+                            GameWorldState.Add(new Character(inc.ReadString(), r.Next(1, 40), r.Next(1, 20), inc.SenderConnection));
+
+                            // Create message, that can be written and sent
+                            NetOutgoingMessage outmsg = Server.CreateMessage();
+
+                            // first we write byte
+                            outmsg.Write((byte)PacketTypes.WORLDSTATE);
+
+                            // then int
+                            outmsg.Write(GameWorldState.Count);
+
+                            // iterate trought every character ingame
+                            foreach (Character ch in GameWorldState)
                             {
-                                Console.WriteLine("Incoming LOGIN");
-
-                                // Approve clients connection ( Its sort of agreenment. "You can be my client and i will host you" )
-                                inc.SenderConnection.Approve();
-
-                                // Init random
-                                Random r = new Random();
-
-                                // Add new character to the game.
-                                // It adds new player to the list and stores name, ( that was sent from the client )
-                                // Random x, y and stores client IP+Port
-                                GameWorldState.Add(new Character(inc.ReadString(), r.Next(1, 40), r.Next(1, 20), inc.SenderConnection));
-
-                                // Create message, that can be written and sent
-                                NetOutgoingMessage outmsg = Server.CreateMessage();
-
-                                // first we write byte
-                                outmsg.Write((byte)PacketTypes.WORLDSTATE);
-
-                                // then int
-                                outmsg.Write(GameWorldState.Count);
-
-                                // iterate trought every character ingame
-                                foreach (Character ch in GameWorldState)
-                                {
-                                    // This is handy method
-                                    // It writes all the properties of object to the packet
-                                    outmsg.WriteAllProperties(ch);
-                                }
-
-                                // Now, packet contains:
-                                // Byte = packet type
-                                // Int = how many players there is in game
-                                // character object * how many players is in game
-
-                                // Send message/packet to all connections, in reliably order, channel 0
-                                // Reliably means, that each packet arrives in same order they were sent. Its slower than unreliable, but easyest to understand
-                                Server.SendMessage(outmsg, inc.SenderConnection, NetDeliveryMethod.ReliableOrdered, 0);
-
-                                // Debug
-                                Console.WriteLine("Approved new connection and updated the world status");
+                                // This is handy method
+                                // It writes all the properties of object to the packet
+                                outmsg.WriteAllProperties(ch);
                             }
 
-                            break;
+                            // Now, packet contains:
+                            // Byte = packet type
+                            // Int = how many players there is in game
+                            // character object * how many players is in game
+
+                            // Send message/packet to all connections, in reliably order, channel 0
+                            // Reliably means, that each packet arrives in same order they were sent. Its slower than unreliable, but easyest to understand
+                            Server.SendMessage(outmsg, inc.SenderConnection, NetDeliveryMethod.ReliableOrdered, 0);
+
+                            // Debug
+                            Console.WriteLine("Approved new connection and updated the world status");
+                        }
+
+                        break;
                         // Data type is all messages manually sent from client
                         // ( Approval is automated process )
                         case NetIncomingMessageType.Data:
-                            {
-                                // Read first piece of data
-                                SelectedCard = inc.ReadInt32();
+                        {
+                            SelectedCard = inc.ReadInt32();
+
+                            //switch ((byte)inc.ReadByte())
+                            //{
+                            //    case (byte)Datatype.SelectedCard:
+                            //    {
+                            //        // Read first piece of data
+                            //        SelectedCard = inc.ReadInt32();
+                            //        break;
+                            //    }
+
+                            //    case (byte)Datatype.UpdateDeck:
+                            //    {
+
+                            //        break;
+                            //    }
+                            //}
 
 
 
-                                //// Read first byte
-                                //if (inc.ReadByte() == (byte)PacketTypes.MOVE)
-                                //{
-                                //    // Check who sent the message
-                                //    // This way we know, what character belongs to message sender
-                                //    foreach (Character ch in GameWorldState)
-                                //    {
-                                //        // If stored connection ( check approved message. We stored ip+port there, to character obj )
-                                //        // Find the correct character
-                                //        if (ch.Connection != inc.SenderConnection)
-                                //            continue;
 
-                                //        // Read next byte
-                                //        byte b = inc.ReadByte();
 
-                                //        // Handle movement. This byte should correspond to some direction
-                                //        if ((byte)MoveDirection.UP == b)
-                                //            ch.Y--;
-                                //        if ((byte)MoveDirection.DOWN == b)
-                                //            ch.Y++;
-                                //        if ((byte)MoveDirection.LEFT == b)
-                                //            ch.X--;
-                                //        if ((byte)MoveDirection.RIGHT == b)
-                                //            ch.X++;
+                            //// Read first byte
+                            //if (inc.ReadByte() == (byte)PacketTypes.MOVE)
+                            //{
+                            //    // Check who sent the message
+                            //    // This way we know, what character belongs to message sender
+                            //    foreach (Character ch in GameWorldState)
+                            //    {
+                            //        // If stored connection ( check approved message. We stored ip+port there, to character obj )
+                            //        // Find the correct character
+                            //        if (ch.Connection != inc.SenderConnection)
+                            //            continue;
 
-                                //        // Create new message
-                                //        NetOutgoingMessage outmsg = Server.CreateMessage();
+                            //        // Read next byte
+                            //        byte b = inc.ReadByte();
 
-                                //        // Write byte, that is type of world state
-                                //        outmsg.Write((byte)PacketTypes.WORLDSTATE);
+                            //        // Handle movement. This byte should correspond to some direction
+                            //        if ((byte)MoveDirection.UP == b)
+                            //            ch.Y--;
+                            //        if ((byte)MoveDirection.DOWN == b)
+                            //            ch.Y++;
+                            //        if ((byte)MoveDirection.LEFT == b)
+                            //            ch.X--;
+                            //        if ((byte)MoveDirection.RIGHT == b)
+                            //            ch.X++;
 
-                                //        // Write int, "how many players in game?"
-                                //        outmsg.Write(GameWorldState.Count);
+                            //        // Create new message
+                            //        NetOutgoingMessage outmsg = Server.CreateMessage();
 
-                                //        // Iterate throught all the players in game
-                                //        foreach (Character ch2 in GameWorldState)
-                                //        {
-                                //            // Write all the properties of object to message
-                                //            outmsg.WriteAllProperties(ch2);
-                                //        }
+                            //        // Write byte, that is type of world state
+                            //        outmsg.Write((byte)PacketTypes.WORLDSTATE);
 
-                                //        // Message contains
-                                //        // Byte = PacketType
-                                //        // Int = Player count
-                                //        // Character obj * Player count
+                            //        // Write int, "how many players in game?"
+                            //        outmsg.Write(GameWorldState.Count);
 
-                                //        // Send messsage to clients ( All connections, in reliable order, channel 0)
-                                //        Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
-                                //        break;
-                                //    }
+                            //        // Iterate throught all the players in game
+                            //        foreach (Character ch2 in GameWorldState)
+                            //        {
+                            //            // Write all the properties of object to message
+                            //            outmsg.WriteAllProperties(ch2);
+                            //        }
 
-                                
-                                break;
-                            }
+                            //        // Message contains
+                            //        // Byte = PacketType
+                            //        // Int = Player count
+                            //        // Character obj * Player count
+
+                            //        // Send messsage to clients ( All connections, in reliable order, channel 0)
+                            //        Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+                            //        break;
+                            //    }
+
+
+                            break;
+                        }
                         case NetIncomingMessageType.StatusChanged:
-                            // In case status changed
-                            // It can be one of these
-                            // NetConnectionStatus.Connected;
-                            // NetConnectionStatus.Connecting;
-                            // NetConnectionStatus.Disconnected;
-                            // NetConnectionStatus.Disconnecting;
-                            // NetConnectionStatus.None;
+                        // In case status changed
+                        // It can be one of these
+                        // NetConnectionStatus.Connected;
+                        // NetConnectionStatus.Connecting;
+                        // NetConnectionStatus.Disconnected;
+                        // NetConnectionStatus.Disconnecting;
+                        // NetConnectionStatus.None;
 
-                            // NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with disconnect()
-                            Console.WriteLine(inc.SenderConnection.ToString() + " status changed. " + (NetConnectionStatus)inc.SenderConnection.Status);
-                            if (inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting)
+                        // NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with disconnect()
+                        Console.WriteLine(inc.SenderConnection.ToString() + " status changed. " + (NetConnectionStatus)inc.SenderConnection.Status);
+                        if (inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting)
+                        {
+                            // Find disconnected character and remove it
+                            foreach (Character cha in GameWorldState)
                             {
-                                // Find disconnected character and remove it
-                                foreach (Character cha in GameWorldState)
+                                if (cha.Connection == inc.SenderConnection)
                                 {
-                                    if (cha.Connection == inc.SenderConnection)
-                                    {
-                                        GameWorldState.Remove(cha);
-                                        break;
-                                    }
+                                    GameWorldState.Remove(cha);
+                                    break;
                                 }
                             }
-                            break;
+                        }
+                        break;
                         default:
-                            // As i statet previously, theres few other kind of messages also, but i dont cover those in this example
-                            // Uncommenting next line, informs you, when ever some other kind of message is received
-                            //Console.WriteLine("Not Important Message");
-                            break;
+                        // As i statet previously, theres few other kind of messages also, but i dont cover those in this example
+                        // Uncommenting next line, informs you, when ever some other kind of message is received
+                        //Console.WriteLine("Not Important Message");
+                        break;
                     }
                 } // If New messages
 
@@ -260,14 +280,15 @@ namespace GameServer
                         // Write the index of the selected card.
                         outmsg.Write(SelectedCard);
 
-                        //// Write the size of the deck's cardlist.
-                        //outmsg.Write(Deck.CardList.Count);
+                        // Write the size of the deck's cardlist.
+                        outmsg.Write(Deck.CardList.Count);
 
-                        //// Write the properties of each card in the deck.
-                        //foreach (Card card in Deck.CardList)
-                        //{
-                        //    outmsg.WriteAllProperties(card);
-                        //}
+                        // Write the properties of each card in the deck.
+                        foreach (Card card in Deck.CardList)
+                        {
+                            outmsg.Write(card.Value.ToString());
+                            outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
+                        }
 
                         //// Write byte
                         //outmsg.Write((byte)PacketTypes.WORLDSTATE);
@@ -289,7 +310,10 @@ namespace GameServer
                         // Character obj * Player count
 
                         // Send messsage to clients ( All connections, in reliable order, channel 0)
-                        Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+                        if (Server.Connections.Count > 0)
+                        {
+                            Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+                        }
                     }
                     // Update current time
                     time = DateTime.Now;
@@ -299,8 +323,38 @@ namespace GameServer
                 //System.Threading.Thread.Sleep(1);
             }
         }
-    }
 
+        // Send an updated deck to either a client or the server, depending on where this method is called.
+        public static void UpdateDeck( bool isServer, Deck deck )
+        {
+
+        }
+
+        // Receive an updated deck from either a client or the server, depending on where this method is called.
+        public static void ReceiveUpdatedDeck( NetIncomingMessage inc, Deck deck )
+        {
+            // Read the size of the cardlist of the deck.
+            int size = inc.ReadInt32();
+
+            List<Card> tempCardList = new List<Card>();
+            Deck = new Deck();
+            for (int i = 0; i < size; ++i)
+            {
+
+                string value = "";
+                string path = "";
+                inc.ReadString(out value);
+                tempCardList.Add(new Card(0));
+                tempCardList[i].Value = Convert.ToInt32(value);
+                tempCardList[i].CardImage = new Image();
+                tempCardList[i].CardImage.Source = new BitmapImage();
+                inc.ReadString(out path);
+                tempCardList[i].CardImage.Source = new BitmapImage(new Uri(path, UriKind.Absolute));
+            }
+            Deck.CardList = tempCardList;
+        }
+
+    }
 
     /// <summary>
     /// Character class
@@ -317,7 +371,7 @@ namespace GameServer
         public int FocusedElement { get; set; }
         public string Name { get; set; }
         public NetConnection Connection { get; set; }
-        public Character(string name, int x, int y, NetConnection conn)
+        public Character( string name, int x, int y, NetConnection conn )
         {
             Name = name;
             X = x;

@@ -34,7 +34,7 @@ namespace MonopolyDeal
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
         private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
 
-        public GameWindow(string ipAddress)
+        public GameWindow( string ipAddress )
         {
             InitializeComponent();
 
@@ -45,10 +45,15 @@ namespace MonopolyDeal
             InitializeClient();
 
             // Initialize the deck.
-            this.Deck = new Deck();
+            //this.Deck = new Deck();
 
             UpdateServer();
-            ReceiveUpdate();
+
+            Deck previousDeck = Deck;
+            while (null == Deck)
+            {
+                ReceiveUpdate(true);
+            }
 
             this.Player = new Player(Deck, "Player");
 
@@ -85,13 +90,13 @@ namespace MonopolyDeal
 
         // Display a card in a player's hand.
         // Right now, this method only works for player one's hand.
-        public void DisplayCardInHand(List<Card> cardsInHand, int position)
+        public void DisplayCardInHand( List<Card> cardsInHand, int position )
         {
             Button cardButton = new Button();
             cardButton.Name = "CardButton" + position;
             cardButton.Content = cardsInHand[position].CardImage;
             cardButton.Style = (Style)FindResource("NoChromeButton");
-            cardButton.Click +=new RoutedEventHandler(cardButton_Click);
+            cardButton.Click += new RoutedEventHandler(cardButton_Click);
 
             ColumnDefinition col1 = new ColumnDefinition();
             col1.Width = new GridLength(1, GridUnitType.Star);
@@ -112,7 +117,7 @@ namespace MonopolyDeal
         }
 
         // Increase the size of a card when it is selected and decrease its size when another card is selected.
-        public void cardButton_Click(object sender, RoutedEventArgs args)
+        public void cardButton_Click( object sender, RoutedEventArgs args )
         {
             // Deselect the currently selected card.
             DeselectCard(FindButton(SelectedCard));
@@ -141,7 +146,7 @@ namespace MonopolyDeal
         }
 
         // Find a card in player one's hand given its position in the grid displaying the hand.
-        private Button FindButton(int buttonIndex)
+        private Button FindButton( int buttonIndex )
         {
             if (SelectedCard != -1)
             {
@@ -174,7 +179,7 @@ namespace MonopolyDeal
         }
 
         // Set the currently selected card to its normal size.
-        private void DeselectCard(Button cardButton)
+        private void DeselectCard( Button cardButton )
         {
             if (cardButton != null)
             {
@@ -188,19 +193,19 @@ namespace MonopolyDeal
         }
 
         // Again, testing AttachedProperties. Will need to discuss.
-        private void setInfoBox(TriggerBase target, int location)
+        private void setInfoBox( TriggerBase target, int location )
         {
             target.SetValue(InfoBoxAttachedProperty, Player.CardsInHand[location]);
         }
 
         // Receive an update from the server, setting this client's SelectedCard property equal to the value
         // of the server's SelectedCard property.
-        private void ReceiveUpdatesButton_Click(object sender, RoutedEventArgs e)
+        private void ReceiveUpdatesButton_Click( object sender, RoutedEventArgs e )
         {
-            ReceiveUpdate();
+            ReceiveUpdate(false);
         }
 
-        private void ReceiveUpdate()
+        private void ReceiveUpdate( bool updateDeck )
         {
             NetIncomingMessage inc;
 
@@ -213,30 +218,36 @@ namespace MonopolyDeal
                     SelectedCard = inc.ReadInt32();
                     SelectCard(FindButton(SelectedCard));
 
-                    //// Read the size of the cardlist of the deck.
-                    //int size = inc.ReadInt32();
+                    // Read the size of the cardlist of the deck.
+                    int size = inc.ReadInt32();
 
-                    //// Update the deck.
-                    //for (int i = 0; i < size; ++i)
-                    //{
-                    //    // This try-catch is only necessary because we are currently not updating the
-                    //    // server's deck when a change is made to the client's deck. As a result, the client's
-                    //    // deck ends up being smaller than the server's deck when the client receives an update,\
-                    //    // causing an index-out-of-bounds exception.
-                    //    try
-                    //    {
-                    //        inc.ReadAllProperties(Deck.CardList[i]);
-                    //    }
-                    //    catch { break; }
-                    //}
-                    //// I believe one of these break statements is causing the client to disconnect from the server.
-                    //break;
+                    if (updateDeck)
+                    {
+                        // Update the deck.
+                        List<Card> tempCardList = new List<Card>();
+                        Deck = new Deck();
+                        for (int i = 0; i < size; ++i)
+                        {
+
+                            string value = "";
+                            string path = "";
+                            inc.ReadString(out value);
+                            tempCardList.Add(new Card(0));
+                            tempCardList[i].Value = Convert.ToInt32(value);
+                            tempCardList[i].CardImage = new Image();
+                            tempCardList[i].CardImage.Source = new BitmapImage();
+                            inc.ReadString(out path);
+                            tempCardList[i].CardImage.Source = new BitmapImage(new Uri(path, UriKind.Absolute));
+                        }
+                        Deck.CardList = tempCardList;
+                        return;
+                    }
                 }
             }
         }
 
         // Set the server's SelectedCard property equal to the value of this client's SelectedCard property.
-        private void UpdateServerButton_Click(object sender, RoutedEventArgs e)
+        private void UpdateServerButton_Click( object sender, RoutedEventArgs e )
         {
             UpdateServer();
         }
@@ -248,27 +259,30 @@ namespace MonopolyDeal
 
             // Write the value of SelectedCard into the message.
             outmsg.Write(SelectedCard);
-            
+
             //// Since the server's deck should not always be updated, use an enum to notify the server 
             //// when the deck should be updated (Similar to how the GameNetworkingExample works).
             //// Write the values of the cards in the deck to the message.
-            //outmsg.Write(Deck.CardList.Count);
-            //foreach (Card card in Deck.CardList)
-            //{
-            //    outmsg.WriteAllProperties(card);
-            //}
+
 
             // Send it to server
             Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
         }
-        
+
         // 
         private void UpdateServerDeck()
         {
             // Create new message
             NetOutgoingMessage outmsg = Client.CreateMessage();
 
-            
+            outmsg.Write((byte)Datatype.UpdateDeck);
+
+            // Write the properties of each card in the deck.
+            foreach (Card card in Deck.CardList)
+            {
+                outmsg.Write(card.Value.ToString());
+                outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
+            }
 
             // Send it to server
             Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
@@ -276,13 +290,13 @@ namespace MonopolyDeal
 
         // It seems that clients disconnect randomly from the server. 
         // This allows the connection to be reinitialized.
-        private void ReinitializeConnectionButton_Click(object sender, RoutedEventArgs e)
+        private void ReinitializeConnectionButton_Click( object sender, RoutedEventArgs e )
         {
             InitializeClient();
         }
 
         // This event is not used in the application; it was created a test a component of XAML.
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        private void Window_KeyDown( object sender, KeyEventArgs e )
         {
             //int deltaX = 0, deltaY = 0;
 

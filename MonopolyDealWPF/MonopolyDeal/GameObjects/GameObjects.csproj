@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Card.cs" />
+    <Compile Include="Datatype.cs" />
     <Compile Include="Deck.cs" />
     <Compile Include="DiscardPile.cs" />
     <Compile Include="Player.cs" />
