@@ -23,7 +23,7 @@ namespace GameObjects
             this.CardsInPlay = new List<Card>();
 
             // Initialize the player's hand
-            for (int i = 0; i < INITIAL_SIZE_OF_HAND; ++i)
+            for ( int i = 0; i < INITIAL_SIZE_OF_HAND; ++i )
             {
                 CardsInHand.Add(deck.CardList[0]);
                 deck.CardList.Remove(deck.CardList[0]);

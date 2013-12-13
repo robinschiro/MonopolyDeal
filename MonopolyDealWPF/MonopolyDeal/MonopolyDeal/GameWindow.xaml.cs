@@ -14,6 +14,9 @@ using System.Windows.Shapes;
 using GameServer;
 using GameObjects;
 using Lidgren.Network;
+using System.Timers;
+using System.Threading;
+using System.ComponentModel;
 
 namespace MonopolyDeal
 {
@@ -26,9 +29,10 @@ namespace MonopolyDeal
         private Player Player;
         private String ServerIP;
         private int SelectedCard;
+        public delegate void DoWorkDelegate( object sender, DoWorkEventArgs e );
 
         // Client Object
-        static NetClient Client;
+        private volatile NetClient Client;
 
         //Testing something called AttachedProperties. Allows function calls upon triggers. 
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
@@ -44,24 +48,56 @@ namespace MonopolyDeal
             // Connect the client to the server.
             InitializeClient();
 
+            // Do not do anything until the server finalizes its connection with the client.
+            while ( !ReceiveUpdate(Datatype.FirstMessage) ) ;
+
             // Initialize the deck.
             //this.Deck = new Deck();
 
-            UpdateServer();
+            //UpdateServer();
 
-            Deck previousDeck = Deck;
-            while (null == Deck)
+            RequestUpdateFromServer(Datatype.RequestDeck);
+
+            //// Testing use of background worker.
+            //BackgroundWorker test = new BackgroundWorker();
+            //test.DoWork += new DoWorkEventHandler(new DoWorkDelegate(RequestUpdateFromServer));
+            //test.RunWorkerAsync();
+
+            //Thread messageThread = new Thread(RequestUpdateFromServer);
+            //messageThread.Name = "Message Thread";
+            //messageThread.Start();
+
+            //// Loop until worker thread activates. 
+            //while (!messageThread.IsAlive)
+            //{
+            //    Console.WriteLine("Thread not yet alive");
+            //};
+
+            // Put the main thread to sleep for 1 millisecond to 
+            // allow the worker thread to do some work:
+            //Thread.Sleep(1);
+
+            while ( null == Deck )
             {
-                ReceiveUpdate(true);
+                ReceiveUpdate(Datatype.UpdateDeck);
             }
+
+            //messageThread.Abort();
+            //messageThread.Join();
+
+            //ReceiveUpdate(Datatype.UpdateDeck);
 
             this.Player = new Player(Deck, "Player");
 
             // Display the cards in this player's hand.
-            for (int i = 0; i < Player.CardsInHand.Count; ++i)
+            for ( int i = 0; i < Player.CardsInHand.Count; ++i )
             {
                 DisplayCardInHand(Player.CardsInHand, i);
             }
+
+            // Send the updated deck back to the server.
+            //ServerUtilities.SendUpdatedDeck(Client, Deck);
+            ServerUtilities.SendUpdate(Client, Datatype.UpdateDeck, Deck);
         }
 
         private void InitializeClient()
@@ -86,6 +122,15 @@ namespace MonopolyDeal
 
             // Connect client, to ip previously requested from user.
             Client.Connect(ServerIP, 14242, outmsg);
+
+            // Set timer to tick every 50ms
+            System.Timers.Timer update = new System.Timers.Timer(1000);
+
+            // When time has elapsed ( 50ms in this case ), call "update_Elapsed" funtion
+            update.Elapsed += new ElapsedEventHandler(update_Elapsed);
+
+            // Start the timer
+            update.Start();
         }
 
         // Display a card in a player's hand.
@@ -123,13 +168,13 @@ namespace MonopolyDeal
             DeselectCard(FindButton(SelectedCard));
 
             // Update the value of SelectedCard.
-            for (int i = 0; i < PlayerOneHand.Children.Count; ++i)
+            for ( int i = 0; i < PlayerOneHand.Children.Count; ++i )
             {
-                foreach (FrameworkElement element in (PlayerOneHand.Children[i] as Grid).Children)
+                foreach ( FrameworkElement element in (PlayerOneHand.Children[i] as Grid).Children )
                 {
-                    if (element.Name == (sender as Button).Name)
+                    if ( element.Name == (sender as Button).Name )
                     {
-                        if (i != SelectedCard)
+                        if ( i != SelectedCard )
                         {
                             SelectedCard = i;
                             SelectCard(sender as Button);
@@ -148,13 +193,13 @@ namespace MonopolyDeal
         // Find a card in player one's hand given its position in the grid displaying the hand.
         private Button FindButton( int buttonIndex )
         {
-            if (SelectedCard != -1)
+            if ( SelectedCard != -1 )
             {
-                for (int i = 0; i < PlayerOneHand.Children.Count; ++i)
+                for ( int i = 0; i < PlayerOneHand.Children.Count; ++i )
                 {
-                    foreach (FrameworkElement element in (PlayerOneHand.Children[i] as Grid).Children)
+                    foreach ( FrameworkElement element in (PlayerOneHand.Children[i] as Grid).Children )
                     {
-                        if (element.Name == "CardButton" + buttonIndex)
+                        if ( element.Name == "CardButton" + buttonIndex )
                         {
                             return (Button)element;
                         }
@@ -167,7 +212,7 @@ namespace MonopolyDeal
         // Increase the size of the currently selected card.
         private void SelectCard( Button cardButton )
         {
-            if (cardButton != null)
+            if ( cardButton != null )
             {
                 ScaleTransform myScaleTransform = new ScaleTransform();
                 myScaleTransform.ScaleY = 1.2;
@@ -181,7 +226,7 @@ namespace MonopolyDeal
         // Set the currently selected card to its normal size.
         private void DeselectCard( Button cardButton )
         {
-            if (cardButton != null)
+            if ( cardButton != null )
             {
                 ScaleTransform myScaleTransform = new ScaleTransform();
                 myScaleTransform.ScaleY = 1;
@@ -202,133 +247,110 @@ namespace MonopolyDeal
         // of the server's SelectedCard property.
         private void ReceiveUpdatesButton_Click( object sender, RoutedEventArgs e )
         {
-            ReceiveUpdate(false);
+            RequestUpdateFromServer(Datatype.RequestSelectedCard);
+
+            //int previousValue = SelectedCard;
+
+            //Thread messageThread = new Thread(RequestUpdateFromServer);
+            //messageThread.Start();
+            // Loop until worker thread activates. 
+            //while ( !messageThread.IsAlive )
+            {
+                Console.WriteLine("Thread not yet alive");
+            }
+
+            // As of now, do not select the same card twice.
+            //while ( SelectedCard == previousValue )
+            {
+                ReceiveUpdate(Datatype.UpdateSelectedCard);
+            }
+
+            //messageThread.Abort();
+            //messageThread.Join();
         }
 
-        private void ReceiveUpdate( bool updateDeck )
+        private void RequestUpdateFromServer( Datatype datatype )
+        {
+            NetOutgoingMessage outmsg = Client.CreateMessage();
+
+            outmsg.Write((byte)datatype);
+
+            // Clear all messages that the client currently has.
+            while ( Client.ReadMessage() != null ) ;
+
+            Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
+        }
+
+        // Return a boolean indicating whether or not an update was received.
+        private bool ReceiveUpdate(Datatype messageType)
         {
             NetIncomingMessage inc;
 
-            while ((inc = Client.ReadMessage()) != null)
+            // Wait until the client receives a message from the server.
+            while ( (inc = Client.ReadMessage()) == null ) ; 
+
+            // Iterate through all of the available messages.
+            while ( inc != null )
             {
-                if (inc.MessageType == NetIncomingMessageType.Data)
+                if ( inc.MessageType == NetIncomingMessageType.Data )
                 {
-                    // Deselect the currently selected card.
-                    DeselectCard(FindButton(SelectedCard));
-                    SelectedCard = inc.ReadInt32();
-                    SelectCard(FindButton(SelectedCard));
-
-                    // Read the size of the cardlist of the deck.
-                    int size = inc.ReadInt32();
-
-                    if (updateDeck)
+                    if ((Datatype)inc.ReadByte() == messageType)
                     {
-                        // Update the deck.
-                        List<Card> tempCardList = new List<Card>();
-                        Deck = new Deck();
-                        for (int i = 0; i < size; ++i)
+                        switch (messageType)
                         {
+                            case Datatype.UpdateDeck:
+                            {
+                                Deck = (Deck)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                Client.Recycle(inc);
+                                break;
+                            }
 
-                            string value = "";
-                            string path = "";
-                            inc.ReadString(out value);
-                            tempCardList.Add(new Card(0));
-                            tempCardList[i].Value = Convert.ToInt32(value);
-                            tempCardList[i].CardImage = new Image();
-                            tempCardList[i].CardImage.Source = new BitmapImage();
-                            inc.ReadString(out path);
-                            tempCardList[i].CardImage.Source = new BitmapImage(new Uri(path, UriKind.Absolute));
+                            case Datatype.UpdateSelectedCard:
+                            {
+                                DeselectCard(FindButton(SelectedCard));
+                                SelectedCard = (int)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                SelectCard(FindButton(SelectedCard));
+                                Client.Recycle(inc);
+                                break;
+                            }
                         }
-                        Deck.CardList = tempCardList;
-                        return;
+
+                        return true;
                     }
                 }
+                else if ( inc.MessageType == NetIncomingMessageType.StatusChanged && messageType == Datatype.FirstMessage )
+                {
+                    return true;
+                }
+
+                inc = Client.ReadMessage();
             }
+
+            return false;
         }
 
         // Set the server's SelectedCard property equal to the value of this client's SelectedCard property.
         private void UpdateServerButton_Click( object sender, RoutedEventArgs e )
         {
-            UpdateServer();
+            ServerUtilities.SendUpdate(Client, Datatype.UpdateSelectedCard, SelectedCard);
         }
 
-        private void UpdateServer()
-        {
-            // Create new message
-            NetOutgoingMessage outmsg = Client.CreateMessage();
-
-            // Write the value of SelectedCard into the message.
-            outmsg.Write(SelectedCard);
-
-            //// Since the server's deck should not always be updated, use an enum to notify the server 
-            //// when the deck should be updated (Similar to how the GameNetworkingExample works).
-            //// Write the values of the cards in the deck to the message.
-
-
-            // Send it to server
-            Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
-        }
-
-        // 
-        private void UpdateServerDeck()
-        {
-            // Create new message
-            NetOutgoingMessage outmsg = Client.CreateMessage();
-
-            outmsg.Write((byte)Datatype.UpdateDeck);
-
-            // Write the properties of each card in the deck.
-            foreach (Card card in Deck.CardList)
-            {
-                outmsg.Write(card.Value.ToString());
-                outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
-            }
-
-            // Send it to server
-            Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
-        }
-
-        // It seems that clients disconnect randomly from the server. 
-        // This allows the connection to be reinitialized.
+        // It seems that clients disconnect randomly from the server. This allows the connection to be reinitialized.
         private void ReinitializeConnectionButton_Click( object sender, RoutedEventArgs e )
         {
             InitializeClient();
         }
 
-        // This event is not used in the application; it was created a test a component of XAML.
+        // Use this event to perform periodic actions.
+        static void update_Elapsed( object sender, System.Timers.ElapsedEventArgs e )
+        {
+            
+        }
+
+        // Use this event to respond to key presses.
         private void Window_KeyDown( object sender, KeyEventArgs e )
         {
-            //int deltaX = 0, deltaY = 0;
 
-            //if (e.Key == Key.Left)
-            //{
-            //    deltaX = -5;
-            //}
-            //if (e.Key == Key.Right)
-            //{
-            //    deltaX = 5;
-            //}
-            //if (e.Key == Key.Up)
-            //{
-            //    deltaY = -5;
-            //}
-            //if (e.Key == Key.Down)
-            //{
-            //    deltaY = 5;
-            //}
-
-            //foreach (FrameworkElement element in this.GameCanvas.Children)
-            //{
-            //    if ( element.IsFocused )
-            //    {
-            //        double left = (double)element.GetValue(Canvas.LeftProperty);
-            //        element.SetValue(Canvas.LeftProperty, left + deltaX);
-
-            //        double top = (double)element.GetValue(Canvas.TopProperty);
-            //        element.SetValue(Canvas.TopProperty, top + deltaY);
-            //    }
-            //}
-            //e.Handled = true;
         }
     }
 }

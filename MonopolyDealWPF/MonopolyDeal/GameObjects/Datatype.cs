@@ -7,7 +7,10 @@ namespace GameObjects
 {
     public enum Datatype
     {
-        SelectedCard,
-        UpdateDeck
+        FirstMessage,
+        UpdateSelectedCard,
+        UpdateDeck,
+        RequestSelectedCard,
+        RequestDeck
     }
 }

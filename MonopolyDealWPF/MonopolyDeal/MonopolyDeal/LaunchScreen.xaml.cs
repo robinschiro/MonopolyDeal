@@ -24,7 +24,7 @@ namespace MonopolyDeal
             this.Title = "Monopoly Deal Setup";
         }
 
-        private void OKButton_Click(object sender, RoutedEventArgs e)
+        private void OKButton_Click( object sender, RoutedEventArgs e )
         {
             GameWindow gameWindow = new GameWindow(IPAddress.Text);
             gameWindow.Show();
@@ -32,7 +32,7 @@ namespace MonopolyDeal
         }
 
         // The OKButton is enabled only when text exists in the IPAddress textbox.
-        private void IPAddress_TextChanged(object sender, TextChangedEventArgs e)
+        private void IPAddress_TextChanged( object sender, TextChangedEventArgs e )
         {
             // The outer try block is necessary because this event is initially fired before the OKButton exists.
             try

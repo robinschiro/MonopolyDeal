@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="ServerManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GameObjects\GameObjects.csproj">
