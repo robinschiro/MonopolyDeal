@@ -27,9 +27,9 @@ namespace MonopolyDeal
     {
         private Deck Deck;
         private Player Player;
+        private List<String> PlayerNames;
         private String ServerIP;
         private int SelectedCard;
-        public delegate void DoWorkDelegate( object sender, DoWorkEventArgs e );
 
         // Client Object
         private volatile NetClient Client;
@@ -38,7 +38,7 @@ namespace MonopolyDeal
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
         private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
 
-        public GameWindow( string ipAddress )
+        public GameWindow( string ipAddress, string playerName )
         {
             InitializeComponent();
 
@@ -49,45 +49,37 @@ namespace MonopolyDeal
             InitializeClient();
 
             // Do not do anything until the server finalizes its connection with the client.
-            while ( !ReceiveUpdate(Datatype.FirstMessage) ) ;
+            ClientReceiveUpdate(Datatype.FirstMessage);
 
-            // Initialize the deck.
-            //this.Deck = new Deck();
-
-            //UpdateServer();
-
+            // Receive the deck from the server.
             RequestUpdateFromServer(Datatype.RequestDeck);
+            ClientReceiveUpdate(Datatype.UpdateDeck);
 
-            //// Testing use of background worker.
-            //BackgroundWorker test = new BackgroundWorker();
-            //test.DoWork += new DoWorkEventHandler(new DoWorkDelegate(RequestUpdateFromServer));
-            //test.RunWorkerAsync();
+            // Receive a list of the names of the players already on the server.
+            // Eventually, each client will receive a list of Player objects, not just Player names.
+            RequestUpdateFromServer(Datatype.RequestPlayerNames);
+            ClientReceiveUpdate(Datatype.UpdatePlayerNames);
 
-            //Thread messageThread = new Thread(RequestUpdateFromServer);
-            //messageThread.Name = "Message Thread";
-            //messageThread.Start();
-
-            //// Loop until worker thread activates. 
-            //while (!messageThread.IsAlive)
-            //{
-            //    Console.WriteLine("Thread not yet alive");
-            //};
-
-            // Put the main thread to sleep for 1 millisecond to 
-            // allow the worker thread to do some work:
-            //Thread.Sleep(1);
-
-            while ( null == Deck )
+            // Verify that the value of 'playerName' does not exist in the list of Player names.
+            // If it does, modify the name until it no longer matches one on the list.
+            bool hasBeenModified = false;
+            int a = 2;
+            while ( PlayerNames.Contains(playerName) )
             {
-                ReceiveUpdate(Datatype.UpdateDeck);
+                if ( !hasBeenModified )
+                {
+                    playerName += a;
+                    hasBeenModified = true;
+                }
+                else
+                {
+                    ++a;
+                    playerName = playerName.Substring(0, playerName.Length - 1) + a;
+                }
             }
 
-            //messageThread.Abort();
-            //messageThread.Join();
-
-            //ReceiveUpdate(Datatype.UpdateDeck);
-
-            this.Player = new Player(Deck, "Player");
+            // Instantiate the player.
+            this.Player = new Player(Deck, playerName);
 
             // Display the cards in this player's hand.
             for ( int i = 0; i < Player.CardsInHand.Count; ++i )
@@ -96,9 +88,13 @@ namespace MonopolyDeal
             }
 
             // Send the updated deck back to the server.
-            //ServerUtilities.SendUpdatedDeck(Client, Deck);
             ServerUtilities.SendUpdate(Client, Datatype.UpdateDeck, Deck);
+
+            // Send the player's information to the server.
+            ServerUtilities.SendUpdate(Client, Datatype.UpdatePlayer, Player);
         }
+
+        #region Client Communication Code
 
         private void InitializeClient()
         {
@@ -132,6 +128,85 @@ namespace MonopolyDeal
             // Start the timer
             update.Start();
         }
+
+        private void RequestUpdateFromServer( Datatype datatype )
+        {
+            NetOutgoingMessage outmsg = Client.CreateMessage();
+
+            outmsg.Write((byte)datatype);
+
+            // Clear all messages that the client currently has.
+            while ( Client.ReadMessage() != null ) ;
+
+            Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
+        }
+
+        // Return a boolean indicating whether or not an update was received.
+        private void ClientReceiveUpdate( Datatype messageType )
+        {
+            NetIncomingMessage inc;
+            bool updateReceived = false;
+
+            // Continue reading messages until the requested update is received.
+            while ( !updateReceived )
+            {
+                // Wait until the client receives a message from the server.
+                while ( (inc = Client.ReadMessage()) == null ) ;
+
+                // Iterate through all of the available messages.
+                while ( inc != null )
+                {
+                    if ( inc.MessageType == NetIncomingMessageType.Data )
+                    {
+                        if ( (Datatype)inc.ReadByte() == messageType )
+                        {
+                            switch ( messageType )
+                            {
+                                case Datatype.UpdateDeck:
+                                {
+                                    Deck = (Deck)ServerUtilities.ReceiveUpdate(inc, messageType);
+
+                                    updateReceived = true;
+
+                                    // I'm not sure if this is necessary.
+                                    //Client.Recycle(inc);
+
+                                    break;
+                                }
+
+                                case Datatype.UpdateSelectedCard:
+                                {
+                                    DeselectCard(FindButton(SelectedCard));
+                                    SelectedCard = (int)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                    SelectCard(FindButton(SelectedCard));
+
+                                    updateReceived = true;
+                                    break;
+                                }
+
+                                case Datatype.UpdatePlayerNames:
+                                {
+                                    PlayerNames = (List<string>)ServerUtilities.ReceiveUpdate(inc, messageType);
+
+                                    updateReceived = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else if ( inc.MessageType == NetIncomingMessageType.StatusChanged && messageType == Datatype.FirstMessage )
+                    {
+                        updateReceived = true;
+                    }
+
+                    inc = Client.ReadMessage();
+                }
+            }
+        }
+
+        #endregion
+
+        #region Gui Related Code
 
         // Display a card in a player's hand.
         // Right now, this method only works for player one's hand.
@@ -248,85 +323,7 @@ namespace MonopolyDeal
         private void ReceiveUpdatesButton_Click( object sender, RoutedEventArgs e )
         {
             RequestUpdateFromServer(Datatype.RequestSelectedCard);
-
-            //int previousValue = SelectedCard;
-
-            //Thread messageThread = new Thread(RequestUpdateFromServer);
-            //messageThread.Start();
-            // Loop until worker thread activates. 
-            //while ( !messageThread.IsAlive )
-            {
-                Console.WriteLine("Thread not yet alive");
-            }
-
-            // As of now, do not select the same card twice.
-            //while ( SelectedCard == previousValue )
-            {
-                ReceiveUpdate(Datatype.UpdateSelectedCard);
-            }
-
-            //messageThread.Abort();
-            //messageThread.Join();
-        }
-
-        private void RequestUpdateFromServer( Datatype datatype )
-        {
-            NetOutgoingMessage outmsg = Client.CreateMessage();
-
-            outmsg.Write((byte)datatype);
-
-            // Clear all messages that the client currently has.
-            while ( Client.ReadMessage() != null ) ;
-
-            Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
-        }
-
-        // Return a boolean indicating whether or not an update was received.
-        private bool ReceiveUpdate(Datatype messageType)
-        {
-            NetIncomingMessage inc;
-
-            // Wait until the client receives a message from the server.
-            while ( (inc = Client.ReadMessage()) == null ) ; 
-
-            // Iterate through all of the available messages.
-            while ( inc != null )
-            {
-                if ( inc.MessageType == NetIncomingMessageType.Data )
-                {
-                    if ((Datatype)inc.ReadByte() == messageType)
-                    {
-                        switch (messageType)
-                        {
-                            case Datatype.UpdateDeck:
-                            {
-                                Deck = (Deck)ServerUtilities.ReceiveUpdate(inc, messageType);
-                                Client.Recycle(inc);
-                                break;
-                            }
-
-                            case Datatype.UpdateSelectedCard:
-                            {
-                                DeselectCard(FindButton(SelectedCard));
-                                SelectedCard = (int)ServerUtilities.ReceiveUpdate(inc, messageType);
-                                SelectCard(FindButton(SelectedCard));
-                                Client.Recycle(inc);
-                                break;
-                            }
-                        }
-
-                        return true;
-                    }
-                }
-                else if ( inc.MessageType == NetIncomingMessageType.StatusChanged && messageType == Datatype.FirstMessage )
-                {
-                    return true;
-                }
-
-                inc = Client.ReadMessage();
-            }
-
-            return false;
+            ClientReceiveUpdate(Datatype.UpdateSelectedCard);
         }
 
         // Set the server's SelectedCard property equal to the value of this client's SelectedCard property.
@@ -352,5 +349,7 @@ namespace MonopolyDeal
         {
 
         }
+
+        #endregion
     }
 }

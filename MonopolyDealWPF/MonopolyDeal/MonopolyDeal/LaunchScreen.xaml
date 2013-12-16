@@ -26,23 +26,23 @@
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <!--
-            <Label Content="Number of players (Max 4):"
-                   Name="PlayersLabel"
+            
+            <Label Content="Player Name:"
+                   Name="PlayerNameLabel"
                    HorizontalAlignment="Center"
                    Grid.Column="0"
                    Grid.Row="0"
                    VerticalAlignment="Top"/>
             
-            <TextBox Name="NumberOfPlayers" 
+            <TextBox Name="PlayerName" 
                      Grid.Column="1"
                      Grid.Row="0"
-                     Text="2"
+                     Text="Player"
                      VerticalAlignment="Top"
                      HorizontalAlignment="Left"
-                     Width="30"
-                     TextChanged="NumberOfPlayers_TextChanged"/>            
-            -->
+                     Width="150"
+                     TextChanged="PlayerName_TextChanged"/>            
+            
             <Label Content="IP Address of Server:"
                    Name="IPAddressLabel"
                    HorizontalAlignment="Center"

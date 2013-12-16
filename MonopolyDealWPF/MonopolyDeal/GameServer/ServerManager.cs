@@ -142,12 +142,40 @@ namespace GameServer
                                     break;
                                 }
 
+                                case Datatype.UpdatePlayer:
+                                {
+                                    Player updatedPlayer = (Player)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                    bool isPlayerInList = false;
+
+                                    // If the updated Player is already in the server's list, update that's Player's properties.
+                                    // Note: This search only works if players have unique names.
+                                    foreach ( Player player in Players )
+                                    {
+                                        if ( updatedPlayer.Name == player.Name )
+                                        {
+                                            player.CardsInHand = updatedPlayer.CardsInHand;
+                                            player.CardsInPlay = updatedPlayer.CardsInPlay;
+                                            isPlayerInList = true;
+                                            break;
+                                        }
+                                    }
+
+                                    // If the Player is not on the list, add it.
+                                    if ( !isPlayerInList )
+                                    {
+                                        Players.Add(updatedPlayer);
+                                    }
+
+                                    break;
+                                }
+
                                 case Datatype.RequestDeck:
                                 {
                                     if ( Server.ConnectionsCount != 0 )
                                     {
                                         ServerUtilities.SendUpdate(Server, Datatype.UpdateDeck, Deck);
                                     }
+
                                     break;
                                 }
 
@@ -157,6 +185,14 @@ namespace GameServer
                                     {
                                         ServerUtilities.SendUpdate(Server, Datatype.UpdateSelectedCard, SelectedCard);
                                     }
+
+                                    break;
+                                }
+
+                                case Datatype.RequestPlayerNames:
+                                {
+                                    ServerUtilities.SendUpdate(Server, Datatype.UpdatePlayerNames, Players);
+
                                     break;
                                 }
                             }
@@ -194,35 +230,6 @@ namespace GameServer
                 // if 30ms has passed
                 if ( (time + timetopass) < DateTime.Now )
                 {
-                    //// If there is even 1 client
-                    //if ( Server.ConnectionsCount != 0 )
-                    //{
-                    //    ServerUtilities.SendUpdate(Server, Datatype.UpdateSelectedCard, SelectedCard);
-                    //    ServerUtilities.SendUpdate(Server, Datatype.UpdateDeck, Deck);
-                    //}
-                    //// Create new message
-                    //NetOutgoingMessage outmsg = Server.CreateMessage();
-
-                    //// Write the index of the selected card.
-                    //outmsg.Write(SelectedCard);
-
-                    //// Write the size of the deck's cardlist.
-                    //outmsg.Write(Deck.CardList.Count);
-
-                    //// Write the properties of each card in the deck.
-                    //foreach ( Card card in Deck.CardList )
-                    //{
-                    //    outmsg.Write(card.Value.ToString());
-                    //    outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
-                    //}
-
-                    //// Send messsage to clients ( All connections, in reliable order, channel 0)
-                    //if ( Server.Connections.Count > 0 )
-                    //{
-                    //    Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
-                    //}
-
-                    // Update current time
                     time = DateTime.Now;
                 }
 

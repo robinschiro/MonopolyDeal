@@ -41,9 +41,8 @@ namespace GameObjects
             TextureName = "cardback";
         }
 
-        public Deck( String textureName, List<Card> cardList )
+        public Deck( List<Card> cardList )
         {
-            this.TextureName = textureName;
             this.CardList = cardList;
         }
 

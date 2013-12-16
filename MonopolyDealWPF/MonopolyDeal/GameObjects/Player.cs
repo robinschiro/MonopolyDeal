@@ -9,18 +9,19 @@ namespace GameObjects
     {
         const int INITIAL_SIZE_OF_HAND = 5;
 
-        // This list represents the player's hand.
-        public List<Card> CardsInHand { get; set; }
-
         // This represents the cards that the player has played on the playing field.
         public List<Card> CardsInPlay { get; set; }
 
-        public String Name { get; set; }
+        // This list represents the player's hand.
+        public List<Card> CardsInHand { get; set; }
+        
+        public string Name { get; set; }
 
-        public Player( Deck deck, String name )
+        // Use this constructor when generating a player for the first time.
+        public Player( Deck deck, string name )
         {
-            this.CardsInHand = new List<Card>();
             this.CardsInPlay = new List<Card>();
+            this.CardsInHand = new List<Card>();
 
             // Initialize the player's hand
             for ( int i = 0; i < INITIAL_SIZE_OF_HAND; ++i )
@@ -30,6 +31,17 @@ namespace GameObjects
             }
 
             this.Name = name;
+        }
+
+        public Player( string name, List<Card> cardsInPlay, List<Card> cardsInHand )
+        {
+            this.Name = name;
+            this.CardsInPlay = cardsInPlay;
+            this.CardsInHand = cardsInHand;
+        }
+
+        public Player()
+        {
         }
     }
 }

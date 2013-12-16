@@ -10,7 +10,10 @@ namespace GameObjects
         FirstMessage,
         UpdateSelectedCard,
         UpdateDeck,
+        UpdatePlayer,
+        UpdatePlayerNames,
         RequestSelectedCard,
-        RequestDeck
+        RequestDeck,
+        RequestPlayerNames
     }
 }
