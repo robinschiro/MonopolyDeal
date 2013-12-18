@@ -209,14 +209,14 @@ namespace MonopolyDeal
         #region Gui Related Code
 
         // Display a card in a player's hand.
-        // Right now, this method only works for player one's hand.
         public void DisplayCardInHand( List<Card> cardsInHand, int position )
         {
             Button cardButton = new Button();
-            cardButton.Name = "CardButton" + position;
             cardButton.Content = cardsInHand[position].CardImage;
+            cardButton.Tag = cardsInHand[position];
             cardButton.Style = (Style)FindResource("NoChromeButton");
-            cardButton.Click += new RoutedEventHandler(cardButton_Click);
+            cardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
+            cardButton.PreviewMouseRightButtonDown += new MouseButtonEventHandler(PlayCardEvent);
 
             ColumnDefinition col1 = new ColumnDefinition();
             col1.Width = new GridLength(1, GridUnitType.Star);
@@ -236,48 +236,85 @@ namespace MonopolyDeal
             Grid.SetColumn(cardGrid, position);
         }
 
-        // Increase the size of a card when it is selected and decrease its size when another card is selected.
-        public void cardButton_Click( object sender, RoutedEventArgs args )
+        public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
-            // Deselect the currently selected card.
-            DeselectCard(FindButton(SelectedCard));
+            Button cardButton = FindButton(SelectedCard);
 
-            // Update the value of SelectedCard.
-            for ( int i = 0; i < PlayerOneHand.Children.Count; ++i )
+            if ( -1 != SelectedCard && sender == cardButton )
             {
-                foreach ( FrameworkElement element in (PlayerOneHand.Children[i] as Grid).Children )
-                {
-                    if ( element.Name == (sender as Button).Name )
-                    {
-                        if ( i != SelectedCard )
-                        {
-                            SelectedCard = i;
-                            SelectCard(sender as Button);
-                        }
-                        else
-                        {
-                            SelectedCard = -1;
-                            DeselectCard(sender as Button);
-                        }
-                        break;
-                    }
-                }
+                RemoveCardFromHand(cardButton);
+
+                // Update the value of 'SelectedCard' (no card is selected after a card is played).
+                SelectedCard = -1;
+
+                AddCardToPlay(cardButton);
+
             }
         }
 
-        // Find a card in player one's hand given its position in the grid displaying the hand.
+        // Add a card to the player's side of the playing field.
+        public void AddCardToPlay( Button cardButton )
+        {
+            // Add the card to the Player's CardsInPlay list.
+            Player.CardsInPlay.Add(cardButton.Tag as Card);
+        }
+
+        // Remove a card (given its Button wrapper) from the player's hand.
+        public void RemoveCardFromHand( Button cardButton )
+        {
+            // Remove the card from the Player's CardsInHand list.
+            Player.CardsInHand.Remove(cardButton.Tag as Card);
+
+            // Get the index of the card button.
+            int buttonIndex = Grid.GetColumn(cardButton.Parent as Grid);
+
+            // Remove the card's button from the PlayerOneHand grid.
+            PlayerOneHand.Children.RemoveAt(buttonIndex);
+
+            // Shift all subsequetial card buttons to the left.
+            for ( int i = buttonIndex; i < Player.CardsInHand.Count; ++i )
+            {
+                Grid.SetColumn(PlayerOneHand.Children[i], i);
+            }
+        }
+
+        // Increase the size of a card when it is selected and decrease its size when another card is selected.
+        public void SelectCardEvent( object sender, MouseButtonEventArgs args )
+        {
+            // Get the index of the button that called this event.
+            int buttonIndex = Grid.GetColumn((sender as Button).Parent as Grid);
+
+            if ( buttonIndex != SelectedCard )
+            {
+                // Deselect the currently selected card.
+                if ( SelectedCard != -1 )
+                {
+                    DeselectCard(FindButton(SelectedCard));
+                }
+
+                // Select this card.
+                SelectedCard = buttonIndex;
+                SelectCard(sender as Button);
+            }
+            else
+            {
+                // Deselect this card if it is already selected.
+                SelectedCard = -1;
+                DeselectCard(sender as Button);
+            }
+        }
+
+        // Find a card in the player's hand given its position in PlayerOneHand.
         private Button FindButton( int buttonIndex )
         {
             if ( SelectedCard != -1 )
             {
                 for ( int i = 0; i < PlayerOneHand.Children.Count; ++i )
                 {
-                    foreach ( FrameworkElement element in (PlayerOneHand.Children[i] as Grid).Children )
+                    Button cardButton = (PlayerOneHand.Children[i] as Grid).Children[0] as Button;
+                    if ( Grid.GetColumn((PlayerOneHand.Children[i] as Grid)) == buttonIndex )
                     {
-                        if ( element.Name == "CardButton" + buttonIndex )
-                        {
-                            return (Button)element;
-                        }
+                        return cardButton;
                     }
                 }
             }
@@ -341,7 +378,7 @@ namespace MonopolyDeal
         // Use this event to perform periodic actions.
         static void update_Elapsed( object sender, System.Timers.ElapsedEventArgs e )
         {
-            
+
         }
 
         // Use this event to respond to key presses.
