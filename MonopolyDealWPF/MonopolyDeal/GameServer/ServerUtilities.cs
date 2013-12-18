@@ -51,6 +51,22 @@ namespace GameServer
 
                     return playerNames;
                 }
+
+                case Datatype.UpdatePlayerList:
+                {
+                    // Read the size of the list of players.
+                    int size = inc.ReadInt32();
+
+                    List<Player> playerList = new List<Player>();
+
+                    // Read each name in the message and add it to the list.
+                    for ( int i = 0; i < size; ++i )
+                    {
+                        playerList.Add(new Player(inc.ReadString(), ReadCards(inc), ReadCards(inc)));
+                    }
+
+                    return playerList;
+                }
             }
 
             return null;
@@ -75,6 +91,32 @@ namespace GameServer
             }
 
             return cards;
+        }
+
+        public static void WritePlayer( NetOutgoingMessage outmsg, Player player )
+        {
+            // Write the player's name.
+            outmsg.Write(player.Name);
+
+            // Write the count of the Player's CardsInPlay.
+            outmsg.Write(player.CardsInPlay.Count);
+
+            // Write the properties of each card.
+            foreach ( Card card in player.CardsInPlay )
+            {
+                outmsg.Write(card.Value.ToString());
+                outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
+            }
+
+            // Write the count of the Player's CardsInHand.
+            outmsg.Write(player.CardsInHand.Count);
+
+            // Write the properties of each card.
+            foreach ( Card card in player.CardsInHand )
+            {
+                outmsg.Write(card.Value.ToString());
+                outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
+            }
         }
 
         // Send an update to either a client or the server, depending on where this method is called.
@@ -160,6 +202,21 @@ namespace GameServer
                     foreach ( Player player in players )
                     {
                         outmsg.Write(player.Name);
+                    }
+                    break;
+                }
+
+                case Datatype.UpdatePlayerList:
+                {
+                    List<Player> players = (List<Player>)updatedObject;
+
+                    // Write the count of players.
+                    outmsg.Write(players.Count);
+
+                    // Write the name of each player in the game.
+                    foreach ( Player player in players )
+                    {
+                        WritePlayer(outmsg, player);
                     }
                     break;
                 }

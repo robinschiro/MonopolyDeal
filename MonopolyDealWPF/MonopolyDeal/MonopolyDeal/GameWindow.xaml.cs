@@ -28,6 +28,7 @@ namespace MonopolyDeal
         private Deck Deck;
         private Player Player;
         private List<String> PlayerNames;
+        private List<Player> PlayerList;
         private String ServerIP;
         private int SelectedCard;
 
@@ -80,6 +81,9 @@ namespace MonopolyDeal
 
             // Instantiate the player.
             this.Player = new Player(Deck, playerName);
+
+            // Re-title the window.
+            this.Title = playerName + "'s Window";
 
             // Display the cards in this player's hand.
             for ( int i = 0; i < Player.CardsInHand.Count; ++i )
@@ -191,6 +195,15 @@ namespace MonopolyDeal
                                     updateReceived = true;
                                     break;
                                 }
+
+                                case Datatype.UpdatePlayerList:
+                                {
+                                    PlayerList = (List<Player>)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                    DisplayOpponentCardsInPlay();
+
+                                    updateReceived = true;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -206,9 +219,97 @@ namespace MonopolyDeal
 
         #endregion
 
-        #region Gui Related Code
+        #region Events
+
+        public void PlayCardEvent( object sender, MouseButtonEventArgs args )
+        {
+            Button cardButton = FindButton(SelectedCard);
+
+            if ( -1 != SelectedCard && sender == cardButton )
+            {
+                RemoveCardFromHand(cardButton);
+
+                // Update the value of 'SelectedCard' (no card is selected after a card is played).
+                SelectedCard = -1;
+
+                // Add the card to the Player's CardsInPlay list.
+                Player.CardsInPlay.Add(cardButton.Tag as Card);
+
+                AddCardToField(cardButton, PlayerOneField);
+
+                // Update the server.
+                ServerUtilities.SendUpdate(Client, Datatype.UpdatePlayer, Player);
+            }
+        }
+
+        // Increase the size of a card when it is selected and decrease its size when another card is selected.
+        public void SelectCardEvent( object sender, MouseButtonEventArgs args )
+        {
+            // Get the index of the button that called this event.
+            int buttonIndex = Grid.GetColumn((sender as Button).Parent as Grid);
+
+            if ( buttonIndex != SelectedCard )
+            {
+                // Deselect the currently selected card.
+                if ( SelectedCard != -1 )
+                {
+                    DeselectCard(FindButton(SelectedCard));
+                }
+
+                // Select this card.
+                SelectedCard = buttonIndex;
+                SelectCard(sender as Button);
+            }
+            else
+            {
+                // Deselect this card if it is already selected.
+                SelectedCard = -1;
+                DeselectCard(sender as Button);
+            }
+        }
+
+        // Receive an update from the server, setting this client's SelectedCard property equal to the value
+        // of the server's SelectedCard property.
+        private void ReceiveUpdatesButton_Click( object sender, RoutedEventArgs e )
+        {
+            RequestUpdateFromServer(Datatype.RequestSelectedCard);
+            ClientReceiveUpdate(Datatype.UpdateSelectedCard);
+
+            // Receive the most current list of players.
+            RequestUpdateFromServer(Datatype.RequestPlayerList);
+            ClientReceiveUpdate(Datatype.UpdatePlayerList);
+        }
+
+        // Set the server's SelectedCard property equal to the value of this client's SelectedCard property.
+        private void UpdateServerButton_Click( object sender, RoutedEventArgs e )
+        {
+            ServerUtilities.SendUpdate(Client, Datatype.UpdateSelectedCard, SelectedCard);
+        }
+
+        // It seems that clients disconnect randomly from the server. This allows the connection to be reinitialized.
+        private void ReinitializeConnectionButton_Click( object sender, RoutedEventArgs e )
+        {
+            InitializeClient();
+        }
+
+        // Use this event to perform periodic actions.
+        static void update_Elapsed( object sender, System.Timers.ElapsedEventArgs e )
+        {
+
+        }
+
+        // Use this event to respond to key presses.
+        private void Window_KeyDown( object sender, KeyEventArgs e )
+        {
+
+        }
+
+        #endregion
+
+        #region Hand and Field Manipulation
 
         // Display a card in a player's hand.
+        // This is duplicate code. Consider deleting this method and using AddCardToField instead.
         public void DisplayCardInHand( List<Card> cardsInHand, int position )
         {
             Button cardButton = new Button();
@@ -236,27 +337,76 @@ namespace MonopolyDeal
             Grid.SetColumn(cardGrid, position);
         }
 
-        public void PlayCardEvent( object sender, MouseButtonEventArgs args )
+        // Wrap a Button around a Card.
+        public Button ConvertCardToButton( Card card )
         {
-            Button cardButton = FindButton(SelectedCard);
+            Button cardButton = new Button();
+            cardButton.Content = card.CardImage;
+            cardButton.Tag = card;
+            cardButton.Style = (Style)FindResource("NoChromeButton");
 
-            if ( -1 != SelectedCard && sender == cardButton )
+            return cardButton;
+        }
+
+        // This is a proof-concept-method; it will later be deleted or significantly modified.
+        // Display the cards played by the player's opponent (this method is flawed because it only works for 2-player games).
+        public void DisplayOpponentCardsInPlay()
+        {
+            Player opponent = null;
+
+            foreach ( Player player in PlayerList )
             {
-                RemoveCardFromHand(cardButton);
-
-                // Update the value of 'SelectedCard' (no card is selected after a card is played).
-                SelectedCard = -1;
-
-                AddCardToPlay(cardButton);
-
+                if ( player.Name != this.Player.Name )
+                {
+                    opponent = player;
+                    break;
+                }
             }
+
+            if ( opponent != null )
+            {
+                ClearCardsOnField(PlayerTwoField);
+
+                foreach ( Card card in opponent.CardsInPlay )
+                {
+                    AddCardToField(ConvertCardToButton(card), PlayerTwoField);
+                }
+            }
+
+        }
+
+        // Clear all of the card buttons from a give grid.
+        public void ClearCardsOnField( Grid playerField )
+        {
+            playerField.Children.Clear();
         }
 
         // Add a card to the player's side of the playing field.
-        public void AddCardToPlay( Button cardButton )
+        public void AddCardToField( Button handCardButton, Grid playerField )
         {
-            // Add the card to the Player's CardsInPlay list.
-            Player.CardsInPlay.Add(cardButton.Tag as Card);
+            Button playCardButton = new Button();
+            playCardButton.Content = handCardButton.Content;
+            playCardButton.Tag = handCardButton.Tag;
+            playCardButton.Style = (Style)FindResource("NoChromeButton");
+            //playCardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
+            //playCardButton.PreviewMouseRightButtonDown += new MouseButtonEventHandler(PlayCardEvent);
+
+            ColumnDefinition col1 = new ColumnDefinition();
+            col1.Width = new GridLength(1, GridUnitType.Star);
+            ColumnDefinition col2 = new ColumnDefinition();
+            col2.Width = new GridLength(16, GridUnitType.Star);
+            ColumnDefinition col3 = new ColumnDefinition();
+            col3.Width = new GridLength(1, GridUnitType.Star);
+
+            Grid playCardGrid = new Grid();
+            playCardGrid.ColumnDefinitions.Add(col1);
+            playCardGrid.ColumnDefinitions.Add(col2);
+            playCardGrid.ColumnDefinitions.Add(col3);
+            playCardGrid.Children.Add(playCardButton);
+            Grid.SetColumn(playCardButton, 1);
+
+            playerField.Children.Add(playCardGrid);
+            Grid.SetColumn(playCardGrid, playerField.Children.Count - 1);
         }
 
         // Remove a card (given its Button wrapper) from the player's hand.
@@ -275,32 +425,6 @@ namespace MonopolyDeal
             for ( int i = buttonIndex; i < Player.CardsInHand.Count; ++i )
             {
                 Grid.SetColumn(PlayerOneHand.Children[i], i);
-            }
-        }
-
-        // Increase the size of a card when it is selected and decrease its size when another card is selected.
-        public void SelectCardEvent( object sender, MouseButtonEventArgs args )
-        {
-            // Get the index of the button that called this event.
-            int buttonIndex = Grid.GetColumn((sender as Button).Parent as Grid);
-
-            if ( buttonIndex != SelectedCard )
-            {
-                // Deselect the currently selected card.
-                if ( SelectedCard != -1 )
-                {
-                    DeselectCard(FindButton(SelectedCard));
-                }
-
-                // Select this card.
-                SelectedCard = buttonIndex;
-                SelectCard(sender as Button);
-            }
-            else
-            {
-                // Deselect this card if it is already selected.
-                SelectedCard = -1;
-                DeselectCard(sender as Button);
             }
         }
 
@@ -353,38 +477,6 @@ namespace MonopolyDeal
         private void setInfoBox( TriggerBase target, int location )
         {
             target.SetValue(InfoBoxAttachedProperty, Player.CardsInHand[location]);
-        }
-
-        // Receive an update from the server, setting this client's SelectedCard property equal to the value
-        // of the server's SelectedCard property.
-        private void ReceiveUpdatesButton_Click( object sender, RoutedEventArgs e )
-        {
-            RequestUpdateFromServer(Datatype.RequestSelectedCard);
-            ClientReceiveUpdate(Datatype.UpdateSelectedCard);
-        }
-
-        // Set the server's SelectedCard property equal to the value of this client's SelectedCard property.
-        private void UpdateServerButton_Click( object sender, RoutedEventArgs e )
-        {
-            ServerUtilities.SendUpdate(Client, Datatype.UpdateSelectedCard, SelectedCard);
-        }
-
-        // It seems that clients disconnect randomly from the server. This allows the connection to be reinitialized.
-        private void ReinitializeConnectionButton_Click( object sender, RoutedEventArgs e )
-        {
-            InitializeClient();
-        }
-
-        // Use this event to perform periodic actions.
-        static void update_Elapsed( object sender, System.Timers.ElapsedEventArgs e )
-        {
-
-        }
-
-        // Use this event to respond to key presses.
-        private void Window_KeyDown( object sender, KeyEventArgs e )
-        {
-
         }
 
         #endregion

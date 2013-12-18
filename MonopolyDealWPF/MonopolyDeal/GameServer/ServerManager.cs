@@ -39,7 +39,7 @@ namespace GameServer
 
         // Game objects.
         static Deck Deck;
-        static List<Player> Players;
+        static List<Player> PlayerList;
         static int SelectedCard;
         static bool HasSentFirstMessage;
 
@@ -51,10 +51,10 @@ namespace GameServer
             Deck.Test = "Server Created";
 
             // Create a new list of players.
-            Players = new List<Player>();
+            PlayerList = new List<Player>();
 
             // Initialize the selected card.
-            SelectedCard = 0;
+            SelectedCard = -1;
 
             HasSentFirstMessage = false;
 
@@ -149,7 +149,7 @@ namespace GameServer
 
                                     // If the updated Player is already in the server's list, update that's Player's properties.
                                     // Note: This search only works if players have unique names.
-                                    foreach ( Player player in Players )
+                                    foreach ( Player player in PlayerList )
                                     {
                                         if ( updatedPlayer.Name == player.Name )
                                         {
@@ -163,7 +163,7 @@ namespace GameServer
                                     // If the Player is not on the list, add it.
                                     if ( !isPlayerInList )
                                     {
-                                        Players.Add(updatedPlayer);
+                                        PlayerList.Add(updatedPlayer);
                                     }
 
                                     break;
@@ -191,7 +191,14 @@ namespace GameServer
 
                                 case Datatype.RequestPlayerNames:
                                 {
-                                    ServerUtilities.SendUpdate(Server, Datatype.UpdatePlayerNames, Players);
+                                    ServerUtilities.SendUpdate(Server, Datatype.UpdatePlayerNames, PlayerList);
+
+                                    break;
+                                }
+
+                                case Datatype.RequestPlayerList:
+                                {
+                                    ServerUtilities.SendUpdate(Server, Datatype.UpdatePlayerList, PlayerList);
 
                                     break;
                                 }

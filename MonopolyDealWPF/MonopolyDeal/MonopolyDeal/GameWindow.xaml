@@ -1,7 +1,7 @@
 ﻿<Window x:Class="MonopolyDeal.GameWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="GameWindow" Height="525" Width="1000"
+        Title="GameWindow" Height="475" Width="1000"
         KeyDown="Window_KeyDown">
 
     <Window.Resources>
