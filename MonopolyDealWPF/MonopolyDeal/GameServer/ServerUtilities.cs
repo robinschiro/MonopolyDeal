@@ -36,22 +36,6 @@ namespace GameServer
                     return new Player(inc.ReadString(), ReadCards(inc), ReadCards(inc));
                 }
 
-                case Datatype.UpdatePlayerNames:
-                {
-                    // Read the size of the list of names.
-                    int size = inc.ReadInt32();
-
-                    List<string> playerNames = new List<string>();
-
-                    // Read each name in the message and add it to the list.
-                    for ( int i = 0; i < size; ++i )
-                    {
-                        playerNames.Add(inc.ReadString());
-                    }
-
-                    return playerNames;
-                }
-
                 case Datatype.UpdatePlayerList:
                 {
                     // Read the size of the list of players.
@@ -93,30 +77,29 @@ namespace GameServer
             return cards;
         }
 
+        public static void WriteCards( NetOutgoingMessage outmsg, List<Card> cardList )
+        {
+            // Write the count of the list of cards.
+            outmsg.Write(cardList.Count);
+
+            // Write the properties of each card.
+            foreach ( Card card in cardList )
+            {
+                outmsg.Write(card.Value.ToString());
+                outmsg.Write(card.CardImageUriPath);
+            }
+        }
+
         public static void WritePlayer( NetOutgoingMessage outmsg, Player player )
         {
-            // Write the player's name.
+            // Write the Player's name.
             outmsg.Write(player.Name);
+            
+            // Write the Player's CardsInPlay.
+            WriteCards(outmsg, player.CardsInPlay);
 
-            // Write the count of the Player's CardsInPlay.
-            outmsg.Write(player.CardsInPlay.Count);
-
-            // Write the properties of each card.
-            foreach ( Card card in player.CardsInPlay )
-            {
-                outmsg.Write(card.Value.ToString());
-                outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
-            }
-
-            // Write the count of the Player's CardsInHand.
-            outmsg.Write(player.CardsInHand.Count);
-
-            // Write the properties of each card.
-            foreach ( Card card in player.CardsInHand )
-            {
-                outmsg.Write(card.Value.ToString());
-                outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
-            }
+            // Write the Player's CardsInHand.
+            WriteCards(outmsg, player.CardsInHand);
         }
 
         // Send an update to either a client or the server, depending on where this method is called.
@@ -141,14 +124,7 @@ namespace GameServer
             {
                 case Datatype.UpdateDeck:
                 {
-                    outmsg.Write((updatedObject as Deck).CardList.Count);
-
-                    // Write the properties of each card in the deck.
-                    foreach ( Card card in (updatedObject as Deck).CardList )
-                    {
-                        outmsg.Write(card.Value.ToString());
-                        outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
-                    }
+                    WriteCards(outmsg, (updatedObject as Deck).CardList);
 
                     break;
                 }
@@ -165,44 +141,8 @@ namespace GameServer
                 {
                     Player player = (Player)updatedObject;
 
-                    // Write the player's name.
-                    outmsg.Write(player.Name);
+                    WritePlayer(outmsg, player);
 
-                    // Write the count of the Player's CardsInPlay.
-                    outmsg.Write(player.CardsInPlay.Count);
-
-                    // Write the properties of each card.
-                    foreach ( Card card in player.CardsInPlay )
-                    {
-                        outmsg.Write(card.Value.ToString());
-                        outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
-                    }
-
-                    // Write the count of the Player's CardsInHand.
-                    outmsg.Write(player.CardsInHand.Count);
-
-                    // Write the properties of each card.
-                    foreach ( Card card in player.CardsInHand )
-                    {
-                        outmsg.Write(card.Value.ToString());
-                        outmsg.Write(((BitmapImage)card.CardImage.Source).UriSource.OriginalString);
-                    }
-
-                    break;
-                }
-
-                case Datatype.UpdatePlayerNames:
-                {
-                    List<Player> players = (List<Player>)updatedObject;
-
-                    // Write the count of playerNames.
-                    outmsg.Write(players.Count);
-
-                    // Write the name of each player in the game.
-                    foreach ( Player player in players )
-                    {
-                        outmsg.Write(player.Name);
-                    }
                     break;
                 }
 

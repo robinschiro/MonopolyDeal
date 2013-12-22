@@ -1,4 +1,9 @@
-﻿using System;
+﻿// Preprocessor directives.
+// This 'define' enables server/client communication based on callback messages. This implementation provides immediate feedback
+// for clients, instead of requiring them to click the 'Receive Updates' button to see updates.
+#define USE_CALLBACK
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +22,7 @@ using Lidgren.Network;
 using System.Timers;
 using System.Threading;
 using System.ComponentModel;
+using System.Windows.Threading;
 
 namespace MonopolyDeal
 {
@@ -27,10 +33,10 @@ namespace MonopolyDeal
     {
         private Deck Deck;
         private Player Player;
-        private List<String> PlayerNames;
         private List<Player> PlayerList;
         private String ServerIP;
         private int SelectedCard;
+        private bool BeginCommunication;
 
         // Client Object
         private volatile NetClient Client;
@@ -45,45 +51,47 @@ namespace MonopolyDeal
 
             this.ServerIP = ipAddress;
             this.SelectedCard = -1;
+            this.BeginCommunication = false;
 
             // Connect the client to the server.
             InitializeClient();
 
+#if USE_CALLBACK
+            while ( !this.BeginCommunication );
+#else
+
             // Do not do anything until the server finalizes its connection with the client.
             ClientReceiveUpdate(Datatype.FirstMessage);
+#endif
 
             // Receive the deck from the server.
             RequestUpdateFromServer(Datatype.RequestDeck);
-            ClientReceiveUpdate(Datatype.UpdateDeck);
 
-            // Receive a list of the names of the players already on the server.
-            // Eventually, each client will receive a list of Player objects, not just Player names.
-            RequestUpdateFromServer(Datatype.RequestPlayerNames);
-            ClientReceiveUpdate(Datatype.UpdatePlayerNames);
+#if !USE_CALLBACK
+            ClientReceiveUpdate(Datatype.UpdateDeck);
+#endif
+
+            // Receive a list of the players already on the server.
+            RequestUpdateFromServer(Datatype.RequestPlayerList);
+
+#if !USE_CALLBACK
+            ClientReceiveUpdate(Datatype.UpdatePlayerList);
+#endif
+
+            while ( this.Deck == null || this.PlayerList == null ) ;
 
             // Verify that the value of 'playerName' does not exist in the list of Player names.
             // If it does, modify the name until it no longer matches one on the list.
-            bool hasBeenModified = false;
-            int a = 2;
-            while ( PlayerNames.Contains(playerName) )
-            {
-                if ( !hasBeenModified )
-                {
-                    playerName += a;
-                    hasBeenModified = true;
-                }
-                else
-                {
-                    ++a;
-                    playerName = playerName.Substring(0, playerName.Length - 1) + a;
-                }
-            }
+            playerName = VerifyPlayerName(playerName);
 
             // Instantiate the player.
             this.Player = new Player(Deck, playerName);
 
             // Re-title the window.
             this.Title = playerName + "'s Window";
+
+            // Display the opponent's cards.
+            DisplayOpponentCardsInPlay(new Object());
 
             // Display the cards in this player's hand.
             for ( int i = 0; i < Player.CardsInHand.Count; ++i )
@@ -123,6 +131,12 @@ namespace MonopolyDeal
             // Connect client, to ip previously requested from user.
             Client.Connect(ServerIP, 14242, outmsg);
 
+#if USE_CALLBACK
+            SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
+        
+            Client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage)); 
+#endif
+
             // Set timer to tick every 50ms
             System.Timers.Timer update = new System.Timers.Timer(1000);
 
@@ -133,14 +147,91 @@ namespace MonopolyDeal
             update.Start();
         }
 
+        public void GotMessage( object peer )
+        {
+            NetIncomingMessage inc;
+            bool updateReceived = false;
+
+            // Continue reading messages until the requested update is received.
+            while ( !updateReceived )
+            {
+                // Wait until the client receives a message from the server.
+                while ( (inc = (peer as NetPeer).ReadMessage()) == null ) ;
+
+                // Iterate through all of the available messages.
+                while ( inc != null )
+                {
+                    if ( inc.MessageType == NetIncomingMessageType.Data )
+                    {
+                        Datatype messageType = (Datatype)inc.ReadByte();
+
+                        switch ( messageType )
+                        {
+                            case Datatype.UpdateDeck:
+                            {
+                                this.Deck = (Deck)ServerUtilities.ReceiveUpdate(inc, messageType);
+
+
+                                // I'm not sure if this is necessary.
+                                //Client.Recycle(inc);
+
+                                break;
+                            }
+
+                            case Datatype.UpdateSelectedCard:
+                            {
+                                int previousSelectedCard = this.SelectedCard;
+                                this.SelectedCard = (int)ServerUtilities.ReceiveUpdate(inc, messageType);
+
+                                if ( this.SelectedCard != previousSelectedCard )
+                                {
+                                    ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<int>(AltDeselectCard), previousSelectedCard); }; // Create the thread and kick it started! ;
+                                    Thread newThread = new Thread(start);
+                                    newThread.Start();
+
+                                    ThreadStart start2 = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<int>(AltSelectCard), SelectedCard); }; // Create the thread and kick it started! ;
+                                    Thread newThread2 = new Thread(start2);
+                                    newThread2.Start();
+                                }
+
+                                break;
+                            }
+
+                            case Datatype.UpdatePlayerList:
+                            {
+                                this.PlayerList = (List<Player>)ServerUtilities.ReceiveUpdate(inc, messageType);
+
+                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(DisplayOpponentCardsInPlay), new Object()); }; // Create the thread and kick it started! ;
+                                Thread newThread = new Thread(start);
+                                newThread.Start();
+
+                                break;
+                            }
+                        }
+
+                        updateReceived = true;
+                        
+                    }
+                    else if ( inc.MessageType == NetIncomingMessageType.StatusChanged )
+                    {
+                        this.BeginCommunication = true;
+                        updateReceived = true;
+                    }
+
+                    inc = Client.ReadMessage();
+                }
+            }
+        } 
+
         private void RequestUpdateFromServer( Datatype datatype )
         {
             NetOutgoingMessage outmsg = Client.CreateMessage();
 
             outmsg.Write((byte)datatype);
-
+#if !USE_CALLBACK
             // Clear all messages that the client currently has.
             while ( Client.ReadMessage() != null ) ;
+#endif
 
             Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
         }
@@ -168,9 +259,8 @@ namespace MonopolyDeal
                             {
                                 case Datatype.UpdateDeck:
                                 {
-                                    Deck = (Deck)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                    this.Deck = (Deck)ServerUtilities.ReceiveUpdate(inc, messageType);
 
-                                    updateReceived = true;
 
                                     // I'm not sure if this is necessary.
                                     //Client.Recycle(inc);
@@ -180,31 +270,20 @@ namespace MonopolyDeal
 
                                 case Datatype.UpdateSelectedCard:
                                 {
-                                    DeselectCard(FindButton(SelectedCard));
-                                    SelectedCard = (int)ServerUtilities.ReceiveUpdate(inc, messageType);
-                                    SelectCard(FindButton(SelectedCard));
+                                    this.SelectedCard = (int)ServerUtilities.ReceiveUpdate(inc, messageType);
 
-                                    updateReceived = true;
-                                    break;
-                                }
-
-                                case Datatype.UpdatePlayerNames:
-                                {
-                                    PlayerNames = (List<string>)ServerUtilities.ReceiveUpdate(inc, messageType);
-
-                                    updateReceived = true;
                                     break;
                                 }
 
                                 case Datatype.UpdatePlayerList:
                                 {
-                                    PlayerList = (List<Player>)ServerUtilities.ReceiveUpdate(inc, messageType);
-                                    DisplayOpponentCardsInPlay();
+                                    this.PlayerList = (List<Player>)ServerUtilities.ReceiveUpdate(inc, messageType);
 
-                                    updateReceived = true;
                                     break;
                                 }
                             }
+
+                            updateReceived = true;
                         }
                     }
                     else if ( inc.MessageType == NetIncomingMessageType.StatusChanged && messageType == Datatype.FirstMessage )
@@ -266,18 +345,25 @@ namespace MonopolyDeal
                 SelectedCard = -1;
                 DeselectCard(sender as Button);
             }
+
+#if USE_CALLBACK
+            ServerUtilities.SendUpdate(Client, Datatype.UpdateSelectedCard, SelectedCard);
+#endif
         }
 
-        // Receive an update from the server, setting this client's SelectedCard property equal to the value
-        // of the server's SelectedCard property.
+        // Receive an update from the server.
         private void ReceiveUpdatesButton_Click( object sender, RoutedEventArgs e )
         {
+            // Set this client's SelectedCard property equal to the value the server's SelectedCard property.
+            DeselectCard(FindButton(SelectedCard));
             RequestUpdateFromServer(Datatype.RequestSelectedCard);
             ClientReceiveUpdate(Datatype.UpdateSelectedCard);
+            SelectCard(FindButton(SelectedCard));
 
             // Receive the most current list of players.
             RequestUpdateFromServer(Datatype.RequestPlayerList);
             ClientReceiveUpdate(Datatype.UpdatePlayerList);
+            DisplayOpponentCardsInPlay(new Object());
         }
 
         // Set the server's SelectedCard property equal to the value of this client's SelectedCard property.
@@ -313,7 +399,11 @@ namespace MonopolyDeal
         public void DisplayCardInHand( List<Card> cardsInHand, int position )
         {
             Button cardButton = new Button();
-            cardButton.Content = cardsInHand[position].CardImage;
+
+            // Create an image based on the card's uri path.
+            cardButton.Content = new Image();
+            (cardButton.Content as Image).Source = new BitmapImage(new Uri(cardsInHand[position].CardImageUriPath, UriKind.Absolute));
+
             cardButton.Tag = cardsInHand[position];
             cardButton.Style = (Style)FindResource("NoChromeButton");
             cardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
@@ -341,7 +431,7 @@ namespace MonopolyDeal
         public Button ConvertCardToButton( Card card )
         {
             Button cardButton = new Button();
-            cardButton.Content = card.CardImage;
+            cardButton.Content = card.CardImageUriPath;
             cardButton.Tag = card;
             cardButton.Style = (Style)FindResource("NoChromeButton");
 
@@ -350,7 +440,7 @@ namespace MonopolyDeal
 
         // This is a proof-concept-method; it will later be deleted or significantly modified.
         // Display the cards played by the player's opponent (this method is flawed because it only works for 2-player games).
-        public void DisplayOpponentCardsInPlay()
+        public void DisplayOpponentCardsInPlay(Object filler)
         {
             Player opponent = null;
 
@@ -375,7 +465,7 @@ namespace MonopolyDeal
 
         }
 
-        // Clear all of the card buttons from a give grid.
+        // Clear all of the card buttons from a given grid.
         public void ClearCardsOnField( Grid playerField )
         {
             playerField.Children.Clear();
@@ -385,7 +475,11 @@ namespace MonopolyDeal
         public void AddCardToField( Button handCardButton, Grid playerField )
         {
             Button playCardButton = new Button();
-            playCardButton.Content = handCardButton.Content;
+
+            // Create an image based on the card's uri path.
+            playCardButton.Content = new Image();
+            (playCardButton.Content as Image).Source = new BitmapImage(new Uri((handCardButton.Tag as Card).CardImageUriPath, UriKind.Absolute));
+
             playCardButton.Tag = handCardButton.Tag;
             playCardButton.Style = (Style)FindResource("NoChromeButton");
             //playCardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
@@ -431,7 +525,7 @@ namespace MonopolyDeal
         // Find a card in the player's hand given its position in PlayerOneHand.
         private Button FindButton( int buttonIndex )
         {
-            if ( SelectedCard != -1 )
+            if ( buttonIndex != -1 )
             {
                 for ( int i = 0; i < PlayerOneHand.Children.Count; ++i )
                 {
@@ -459,9 +553,37 @@ namespace MonopolyDeal
             }
         }
 
+        private void AltSelectCard( int cardToSelect )
+        {
+            Button cardButton = FindButton(cardToSelect);
+            if ( cardButton != null )
+            {
+                ScaleTransform myScaleTransform = new ScaleTransform();
+                myScaleTransform.ScaleY = 1.2;
+                myScaleTransform.ScaleX = 1.2;
+
+                cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                cardButton.RenderTransform = myScaleTransform;
+            }
+        }
+
         // Set the currently selected card to its normal size.
         private void DeselectCard( Button cardButton )
         {
+            if ( cardButton != null )
+            {
+                ScaleTransform myScaleTransform = new ScaleTransform();
+                myScaleTransform.ScaleY = 1;
+                myScaleTransform.ScaleX = 1;
+
+                cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                cardButton.RenderTransform = myScaleTransform;
+            }
+        }
+
+        private void AltDeselectCard( int selectedCard )
+        {
+            Button cardButton = FindButton(selectedCard);
             if ( cardButton != null )
             {
                 ScaleTransform myScaleTransform = new ScaleTransform();
@@ -477,6 +599,39 @@ namespace MonopolyDeal
         private void setInfoBox( TriggerBase target, int location )
         {
             target.SetValue(InfoBoxAttachedProperty, Player.CardsInHand[location]);
+        }
+
+        #endregion
+
+        #region Miscellaneous
+
+        private string VerifyPlayerName(string playerName)
+        {
+            bool hasBeenModified = false;
+            int a = 2;
+            List<string> playerNames = new List<string>();
+
+            // Generate the the list of player names.
+            foreach ( Player player in PlayerList )
+            {
+                playerNames.Add(player.Name);
+            }
+
+            while ( playerNames.Contains(playerName) )
+            {
+                if ( !hasBeenModified )
+                {
+                    playerName += a;
+                    hasBeenModified = true;
+                }
+                else
+                {
+                    ++a;
+                    playerName = playerName.Substring(0, playerName.Length - 1) + a;
+                }
+            }
+
+            return playerName;
         }
 
         #endregion

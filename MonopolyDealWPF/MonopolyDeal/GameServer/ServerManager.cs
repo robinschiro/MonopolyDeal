@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define USE_CALLBACK
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -139,6 +141,12 @@ namespace GameServer
                                 case Datatype.UpdateSelectedCard:
                                 {
                                     SelectedCard = (int)ServerUtilities.ReceiveUpdate(inc, messageType);
+#if USE_CALLBACK
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendUpdate(Server, Datatype.UpdateSelectedCard, SelectedCard);
+                                    }
+#endif
                                     break;
                                 }
 
@@ -166,6 +174,13 @@ namespace GameServer
                                         PlayerList.Add(updatedPlayer);
                                     }
 
+
+#if USE_CALLBACK
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendUpdate(Server, Datatype.UpdatePlayerList, PlayerList);
+                                    }
+#endif
                                     break;
                                 }
 
@@ -185,13 +200,6 @@ namespace GameServer
                                     {
                                         ServerUtilities.SendUpdate(Server, Datatype.UpdateSelectedCard, SelectedCard);
                                     }
-
-                                    break;
-                                }
-
-                                case Datatype.RequestPlayerNames:
-                                {
-                                    ServerUtilities.SendUpdate(Server, Datatype.UpdatePlayerNames, PlayerList);
 
                                     break;
                                 }

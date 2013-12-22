@@ -12,10 +12,8 @@ namespace GameObjects
         UpdateDeck,
         UpdatePlayer,
         UpdatePlayerList,
-        UpdatePlayerNames,
         RequestSelectedCard,
         RequestDeck,
-        RequestPlayerNames,
         RequestPlayerList
 
     }
