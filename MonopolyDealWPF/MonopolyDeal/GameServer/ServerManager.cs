@@ -1,6 +1,4 @@
-﻿#define USE_CALLBACK
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +7,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using GameObjects;
 using Lidgren.Network;
-
-
 
 // Lidgren Network example
 // Made by: Riku Koskinen
@@ -26,10 +22,6 @@ using Lidgren.Network;
 // THIS IS VERY VERY VERY BASIC EXAMPLE OF NETWORKING IN GAMES
 // NO PREDICTION, NO LAG COMPENSATION OF ANYKIND
 
-
-
-
-
 namespace GameServer
 {
     public class ServerManager
@@ -42,8 +34,6 @@ namespace GameServer
         // Game objects.
         static Deck Deck;
         static List<Player> PlayerList;
-        static int SelectedCard;
-        static bool HasSentFirstMessage;
 
         [STAThread]
         static void Main( string[] args )
@@ -54,11 +44,6 @@ namespace GameServer
 
             // Create a new list of players.
             PlayerList = new List<Player>();
-
-            // Initialize the selected card.
-            SelectedCard = -1;
-
-            HasSentFirstMessage = false;
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             Config = new NetPeerConfiguration("game");
@@ -138,18 +123,6 @@ namespace GameServer
                                     break;
                                 }
 
-                                case Datatype.UpdateSelectedCard:
-                                {
-                                    SelectedCard = (int)ServerUtilities.ReceiveUpdate(inc, messageType);
-#if USE_CALLBACK
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendUpdate(Server, Datatype.UpdateSelectedCard, SelectedCard);
-                                    }
-#endif
-                                    break;
-                                }
-
                                 case Datatype.UpdatePlayer:
                                 {
                                     Player updatedPlayer = (Player)ServerUtilities.ReceiveUpdate(inc, messageType);
@@ -174,13 +147,10 @@ namespace GameServer
                                         PlayerList.Add(updatedPlayer);
                                     }
 
-
-#if USE_CALLBACK
                                     if ( Server.ConnectionsCount != 0 )
                                     {
                                         ServerUtilities.SendUpdate(Server, Datatype.UpdatePlayerList, PlayerList);
                                     }
-#endif
                                     break;
                                 }
 
@@ -189,16 +159,6 @@ namespace GameServer
                                     if ( Server.ConnectionsCount != 0 )
                                     {
                                         ServerUtilities.SendUpdate(Server, Datatype.UpdateDeck, Deck);
-                                    }
-
-                                    break;
-                                }
-
-                                case Datatype.RequestSelectedCard:
-                                {
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendUpdate(Server, Datatype.UpdateSelectedCard, SelectedCard);
                                     }
 
                                     break;

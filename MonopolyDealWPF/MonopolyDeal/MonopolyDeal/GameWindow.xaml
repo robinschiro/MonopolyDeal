@@ -135,20 +135,15 @@
                     <RowDefinition Height="1*" />
                     <RowDefinition Height="1*" />
                 </Grid.RowDefinitions>
-                <Button Name="UpdateServerButton"
-                        Content="Update Server"
-                        Click="UpdateServerButton_Click"
+
+                <Button Name="ReinitializeConnectionButton"
+                        Content="Reinitialize Connection"
+                        Click="ReinitializeConnectionButton_Click"
                         Grid.Row="0"/>
-                <Button Name="ReceiveUpdatesButton"
-                        Content="Receive Update"
-                        Click="ReceiveUpdatesButton_Click" 
-                        Grid.Row="1"/>
+                
             </Grid>
             <Grid Name="InfoBox"
                   Grid.Row="1">
-                <Button Name="ReinitializeConnectionButton"
-                        Content="Reinitialize Connection"
-                        Click="ReinitializeConnectionButton_Click" />
                 
             </Grid>
         </Grid>

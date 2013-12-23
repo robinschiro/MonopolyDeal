@@ -8,11 +8,9 @@ namespace GameObjects
     public enum Datatype
     {
         FirstMessage,
-        UpdateSelectedCard,
         UpdateDeck,
         UpdatePlayer,
         UpdatePlayerList,
-        RequestSelectedCard,
         RequestDeck,
         RequestPlayerList
 

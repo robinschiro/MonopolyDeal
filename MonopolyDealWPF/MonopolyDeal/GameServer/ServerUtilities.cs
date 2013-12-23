@@ -22,12 +22,6 @@ namespace GameServer
                     return new Deck(ReadCards(inc));
                 }
 
-                case Datatype.UpdateSelectedCard:
-                {
-                    // Return the current value of 'SelectedCard'.
-                    return inc.ReadInt32();
-                }
-
                 case Datatype.UpdatePlayer:
                 {
                     // This first string in the message is the player's name.
@@ -67,10 +61,8 @@ namespace GameServer
             // Read the values of the properties of each card.
             for ( int i = 0; i < size; ++i )
             {
-                string value = "";
-                string path = "";
-                inc.ReadString(out value);
-                inc.ReadString(out path);
+                string value = inc.ReadString();
+                string path = inc.ReadString();
                 cards.Add(new Card(Convert.ToInt32(value), path));
             }
 
@@ -125,14 +117,6 @@ namespace GameServer
                 case Datatype.UpdateDeck:
                 {
                     WriteCards(outmsg, (updatedObject as Deck).CardList);
-
-                    break;
-                }
-
-                case Datatype.UpdateSelectedCard:
-                {
-                    // Write the value of the variable 'selectedCard'.
-                    outmsg.Write((int)updatedObject);
 
                     break;
                 }
