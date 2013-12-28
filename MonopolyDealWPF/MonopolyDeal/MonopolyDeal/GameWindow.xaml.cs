@@ -295,18 +295,28 @@ namespace MonopolyDeal
 
             if ( opponent != null )
             {
-                ClearCardsOnField(PlayerTwoField);
+                // Update the display of the opponent's cards in play.
+                ClearCardsInGrid(PlayerTwoField);
 
                 foreach ( Card card in opponent.CardsInPlay )
                 {
                     AddCardToGrid(card, PlayerTwoField, false);
+                }
+
+                // Update the display of the opponent's hand.
+                ClearCardsInGrid(PlayerTwoHand);
+
+                foreach ( Card card in opponent.CardsInHand )
+                {
+                    Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
+                    AddCardToGrid(cardBack, PlayerTwoHand, false);
                 }
             }
 
         }
 
         // Clear all of the card buttons from a given grid.
-        public void ClearCardsOnField( Grid playerField )
+        public void ClearCardsInGrid( Grid playerField )
         {
             playerField.Children.Clear();
         }
