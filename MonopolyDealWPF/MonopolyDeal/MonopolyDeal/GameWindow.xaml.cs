@@ -60,10 +60,10 @@ namespace MonopolyDeal
             while ( !this.BeginCommunication );
 
             // Receive the deck from the server.
-            RequestUpdateFromServer(Datatype.RequestDeck);
+            ServerUtilities.SendMessage(Client, Datatype.RequestDeck, null);
 
             // Receive a list of the players already on the server.
-            RequestUpdateFromServer(Datatype.RequestPlayerList);
+            ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList, null);
 
             // Do not continue until the client receives the Deck and Player List from the server.
             while ( this.Deck == null || this.PlayerList == null ) ;
@@ -88,10 +88,10 @@ namespace MonopolyDeal
             }
 
             // Send the updated deck back to the server.
-            ServerUtilities.SendUpdate(Client, Datatype.UpdateDeck, Deck);
+            ServerUtilities.SendMessage(Client, Datatype.UpdateDeck, Deck);
 
             // Send the player's information to the server.
-            ServerUtilities.SendUpdate(Client, Datatype.UpdatePlayer, Player);
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
         }
 
         #region Client Communication Code
@@ -147,7 +147,7 @@ namespace MonopolyDeal
                         {
                             case Datatype.UpdateDeck:
                             {
-                                this.Deck = (Deck)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                this.Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
 
                                 // I'm not sure if this is necessary.
                                 //Client.Recycle(inc);
@@ -157,7 +157,7 @@ namespace MonopolyDeal
 
                             case Datatype.UpdatePlayerList:
                             {
-                                this.PlayerList = (List<Player>)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
                                 ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(DisplayOpponentCardsInPlay), new Object()); };
                                 Thread newThread = new Thread(start);
@@ -178,15 +178,6 @@ namespace MonopolyDeal
                 }
             }
         } 
-
-        private void RequestUpdateFromServer( Datatype datatype )
-        {
-            NetOutgoingMessage outmsg = Client.CreateMessage();
-
-            outmsg.Write((byte)datatype);
-
-            Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
-        }
 
         #endregion
 
@@ -209,7 +200,7 @@ namespace MonopolyDeal
                 AddCardToGrid(cardButton.Tag as Card, PlayerOneField, false);
 
                 // Update the server.
-                ServerUtilities.SendUpdate(Client, Datatype.UpdatePlayer, Player);
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
             }
         }
 

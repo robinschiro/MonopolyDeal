@@ -119,13 +119,13 @@ namespace GameServer
                             {
                                 case Datatype.UpdateDeck:
                                 {
-                                    Deck = (Deck)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                    Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
                                     break;
                                 }
 
                                 case Datatype.UpdatePlayer:
                                 {
-                                    Player updatedPlayer = (Player)ServerUtilities.ReceiveUpdate(inc, messageType);
+                                    Player updatedPlayer = (Player)ServerUtilities.ReceiveMessage(inc, messageType);
                                     bool isPlayerInList = false;
 
                                     // If the updated Player is already in the server's list, update that's Player's properties.
@@ -149,7 +149,7 @@ namespace GameServer
 
                                     if ( Server.ConnectionsCount != 0 )
                                     {
-                                        ServerUtilities.SendUpdate(Server, Datatype.UpdatePlayerList, PlayerList);
+                                        ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
                                     }
                                     break;
                                 }
@@ -158,7 +158,7 @@ namespace GameServer
                                 {
                                     if ( Server.ConnectionsCount != 0 )
                                     {
-                                        ServerUtilities.SendUpdate(Server, Datatype.UpdateDeck, Deck);
+                                        ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
                                     }
 
                                     break;
@@ -166,7 +166,7 @@ namespace GameServer
 
                                 case Datatype.RequestPlayerList:
                                 {
-                                    ServerUtilities.SendUpdate(Server, Datatype.UpdatePlayerList, PlayerList);
+                                    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
 
                                     break;
                                 }

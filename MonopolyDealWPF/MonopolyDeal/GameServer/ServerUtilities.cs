@@ -13,7 +13,7 @@ namespace GameServer
     public class ServerUtilities
     {
         // Receive an update from either a client or the server, depending on where this method is called.
-        public static object ReceiveUpdate( NetIncomingMessage inc, Datatype messageType )
+        public static object ReceiveMessage( NetIncomingMessage inc, Datatype messageType )
         {
             switch ( messageType )
             {
@@ -71,14 +71,17 @@ namespace GameServer
 
         public static void WriteCards( NetOutgoingMessage outmsg, List<Card> cardList )
         {
-            // Write the count of the list of cards.
-            outmsg.Write(cardList.Count);
-
-            // Write the properties of each card.
-            foreach ( Card card in cardList )
+            if ( cardList != null )
             {
-                outmsg.Write(card.Value.ToString());
-                outmsg.Write(card.CardImageUriPath);
+                // Write the count of the list of cards.
+                outmsg.Write(cardList.Count);
+
+                // Write the properties of each card.
+                foreach ( Card card in cardList )
+                {
+                    outmsg.Write(card.Value.ToString());
+                    outmsg.Write(card.CardImageUriPath);
+                }
             }
         }
 
@@ -95,7 +98,7 @@ namespace GameServer
         }
 
         // Send an update to either a client or the server, depending on where this method is called.
-        public static void SendUpdate( NetPeer netPeer, Datatype messageType, object updatedObject )
+        public static void SendMessage( NetPeer netPeer, Datatype messageType, object updatedObject = null )
         {
             NetOutgoingMessage outmsg;
 
@@ -142,12 +145,6 @@ namespace GameServer
                     {
                         WritePlayer(outmsg, player);
                     }
-                    break;
-                }
-
-                case Datatype.FirstMessage:
-                {
-                    // Only the type of the message is necessary for this case. That is why there is no code here.
                     break;
                 }
             }

@@ -40,8 +40,11 @@ namespace GameObjects
             this.CardsInHand = cardsInHand;
         }
 
-        public Player()
+        public Player( string name )
         {
+            this.Name = name;
+            this.CardsInPlay = new List<Card>();
+            this.CardsInHand = new List<Card>();
         }
     }
 }

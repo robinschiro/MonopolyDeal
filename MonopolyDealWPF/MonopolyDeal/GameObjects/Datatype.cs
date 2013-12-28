@@ -7,7 +7,6 @@ namespace GameObjects
 {
     public enum Datatype
     {
-        FirstMessage,
         UpdateDeck,
         UpdatePlayer,
         UpdatePlayerList,
