@@ -62,6 +62,9 @@
     <Compile Include="LaunchScreen.xaml.cs">
       <DependentUpon>LaunchScreen.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RoomWindow.xaml.cs">
+      <DependentUpon>RoomWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="GameWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -75,6 +78,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="LaunchScreen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RoomWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

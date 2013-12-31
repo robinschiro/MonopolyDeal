@@ -1,28 +1,16 @@
-﻿// Preprocessor directives.
-// This 'define' enables server/client communication based on callback messages. This implementation provides immediate feedback
-// for clients, instead of requiring them to click the 'Receive Updates' button to see updates.
-#define USE_CALLBACK
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using GameServer;
-using GameObjects;
-using Lidgren.Network;
-using System.Timers;
-using System.Threading;
-using System.ComponentModel;
 using System.Windows.Threading;
+using GameObjects;
+using GameServer;
+using Lidgren.Network;
 
 namespace MonopolyDeal
 {
@@ -37,66 +25,47 @@ namespace MonopolyDeal
         private String ServerIP;
         private int SelectedCard;
         private bool BeginCommunication;
-
-        // Client Object
         private volatile NetClient Client;
 
         //Testing something called AttachedProperties. Allows function calls upon triggers. 
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
         private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
 
-        public GameWindow( string ipAddress, string playerName )
+        public GameWindow( string playerName, string ipAddress, NetClient client = null )
         {
             InitializeComponent();
-
-            this.ServerIP = ipAddress;
             this.SelectedCard = -1;
             this.BeginCommunication = false;
+            this.ServerIP = ipAddress;
 
             // Connect the client to the server.
-            InitializeClient();
+            InitializeClient(ipAddress);
 
             // Do not continue until the client has successfully established communication with the server.
             while ( !this.BeginCommunication );
 
-            // Receive the deck from the server.
-            ServerUtilities.SendMessage(Client, Datatype.RequestDeck, null);
-
             // Receive a list of the players already on the server.
-            ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList, null);
+            ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
 
-            // Do not continue until the client receives the Deck and Player List from the server.
-            while ( this.Deck == null || this.PlayerList == null ) ;
+            // Do not continue until the client receives the Player List from the server.
+            while ( this.PlayerList == null ) ;
 
-            // Verify that the value of 'playerName' does not exist in the list of Player names.
-            // If it does, modify the name until it no longer matches one on the list.
-            playerName = VerifyPlayerName(playerName);
-
-            // Instantiate the player.
-            this.Player = new Player(Deck, playerName);
+            // Find the Player in the PlayerList.
+            this.Player = FindPlayerInList(playerName);
 
             // Re-title the window.
             this.Title = playerName + "'s Window";
-
-            // Display the opponent's cards.
-            DisplayOpponentCardsInPlay(new Object());
 
             // Display the cards in this player's hand.
             foreach ( Card card in Player.CardsInHand )
             {
                 AddCardToGrid(card, PlayerOneHand, true);
             }
-
-            // Send the updated deck back to the server.
-            ServerUtilities.SendMessage(Client, Datatype.UpdateDeck, Deck);
-
-            // Send the player's information to the server.
-            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
         }
 
         #region Client Communication Code
 
-        private void InitializeClient()
+        private void InitializeClient(string serverIP)
         {
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             NetPeerConfiguration Config = new NetPeerConfiguration("game");
@@ -117,7 +86,7 @@ namespace MonopolyDeal
             outmsg.Write("MyName");
 
             // Connect client, to ip previously requested from user.
-            Client.Connect(ServerIP, 14242, outmsg);
+            Client.Connect(serverIP, 14242, outmsg);
 
             // Create the synchronization context used by the client to receive updates as soon as they are available.
             SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
@@ -159,7 +128,7 @@ namespace MonopolyDeal
                             {
                                 this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(DisplayOpponentCardsInPlay), new Object()); };
+                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(DisplayOpponentCards), null); };
                                 Thread newThread = new Thread(start);
                                 newThread.Start();
 
@@ -269,12 +238,13 @@ namespace MonopolyDeal
             return cardButton;
         }
 
-        // This is a proof-concept-method; it will later be deleted or significantly modified.
+        // This is a proof-of-concept method; it will later be deleted or significantly modified.
         // Display the cards played by the player's opponent (this method is flawed because it only works for 2-player games).
-        public void DisplayOpponentCardsInPlay(Object filler)
+        public void DisplayOpponentCards(Object filler = null)
         {
             Player opponent = null;
 
+            // Find the opponent in the PlayerList.
             foreach ( Player player in PlayerList )
             {
                 if ( player.Name != this.Player.Name )
@@ -284,11 +254,11 @@ namespace MonopolyDeal
                 }
             }
 
+            // If the opponent is found, display his cards.
             if ( opponent != null )
             {
                 // Update the display of the opponent's cards in play.
                 ClearCardsInGrid(PlayerTwoField);
-
                 foreach ( Card card in opponent.CardsInPlay )
                 {
                     AddCardToGrid(card, PlayerTwoField, false);
@@ -296,7 +266,6 @@ namespace MonopolyDeal
 
                 // Update the display of the opponent's hand.
                 ClearCardsInGrid(PlayerTwoHand);
-
                 foreach ( Card card in opponent.CardsInHand )
                 {
                     Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
@@ -426,7 +395,20 @@ namespace MonopolyDeal
 
         #region Miscellaneous
 
-        private string VerifyPlayerName(string playerName)
+        private Player FindPlayerInList( string playerName )
+        {
+            foreach ( Player player in PlayerList )
+            {
+                if ( player.Name == playerName )
+                {
+                    return player;
+                }
+            }
+
+            return null;
+        }
+
+        private string VerifyPlayerName( string playerName )
         {
             bool hasBeenModified = false;
             int a = 2;

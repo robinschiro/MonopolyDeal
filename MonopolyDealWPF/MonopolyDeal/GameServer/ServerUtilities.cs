@@ -115,37 +115,40 @@ namespace GameServer
             // Write the type of the message that is being sent.
             outmsg.Write((byte)messageType);
 
-            switch ( messageType )
+            if ( updatedObject != null )
             {
-                case Datatype.UpdateDeck:
+                switch ( messageType )
                 {
-                    WriteCards(outmsg, (updatedObject as Deck).CardList);
-
-                    break;
-                }
-
-                case Datatype.UpdatePlayer:
-                {
-                    Player player = (Player)updatedObject;
-
-                    WritePlayer(outmsg, player);
-
-                    break;
-                }
-
-                case Datatype.UpdatePlayerList:
-                {
-                    List<Player> players = (List<Player>)updatedObject;
-
-                    // Write the count of players.
-                    outmsg.Write(players.Count);
-
-                    // Write the name of each player in the game.
-                    foreach ( Player player in players )
+                    case Datatype.UpdateDeck:
                     {
-                        WritePlayer(outmsg, player);
+                        WriteCards(outmsg, (updatedObject as Deck).CardList);
+
+                        break;
                     }
-                    break;
+
+                    case Datatype.UpdatePlayer:
+                    {
+                        Player player = (Player)updatedObject;
+
+                        WritePlayer(outmsg, player);
+
+                        break;
+                    }
+
+                    case Datatype.UpdatePlayerList:
+                    {
+                        List<Player> players = (List<Player>)updatedObject;
+
+                        // Write the count of players.
+                        outmsg.Write(players.Count);
+
+                        // Write the name of each player in the game.
+                        foreach ( Player player in players )
+                        {
+                            WritePlayer(outmsg, player);
+                        }
+                        break;
+                    }
                 }
             }
 

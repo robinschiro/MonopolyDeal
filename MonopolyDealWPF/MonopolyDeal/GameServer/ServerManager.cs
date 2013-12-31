@@ -94,35 +94,38 @@ namespace GameServer
                         // This is the very first packet/message that is sent from client
                         // Here you can do new player initialisation stuff
                         case NetIncomingMessageType.ConnectionApproval:
-
-                        // Read the first byte of the packet
-                        // ( Enums can be casted to bytes, so it be used to make bytes human readable )
-                        if ( inc.ReadByte() == (byte)PacketTypes.LOGIN )
                         {
-                            Console.WriteLine("Incoming LOGIN");
+                            // Read the first byte of the packet
+                            // ( Enums can be casted to bytes, so it be used to make bytes human readable )
+                            if ( inc.ReadByte() == (byte)PacketTypes.LOGIN )
+                            {
+                                Console.WriteLine("Incoming LOGIN");
 
-                            // Approve clients connection ( Its sort of agreenment. "You can be my client and i will host you" )
-                            inc.SenderConnection.Approve();
+                                // Approve clients connection ( Its sort of agreenment. "You can be my client and i will host you" )
+                                inc.SenderConnection.Approve();
 
-                            // Debug
-                            Console.WriteLine("Approved new connection and updated the world status");
+                                // Debug
+                                Console.WriteLine("Approved new connection and updated the world status");
+                            }
+
+                            break;
                         }
-
-                        break;
                         // Data type is all messages manually sent from client
-                        // ( Approval is automated process )
+                        // ( Approval is an automated process )
                         case NetIncomingMessageType.Data:
                         {
                             Datatype messageType = (Datatype)inc.ReadByte();
 
                             switch ( messageType )
                             {
+                                // Receive an updated deck from a client.
                                 case Datatype.UpdateDeck:
                                 {
                                     Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
                                     break;
                                 }
 
+                                // Add or modify a player in the PlayerList.
                                 case Datatype.UpdatePlayer:
                                 {
                                     Player updatedPlayer = (Player)ServerUtilities.ReceiveMessage(inc, messageType);
@@ -147,6 +150,7 @@ namespace GameServer
                                         PlayerList.Add(updatedPlayer);
                                     }
 
+                                    // Send the updated PlayerList to all clients.
                                     if ( Server.ConnectionsCount != 0 )
                                     {
                                         ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
@@ -154,6 +158,25 @@ namespace GameServer
                                     break;
                                 }
 
+                                // Update the server's PlayerList. This case should be hit only when a client launches the game.
+                                case Datatype.UpdatePlayerList:
+                                {
+                                    // Deal the initial hands to the players.
+                                    for ( int i = 0; i < PlayerList.Count; ++i )
+                                    {
+                                        PlayerList[i] = new Player(Deck, PlayerList[i].Name);
+                                    }
+
+                                    // Tell all clients to launch the game.
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.LaunchGame);
+                                    }
+
+                                    break;
+                                }
+
+                                // Send the server's Deck to all clients.
                                 case Datatype.RequestDeck:
                                 {
                                     if ( Server.ConnectionsCount != 0 )
@@ -164,9 +187,13 @@ namespace GameServer
                                     break;
                                 }
 
+                                // Send the server's PlayerList to all clients.
                                 case Datatype.RequestPlayerList:
                                 {
-                                    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
+                                    }
 
                                     break;
                                 }
