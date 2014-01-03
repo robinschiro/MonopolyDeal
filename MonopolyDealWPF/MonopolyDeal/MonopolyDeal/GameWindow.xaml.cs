@@ -238,38 +238,84 @@ namespace MonopolyDeal
             return cardButton;
         }
 
-        // This is a proof-of-concept method; it will later be deleted or significantly modified.
-        // Display the cards played by the player's opponent (this method is flawed because it only works for 2-player games).
-        public void DisplayOpponentCards(Object filler = null)
+        // This is used to get the position of a Player in the PlayerList relative
+        // to the position of the client's Player object.
+        // Source: This method was created by Rolan.
+        public int GetRelativePosition( String player1Name, String player2Name )
         {
-            Player opponent = null;
+            int position;
+            int player1 = 0;
+            int player2 = 0;
+            int dif = 0;
 
-            // Find the opponent in the PlayerList.
-            foreach ( Player player in PlayerList )
+            player1 = FindPlayerPositionInPlayerList(player1Name);
+            player2 = FindPlayerPositionInPlayerList(player2Name);
+
+            dif = player2 - player1;
+
+            if ( dif < 0 )
             {
-                if ( player.Name != this.Player.Name )
-                {
-                    opponent = player;
-                    break;
-                }
+                position = dif + PlayerList.Count;
+            }
+            else
+            {
+                position = dif;
             }
 
-            // If the opponent is found, display his cards.
-            if ( opponent != null )
+            return position;
+
+        }
+
+        // Display the cards of the player's opponents.
+        public void DisplayOpponentCards(Object filler = null)
+        {
+            foreach ( Player player in PlayerList )
             {
-                // Update the display of the opponent's cards in play.
-                ClearCardsInGrid(PlayerTwoField);
-                foreach ( Card card in opponent.CardsInPlay )
+                Grid playerHand = null;
+                Grid playerField = null;
+
+                // Choose a logical position for each player on the client's screen.
+                switch ( GetRelativePosition(Player.Name, player.Name) )
                 {
-                    AddCardToGrid(card, PlayerTwoField, false);
+                    case 1:
+                    {
+                        playerHand = PlayerTwoHand;
+                        playerField = PlayerTwoField;
+                        break;
+                    }
+
+                    case 2:
+                    {
+                        playerHand = PlayerThreeHand;
+                        playerField = PlayerThreeField;
+                        break;
+                    }
+
+                    case 3:
+                    {
+                        playerHand = PlayerFourHand;
+                        playerField = PlayerFourField;
+                        break;
+                    }
                 }
 
-                // Update the display of the opponent's hand.
-                ClearCardsInGrid(PlayerTwoHand);
-                foreach ( Card card in opponent.CardsInHand )
+                //// If the opponent is found, display his cards.
+                if ( playerHand != null )
                 {
-                    Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
-                    AddCardToGrid(cardBack, PlayerTwoHand, false);
+                    // Update the display of the opponent's cards in play.
+                    ClearCardsInGrid(playerField);
+                    foreach ( Card card in player.CardsInPlay )
+                    {
+                        AddCardToGrid(card, playerField, false);
+                    }
+
+                    // Update the display of the opponent's hand.
+                    ClearCardsInGrid(playerHand);
+                    foreach ( Card card in player.CardsInHand )
+                    {
+                        Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
+                        AddCardToGrid(cardBack, playerHand, false);
+                    }
                 }
             }
 
@@ -406,6 +452,19 @@ namespace MonopolyDeal
             }
 
             return null;
+        }
+
+        private int FindPlayerPositionInPlayerList( string playerName )
+        {
+            for ( int i = 0; i < PlayerList.Count; ++i )
+            {
+                if ( PlayerList[i].Name == playerName )
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         private string VerifyPlayerName( string playerName )
