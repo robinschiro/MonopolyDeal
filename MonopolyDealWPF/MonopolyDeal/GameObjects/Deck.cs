@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Collections;
+using tvToolbox;
 
 namespace GameObjects
 {
@@ -14,21 +15,43 @@ namespace GameObjects
     {
         public String TextureName { get; set; }
         public List<Card> CardList { get; set; }  // Deck is a list of cards
-        public String Test { get; set; }
+        private tvProfile Profile;
 
-        // This constant is temporary; it will not be needed once we are importing values from a spreadsheet.
-        private const int TOTAL_NUMBER_OF_CARDS = 110;
-
-        public Deck()
+        public Deck(tvProfile profile)
         {
-            // Creates cards with different values for testing. A card is created for each picture in the Images folder.
-            // Will eventually read in .xls spreadsheet and create each card
+            this.Profile = profile;
+            GenerateDeck();
+        }
+
+        public Deck( List<Card> cardList )
+        {
+            this.CardList = cardList;
+        }
+
+        // Creates cards with different values for testing. A card is created for each picture in the Images folder.
+        // Will eventually read in .xls spreadsheet and create each card
+        public void GenerateDeck()
+        {
             CardList = new List<Card>();
-            string[] files = GetResourcesUnder("Images");
+            string[] files = GetResourcesInFolder("Images");
+
+            // Alphabetize the file names.
+            files = files.OrderBy(d => d).ToArray();
             for ( int i = 0; i < files.Length; i++ )
             {
-                string uriPath = "pack://application:,,,/GameObjects;component/Images/" + files[i];
-                CardList.Add(new Card(i, uriPath));
+                tvProfile cardProfile = Profile.oProfile("-" + files[i]);
+
+                for ( int a = 0; a < cardProfile.iValue("-Count", 0); ++a )
+                {
+                    string name = cardProfile.sValue("-Name", "");
+                    CardType cardType = (CardType)Enum.Parse(typeof(CardType), cardProfile.sValue("-CardType", ""));
+                    int value = cardProfile.iValue("-Value", 0);
+                    PropertyType propertyType = cardProfile.sValue("-PropertyType", "") == "" ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-PropertyType", ""));
+                    PropertyType altPropertyType = cardProfile.sValue("-AltPropertyType", "") == "" ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-AltPropertyType", ""));
+                    string uriPath = "pack://application:,,,/GameObjects;component/Images/" + files[i];
+
+                    CardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath));                  
+                }
             }
 
             Shuffle(CardList); // Randomizes the cards in the deck
@@ -41,22 +64,11 @@ namespace GameObjects
             TextureName = "cardback";
         }
 
-        public Deck( List<Card> cardList )
-        {
-            this.CardList = cardList;
-        }
-
-        public Deck( bool test )
-        {
-            Test = "Client Created";
-            CardList = new List<Card>();
-        }
-
         // Returns a list a file names inside a folder containing resources for the calling assembly.
         // This is needed in order to properly embed the images in the .exe (Before we were using relative
         // file paths, which caused the .exe to crash when it was run from a different directory).
         // This method was found here: http://tinyurl.com/m8d8dvl
-        public static string[] GetResourcesUnder( string strFolder )
+        public static string[] GetResourcesInFolder( string strFolder )
         {
             strFolder = strFolder.ToLower() + "/";
 

@@ -61,9 +61,13 @@ namespace GameServer
             // Read the values of the properties of each card.
             for ( int i = 0; i < size; ++i )
             {
+                string name = inc.ReadString();
+                CardType type = (CardType)inc.ReadByte();
                 string value = inc.ReadString();
-                string path = inc.ReadString();
-                cards.Add(new Card(Convert.ToInt32(value), path));
+                PropertyType color = (PropertyType)inc.ReadByte();
+                PropertyType altColor = (PropertyType)inc.ReadByte();
+                string uriPath = inc.ReadString();
+                cards.Add(new Card(name, type, Convert.ToInt32(value), color, altColor, uriPath));
             }
 
             return cards;
@@ -79,7 +83,11 @@ namespace GameServer
                 // Write the properties of each card.
                 foreach ( Card card in cardList )
                 {
+                    outmsg.Write(card.Name);
+                    outmsg.Write((byte)card.Type);
                     outmsg.Write(card.Value.ToString());
+                    outmsg.Write((byte)card.Color);
+                    outmsg.Write((byte)card.AltColor);
                     outmsg.Write(card.CardImageUriPath);
                 }
             }

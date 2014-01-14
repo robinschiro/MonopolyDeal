@@ -9,27 +9,61 @@ using System.IO;
 
 namespace GameObjects
 {
-    public class Card
+    // Creates enum for different card types
+    public enum CardType
     {
-        public enum cardType { money, property, action }; // Creates enum for different card types
-        public cardType Type { get; set; }
+        Money,
+        Property,
+        Action
+    }
+
+    public enum PropertyType
+    {
+        None,
+        Brown,
+        LightBlue,
+        Pink,
+        Orange,
+        Red,
+        Yellow,
+        Green,
+        Blue,
+        Railroad,
+        Utility,
+        Wild
+    }
+
+    
+    public class Card
+    {       
         public string Name { get; set; }
+        public CardType Type { get; set; }
         public int Value { get; set; }
-        public string TextureName { get; set; }
+        public PropertyType Color { get; set; }
+        public PropertyType AltColor { get; set; }
         public string CardImageUriPath { get; set; }
 
-        public Card( cardType type, String name, int value, String textureName ) // Create a card given a type, name, and value
+        public Card( CardType type, String name, int value ) // Create a card given a type, name, and value
         {
             this.Type = type;
             this.Name = name;
             this.Value = value;
-            this.TextureName = textureName;
+        }
+
+        public Card( string name, CardType type, int value, PropertyType color, PropertyType altColor, string uriPath ) // Create a card given a type, name, and value
+        {
+            this.Name = name;
+            this.Type = type;
+            this.Value = value;
+            this.Color = color;
+            this.AltColor = altColor;
+            this.CardImageUriPath = uriPath;
         }
 
         //Standard card for testing purposes
         public Card( int value ) // Takes in value to differentiate between cards
         {
-            this.Type = cardType.action;
+            this.Type = CardType.Action;
             this.Name = "Test Card";
             this.Value = value;
         }

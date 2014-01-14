@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using GameObjects;
+using tvToolbox;
 using Lidgren.Network;
 
 // Lidgren Network example
@@ -30,6 +31,7 @@ namespace GameServer
         static NetServer Server;
         // Configuration object
         static NetPeerConfiguration Config;
+        static tvProfile Profile;
 
         // Game objects.
         static Deck Deck;
@@ -38,9 +40,11 @@ namespace GameServer
         [STAThread]
         static void Main( string[] args )
         {
+            // Generate a Profile object.
+            Profile = new tvProfile("..\\..\\..\\Profile.txt", false);
+
             // Create a new deck.
-            Deck = new Deck();
-            Deck.Test = "Server Created";
+            Deck = new Deck(Profile);
 
             // Create a new list of players.
             PlayerList = new List<Player>();

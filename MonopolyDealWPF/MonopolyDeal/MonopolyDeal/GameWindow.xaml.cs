@@ -31,7 +31,7 @@ namespace MonopolyDeal
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
         private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
 
-        public GameWindow( string playerName, string ipAddress, NetClient client = null )
+        public GameWindow( string playerName, string ipAddress )
         {
             InitializeComponent();
             this.SelectedCard = -1;
@@ -345,6 +345,10 @@ namespace MonopolyDeal
                 cardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
                 cardButton.PreviewMouseRightButtonDown += new MouseButtonEventHandler(PlayCardEvent);
             }
+            //else
+            //{
+            //    cardButton.PreviewMouseMove += new MouseEventHandler(cardButton_PreviewMouseMove);
+            //}
 
             // Wrap the card inside a grid in order to insert spaces between the displayed the cards.
             Grid cardGridWrapper = new Grid();
@@ -365,6 +369,15 @@ namespace MonopolyDeal
             // Add the card (within its grid wrapper) to the next available position in the specified grid.
             grid.Children.Add(cardGridWrapper);
             Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
+        }
+
+        private void cardButton_PreviewMouseMove( object sender, MouseEventArgs e )
+        {
+            Button cardButton = sender as Button;
+            if ( cardButton != null && e.LeftButton == MouseButtonState.Pressed )
+            {
+                DragDrop.DoDragDrop(cardButton, cardButton, DragDropEffects.Move);
+            }
         }
 
         // Remove a card (given its Button wrapper) from the player's hand.
