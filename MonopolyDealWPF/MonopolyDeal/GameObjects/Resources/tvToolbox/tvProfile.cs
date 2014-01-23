@@ -1761,7 +1761,12 @@ namespace tvToolbox
         /// </returns>
         public tvProfile oProfile(String asKey, tvProfile aoDefaultProfile)
         {
-            return (tvProfile)this.GetAdd(asKey, aoDefaultProfile);
+            object  loProfile = this.GetAdd(asKey, aoDefaultProfile);
+            object  loProfileCast = loProfile as tvProfile;
+                    if ( null == loProfileCast )
+                        loProfileCast = new tvProfile(loProfile.ToString());
+
+            return (tvProfile)loProfileCast;
         }
 
         /// <summary>
@@ -1778,9 +1783,14 @@ namespace tvToolbox
         /// The tvProfile object value found or asDefaultProfile 
         /// (converted to a tvProfile object, see <see cref="GetAdd"/>).
         /// </returns>
-        public tvProfile oProfile(String asKey, string asDefaultProfile)
+        public tvProfile oProfile(String asKey, String asDefaultProfile)
         {
-            return (tvProfile)this.GetAdd(asKey, new tvProfile(asDefaultProfile));
+            object  loProfile = this.GetAdd(asKey, asDefaultProfile);
+            object  loProfileCast = loProfile as tvProfile;
+                    if ( null == loProfileCast )
+                        loProfileCast = new tvProfile(loProfile.ToString());
+
+            return (tvProfile)loProfileCast;
         }
 
         /// <summary>
@@ -1795,14 +1805,12 @@ namespace tvToolbox
         /// </returns>
         public tvProfile oProfile(String asKey)
         {
-            try
-            {
-                return (tvProfile)this.GetAdd(asKey, new tvProfile());
-            }
-            catch
-            {
-                return new tvProfile((string)this.GetAdd(asKey, new tvProfile()));
-            }
+            object  loProfile = this.GetAdd(asKey, new tvProfile());
+            object  loProfileCast = loProfile as tvProfile;
+                    if ( null == loProfileCast )
+                        loProfileCast = new tvProfile(loProfile.ToString());
+
+            return (tvProfile)loProfileCast;
         }
 
         /// <summary>
@@ -2513,9 +2521,9 @@ Copy and proceed from there?
                         {
                             if ( null != mttvMessageBox )
                             {
-                                //moAppLoadingWaitMsg = Activator.CreateInstance(mttvMessageBox);
-                                //mttvMessageBox.InvokeMember("ShowWait", BindingFlags.InvokeMethod, null, moAppLoadingWaitMsg
-                                //                            , new object[]{null, lcsLoadingMsg, 250});
+                                moAppLoadingWaitMsg = Activator.CreateInstance(mttvMessageBox);
+                                mttvMessageBox.InvokeMember("ShowWait", BindingFlags.InvokeMethod, null, moAppLoadingWaitMsg
+                                                            , new object[]{null, lcsLoadingMsg, 250});
                             }
 
                             String lsNewExePathFile = Path.Combine(lsNewPath, Path.GetFileName(this.sExePathFile));
@@ -2557,9 +2565,9 @@ Copy and proceed from there?
             {
                 if ( null != mttvMessageBox )
                 {
-                    //moAppLoadingWaitMsg = Activator.CreateInstance(mttvMessageBox);
-                    //mttvMessageBox.InvokeMember("ShowWait", BindingFlags.InvokeMethod, null, moAppLoadingWaitMsg
-                    //                            , new object[]{null, lcsLoadingMsg, 250});
+                    moAppLoadingWaitMsg = Activator.CreateInstance(mttvMessageBox);
+                    mttvMessageBox.InvokeMember("ShowWait", BindingFlags.InvokeMethod, null, moAppLoadingWaitMsg
+                                                , new object[]{null, lcsLoadingMsg, 250});
                 }
 
                 String  lsFileAsStream = null;
@@ -3326,7 +3334,7 @@ Copy and proceed from there?
         private const char   mccSplitMark = '\u0001';
         private FileStream   moFileStreamProfileFileLock;
         private tvProfile    moInputCommandLineProfile;
-        private Type         mttvMessageBox = Type.GetType("tvMessageBox");
+        private Type         mttvMessageBox = null;
         private object       moAppLoadingWaitMsg;
 
 

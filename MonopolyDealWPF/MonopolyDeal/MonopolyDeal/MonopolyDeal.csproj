@@ -60,6 +60,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="IGameClient.cs" />
     <Compile Include="LaunchScreen.xaml.cs">
       <DependentUpon>LaunchScreen.xaml</DependentUpon>
     </Compile>
