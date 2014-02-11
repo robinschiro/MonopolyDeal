@@ -174,13 +174,53 @@ namespace MonopolyDeal
                 SelectedCard = -1;
 
                 // Add the card to the Player's CardsInPlay list.
-                Player.CardsInPlay.Add(cardBeingPlayed);
+                //Player.CardsInPlay.Add(cardBeingPlayed);
+
+                // TODO: Define this method (take most of the functionality from the AddCardToGrid method).
+                AddCardToCardsInPlay(cardBeingPlayed);
 
                 AddCardToGrid(cardBeingPlayed, PlayerOneField, false);
 
                 // Update the server.
                 ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
             }
+        }
+
+        // When a card is added to the Player's CardsInPlay, it must be placed in the same list as compatible properties
+        // that have already been played. If no compatible properties have been played, a new list is created for the card.
+        public void AddCardToCardsInPlay( Card cardBeingAdded )
+        {
+            // Check if any cards currently in play match the color of the card being played (if the card is a property).
+            // If it does, lay the card being played over the matching cards.
+            if ( cardBeingAdded.Type == CardType.Property )
+            {
+                foreach ( List<Card> cardList in Player.CardsInPlay )
+                {
+                    //Grid cardGrid = element as Grid;
+                    bool propertyMatchesSet = true;
+
+                    foreach ( Card cardInList in cardList )
+                    {
+                        // Check the compatibility of the two properties.
+                        if ( !CheckPropertyCompatibility(cardInList, cardBeingAdded) )
+                        {
+                            propertyMatchesSet = false;
+                            break;
+                        }
+                    }
+
+                    if ( propertyMatchesSet )
+                    {
+                        cardList.Add(cardBeingAdded);
+                        return;
+                    }
+                }
+            }
+
+            // If this code is reached, the card must not have matched any existing properties.
+            List<Card> newCardList = new List<Card>();
+            newCardList.Add(cardBeingAdded);
+            Player.CardsInPlay.Add(newCardList);
         }
 
         // Increase the size of a card when it is selected and decrease its size when another card is selected.
@@ -310,6 +350,19 @@ namespace MonopolyDeal
 
         }
 
+        public void DisplayPlayerCardsInPlay()
+        {
+            ClearCardsInGrid(PlayerOneField);
+            foreach ( List<Card> cardList in Player.CardsInPlay )
+            {
+                foreach ( Card card in cardList )
+                {
+                    //AddCardToCardsInPlay(card);
+                    AddCardToGrid(card, PlayerOneField, false);
+                }
+            }
+        }
+
         // Display the cards of the player's opponents.
         public void DisplayOpponentCards(Object filler = null)
         {
@@ -348,9 +401,13 @@ namespace MonopolyDeal
                 {
                     // Update the display of the opponent's cards in play.
                     ClearCardsInGrid(playerField);
-                    foreach ( Card card in player.CardsInPlay )
+                    foreach ( List<Card> cardList in player.CardsInPlay )
                     {
-                        AddCardToGrid(card, playerField, false);
+                        foreach ( Card card in cardList )
+                        {
+                            //AddCardToCardsInPlay(card);
+                            AddCardToGrid(card, playerField, false);
+                        }
                     }
 
                     // Update the display of the opponent's hand.
@@ -408,7 +465,25 @@ namespace MonopolyDeal
             }
             else
             {
-                //cardButton.PreviewMouseMove += new MouseEventHandler(cardButton_PreviewMouseMove);
+                // Create context menu that allows the user to reorder properties.
+                // TODO: Prevent players from seeing the context menu of other players' cards in play.
+                ContextMenu menu = new ContextMenu();
+                MenuItem forwardMenuItem = new MenuItem();
+                forwardMenuItem.Header = "Move Forward";
+                forwardMenuItem.Click += ( sender, args ) =>
+                {
+                    MoveCardInList(cardBeingAdded, 1);
+                };
+                MenuItem backwardMenuItem = new MenuItem();
+                backwardMenuItem.Header = "Move Backward";
+                backwardMenuItem.Click += ( sender2, args2 ) =>
+                {
+                    MoveCardInList(cardBeingAdded, -1);
+                };
+                menu.Items.Add(forwardMenuItem);
+                menu.Items.Add(backwardMenuItem);
+                cardButton.ContextMenu = menu;
+
                 
                 // Check if any cards currently in play match the color of the card being played (if the card is a property).
                 // If it does, lay the card being played over the matching cards.
@@ -434,6 +509,8 @@ namespace MonopolyDeal
 
                         if ( propertyMatchesSet )
                         {
+                            
+
                             // Lay properties of compatible colors on top of each other (offset vertically).
                             TranslateTransform myTranslateTransform = new TranslateTransform();
                             myTranslateTransform.Y = (cardGrid.Children.Count * .10) * grid.ActualHeight;
@@ -581,6 +658,60 @@ namespace MonopolyDeal
 
         #region Miscellaneous
 
+        public void MoveItemInList<T>(IList<T> list, int oldIndex, int newIndex)
+        {
+            var item = list[oldIndex];
+
+            list.RemoveAt(oldIndex);
+
+            //if ( newIndex > oldIndex ) newIndex--;
+            // the actual index could have shifted due to the removal
+
+            if ( newIndex < list.Count && newIndex >= 0 )
+            {
+                list.Insert(newIndex, item);
+            }
+            else
+            {
+                list.Add(item);
+            }
+        }
+
+        public void MoveCardInList( Card cardBeingMoved, int numberOfSpaces )
+        {
+            foreach ( List<Card> cardList in Player.CardsInPlay )
+            {
+                for ( int i = 0; i < cardList.Count; ++i )
+                {
+                    if ( cardList[i] == cardBeingMoved )
+                    {
+                        MoveItemInList<Card>(cardList, i, i + numberOfSpaces);
+                        DisplayPlayerCardsInPlay();
+
+                        // Update the server.
+                        ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                        return;
+                    }
+                }
+            }
+        }
+
+        public List<Card> FindListContainingCard( Card cardBeingFound )
+        {
+            foreach ( List<Card> cardList in Player.CardsInPlay )
+            {
+                foreach (Card card in cardList)
+                {
+                    if ( card == cardBeingFound )
+                    {
+                        return cardList;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private Player FindPlayerInList( string playerName )
         {
             foreach ( Player player in PlayerList )
@@ -638,5 +769,10 @@ namespace MonopolyDeal
 
         #endregion
 
+
+        public void cardButton_PreviewMouseRightButtonDown( object sender, MouseButtonEventArgs e )
+        {
+
+        }
     }
 }

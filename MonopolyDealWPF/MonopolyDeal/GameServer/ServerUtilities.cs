@@ -24,10 +24,7 @@ namespace GameServer
 
                 case Datatype.UpdatePlayer:
                 {
-                    // This first string in the message is the player's name.
-                    // The first list of cards is the Player's CardsInPlay list.
-                    // The second list of cards is the Player's CardsInHand list.
-                    return new Player(inc.ReadString(), ReadCards(inc), ReadCards(inc));
+                    return ReadPlayer(inc);
                 }
 
                 case Datatype.UpdatePlayerList:
@@ -40,7 +37,8 @@ namespace GameServer
                     // Read each name in the message and add it to the list.
                     for ( int i = 0; i < size; ++i )
                     {
-                        playerList.Add(new Player(inc.ReadString(), ReadCards(inc), ReadCards(inc)));
+                        //playerList.Add(new Player(inc.ReadString(), ReadCards(inc), ReadCards(inc)));
+                        playerList.Add(ReadPlayer(inc));
                     }
 
                     return playerList;
@@ -48,6 +46,29 @@ namespace GameServer
             }
 
             return null;
+        }
+
+        public static Player ReadPlayer( NetIncomingMessage inc )
+        {
+            // Read the name of the player.
+            string name = inc.ReadString();
+
+            // Read the CardsInPlay list.
+            List<List<Card>> cardsInPlay = new List<List<Card>>();
+            int count = inc.ReadInt32();
+            for ( int i = 0; i < count; ++i )
+            {
+                cardsInPlay.Add(ReadCards(inc));
+            }
+
+            // Read the CardsInHand list.
+            List<Card> cardsInHand = ReadCards(inc);
+
+            // This first string in the message is the player's name.
+            // The first list of cards is the Player's CardsInPlay list.
+            // The second list of cards is the Player's CardsInHand list.
+            //return new Player(inc.ReadString(), ReadCards(inc), ReadCards(inc));
+            return new Player(name, cardsInPlay, cardsInHand);
         }
 
         // Read in a list of cards from an incoming message.
@@ -98,8 +119,13 @@ namespace GameServer
             // Write the Player's name.
             outmsg.Write(player.Name);
             
-            // Write the Player's CardsInPlay.
-            WriteCards(outmsg, player.CardsInPlay);
+            // Write the Player's CardsInPlay (which is a list of card lists).
+            outmsg.Write(player.CardsInPlay.Count);
+
+            foreach ( List<Card> cardList in player.CardsInPlay )
+            {
+                WriteCards(outmsg, cardList);
+            }
 
             // Write the Player's CardsInHand.
             WriteCards(outmsg, player.CardsInHand);
