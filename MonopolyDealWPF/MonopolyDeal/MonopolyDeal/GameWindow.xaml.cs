@@ -466,24 +466,26 @@ namespace MonopolyDeal
             else
             {
                 // Create context menu that allows the user to reorder properties.
-                // TODO: Prevent players from seeing the context menu of other players' cards in play.
-                ContextMenu menu = new ContextMenu();
-                MenuItem forwardMenuItem = new MenuItem();
-                forwardMenuItem.Header = "Move Forward";
-                forwardMenuItem.Click += ( sender, args ) =>
+                // This if statement is required to prevent players from seeing the context menu of other players' cards in play.
+                if ( grid == PlayerOneField )
                 {
-                    MoveCardInList(cardBeingAdded, 1);
-                };
-                MenuItem backwardMenuItem = new MenuItem();
-                backwardMenuItem.Header = "Move Backward";
-                backwardMenuItem.Click += ( sender2, args2 ) =>
-                {
-                    MoveCardInList(cardBeingAdded, -1);
-                };
-                menu.Items.Add(forwardMenuItem);
-                menu.Items.Add(backwardMenuItem);
-                cardButton.ContextMenu = menu;
-
+                    ContextMenu menu = new ContextMenu();
+                    MenuItem forwardMenuItem = new MenuItem();
+                    forwardMenuItem.Header = "Move Forward";
+                    forwardMenuItem.Click += ( sender, args ) =>
+                    {
+                        MoveCardInList(cardBeingAdded, 1);
+                    };
+                    MenuItem backwardMenuItem = new MenuItem();
+                    backwardMenuItem.Header = "Move Backward";
+                    backwardMenuItem.Click += ( sender2, args2 ) =>
+                    {
+                        MoveCardInList(cardBeingAdded, -1);
+                    };
+                    menu.Items.Add(forwardMenuItem);
+                    menu.Items.Add(backwardMenuItem);
+                    cardButton.ContextMenu = menu;
+                }
                 
                 // Check if any cards currently in play match the color of the card being played (if the card is a property).
                 // If it does, lay the card being played over the matching cards.
