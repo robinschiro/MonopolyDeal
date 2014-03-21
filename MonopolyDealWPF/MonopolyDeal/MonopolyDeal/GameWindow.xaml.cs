@@ -282,11 +282,7 @@ namespace MonopolyDeal
                         {
                             Button cardButton = (Button)cardGrid.Children[i];
 
-                            // Lay properties of compatible colors on top of each other (offset vertically).
-                            TranslateTransform myTranslateTransform = new TranslateTransform();
-                            myTranslateTransform.Y = (i * .10) * field.ActualHeight;
-
-                            cardButton.RenderTransform = myTranslateTransform;
+                            TransformCardButton(cardButton, i, field.ActualHeight);
                         }
                     }
                 }
@@ -487,44 +483,90 @@ namespace MonopolyDeal
                     cardButton.ContextMenu = menu;
                 }
                 
-                // Check if any cards currently in play match the color of the card being played (if the card is a property).
-                // If it does, lay the card being played over the matching cards.
-                if ( cardBeingAdded.Type == CardType.Property )
+                // Play the card in a certain way depending on its type (i.e. property, money, or action).
+                switch ( cardBeingAdded.Type )
                 {
-                    foreach ( FrameworkElement element in grid.Children )
+                    case CardType.Property:
                     {
-                        Grid cardGrid = element as Grid;
-                        bool propertyMatchesSet = true;
-
-                        foreach ( FrameworkElement innerElement in cardGrid.Children )
+                        // Check if any cards currently in play match the color of the card being played (if the card is a property).
+                        // If it does, lay the card being played over the matching cards.
+                        foreach ( FrameworkElement element in grid.Children )
                         {
-                            Button existingCardButton = (Button)innerElement;
-                            Card cardInGrid = existingCardButton.Tag as Card;
+                            // A 'cardGrid' is either a single card or group of cards (stacked on top of each other) currently
+                            // on the playing field.
+                            Grid cardGrid = element as Grid;
+                            bool propertyMatchesSet = true;
 
-                            // Check the compatibility of the two properties.
-                            if ( !CheckPropertyCompatibility(cardInGrid, cardBeingAdded) )
+                            foreach ( FrameworkElement innerElement in cardGrid.Children )
                             {
-                                propertyMatchesSet = false;
-                                break;
+                                Button existingCardButton = (Button)innerElement;
+                                Card cardInGrid = existingCardButton.Tag as Card;
+
+                                // Check the compatibility of the two properties.
+                                if ( !CheckPropertyCompatibility(cardInGrid, cardBeingAdded) )
+                                {
+                                    propertyMatchesSet = false;
+                                    break;
+                                }
+                            }
+
+                            if ( propertyMatchesSet )
+                            {
+                                // Lay properties of compatible colors on top of each other (offset vertically).
+                                TransformCardButton(cardButton, cardGrid.Children.Count, grid.ActualHeight);
+
+
+                                // ROBIN TODO: Widen the gap between the player's hand and his playing field.
+                                // Add the new card to the cardGrid that contains the matching card on the field.
+                                cardGrid.Children.Add(cardButton);
+                                Grid.SetColumn(cardButton, 1);
+
+                                return;
                             }
                         }
 
-                        if ( propertyMatchesSet )
+                        break;
+                    }
+
+                    case CardType.Money:
+                    {
+
+                        // Check if any cards currently in play match the color of the card being played (if the card is a property).
+                        // If it does, lay the card being played over the matching cards.
+                        foreach (FrameworkElement element in grid.Children)
                         {
-                            
+                            // A 'cardGrid' is either a single card or group of cards (stacked on top of each other) currently
+                            // on the playing field.
+                            Grid cardGrid = element as Grid;
 
-                            // Lay properties of compatible colors on top of each other (offset vertically).
-                            TranslateTransform myTranslateTransform = new TranslateTransform();
-                            myTranslateTransform.Y = (cardGrid.Children.Count * .10) * grid.ActualHeight;
+                            foreach (FrameworkElement innerElement in cardGrid.Children)
+                            {
+                                Button existingCardButton = (Button)innerElement;
+                                Card cardInGrid = existingCardButton.Tag as Card;
 
-                            // ROBIN TODO: Widen the gap between the player's hand and his playing field.
-                            cardGrid.Children.Add(cardButton);
-                            Grid.SetColumn(cardButton, 1);
+                                // Check the compatibility of the two properties.
+                                if (cardInGrid.Type == CardType.Money)
+                                {
+                                    // Play money cards horizontally.
+                                    TransformCardButton(cardButton, 0, 0);
 
-                            cardButton.RenderTransform = myTranslateTransform;
+                                    cardGrid.Children.Add(cardButton);
+                                    Grid.SetColumn(cardButton, 1);
 
-                            return;
+                                    return;
+                                }
+                            }
+
+                            //If this reached, that means that no money cards have yet been played.
+
                         }
+
+                        break;
+                    }
+
+                    case CardType.Action:
+                    {
+                        break;
                     }
                 }
             }
@@ -548,8 +590,68 @@ namespace MonopolyDeal
 
             // Add the card (within its grid wrapper) to the next available position in the specified grid.
             grid.Children.Add(cardGridWrapper);
-            Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
 
+            if ( isHand )
+            {
+                Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
+            }
+            else
+            {
+                if ( cardBeingAdded.Type != CardType.Money )
+                {
+                    // BUG: Cards added to the money pile contribute to the count of the Children collection.
+                    // As a result, played cards skip a spot after a money card is played.
+
+                    // If at least one money card has been played, set the column to grid.Children.Count - 1. Otherwise, do not subtract 1.
+                    if (CountOfCardTypeInList(CardType.Money, Player.CardsInPlay) > 0)
+                    {
+                        Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
+                    }
+                    else
+                    {
+                        Grid.SetColumn(cardGridWrapper, grid.Children.Count);
+                    }
+                }
+                else
+                {
+                    TransformCardButton(cardButton, 0, 0);
+                    Grid.SetColumn(cardGridWrapper, 0);
+                }
+            }
+        }
+
+        public void TransformCardButton( Button cardButton, int numberOfMatchingCards, double gridHeight )
+        {
+            Card card = cardButton.Tag as Card;
+
+            switch ( card.Type )
+            {
+                case CardType.Property:
+                {
+                    // Lay properties of compatible colors on top of each other (offset vertically).
+                    TranslateTransform myTranslateTransform = new TranslateTransform();
+                    myTranslateTransform.Y = (numberOfMatchingCards * .10) * gridHeight;
+                    cardButton.RenderTransform = myTranslateTransform;
+
+                    break;
+                }
+
+                case CardType.Money:
+                {
+                    // Play money cards horizontally.
+                    RotateTransform horizontalTransform = new RotateTransform();
+                    horizontalTransform.Angle = -90;
+
+                    cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                    cardButton.RenderTransform = horizontalTransform;
+                    break;
+                }
+
+                case CardType.Action:
+                {
+                    break;
+                }
+            }
         }
 
         private void cardButton_PreviewMouseMove( object sender, MouseEventArgs e )
@@ -738,6 +840,24 @@ namespace MonopolyDeal
             }
 
             return -1;
+        }
+
+        private int CountOfCardTypeInList(CardType cardType, List<List<Card>> cardGroupList)
+        {
+            int count = 0;
+
+            foreach (List<Card> cardGroup in cardGroupList)
+            {
+                foreach (Card card in cardGroup)
+                {
+                    if (card.Type == cardType)
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return count;
         }
 
         private string VerifyPlayerName( string playerName )
