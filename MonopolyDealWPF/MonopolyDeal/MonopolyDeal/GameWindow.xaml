@@ -52,24 +52,29 @@
         <Grid Name="SideBar"
               Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
+                <RowDefinition />
+                <RowDefinition />
             </Grid.RowDefinitions>
             <Grid Name="TopSideBar"
                   Grid.Row="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="1*" />
-                    <RowDefinition Height="1*" />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
 
                 <Button Name="ReinitializeConnectionButton"
                         Content="Reinitialize Connection"
                         Click="ReinitializeConnectionButton_Click"
                         Grid.Row="0"/>
+                <Button Name="EndTurnButton"
+                        Content="End Turn"
+                        Click="EndTurnButton_Click"
+                        Grid.Row="1"/>
                 <Button Name='DrawCardButton'
                         Content="Draw Two"
                         Click="DrawCardButton_Click"
-                        Grid.Row="1" />
+                        Grid.Row="2" />
             </Grid>
             <Grid Name="InfoBox"
                   Grid.Row="1">

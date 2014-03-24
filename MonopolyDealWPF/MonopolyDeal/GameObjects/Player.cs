@@ -15,7 +15,23 @@ namespace GameObjects
         // This list represents the player's hand.
         public List<Card> CardsInHand { get; set; }
         
+        // This represents the player's name. Every player in a game must have different name.
         public string Name { get; set; }
+
+        // This returns the amount of money a player possesses.
+        private int moneyInBank;
+        public int MoneyInBank
+        {
+            get
+            {
+                return CalculateMoneyInBank();
+            }
+
+            set
+            {
+                this.moneyInBank = value;
+            }
+        }
 
         // Use this constructor when generating a player for the first time.
         public Player( Deck deck, string name )
@@ -46,5 +62,25 @@ namespace GameObjects
             this.CardsInPlay = new List<List<Card>>();
             this.CardsInHand = new List<Card>();
         }
+
+        private int CalculateMoneyInBank()
+        {
+            int amountOfMoney = 0;
+
+            foreach ( List<Card> cardGroup in CardsInPlay )
+            {
+                foreach ( Card card in cardGroup )
+                {
+                    if ( card.Type == CardType.Money )
+                    {
+                        amountOfMoney += card.Value;
+                    }
+                }
+            }
+
+            return amountOfMoney;
+        }
+
+
     }
 }

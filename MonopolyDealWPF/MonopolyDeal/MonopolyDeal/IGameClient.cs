@@ -13,7 +13,7 @@ namespace MonopolyDeal
         #region Card Manipulation Methods
 
         void DisplayOpponentCards( Object filler = null );
-        void AddCardToGrid( Card card, Grid grid, bool isHand );
+        void AddCardToGrid( Card card, Grid grid, Player player, bool isHand );
         void RemoveCardFromHand( Button cardButton );
         void SelectCard( Button cardButton );
         void DeselectCard( Button cardButton );

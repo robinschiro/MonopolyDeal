@@ -14,7 +14,8 @@ namespace GameObjects
     {
         Money,
         Property,
-        Action
+        Action,
+        None
     }
 
     public enum PropertyType
@@ -73,6 +74,7 @@ namespace GameObjects
         {
             this.Value = value;
             this.CardImageUriPath = path;
+            this.Type = CardType.None;
         }
     }
 }

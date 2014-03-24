@@ -67,7 +67,7 @@ namespace MonopolyDeal
             // Display the cards in this player's hand.
             foreach ( Card card in Player.CardsInHand )
             {
-                AddCardToGrid(card, PlayerOneHand, true);
+                AddCardToGrid(card, PlayerOneHand, Player, true);
             }
         }
 
@@ -179,7 +179,7 @@ namespace MonopolyDeal
                 // TODO: Define this method (take most of the functionality from the AddCardToGrid method).
                 AddCardToCardsInPlay(cardBeingPlayed);
 
-                AddCardToGrid(cardBeingPlayed, PlayerOneField, false);
+                AddCardToGrid(cardBeingPlayed, PlayerOneField, Player, false);
 
                 // Update the server.
                 ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
@@ -354,7 +354,7 @@ namespace MonopolyDeal
                 foreach ( Card card in cardList )
                 {
                     //AddCardToCardsInPlay(card);
-                    AddCardToGrid(card, PlayerOneField, false);
+                    AddCardToGrid(card, PlayerOneField, Player, false);
                 }
             }
         }
@@ -402,7 +402,7 @@ namespace MonopolyDeal
                         foreach ( Card card in cardList )
                         {
                             //AddCardToCardsInPlay(card);
-                            AddCardToGrid(card, playerField, false);
+                            AddCardToGrid(card, playerField, player, false);
                         }
                     }
 
@@ -411,7 +411,7 @@ namespace MonopolyDeal
                     foreach ( Card card in player.CardsInHand )
                     {
                         Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
-                        AddCardToGrid(cardBack, playerHand, false);
+                        AddCardToGrid(cardBack, playerHand, player, true);
                     }
                 }
             }
@@ -449,7 +449,7 @@ namespace MonopolyDeal
         
 
         // Add a card to a specified grid.
-        public void AddCardToGrid( Card cardBeingAdded, Grid grid, bool isHand )
+        public void AddCardToGrid( Card cardBeingAdded, Grid grid, Player player, bool isHand )
         {
             Button cardButton = ConvertCardToButton(cardBeingAdded);
 
@@ -599,11 +599,8 @@ namespace MonopolyDeal
             {
                 if ( cardBeingAdded.Type != CardType.Money )
                 {
-                    // BUG: Cards added to the money pile contribute to the count of the Children collection.
-                    // As a result, played cards skip a spot after a money card is played.
-
                     // If at least one money card has been played, set the column to grid.Children.Count - 1. Otherwise, do not subtract 1.
-                    if (CountOfCardTypeInList(CardType.Money, Player.CardsInPlay) > 0)
+                    if (CountOfCardTypeInList(CardType.Money, player.CardsInPlay) > 0)
                     {
                         Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
                     }
@@ -743,7 +740,7 @@ namespace MonopolyDeal
                 Card drawnCard = Deck.CardList[0];
 
                 Player.CardsInHand.Add(drawnCard);
-                AddCardToGrid(drawnCard, PlayerOneHand, true);
+                AddCardToGrid(drawnCard, PlayerOneHand, Player, true);
                 Deck.CardList.Remove(drawnCard);
             }
 
@@ -842,6 +839,8 @@ namespace MonopolyDeal
             return -1;
         }
 
+        // This returns the number of a type of card (i.e. money, action, or property) found within
+        // a provided list of card lists.
         private int CountOfCardTypeInList(CardType cardType, List<List<Card>> cardGroupList)
         {
             int count = 0;
@@ -893,6 +892,11 @@ namespace MonopolyDeal
 
 
         public void cardButton_PreviewMouseRightButtonDown( object sender, MouseButtonEventArgs e )
+        {
+
+        }
+
+        private void EndTurnButton_Click( object sender, RoutedEventArgs e )
         {
 
         }

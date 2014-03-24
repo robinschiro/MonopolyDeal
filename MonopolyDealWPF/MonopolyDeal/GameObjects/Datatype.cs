@@ -8,6 +8,7 @@ namespace GameObjects
     public enum Datatype
     {
         LaunchGame,
+        EndTurn,
         UpdateDeck,
         UpdatePlayer,
         UpdatePlayerList,
