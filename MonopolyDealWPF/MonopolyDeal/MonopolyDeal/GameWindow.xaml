@@ -70,10 +70,12 @@
                 <Button Name="EndTurnButton"
                         Content="End Turn"
                         Click="EndTurnButton_Click"
+                        IsEnabled="False"
                         Grid.Row="1"/>
                 <Button Name='DrawCardButton'
                         Content="Draw Two"
                         Click="DrawCardButton_Click"
+                        IsEnabled="False"
                         Grid.Row="2" />
             </Grid>
             <Grid Name="InfoBox"

@@ -28,23 +28,40 @@ namespace MonopolyDeal
         private bool BeginCommunication;
         private volatile NetClient Client;
         private List<Grid> PlayerFields;
+        private Turn Turn;
 
+        // TODO: The disabling/enabling of buttons should be implemented through binding.
+        private bool IsCurrentTurnOwner
+        {
+            get
+            {
+                return (this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name));
+            }
+        }
+
+        private bool HasDrawn;
+            
         //Testing something called AttachedProperties. Allows function calls upon triggers. 
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
         private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
 
-        public GameWindow( string playerName, string ipAddress )
+        public GameWindow( string playerName, string ipAddress, Turn turn )
         {
             InitializeComponent();
             this.SelectedCard = -1;
             this.BeginCommunication = false;
             this.ServerIP = ipAddress;
+            this.HasDrawn = false;
+
             // Add the four player fields to the list.
             this.PlayerFields = new List<Grid>();
             this.PlayerFields.Add(PlayerOneField);
             this.PlayerFields.Add(PlayerTwoField);
             this.PlayerFields.Add(PlayerThreeField);
             this.PlayerFields.Add(PlayerFourField);
+
+            // Instantiate the Player's Turn object.
+            this.Turn = turn;
 
             // Connect the client to the server.
             InitializeClient(ipAddress);
@@ -69,6 +86,9 @@ namespace MonopolyDeal
             {
                 AddCardToGrid(card, PlayerOneHand, Player, true);
             }
+
+            EnableButtonsIfTurnOwner(null);
+
         }
 
         #region Client Communication Code
@@ -142,6 +162,17 @@ namespace MonopolyDeal
 
                                 break;
                             }
+
+                            case Datatype.EndTurn:
+                            {
+                                this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(EnableButtonsIfTurnOwner), null); };
+                                Thread newThread = new Thread(start);
+                                newThread.Start();
+                                
+                                break;
+                            }
                         }
 
                         updateReceived = true;
@@ -163,28 +194,35 @@ namespace MonopolyDeal
 
         public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
-            Button cardButton = FindButtonInGrid(SelectedCard, PlayerOneHand);
-
-            if ( -1 != SelectedCard && sender == cardButton )
+            if ( FindPlayerPositionInPlayerList(this.Player.Name) == this.Turn.CurrentTurnOwner && this.Turn.NumberOfActions < 3 && this.HasDrawn )
             {
-                Card cardBeingPlayed = cardButton.Tag as Card;
-                RemoveCardFromHand(cardButton);
+                Button cardButton = FindButtonInGrid(SelectedCard, PlayerOneHand);
 
-                // Update the value of 'SelectedCard' (no card is selected after a card is played).
-                SelectedCard = -1;
+                if ( -1 != SelectedCard && sender == cardButton )
+                {
+                    Card cardBeingPlayed = cardButton.Tag as Card;
+                    RemoveCardFromHand(cardButton);
 
-                // Add the card to the Player's CardsInPlay list.
-                //Player.CardsInPlay.Add(cardBeingPlayed);
+                    // Update the value of 'SelectedCard' (no card is selected after a card is played).
+                    SelectedCard = -1;
 
-                // TODO: Define this method (take most of the functionality from the AddCardToGrid method).
-                AddCardToCardsInPlay(cardBeingPlayed);
+                    // Add the card to the Player's CardsInPlay list.
+                    AddCardToCardsInPlay(cardBeingPlayed);
 
-                AddCardToGrid(cardBeingPlayed, PlayerOneField, Player, false);
+                    // Add the card to the Player's playing field.
+                    AddCardToGrid(cardBeingPlayed, PlayerOneField, Player, false);
 
-                // Update the server.
-                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                    // Update the player's number of actions.
+                    this.Turn.NumberOfActions++;
+
+                    // Update the server.
+                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                }
             }
         }
+
+        //1 is absolute maxima/minima (saddle points, relative max/min)
+        //6 are from Ch. 15
 
         // When a card is added to the Player's CardsInPlay, it must be placed in the same list as compatible properties
         // that have already been played. If no compatible properties have been played, a new list is created for the card.
@@ -293,7 +331,34 @@ namespace MonopolyDeal
         private void DrawCardButton_Click( object sender, RoutedEventArgs e )
         {
             // In this game, only two cards can be drawn at a time.
-            DrawCards(2);            
+            DrawCards(2);
+            this.HasDrawn = true;
+            
+            // Disable the Draw Cards button once it has been clicked.
+            DrawCardButton.IsEnabled = false;
+        }
+
+        // End the player's turn.
+        private void EndTurnButton_Click( object sender, RoutedEventArgs e )
+        {
+            // Update the current turn owner by cycling through the player list.
+            if ( Turn.CurrentTurnOwner == PlayerList.Count - 1 )
+            {
+                this.Turn.CurrentTurnOwner = 0;
+            }
+            else
+            {
+                this.Turn.CurrentTurnOwner++;
+            }
+
+            // Reset the number of actions.
+            this.Turn.NumberOfActions = 0;
+
+            // Reset the status of the HasDrawn variable so that it is false at the beginning of this player's next turn.
+            this.HasDrawn = false;
+
+            // Send the updated Turn object to the server to be distributed to the other clients.
+            ServerUtilities.SendMessage(Client, Datatype.EndTurn, this.Turn);
         }
 
         // Use this event to respond to key presses.
@@ -305,6 +370,21 @@ namespace MonopolyDeal
         #endregion
 
         #region Hand and Field Manipulation
+
+        // Enable or disable certain buttons depending on whether or not the player is the current turn owner.
+        public void EnableButtonsIfTurnOwner( Object filler )
+        {
+            if ( IsCurrentTurnOwner )
+            {
+                EndTurnButton.IsEnabled = true;
+                DrawCardButton.IsEnabled = true;
+            }
+            else
+            {
+                EndTurnButton.IsEnabled = false;
+                DrawCardButton.IsEnabled = false;
+            }
+        }
  
         // Wrap a Button around a Card.
         public Button ConvertCardToButton( Card card )
@@ -346,6 +426,7 @@ namespace MonopolyDeal
 
         }
 
+        // Display the cards in the Player's CardsInPlay list.
         public void DisplayPlayerCardsInPlay()
         {
             ClearCardsInGrid(PlayerOneField);
@@ -353,7 +434,6 @@ namespace MonopolyDeal
             {
                 foreach ( Card card in cardList )
                 {
-                    //AddCardToCardsInPlay(card);
                     AddCardToGrid(card, PlayerOneField, Player, false);
                 }
             }
@@ -600,7 +680,7 @@ namespace MonopolyDeal
                 if ( cardBeingAdded.Type != CardType.Money )
                 {
                     // If at least one money card has been played, set the column to grid.Children.Count - 1. Otherwise, do not subtract 1.
-                    if (CountOfCardTypeInList(CardType.Money, player.CardsInPlay) > 0)
+                    if (CountOfCardTypeInGrid(CardType.Money, grid) > 0)
                     {
                         Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
                     }
@@ -859,6 +939,29 @@ namespace MonopolyDeal
             return count;
         }
 
+        private int CountOfCardTypeInGrid( CardType cardType, Grid grid )
+        {
+            int count = 0;
+
+            foreach ( FrameworkElement element in grid.Children )
+            {
+                Grid cardGrid = element as Grid;
+
+                foreach ( FrameworkElement innerElement in cardGrid.Children )
+                {
+                    Button existingCardButton = (Button)innerElement;
+                    Card cardInGrid = existingCardButton.Tag as Card;
+
+                    if ( cardInGrid.Type == cardType )
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return count;
+        }
+
         private string VerifyPlayerName( string playerName )
         {
             bool hasBeenModified = false;
@@ -896,9 +999,5 @@ namespace MonopolyDeal
 
         }
 
-        private void EndTurnButton_Click( object sender, RoutedEventArgs e )
-        {
-
-        }
     }
 }

@@ -9,6 +9,7 @@ namespace GameObjects
     {
         LaunchGame,
         EndTurn,
+        UpdateTurn,
         UpdateDeck,
         UpdatePlayer,
         UpdatePlayerList,

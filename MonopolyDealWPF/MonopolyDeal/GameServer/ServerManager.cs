@@ -36,11 +36,13 @@ namespace GameServer
         // Game objects.
         static Deck Deck;
         static List<Player> PlayerList;
+        static Turn Turn;
 
         [STAThread]
         static void Main( string[] args )
         {
-            // Generate a Profile object.
+            // Generate a Profile object. When this project is near the end of its development, 
+            // we will need to remove the leading "..\\"'s from this file path.
             Profile = new tvProfile("..\\..\\..\\Profile.txt", false);
 
             // Create a new deck.
@@ -171,11 +173,24 @@ namespace GameServer
                                         PlayerList[i] = new Player(Deck, PlayerList[i].Name);
                                     }
 
-                                    // Tell all clients to launch the game.
+                                    // Generate the Turn object to keep track of the current turn.
+                                    Turn = new Turn(PlayerList.Count);
+
+                                    // Tell all clients to launch the game and send them the Turn object.
                                     if ( Server.ConnectionsCount != 0 )
                                     {
-                                        ServerUtilities.SendMessage(Server, Datatype.LaunchGame);
+                                        ServerUtilities.SendMessage(Server, Datatype.LaunchGame, Turn);
                                     }
+
+                                    break;
+                                }
+
+                                case Datatype.EndTurn:
+                                {
+                                    Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.EndTurn);
+
+                                    // Send the updated Turn object to the clients.
+                                    ServerUtilities.SendMessage(Server, Datatype.EndTurn, Turn);
 
                                     break;
                                 }

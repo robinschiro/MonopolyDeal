@@ -43,9 +43,29 @@ namespace GameServer
 
                     return playerList;
                 }
+
+                case Datatype.LaunchGame:
+                {
+                    return ReadTurn(inc);
+                }
+
+                case Datatype.EndTurn:
+                {
+                    return ReadTurn(inc);
+                }
             }
 
             return null;
+        }
+
+        public static Turn ReadTurn( NetIncomingMessage inc )
+        {
+            int currentTurnOwner = inc.ReadInt32();
+            int numberOfActions = inc.ReadInt32();
+
+            Turn turn = new Turn(currentTurnOwner, numberOfActions);
+
+            return turn;
         }
 
         public static Player ReadPlayer( NetIncomingMessage inc )
@@ -131,6 +151,13 @@ namespace GameServer
             WriteCards(outmsg, player.CardsInHand);
         }
 
+        public static void WriteTurn( NetOutgoingMessage outmsg, Turn turn )
+        {
+            // Write the data related to the current turn.
+            outmsg.Write(turn.CurrentTurnOwner);
+            outmsg.Write(turn.NumberOfActions);
+        }
+
         // Send an update to either a client or the server, depending on where this method is called.
         public static void SendMessage( NetPeer netPeer, Datatype messageType, object updatedObject = null )
         {
@@ -181,6 +208,24 @@ namespace GameServer
                         {
                             WritePlayer(outmsg, player);
                         }
+                        break;
+                    }
+
+                    case Datatype.LaunchGame:
+                    {
+                        Turn currentTurn = (Turn)updatedObject;
+
+                        WriteTurn(outmsg, currentTurn);
+
+                        break;
+                    }
+
+                    case Datatype.EndTurn:
+                    {
+                        Turn currentTurn = (Turn)updatedObject;
+
+                        WriteTurn(outmsg, currentTurn);
+
                         break;
                     }
                 }

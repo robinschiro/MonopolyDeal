@@ -20,6 +20,7 @@ namespace MonopolyDeal
         private string ServerIP;
         private bool BeginCommunication;
         private List<Player> PlayerList;
+        private volatile Turn Turn;
 
         //// This is part of a failed attempt to use Binding. Binding currently does not work because non-UI threads cannot change the contents of
         //// observable collections. We should keep this code here in case we want to revisit binding in the future.
@@ -150,7 +151,10 @@ namespace MonopolyDeal
 
                             case Datatype.LaunchGame:
                             {
-                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(LaunchGame), null); };
+                                // Receive the data related to the current turn from the server.
+                                Turn Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.LaunchGame);
+
+                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Turn>(LaunchGame), Turn); };
                                 Thread newThread = new Thread(start);
                                 newThread.SetApartmentState(ApartmentState.STA);
                                 newThread.Start();
@@ -171,14 +175,14 @@ namespace MonopolyDeal
             }
         }
 
-        private void LaunchGame( Object filler )
+        private void LaunchGame( Turn turn )
         {
             // ROBIN: I previously attempted to pass the Client object to the GameWindow's constructor. As a result (for an unknown reason), 
             // the Client's callback messages were not registering. Therefore, each client is disconnected from the server before launching the game.
             // A new Client object is created and connected to the server when the GameWindow is constructed.
             Client.Disconnect("Bye");
 
-            GameWindow gameWindow = new GameWindow(this.Player.Name, this.ServerIP);
+            GameWindow gameWindow = new GameWindow(this.Player.Name, this.ServerIP, turn);
             gameWindow.Show();
             Close();
         }
