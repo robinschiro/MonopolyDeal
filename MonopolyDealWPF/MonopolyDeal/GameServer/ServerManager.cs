@@ -37,6 +37,7 @@ namespace GameServer
         static Deck Deck;
         static List<Player> PlayerList;
         static Turn Turn;
+        static List<Card> DiscardPile;
 
         [STAThread]
         static void Main( string[] args )
@@ -50,6 +51,9 @@ namespace GameServer
 
             // Create a new list of players.
             PlayerList = new List<Player>();
+
+            // Create a new Dicard Pile.
+            DiscardPile = new List<Card>();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             Config = new NetPeerConfiguration("game");
@@ -116,7 +120,7 @@ namespace GameServer
 
                             break;
                         }
-                        // Data type is all messages manually sent from client
+                        // All messages manually sent from clients are considered "Data" messages.
                         // ( Approval is an automated process )
                         case NetIncomingMessageType.Data:
                         {
@@ -124,10 +128,24 @@ namespace GameServer
 
                             switch ( messageType )
                             {
-                                // Receive an updated deck from a client.
+                                // Receive an updated Deck from a client.
                                 case Datatype.UpdateDeck:
                                 {
                                     Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
+                                    break;
+                                }
+
+                                // Receive an updated DiscardPile from a client.
+                                case Datatype.UpdateDiscardPile:
+                                {
+                                    DiscardPile = (List<Card>)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                                    // Send the updated DiscardPile to all clients.
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.UpdateDiscardPile, DiscardPile);
+                                    }
+
                                     break;
                                 }
 
@@ -203,6 +221,11 @@ namespace GameServer
                                         ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
                                     }
 
+                                    break;
+                                }
+
+                                case Datatype.RequestDiscardPile:
+                                {
                                     break;
                                 }
 

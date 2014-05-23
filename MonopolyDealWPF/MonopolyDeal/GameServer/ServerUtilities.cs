@@ -22,6 +22,11 @@ namespace GameServer
                     return new Deck(ReadCards(inc));
                 }
 
+                case Datatype.UpdateDiscardPile:
+                {
+                    return ReadCards(inc);
+                }
+
                 case Datatype.UpdatePlayer:
                 {
                     return ReadPlayer(inc);
@@ -184,6 +189,12 @@ namespace GameServer
                     {
                         WriteCards(outmsg, (updatedObject as Deck).CardList);
 
+                        break;
+                    }
+
+                    case Datatype.UpdateDiscardPile:
+                    {
+                        WriteCards(outmsg, (updatedObject as List<Card>));
                         break;
                     }
 

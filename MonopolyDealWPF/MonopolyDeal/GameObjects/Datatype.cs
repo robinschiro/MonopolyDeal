@@ -11,9 +11,11 @@ namespace GameObjects
         EndTurn,
         UpdateTurn,
         UpdateDeck,
+        UpdateDiscardPile,
         UpdatePlayer,
         UpdatePlayerList,
         RequestDeck,
+        RequestDiscardPile,
         RequestPlayerList
 
     }

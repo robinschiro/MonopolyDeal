@@ -12,6 +12,8 @@ using System.Windows.Threading;
 using GameObjects;
 using GameServer;
 using Lidgren.Network;
+using System.Reactive.Linq;
+using System.Reactive;
 
 namespace MonopolyDeal
 {
@@ -29,6 +31,7 @@ namespace MonopolyDeal
         private volatile NetClient Client;
         private List<Grid> PlayerFields;
         private Turn Turn;
+        private List<Card> DiscardPile;
 
         // TODO: The disabling/enabling of buttons should be implemented through binding.
         private bool IsCurrentTurnOwner
@@ -63,6 +66,9 @@ namespace MonopolyDeal
             // Instantiate the Player's Turn object.
             this.Turn = turn;
 
+            // Instantiate the DiscardPile.
+            this.DiscardPile = new List<Card>();
+
             // Connect the client to the server.
             InitializeClient(ipAddress);
 
@@ -89,6 +95,19 @@ namespace MonopolyDeal
 
             EnableButtonsIfTurnOwner(null);
 
+            // Enable Reactive Extensions (taken from http://goo.gl/0Jr5WU) in order to perform Size_Changed responses at the end of a chain of resizing events
+            // (instead performing a Size_Changed response for every resize event). This is used to improve efficiency.
+            IObservable<SizeChangedEventArgs> ObservableSizeChanges = Observable
+                .FromEventPattern<SizeChangedEventArgs>(this, "SizeChanged")
+                .Select(x => x.EventArgs)
+                .Throttle(TimeSpan.FromMilliseconds(200));
+
+            IDisposable SizeChangedSubscription = ObservableSizeChanges
+                .ObserveOn(SynchronizationContext.Current)
+                .Subscribe(x =>
+                {
+                    Size_Changed(x);
+                });
         }
 
         #region Client Communication Code
@@ -152,13 +171,20 @@ namespace MonopolyDeal
                                 break;
                             }
 
+                            case Datatype.UpdateDiscardPile:
+                            {
+                                this.DiscardPile = (List<Card>)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                                CreateNewThread(new Action<Object>(DisplayUpdatedDiscardPile));
+
+                                break;
+                            }
+
                             case Datatype.UpdatePlayerList:
                             {
                                 this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(DisplayOpponentCards), null); };
-                                Thread newThread = new Thread(start);
-                                newThread.Start();
+                                CreateNewThread(new Action<Object>(DisplayOpponentCards));
 
                                 break;
                             }
@@ -167,10 +193,8 @@ namespace MonopolyDeal
                             {
                                 this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(EnableButtonsIfTurnOwner), null); };
-                                Thread newThread = new Thread(start);
-                                newThread.Start();
-                                
+                                CreateNewThread(new Action<Object>(EnableButtonsIfTurnOwner));
+
                                 break;
                             }
                         }
@@ -206,17 +230,28 @@ namespace MonopolyDeal
                     // Update the value of 'SelectedCard' (no card is selected after a card is played).
                     SelectedCard = -1;
 
-                    // Add the card to the Player's CardsInPlay list.
-                    AddCardToCardsInPlay(cardBeingPlayed);
-
-                    // Add the card to the Player's playing field.
-                    AddCardToGrid(cardBeingPlayed, PlayerOneField, Player, false);
+                    // Add the card to the Player's playing field (if it is not an action card).
+                    if ( cardBeingPlayed.Type != CardType.Action )
+                    {
+                        // Add the card to the Player's CardsInPlay list.
+                        AddCardToCardsInPlay(cardBeingPlayed);
+                        AddCardToGrid(cardBeingPlayed, PlayerOneField, this.Player, false);
+                    }
+                    else
+                    {
+                        // Add the card to the DiscardPile and display it.
+                        this.DiscardPile.Add(cardBeingPlayed);
+                        AddCardToGrid(cardBeingPlayed, DiscardPileGrid, this.Player, false);
+                    }
 
                     // Update the player's number of actions.
                     this.Turn.NumberOfActions++;
 
-                    // Update the server.
+                    // Update the server's information regarding this player.
                     ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+
+                    // Update the server's discard pile.
+                    ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, DiscardPile);
                 }
             }
         }
@@ -278,6 +313,10 @@ namespace MonopolyDeal
                 // Select this card.
                 SelectedCard = buttonIndex;
                 SelectCard(sender as Button);
+
+                // Add this card to the InfoBox.
+                InfoBox.Children.Clear();
+                InfoBox.Children.Add(ConvertCardToButton((sender as Button).Tag as Card));
             }
             else
             {
@@ -307,24 +346,29 @@ namespace MonopolyDeal
 
         // When the client resizes the windows, scale the display of overlaid cards on the players' fields so that they
         // are always spaced proportionally.
-        private void Window_SizeChanged( object sender, SizeChangedEventArgs e )
-        {
-            if ( PlayerFields != null )
-            {
-                foreach ( Grid field in PlayerFields )
-                {
-                    foreach ( FrameworkElement element in field.Children )
-                    {
-                        Grid cardGrid = (Grid)element;
-                        for ( int i = 0; i < cardGrid.Children.Count; ++i )
-                        {
-                            Button cardButton = (Button)cardGrid.Children[i];
+        //private void Window_SizeChanged( object sender, SizeChangedEventArgs e )
+        //{
+        //    if ( PlayerFields != null )
+        //    {
+        //        foreach ( Grid field in PlayerFields )
+        //        {
+        //            foreach ( FrameworkElement element in field.Children )
+        //            {
+        //                Grid cardGrid = (Grid)element;
+        //                for ( int i = 0; i < cardGrid.Children.Count; ++i )
+        //                {
+        //                    Button cardButton = (Button)cardGrid.Children[i];
 
-                            TransformCardButton(cardButton, i, field.ActualHeight);
-                        }
-                    }
-                }
-            }
+        //                    TransformCardButton(cardButton, i, field.ActualHeight);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        private void Size_Changed( SizeChangedEventArgs e )
+        {
+            CreateNewThread(new Action<Object>(ResizeUIElements));
         }
 
         // Draw two cards from the Deck.
@@ -385,6 +429,16 @@ namespace MonopolyDeal
                 DrawCardButton.IsEnabled = false;
             }
         }
+
+        public void DisplayUpdatedDiscardPile( Object filler )
+        {
+            DiscardPileGrid.Children.Clear();
+
+            foreach ( Card card in this.DiscardPile )
+            {
+                AddCardToGrid(card, DiscardPileGrid, this.Player, false);
+            }
+        }
  
         // Wrap a Button around a Card.
         public Button ConvertCardToButton( Card card )
@@ -439,8 +493,29 @@ namespace MonopolyDeal
             }
         }
 
+        // Resize UI elements so that they are propotional to the size of the window.
+        public void ResizeUIElements( Object filler )
+        {
+            if ( PlayerFields != null )
+            {
+                foreach ( Grid field in PlayerFields )
+                {
+                    foreach ( FrameworkElement element in field.Children )
+                    {
+                        Grid cardGrid = (Grid)element;
+                        for ( int i = 0; i < cardGrid.Children.Count; ++i )
+                        {
+                            Button cardButton = (Button)cardGrid.Children[i];
+
+                            TransformCardButton(cardButton, i, field.ActualHeight);
+                        }
+                    }
+                }
+            }
+        }
+
         // Display the cards of the player's opponents.
-        public void DisplayOpponentCards(Object filler = null)
+        public void DisplayOpponentCards(Object filler)
         {
             foreach ( Player player in PlayerList )
             {
@@ -541,9 +616,9 @@ namespace MonopolyDeal
             }
             else
             {
-                // Create context menu that allows the user to reorder properties.
+                // Create context menu that allows the user to reorder properties and money cards (not action cards).
                 // This if statement is required to prevent players from seeing the context menu of other players' cards in play.
-                if ( grid == PlayerOneField )
+                if ( grid == PlayerOneField && cardBeingAdded.Type != CardType.Action)
                 {
                     ContextMenu menu = new ContextMenu();
                     MenuItem forwardMenuItem = new MenuItem();
@@ -615,8 +690,7 @@ namespace MonopolyDeal
                         // If it does, lay the card being played over the matching cards.
                         foreach (FrameworkElement element in grid.Children)
                         {
-                            // A 'cardGrid' is either a single card or group of cards (stacked on top of each other) currently
-                            // on the playing field.
+                            // A 'cardGrid' is either a single card or group of cards (stacked on top of each other) currently on the playing field.
                             Grid cardGrid = element as Grid;
 
                             foreach (FrameworkElement innerElement in cardGrid.Children)
@@ -624,7 +698,7 @@ namespace MonopolyDeal
                                 Button existingCardButton = (Button)innerElement;
                                 Card cardInGrid = existingCardButton.Tag as Card;
 
-                                // Check the compatibility of the two properties.
+                                // Check to see if the found card is a money card. There should only be one group of money cards (the first group on the playing field)
                                 if (cardInGrid.Type == CardType.Money)
                                 {
                                     // Play money cards horizontally.
@@ -643,10 +717,12 @@ namespace MonopolyDeal
 
                         break;
                     }
-
+                    
+                    // This case adds played Action cards to the Action Card/Discard pile.
                     case CardType.Action:
                     {
-                        break;
+                        grid.Children.Add(cardButton);
+                        return;
                     }
                 }
             }
@@ -677,7 +753,7 @@ namespace MonopolyDeal
             }
             else
             {
-                if ( cardBeingAdded.Type != CardType.Money )
+                if ( cardBeingAdded.Type == CardType.Property)
                 {
                     // If at least one money card has been played, set the column to grid.Children.Count - 1. Otherwise, do not subtract 1.
                     if (CountOfCardTypeInGrid(CardType.Money, grid) > 0)
@@ -689,7 +765,7 @@ namespace MonopolyDeal
                         Grid.SetColumn(cardGridWrapper, grid.Children.Count);
                     }
                 }
-                else
+                else if ( cardBeingAdded.Type == CardType.Money )
                 {
                     TransformCardButton(cardButton, 0, 0);
                     Grid.SetColumn(cardGridWrapper, 0);
@@ -838,6 +914,14 @@ namespace MonopolyDeal
         #endregion
 
         #region Miscellaneous
+
+        // Create a new thread to run a function that cannot be run on the same thread invoking CreateNewThread().
+        public void CreateNewThread( Action<Object> action )
+        {
+            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, action, null); };
+            Thread newThread = new Thread(start);
+            newThread.Start();
+        }
 
         public void MoveItemInList<T>(IList<T> list, int oldIndex, int newIndex)
         {
@@ -992,12 +1076,5 @@ namespace MonopolyDeal
         }
 
         #endregion
-
-
-        public void cardButton_PreviewMouseRightButtonDown( object sender, MouseButtonEventArgs e )
-        {
-
-        }
-
     }
 }
