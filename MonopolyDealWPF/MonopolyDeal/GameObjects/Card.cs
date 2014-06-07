@@ -43,6 +43,7 @@ namespace GameObjects
         public PropertyType Color { get; set; }
         public PropertyType AltColor { get; set; }
         public string CardImageUriPath { get; set; }
+        public bool IsFlipped { get; set; }
 
         public Card( CardType type, String name, int value ) // Create a card given a type, name, and value
         {
@@ -51,7 +52,7 @@ namespace GameObjects
             this.Value = value;
         }
 
-        public Card( string name, CardType type, int value, PropertyType color, PropertyType altColor, string uriPath ) // Create a card given a type, name, and value
+        public Card( string name, CardType type, int value, PropertyType color, PropertyType altColor, string uriPath, bool isFlipped = false ) // Create a card given a type, name, and value
         {
             this.Name = name;
             this.Type = type;
@@ -59,6 +60,7 @@ namespace GameObjects
             this.Color = color;
             this.AltColor = altColor;
             this.CardImageUriPath = uriPath;
+            this.IsFlipped = isFlipped;
         }
 
         //Standard card for testing purposes

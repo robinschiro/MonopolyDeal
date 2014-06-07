@@ -64,7 +64,7 @@ namespace MonopolyDeal
             }
         }
 
-            
+
         //Testing something called AttachedProperties. Allows function calls upon triggers. 
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
         private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
@@ -89,7 +89,7 @@ namespace MonopolyDeal
             InitializeClient(ipAddress);
 
             // Do not continue until the client has successfully established communication with the server.
-            while ( !this.BeginCommunication );
+            while ( !this.BeginCommunication ) ;
 
             // Receive a list of the players already on the server.
             ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
@@ -147,7 +147,7 @@ namespace MonopolyDeal
 
         #region Client Communication Code
 
-        private void InitializeClient(string serverIP)
+        private void InitializeClient( string serverIP )
         {
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             NetPeerConfiguration Config = new NetPeerConfiguration("game");
@@ -236,7 +236,7 @@ namespace MonopolyDeal
                         }
 
                         updateReceived = true;
-                        
+
                     }
                     else if ( inc.MessageType == NetIncomingMessageType.StatusChanged )
                     {
@@ -245,7 +245,7 @@ namespace MonopolyDeal
                     }
                 }
             }
-        } 
+        }
 
         #endregion
 
@@ -271,32 +271,38 @@ namespace MonopolyDeal
                 if ( IsCardSelected(cardButton) )
                 {
                     Card cardBeingPlayed = cardButton.Tag as Card;
-                    RemoveCardFromHand(cardButton);
-
-                    // Update the value of 'SelectedCard' (no card is selected after a card is played).
-                    SelectedCard = -1;
+                    bool cardWasPlayed = false;
 
                     // Add the card to the Player's playing field (if it is not an action card).
                     if ( cardBeingPlayed.Type != CardType.Action )
                     {
                         // Add the card to the Player's CardsInPlay list.
-                        AddCardToCardsInPlay(cardBeingPlayed);
+                        cardWasPlayed = AddCardToCardsInPlay(cardBeingPlayed);
                     }
                     else
                     {
                         // Add the card to the DiscardPile and display it.
                         this.DiscardPile.Add(cardBeingPlayed);
                         AddCardToGrid(cardBeingPlayed, DiscardPileGrid, this.Player, false);
+                        cardWasPlayed = true;
                     }
 
-                    // Update the player's number of actions.
-                    this.Turn.NumberOfActions++;
+                    if ( cardWasPlayed )
+                    {
+                        // Update the value of 'SelectedCard' (no card is selected after a card is played).
+                        SelectedCard = -1;
 
-                    // Update the server's information regarding this player.
-                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                        RemoveCardFromHand(cardButton);
 
-                    // Update the server's discard pile.
-                    ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, DiscardPile);
+                        // Update the player's number of actions.
+                        this.Turn.NumberOfActions++;
+
+                        // Update the server's information regarding this player.
+                        ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+
+                        // Update the server's discard pile.
+                        ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, DiscardPile);
+                    }
                 }
             }
         }
@@ -445,7 +451,7 @@ namespace MonopolyDeal
                 AddCardToGrid(card, DiscardPileGrid, this.Player, false);
             }
         }
- 
+
         // Wrap a Button around a Card.
         public Button ConvertCardToButton( Card card )
         {
@@ -488,7 +494,7 @@ namespace MonopolyDeal
 
         // Display the cards in the Player's CardsInPlay list.
         // TODO: Get this to work
-        public void DisplayCardsInPlay(Player player, Grid field)
+        public void DisplayCardsInPlay( Player player, Grid field )
         {
             ClearCardsInGrid(field);
 
@@ -525,7 +531,7 @@ namespace MonopolyDeal
         }
 
         // Display the cards of the player's opponents.
-        public void DisplayOpponentCards(Object filler)
+        public void DisplayOpponentCards( Object filler )
         {
             foreach ( Player player in PlayerList )
             {
@@ -583,7 +589,7 @@ namespace MonopolyDeal
 
         // Determines if a property card is of the same color as another property card.
         // TODO: Account for houses and hotels being added to monopolies.
-        public bool CheckPropertyCompatibility(Card propOne, Card propTwo)
+        public bool CheckPropertyCompatibility( Card propOne, Card propTwo )
         {
             if ( propOne.Type != CardType.Property || propTwo.Type != CardType.Property )
             {
@@ -591,23 +597,24 @@ namespace MonopolyDeal
             }
 
             // There is probably a better way to compare the cards' PropertyTypes, but this works for now.
-            if ( ( (propOne.Color == propTwo.Color) && (propOne.Color != PropertyType.None) )           ||
-                    ( (propOne.AltColor == propTwo.AltColor) && (propOne.AltColor != PropertyType.None) )  || 
-                    ( (propOne.Color == propTwo.AltColor) && (propOne.Color != PropertyType.None) )        ||
-                    ( (propOne.AltColor== propTwo.Color) && (propOne.Color != PropertyType.None) )         ||
-                    ( (propOne.Color == PropertyType.Wild) || (propTwo.Color == PropertyType.Wild) ) )
+            if ( ((propOne.Color == propTwo.Color) && (propOne.Color != PropertyType.None)) ||
+                    ((propOne.AltColor == propTwo.AltColor) && (propOne.AltColor != PropertyType.None)) ||
+                    ((propOne.Color == propTwo.AltColor) && (propOne.Color != PropertyType.None)) ||
+                    ((propOne.AltColor == propTwo.Color) && (propOne.Color != PropertyType.None)) ||
+                    ((propOne.Color == PropertyType.Wild) || (propTwo.Color == PropertyType.Wild)) )
             {
                 return true;
             }
 
             return false;
-            
+
         }
 
 
         // When a card is added to the Player's CardsInPlay, it must be placed in the same list as compatible properties
         // that have already been played. If no compatible properties have been played, a new list is created for the card.
-        public void AddCardToCardsInPlay( Card cardBeingAdded )
+        // This method returns 'true' if it successfully adds a card to the CardsInPlay.
+        public bool AddCardToCardsInPlay( Card cardBeingAdded )
         {
             // Check if any cards currently in play match the color of the card being played (if the card is a property).
             // If it does, lay the card being played over the matching cards.
@@ -617,37 +624,60 @@ namespace MonopolyDeal
                 {
                     // Add the house to an existing monopoly or the hotel to a monopoly that has a house. The card should not be removed from the player's hand
                     // unless it is placed in a monopoly.
+                    int indexOfMonopoly = 0;
+
+
                 }
                 else
                 {
-                    foreach ( List<Card> cardList in Player.CardsInPlay )
+                    // Before a card is added to the player's CardsInPlay, we must verify that it can be added to the player's CardsInPlay.
+                    // If a monopoly of the card's color already exists, then the card cannot be played.
+                    List<PropertyType> colorsOfCurrentMonopolies = new List<PropertyType>();
+
+                    foreach ( int index in FindMonopolies(Player) )
                     {
-                        bool propertyMatchesSet = true;
+                        colorsOfCurrentMonopolies.Add(FindCardListColor(Player.CardsInPlay[index]));
+                    }
 
-                        // If there is nothing in the list of cards, the property does not match the set.
-                        if ( 0 == cardList.Count )
+                    if ( PropertyType.None != cardBeingAdded.AltColor )
+                    {
+                        if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.Color) && colorsOfCurrentMonopolies.Contains(cardBeingAdded.AltColor) )
                         {
-                            propertyMatchesSet = false;
+                            return false;
                         }
-                        else
+                    }
+                    else if ( PropertyType.Wild != cardBeingAdded.Color )
+                    {
+                        if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.Color) )
                         {
-                            foreach ( Card cardInList in cardList )
-                            {
-                                // Check the compatibility of the two properties.
-                                if ( !CheckPropertyCompatibility(cardInList, cardBeingAdded) )
-                                {
-                                    propertyMatchesSet = false;
-                                    break;
-                                }
-                            }
+                            return false;
                         }
+                    }
+                    else
+                    {
+                        // A Property Wild Card (that is, the card that is compatible with all properties) cannot be added to 
+                        // the player's CardsInPlay unless there is a list of property cards (that are not a monopoly) already there.
+                        // That is, a Property Wild Card can never be by itself on the field.
+                        if ( colorsOfCurrentMonopolies.Count == Player.CardsInPlay.Count - 1 )
+                        {
+                            return false;
+                        }
+                    }
 
-                        if ( propertyMatchesSet )
+                    // If the card has passed the previous check, add it to the player's CardsInPlay.
+                    for ( int i = 1; i < Player.CardsInPlay.Count; ++i )
+                    {
+                        List<Card> cardList = Player.CardsInPlay[i];
+
+                        PropertyType cardListColor = FindCardListColor(cardList);
+
+                        // If the cardlist is not a monopoly and is compatible with the card being added, add the card to the list.
+                        if ( !IsCardListMonopoly(cardList) && ( cardListColor == cardBeingAdded.Color || PropertyType.Wild == cardBeingAdded.Color ) )
                         {
                             cardList.Add(cardBeingAdded);
                             AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false, Player.CardsInPlay.IndexOf(cardList));
 
-                            return;
+                            return true;
                         }
                     }
                 }
@@ -657,11 +687,31 @@ namespace MonopolyDeal
                 newCardList.Add(cardBeingAdded);
                 Player.CardsInPlay.Add(newCardList);
                 AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false);
+                return true;
             }
             else if ( cardBeingAdded.Type == CardType.Money )
             {
                 Player.CardsInPlay[0].Add(cardBeingAdded);
                 AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false);
+                return true;
+            }
+
+            return false;
+        }
+
+        // Remove a card from a player's CardsInPlay. If it is the last card in a list, remove the list as well (unless it is the money list).
+        public void RemoveCardFromCardsInPlay( Card cardBeingRemoved, Player player )
+        {
+            for ( int i = 0; i < player.CardsInPlay.Count; ++i )
+            {
+                if ( player.CardsInPlay[i].Remove(cardBeingRemoved) )
+                {
+                    if ( (0 == player.CardsInPlay[i].Count) && (0 != i) )
+                    {
+                        player.CardsInPlay.Remove(player.CardsInPlay[i]);
+                    }
+                    return;
+                }
             }
         }
 
@@ -700,14 +750,14 @@ namespace MonopolyDeal
                     };
                     menu.Items.Add(playAsActionMenuItem);
                     menu.Items.Add(playAsMoneyMenuItem);
-                    cardButton.ContextMenu = menu;                    
+                    cardButton.ContextMenu = menu;
                 }
             }
             else
             {
                 // Create context menu that allows the user to reorder properties and money cards (not action cards).
                 // This if statement is required to prevent players from seeing the context menu of other players' cards in play.
-                if ( grid == PlayerOneField && cardBeingAdded.Type != CardType.Action)
+                if ( grid == PlayerOneField && cardBeingAdded.Type != CardType.Action )
                 {
                     ContextMenu menu = new ContextMenu();
                     MenuItem forwardMenuItem = new MenuItem();
@@ -722,11 +772,35 @@ namespace MonopolyDeal
                     {
                         MoveCardInList(cardBeingAdded, -1);
                     };
+
+                    // If it is a two-color property card, allow the player to flip it.
+                    if ( PropertyType.None != cardBeingAdded.AltColor )
+                    {
+                        MenuItem flipMenuItem = new MenuItem();
+                        flipMenuItem.Header = "Flip Card";
+                        flipMenuItem.Click += ( sender2, args2 ) =>
+                        {
+                            FlipCard(cardBeingAdded);
+
+                            // Remove the card and re-add it to the Player's CardsInPlay.
+                            RemoveCardFromCardsInPlay(cardBeingAdded, this.Player);
+                            AddCardToCardsInPlay(cardBeingAdded);
+
+                            // Displayed the updated CardsInPlay.
+                            DisplayCardsInPlay(this.Player, PlayerOneField);
+
+                            // Update the server.
+                            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+
+                        };
+                        menu.Items.Add(flipMenuItem);
+                    }
+                    
                     menu.Items.Add(forwardMenuItem);
                     menu.Items.Add(backwardMenuItem);
                     cardButton.ContextMenu = menu;
                 }
-                
+
                 // Play the card in a certain way depending on its type (i.e. property, money, or action).
                 switch ( cardBeingAdded.Type )
                 {
@@ -757,7 +831,7 @@ namespace MonopolyDeal
                         Grid.SetColumn(cardButton, 1);
                         return;
                     }
-                    
+
                     // This case adds played Action cards to the Action Card/Discard pile.
                     case CardType.Action:
                     {
@@ -783,20 +857,9 @@ namespace MonopolyDeal
             }
             else
             {
-                if ( cardBeingAdded.Type == CardType.Property)
+                if ( cardBeingAdded.Type == CardType.Property )
                 {
-                    // If at least one money card has been played, set the column to grid.Children.Count - 1. Otherwise, do not subtract 1.
-                    // TODO: Modify this to work.
-                    //if (CountOfCardTypeInGrid(CardType.Money, grid) > 0)
-                    //{
-                    //    Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
-                    //}
-                    //else
-                    //{
-                    //    Grid.SetColumn(cardGridWrapper, grid.Children.Count);
-                    //}
                     Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
-
                 }
                 else if ( cardBeingAdded.Type == CardType.Money )
                 {
@@ -806,7 +869,7 @@ namespace MonopolyDeal
             }
         }
 
-        public Grid CreateCardGrid(int columnIndex = 0)
+        public Grid CreateCardGrid( int columnIndex = 0 )
         {
             // Wrap the card inside a grid in order to insert spaces between the displayed the cards.
             Grid cardGrid = new Grid();
@@ -835,10 +898,23 @@ namespace MonopolyDeal
             {
                 case CardType.Property:
                 {
+                    TransformGroup transformGroup = new TransformGroup();
+
+                    // Flip properties that are supposed to be flipped.
+                    if ( card.IsFlipped )
+                    {
+                        RotateTransform horizontalTransform = new RotateTransform();
+                        horizontalTransform.Angle = 180;
+                        cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                        transformGroup.Children.Add(horizontalTransform);
+                    }
+
                     // Lay properties of compatible colors on top of each other (offset vertically).
                     TranslateTransform myTranslateTransform = new TranslateTransform();
                     myTranslateTransform.Y = (numberOfMatchingCards * .10) * gridHeight;
-                    cardButton.RenderTransform = myTranslateTransform;
+                    transformGroup.Children.Add(myTranslateTransform);
+
+                    cardButton.RenderTransform = transformGroup;
 
                     break;
                 }
@@ -977,7 +1053,7 @@ namespace MonopolyDeal
             newThread.Start();
         }
 
-        public void MoveItemInList<T>(IList<T> list, int oldIndex, int newIndex)
+        public void MoveItemInList<T>( IList<T> list, int oldIndex, int newIndex )
         {
             var item = list[oldIndex];
 
@@ -1015,11 +1091,19 @@ namespace MonopolyDeal
             }
         }
 
+        public void FlipCard( Card card )
+        {
+            PropertyType oldColor = card.Color;
+            card.Color = card.AltColor;
+            card.AltColor = oldColor;
+            card.IsFlipped = !card.IsFlipped;
+        }
+
         public List<Card> FindListContainingCard( Card cardBeingFound )
         {
             foreach ( List<Card> cardList in Player.CardsInPlay )
             {
-                foreach (Card card in cardList)
+                foreach ( Card card in cardList )
                 {
                     if ( card == cardBeingFound )
                     {
@@ -1059,15 +1143,15 @@ namespace MonopolyDeal
 
         // This returns the number of a type of card (i.e. money, action, or property) found within
         // a provided list of card lists.
-        private int CountOfCardTypeInList(CardType cardType, List<List<Card>> cardGroupList)
+        private int CountOfCardTypeInList( CardType cardType, List<List<Card>> cardGroupList )
         {
             int count = 0;
 
-            foreach (List<Card> cardGroup in cardGroupList)
+            foreach ( List<Card> cardGroup in cardGroupList )
             {
-                foreach (Card card in cardGroup)
+                foreach ( Card card in cardGroup )
                 {
-                    if (card.Type == cardType)
+                    if ( card.Type == cardType )
                     {
                         count++;
                     }
@@ -1127,6 +1211,45 @@ namespace MonopolyDeal
             }
 
             return playerName;
+        }
+
+        // Return a list of the indices (where each index is a position in the Player's CardsInPlay) of all monopolies.
+        public List<int> FindMonopolies( Player player )
+        {
+            List<int> indices = new List<int>();
+
+            // Iterate through the card lists. Always skip the first one, since it is reserved for money.
+            for ( int i = 1; i < player.CardsInPlay.Count; ++i )
+            {
+                if ( IsCardListMonopoly(player.CardsInPlay[i]) )
+                {
+                    indices.Add(i);
+                }
+            }
+
+            return indices;
+        }
+
+        public bool IsCardListMonopoly( List<Card> cardList )
+        {
+            PropertyType monopolyColor = FindCardListColor(cardList);
+            int countOfProperties = 0;
+             
+
+            return false;
+        }
+
+        public PropertyType FindCardListColor( List<Card> cardList )
+        {
+            foreach ( Card card in cardList )
+            {
+                if ( PropertyType.None != card.Color && PropertyType.Wild != card.Color )
+                {
+                    return card.Color;
+                }
+            }
+            return PropertyType.None;
+
         }
 
         // For each type of property, store the number of cards of that property type that make up a complete monopoly
