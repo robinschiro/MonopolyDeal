@@ -28,8 +28,8 @@ namespace GameObjects
             this.CardList = cardList;
         }
 
-        // Creates cards with different values for testing. A card is created for each picture in the Images folder.
-        // Will eventually read in .xls spreadsheet and create each card
+        // Scan data from the profile file to generate the cards for the deck.
+        // ROBIN TODO: Generalize this method so that it works for cards with any properties (not just those specific to Monopoly Deal).
         public void GenerateDeck()
         {
             CardList = new List<Card>();
@@ -54,12 +54,8 @@ namespace GameObjects
                 }
             }
 
-            Shuffle(CardList); // Randomizes the cards in the deck
-
-            foreach ( Card card in CardList )
-            {
-                Debug.WriteLine(card.Value); // Print out list of cards in deck
-            }
+            // Randomize the cards in the deck
+            Shuffle(CardList);
 
             TextureName = "cardback";
         }

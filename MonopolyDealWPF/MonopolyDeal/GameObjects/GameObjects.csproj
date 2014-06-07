@@ -50,9 +50,7 @@
     <Compile Include="Turn.cs" />
     <Compile Include="Datatype.cs" />
     <Compile Include="Deck.cs" />
-    <Compile Include="DiscardPile.cs" />
     <Compile Include="Player.cs" />
-    <Compile Include="PlayingField.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\tvToolbox\tvExtensions.cs" />
     <Compile Include="Resources\tvToolbox\tvFetchResource.cs" />

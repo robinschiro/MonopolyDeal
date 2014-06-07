@@ -37,6 +37,8 @@ namespace GameObjects
         public Player( Deck deck, string name )
         {
             this.CardsInPlay = new List<List<Card>>();
+            // Instantiate the CardsInPlay with an empty list as the first element, to be used for money only.
+            this.CardsInPlay.Add(new List<Card>());
             this.CardsInHand = new List<Card>();
 
             // Initialize the player's hand

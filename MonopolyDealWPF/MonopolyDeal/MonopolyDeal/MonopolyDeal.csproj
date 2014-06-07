@@ -67,6 +67,7 @@
     <Compile Include="LaunchScreen.xaml.cs">
       <DependentUpon>LaunchScreen.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MultiBoolConverter.cs" />
     <Compile Include="RoomWindow.xaml.cs">
       <DependentUpon>RoomWindow.xaml</DependentUpon>
     </Compile>

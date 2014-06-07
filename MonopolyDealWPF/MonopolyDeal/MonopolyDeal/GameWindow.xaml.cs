@@ -20,7 +20,7 @@ namespace MonopolyDeal
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class GameWindow : Window, IGameClient
+    public partial class GameWindow : Window, IGameClient, INotifyPropertyChanged
     {
         private Deck Deck;
         private Player Player;
@@ -29,20 +29,41 @@ namespace MonopolyDeal
         private int SelectedCard;
         private bool BeginCommunication;
         private volatile NetClient Client;
-        private List<Grid> PlayerFields;
+        private List<Grid> PlayerFields;                        // This list is needed in order to resize the grids when the window size changes.
         private Turn Turn;
         private List<Card> DiscardPile;
+        private Dictionary<PropertyType, int> MonopolyData;
 
         // TODO: The disabling/enabling of buttons should be implemented through binding.
-        private bool IsCurrentTurnOwner
+        private bool isCurrentTurnOwner;
+        public bool IsCurrentTurnOwner
         {
             get
             {
-                return (this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name));
+                //return (this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name));
+                return isCurrentTurnOwner;
+            }
+            set
+            {
+                isCurrentTurnOwner = value;
+                OnPropertyChanged("IsCurrentTurnOwner");
             }
         }
 
-        private bool HasDrawn;
+        private bool hasDrawn;
+        public bool HasDrawn
+        {
+            get
+            {
+                return hasDrawn;
+            }
+            set
+            {
+                hasDrawn = value;
+                OnPropertyChanged("HasDrawn");
+            }
+        }
+
             
         //Testing something called AttachedProperties. Allows function calls upon triggers. 
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
@@ -50,21 +71,16 @@ namespace MonopolyDeal
 
         public GameWindow( string playerName, string ipAddress, Turn turn )
         {
-            InitializeComponent();
             this.SelectedCard = -1;
             this.BeginCommunication = false;
             this.ServerIP = ipAddress;
             this.HasDrawn = false;
 
-            // Add the four player fields to the list.
-            this.PlayerFields = new List<Grid>();
-            this.PlayerFields.Add(PlayerOneField);
-            this.PlayerFields.Add(PlayerTwoField);
-            this.PlayerFields.Add(PlayerThreeField);
-            this.PlayerFields.Add(PlayerFourField);
-
             // Instantiate the Player's Turn object.
             this.Turn = turn;
+
+            // Instantiate the MonopolyData object.
+            InstantiateMonopolyData();
 
             // Instantiate the DiscardPile.
             this.DiscardPile = new List<Card>();
@@ -84,8 +100,27 @@ namespace MonopolyDeal
             // Find the Player in the PlayerList.
             this.Player = FindPlayerInList(playerName);
 
+            CheckIfCurrentTurnOwner();
+
+            InitializeComponent();
+
+            WindowGrid.DataContext = this;
+
             // Re-title the window.
             this.Title = playerName + "'s Window";
+
+            // Add an empty grid as the first element of every field. This grid is used to display each player's money pile.
+            PlayerOneField.Children.Add(CreateCardGrid());
+            PlayerTwoField.Children.Add(CreateCardGrid());
+            PlayerThreeField.Children.Add(CreateCardGrid());
+            PlayerFourField.Children.Add(CreateCardGrid());
+
+            // Add the four player fields to the list.
+            this.PlayerFields = new List<Grid>();
+            this.PlayerFields.Add(PlayerOneField);
+            this.PlayerFields.Add(PlayerTwoField);
+            this.PlayerFields.Add(PlayerThreeField);
+            this.PlayerFields.Add(PlayerFourField);
 
             // Display the cards in this player's hand.
             foreach ( Card card in Player.CardsInHand )
@@ -93,7 +128,7 @@ namespace MonopolyDeal
                 AddCardToGrid(card, PlayerOneHand, Player, true);
             }
 
-            EnableButtonsIfTurnOwner(null);
+            //EnableButtonsIfTurnOwner(null);
 
             // Enable Reactive Extensions (taken from http://goo.gl/0Jr5WU) in order to perform Size_Changed responses at the end of a chain of resizing events
             // (instead performing a Size_Changed response for every resize event). This is used to improve efficiency.
@@ -193,7 +228,8 @@ namespace MonopolyDeal
                             {
                                 this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                                CreateNewThread(new Action<Object>(EnableButtonsIfTurnOwner));
+                                // Check to see if the player is the current turn owner. 
+                                CheckIfCurrentTurnOwner();
 
                                 break;
                             }
@@ -215,14 +251,24 @@ namespace MonopolyDeal
 
         #region Events
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged( string info )
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if ( handler != null )
+            {
+                handler(this, new PropertyChangedEventArgs(info));
+            }
+        }
 
         public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
             if ( FindPlayerPositionInPlayerList(this.Player.Name) == this.Turn.CurrentTurnOwner && this.Turn.NumberOfActions < 3 && this.HasDrawn )
             {
-                Button cardButton = FindButtonInGrid(SelectedCard, PlayerOneHand);
+                Button cardButton = sender as Button;
 
-                if ( -1 != SelectedCard && sender == cardButton )
+                if ( IsCardSelected(cardButton) )
                 {
                     Card cardBeingPlayed = cardButton.Tag as Card;
                     RemoveCardFromHand(cardButton);
@@ -235,7 +281,6 @@ namespace MonopolyDeal
                     {
                         // Add the card to the Player's CardsInPlay list.
                         AddCardToCardsInPlay(cardBeingPlayed);
-                        AddCardToGrid(cardBeingPlayed, PlayerOneField, this.Player, false);
                     }
                     else
                     {
@@ -254,46 +299,6 @@ namespace MonopolyDeal
                     ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, DiscardPile);
                 }
             }
-        }
-
-        //1 is absolute maxima/minima (saddle points, relative max/min)
-        //6 are from Ch. 15
-
-        // When a card is added to the Player's CardsInPlay, it must be placed in the same list as compatible properties
-        // that have already been played. If no compatible properties have been played, a new list is created for the card.
-        public void AddCardToCardsInPlay( Card cardBeingAdded )
-        {
-            // Check if any cards currently in play match the color of the card being played (if the card is a property).
-            // If it does, lay the card being played over the matching cards.
-            if ( cardBeingAdded.Type == CardType.Property )
-            {
-                foreach ( List<Card> cardList in Player.CardsInPlay )
-                {
-                    //Grid cardGrid = element as Grid;
-                    bool propertyMatchesSet = true;
-
-                    foreach ( Card cardInList in cardList )
-                    {
-                        // Check the compatibility of the two properties.
-                        if ( !CheckPropertyCompatibility(cardInList, cardBeingAdded) )
-                        {
-                            propertyMatchesSet = false;
-                            break;
-                        }
-                    }
-
-                    if ( propertyMatchesSet )
-                    {
-                        cardList.Add(cardBeingAdded);
-                        return;
-                    }
-                }
-            }
-
-            // If this code is reached, the card must not have matched any existing properties.
-            List<Card> newCardList = new List<Card>();
-            newCardList.Add(cardBeingAdded);
-            Player.CardsInPlay.Add(newCardList);
         }
 
         // Increase the size of a card when it is selected and decrease its size when another card is selected.
@@ -377,9 +382,6 @@ namespace MonopolyDeal
             // In this game, only two cards can be drawn at a time.
             DrawCards(2);
             this.HasDrawn = true;
-            
-            // Disable the Draw Cards button once it has been clicked.
-            DrawCardButton.IsEnabled = false;
         }
 
         // End the player's turn.
@@ -416,18 +418,22 @@ namespace MonopolyDeal
         #region Hand and Field Manipulation
 
         // Enable or disable certain buttons depending on whether or not the player is the current turn owner.
-        public void EnableButtonsIfTurnOwner( Object filler )
+        public void CheckIfCurrentTurnOwner()
         {
-            if ( IsCurrentTurnOwner )
+            if ( this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name) )
             {
-                EndTurnButton.IsEnabled = true;
-                DrawCardButton.IsEnabled = true;
+                IsCurrentTurnOwner = true;
             }
             else
             {
-                EndTurnButton.IsEnabled = false;
-                DrawCardButton.IsEnabled = false;
+                IsCurrentTurnOwner = false;
             }
+        }
+
+        // Given a card button, determine if it is currently selected.
+        public bool IsCardSelected( Button cardButton )
+        {
+            return cardButton == FindButtonInGrid(SelectedCard, PlayerOneHand);
         }
 
         public void DisplayUpdatedDiscardPile( Object filler )
@@ -481,14 +487,18 @@ namespace MonopolyDeal
         }
 
         // Display the cards in the Player's CardsInPlay list.
-        public void DisplayPlayerCardsInPlay()
+        // TODO: Get this to work
+        public void DisplayCardsInPlay(Player player, Grid field)
         {
-            ClearCardsInGrid(PlayerOneField);
-            foreach ( List<Card> cardList in Player.CardsInPlay )
+            ClearCardsInGrid(field);
+
+            //foreach ( List<Card> cardList in Player.CardsInPlay )
+            for ( int i = 0; i < player.CardsInPlay.Count; ++i )
             {
-                foreach ( Card card in cardList )
+                field.Children.Add(CreateCardGrid(i));
+                foreach ( Card card in player.CardsInPlay[i] )
                 {
-                    AddCardToGrid(card, PlayerOneField, Player, false);
+                    AddCardToGrid(card, field, player, false, i);
                 }
             }
         }
@@ -551,15 +561,7 @@ namespace MonopolyDeal
                 if ( playerHand != null )
                 {
                     // Update the display of the opponent's cards in play.
-                    ClearCardsInGrid(playerField);
-                    foreach ( List<Card> cardList in player.CardsInPlay )
-                    {
-                        foreach ( Card card in cardList )
-                        {
-                            //AddCardToCardsInPlay(card);
-                            AddCardToGrid(card, playerField, player, false);
-                        }
-                    }
+                    DisplayCardsInPlay(player, playerField);
 
                     // Update the display of the opponent's hand.
                     ClearCardsInGrid(playerHand);
@@ -601,18 +603,105 @@ namespace MonopolyDeal
             return false;
             
         }
-        
+
+
+        // When a card is added to the Player's CardsInPlay, it must be placed in the same list as compatible properties
+        // that have already been played. If no compatible properties have been played, a new list is created for the card.
+        public void AddCardToCardsInPlay( Card cardBeingAdded )
+        {
+            // Check if any cards currently in play match the color of the card being played (if the card is a property).
+            // If it does, lay the card being played over the matching cards.
+            if ( cardBeingAdded.Type == CardType.Property )
+            {
+                if ( "House" == cardBeingAdded.Name || "Hotel" == cardBeingAdded.Name )
+                {
+                    // Add the house to an existing monopoly or the hotel to a monopoly that has a house. The card should not be removed from the player's hand
+                    // unless it is placed in a monopoly.
+                }
+                else
+                {
+                    foreach ( List<Card> cardList in Player.CardsInPlay )
+                    {
+                        bool propertyMatchesSet = true;
+
+                        // If there is nothing in the list of cards, the property does not match the set.
+                        if ( 0 == cardList.Count )
+                        {
+                            propertyMatchesSet = false;
+                        }
+                        else
+                        {
+                            foreach ( Card cardInList in cardList )
+                            {
+                                // Check the compatibility of the two properties.
+                                if ( !CheckPropertyCompatibility(cardInList, cardBeingAdded) )
+                                {
+                                    propertyMatchesSet = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if ( propertyMatchesSet )
+                        {
+                            cardList.Add(cardBeingAdded);
+                            AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false, Player.CardsInPlay.IndexOf(cardList));
+
+                            return;
+                        }
+                    }
+                }
+
+                // If this code is reached, the card must not have matched any existing properties.
+                List<Card> newCardList = new List<Card>();
+                newCardList.Add(cardBeingAdded);
+                Player.CardsInPlay.Add(newCardList);
+                AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false);
+            }
+            else if ( cardBeingAdded.Type == CardType.Money )
+            {
+                Player.CardsInPlay[0].Add(cardBeingAdded);
+                AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false);
+            }
+        }
 
         // Add a card to a specified grid.
-        public void AddCardToGrid( Card cardBeingAdded, Grid grid, Player player, bool isHand )
+        public void AddCardToGrid( Card cardBeingAdded, Grid grid, Player player, bool isHand, int position = -1 )
         {
             Button cardButton = ConvertCardToButton(cardBeingAdded);
 
             // If a card is being added to the client's hand, attach these events to it and display it.
-            if ( isHand )
+            if ( isHand && player == this.Player )
             {
                 cardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
-                cardButton.PreviewMouseRightButtonDown += new MouseButtonEventHandler(PlayCardEvent);
+
+                // If a card is not an action card, there is only one way it can be played. 
+                // If it is an action card, it can be played in one of two ways.
+                if ( CardType.Action != cardBeingAdded.Type )
+                {
+                    cardButton.PreviewMouseRightButtonDown += new MouseButtonEventHandler(PlayCardEvent);
+                }
+                else
+                {
+                    // ROBIN TODO: Disable the context menu when the card is not selected.
+                    ContextMenu menu = new ContextMenu();
+                    MenuItem playAsActionMenuItem = new MenuItem();
+                    playAsActionMenuItem.Header = "Play as Action";
+                    playAsActionMenuItem.Click += ( sender, args ) =>
+                    {
+                        PlayCardEvent(cardButton, null);
+                    };
+                    MenuItem playAsMoneyMenuItem = new MenuItem();
+                    playAsMoneyMenuItem.Header = "Play as Money";
+                    playAsMoneyMenuItem.Click += ( sender2, args2 ) =>
+                    {
+                        (cardButton.Tag as Card).Type = CardType.Money;
+                        PlayCardEvent(cardButton, null);
+                    };
+                    menu.Items.Add(playAsActionMenuItem);
+                    menu.Items.Add(playAsMoneyMenuItem);
+                    cardButton.ContextMenu = menu;                    
+                }
             }
             else
             {
@@ -643,41 +732,17 @@ namespace MonopolyDeal
                 {
                     case CardType.Property:
                     {
-                        // Check if any cards currently in play match the color of the card being played (if the card is a property).
-                        // If it does, lay the card being played over the matching cards.
-                        foreach ( FrameworkElement element in grid.Children )
+                        // Testing new approach to adding cards to grid
+                        if ( -1 != position )
                         {
-                            // A 'cardGrid' is either a single card or group of cards (stacked on top of each other) currently
-                            // on the playing field.
-                            Grid cardGrid = element as Grid;
-                            bool propertyMatchesSet = true;
+                            Grid cardGrid = (grid.Children[position] as Grid);
 
-                            foreach ( FrameworkElement innerElement in cardGrid.Children )
-                            {
-                                Button existingCardButton = (Button)innerElement;
-                                Card cardInGrid = existingCardButton.Tag as Card;
+                            // Lay properties of compatible colors on top of each other (offset vertically).
+                            TransformCardButton(cardButton, cardGrid.Children.Count, grid.ActualHeight);
 
-                                // Check the compatibility of the two properties.
-                                if ( !CheckPropertyCompatibility(cardInGrid, cardBeingAdded) )
-                                {
-                                    propertyMatchesSet = false;
-                                    break;
-                                }
-                            }
-
-                            if ( propertyMatchesSet )
-                            {
-                                // Lay properties of compatible colors on top of each other (offset vertically).
-                                TransformCardButton(cardButton, cardGrid.Children.Count, grid.ActualHeight);
-
-
-                                // ROBIN TODO: Widen the gap between the player's hand and his playing field.
-                                // Add the new card to the cardGrid that contains the matching card on the field.
-                                cardGrid.Children.Add(cardButton);
-                                Grid.SetColumn(cardButton, 1);
-
-                                return;
-                            }
+                            cardGrid.Children.Add(cardButton);
+                            Grid.SetColumn(cardButton, 1);
+                            return;
                         }
 
                         break;
@@ -685,61 +750,26 @@ namespace MonopolyDeal
 
                     case CardType.Money:
                     {
+                        //Play money cards horizontally.
+                        TransformCardButton(cardButton, 0, 0);
 
-                        // Check if any cards currently in play match the color of the card being played (if the card is a property).
-                        // If it does, lay the card being played over the matching cards.
-                        foreach (FrameworkElement element in grid.Children)
-                        {
-                            // A 'cardGrid' is either a single card or group of cards (stacked on top of each other) currently on the playing field.
-                            Grid cardGrid = element as Grid;
-
-                            foreach (FrameworkElement innerElement in cardGrid.Children)
-                            {
-                                Button existingCardButton = (Button)innerElement;
-                                Card cardInGrid = existingCardButton.Tag as Card;
-
-                                // Check to see if the found card is a money card. There should only be one group of money cards (the first group on the playing field)
-                                if (cardInGrid.Type == CardType.Money)
-                                {
-                                    // Play money cards horizontally.
-                                    TransformCardButton(cardButton, 0, 0);
-
-                                    cardGrid.Children.Add(cardButton);
-                                    Grid.SetColumn(cardButton, 1);
-
-                                    return;
-                                }
-                            }
-
-                            //If this reached, that means that no money cards have yet been played.
-
-                        }
-
-                        break;
+                        (grid.Children[0] as Grid).Children.Add(cardButton);
+                        Grid.SetColumn(cardButton, 1);
+                        return;
                     }
                     
                     // This case adds played Action cards to the Action Card/Discard pile.
                     case CardType.Action:
                     {
                         grid.Children.Add(cardButton);
+
                         return;
                     }
                 }
             }
 
             // Wrap the card inside a grid in order to insert spaces between the displayed the cards.
-            Grid cardGridWrapper = new Grid();
-
-            ColumnDefinition col1 = new ColumnDefinition();
-            col1.Width = new GridLength(1, GridUnitType.Star);
-            ColumnDefinition col2 = new ColumnDefinition();
-            col2.Width = new GridLength(16, GridUnitType.Star);
-            ColumnDefinition col3 = new ColumnDefinition();
-            col3.Width = new GridLength(1, GridUnitType.Star);
-
-            cardGridWrapper.ColumnDefinitions.Add(col1);
-            cardGridWrapper.ColumnDefinitions.Add(col2);
-            cardGridWrapper.ColumnDefinitions.Add(col3);
+            Grid cardGridWrapper = CreateCardGrid();
             cardGridWrapper.Children.Add(cardButton);
             cardGridWrapper.Tag = cardButton;
             Grid.SetColumn(cardButton, 1);
@@ -756,14 +786,17 @@ namespace MonopolyDeal
                 if ( cardBeingAdded.Type == CardType.Property)
                 {
                     // If at least one money card has been played, set the column to grid.Children.Count - 1. Otherwise, do not subtract 1.
-                    if (CountOfCardTypeInGrid(CardType.Money, grid) > 0)
-                    {
-                        Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
-                    }
-                    else
-                    {
-                        Grid.SetColumn(cardGridWrapper, grid.Children.Count);
-                    }
+                    // TODO: Modify this to work.
+                    //if (CountOfCardTypeInGrid(CardType.Money, grid) > 0)
+                    //{
+                    //    Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
+                    //}
+                    //else
+                    //{
+                    //    Grid.SetColumn(cardGridWrapper, grid.Children.Count);
+                    //}
+                    Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
+
                 }
                 else if ( cardBeingAdded.Type == CardType.Money )
                 {
@@ -771,6 +804,27 @@ namespace MonopolyDeal
                     Grid.SetColumn(cardGridWrapper, 0);
                 }
             }
+        }
+
+        public Grid CreateCardGrid(int columnIndex = 0)
+        {
+            // Wrap the card inside a grid in order to insert spaces between the displayed the cards.
+            Grid cardGrid = new Grid();
+
+            ColumnDefinition col1 = new ColumnDefinition();
+            col1.Width = new GridLength(1, GridUnitType.Star);
+            ColumnDefinition col2 = new ColumnDefinition();
+            col2.Width = new GridLength(16, GridUnitType.Star);
+            ColumnDefinition col3 = new ColumnDefinition();
+            col3.Width = new GridLength(1, GridUnitType.Star);
+
+            cardGrid.ColumnDefinitions.Add(col1);
+            cardGrid.ColumnDefinitions.Add(col2);
+            cardGrid.ColumnDefinitions.Add(col3);
+
+            Grid.SetColumn(cardGrid, columnIndex);
+
+            return cardGrid;
         }
 
         public void TransformCardButton( Button cardButton, int numberOfMatchingCards, double gridHeight )
@@ -951,7 +1005,7 @@ namespace MonopolyDeal
                     if ( cardList[i] == cardBeingMoved )
                     {
                         MoveItemInList<Card>(cardList, i, i + numberOfSpaces);
-                        DisplayPlayerCardsInPlay();
+                        DisplayCardsInPlay(Player, PlayerOneField);
 
                         // Update the server.
                         ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
@@ -1073,6 +1127,24 @@ namespace MonopolyDeal
             }
 
             return playerName;
+        }
+
+        // For each type of property, store the number of cards of that property type that make up a complete monopoly
+        // ROBIN TODO: Think of a way to do this without hardcoding the data.
+        public void InstantiateMonopolyData()
+        {
+            MonopolyData = new Dictionary<PropertyType, int>();
+            MonopolyData.Add(PropertyType.Blue, 2);
+            MonopolyData.Add(PropertyType.Brown, 2);
+            MonopolyData.Add(PropertyType.Green, 3);
+            MonopolyData.Add(PropertyType.LightBlue, 3);
+            MonopolyData.Add(PropertyType.Orange, 3);
+            MonopolyData.Add(PropertyType.Pink, 3);
+            MonopolyData.Add(PropertyType.Railroad, 4);
+            MonopolyData.Add(PropertyType.Red, 3);
+            MonopolyData.Add(PropertyType.Utility, 2);
+            MonopolyData.Add(PropertyType.Wild, 0);
+            MonopolyData.Add(PropertyType.Yellow, 3);
         }
 
         #endregion
