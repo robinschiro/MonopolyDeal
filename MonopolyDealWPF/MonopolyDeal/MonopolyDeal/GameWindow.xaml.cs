@@ -624,7 +624,32 @@ namespace MonopolyDeal
                 {
                     // Add the house to an existing monopoly or the hotel to a monopoly that has a house. The card should not be removed from the player's hand
                     // unless it is placed in a monopoly.
-                    int indexOfMonopoly = 0;
+                    List<int> monopolyIndices = FindMonopolies(Player);
+
+                    if ( "House" == cardBeingAdded.Name )
+                    {
+                        bool containsHouse = false;
+                        foreach ( Card cardInMonopoly in Player.CardsInPlay[monopolyIndices[0]] )
+                        {
+                            if ( "House" == cardInMonopoly.Name )
+                            {
+                                containsHouse = true;
+                                break;
+                            }
+                        }
+
+                        if ( !containsHouse )
+                        {
+                            Player.CardsInPlay[monopolyIndices[0]].Add(cardBeingAdded);
+                            AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false, monopolyIndices[0]);
+
+                            return true;
+                        }
+                    }
+                    else
+                    {
+
+                    }
 
 
                 }
@@ -1230,11 +1255,25 @@ namespace MonopolyDeal
             return indices;
         }
 
+        // Determines if a provided card list is a monopoly.
         public bool IsCardListMonopoly( List<Card> cardList )
         {
             PropertyType monopolyColor = FindCardListColor(cardList);
             int countOfProperties = 0;
-             
+
+            // First count the number of properties in the list. This algorithm excludes houses and hotels from the count.
+            foreach ( Card card in cardList )
+            {
+                if ( card.Color != PropertyType.None )
+                {
+                    countOfProperties++;
+                }
+            }
+
+            if ( countOfProperties == MonopolyData[monopolyColor] )
+            {
+                return true;
+            }
 
             return false;
         }
