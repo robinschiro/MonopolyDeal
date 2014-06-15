@@ -439,7 +439,7 @@ namespace MonopolyDeal
         // Given a card button, determine if it is currently selected.
         public bool IsCardSelected( Button cardButton )
         {
-            return cardButton == FindButtonInGrid(SelectedCard, PlayerOneHand);
+            return Grid.GetColumn(cardButton.Parent as Grid) == SelectedCard;
         }
 
         public void DisplayUpdatedDiscardPile( Object filler )
@@ -460,6 +460,8 @@ namespace MonopolyDeal
             (cardButton.Content as Image).Source = new BitmapImage(new Uri(card.CardImageUriPath, UriKind.Absolute));
             cardButton.Tag = card;
             cardButton.Style = (Style)FindResource("NoChromeButton");
+            cardButton.RenderTransform = new TransformGroup();
+            cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
 
             return cardButton;
         }
@@ -493,7 +495,6 @@ namespace MonopolyDeal
         }
 
         // Display the cards in the Player's CardsInPlay list.
-        // TODO: Get this to work
         public void DisplayCardsInPlay( Player player, Grid field )
         {
             ClearCardsInGrid(field);
@@ -624,34 +625,37 @@ namespace MonopolyDeal
                 {
                     // Add the house to an existing monopoly or the hotel to a monopoly that has a house. The card should not be removed from the player's hand
                     // unless it is placed in a monopoly.
-                    List<int> monopolyIndices = FindMonopolies(Player);
+                    List<List<Card>> monopolies = FindMonopolies(Player);
 
                     if ( "House" == cardBeingAdded.Name )
                     {
-                        bool containsHouse = false;
-                        foreach ( Card cardInMonopoly in Player.CardsInPlay[monopolyIndices[0]] )
+                        foreach ( List<Card> monopoly in monopolies )
                         {
-                            if ( "House" == cardInMonopoly.Name )
+                            if ( !IsCardInCardList("House", monopoly  ) )
                             {
-                                containsHouse = true;
-                                break;
+                                monopoly.Add(cardBeingAdded);
+                                AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false, Player.CardsInPlay.IndexOf(monopoly));
+
+                                return true;
                             }
-                        }
-
-                        if ( !containsHouse )
-                        {
-                            Player.CardsInPlay[monopolyIndices[0]].Add(cardBeingAdded);
-                            AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false, monopolyIndices[0]);
-
-                            return true;
                         }
                     }
                     else
                     {
+                        foreach ( List<Card> monopoly in monopolies )
+                        {
+                            if ( IsCardInCardList("House", monopoly) && !IsCardInCardList("Hotel", monopoly) )
+                            {
+                                monopoly.Add(cardBeingAdded);
+                                AddCardToGrid(cardBeingAdded, PlayerOneField, this.Player, false, Player.CardsInPlay.IndexOf(monopoly));
 
+                                return true;
+                            }
+                        }
                     }
 
-
+                    // Do not add the house or hotel if the code is reached.
+                    return false;
                 }
                 else
                 {
@@ -659,9 +663,9 @@ namespace MonopolyDeal
                     // If a monopoly of the card's color already exists, then the card cannot be played.
                     List<PropertyType> colorsOfCurrentMonopolies = new List<PropertyType>();
 
-                    foreach ( int index in FindMonopolies(Player) )
+                    foreach ( List<Card> cardList in FindMonopolies(Player) )
                     {
-                        colorsOfCurrentMonopolies.Add(FindCardListColor(Player.CardsInPlay[index]));
+                        colorsOfCurrentMonopolies.Add(FindCardListColor(cardList));
                     }
 
                     if ( PropertyType.None != cardBeingAdded.AltColor )
@@ -750,11 +754,54 @@ namespace MonopolyDeal
             {
                 cardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
 
+                // Prevent the context menu of a card from opening when it shifts into the position of a card that has just been played.
+                cardButton.ContextMenuOpening += ( sender, args ) =>
+                {
+                    // If the card is not selected, do not open the context menu.
+                    if ( !IsCardSelected(cardButton) )
+                    {
+                        args.Handled = true;
+                    }
+                };
+
+
                 // If a card is not an action card, there is only one way it can be played. 
                 // If it is an action card, it can be played in one of two ways.
                 if ( CardType.Action != cardBeingAdded.Type )
                 {
-                    cardButton.PreviewMouseRightButtonDown += new MouseButtonEventHandler(PlayCardEvent);
+                    if ( PropertyType.None != cardBeingAdded.AltColor )
+                    {
+                        ContextMenu menu = new ContextMenu();
+
+                        MenuItem playMenuItem = new MenuItem();
+                        playMenuItem.Header = "Play as Property";
+                        playMenuItem.Click += ( sender, args ) =>
+                        {
+                            PlayCardEvent(cardButton, null);
+                        };
+
+                        MenuItem flipMenuItem = new MenuItem();
+                        flipMenuItem.Header = "Flip Card";
+                        flipMenuItem.Click += ( sender2, args2 ) =>
+                        {
+                            // Flip the card, swapping its primary and alternative colors.
+                            FlipCard(cardBeingAdded);
+
+                            // TODO: This is bugged. Fix it.
+                            TransformCardButton(cardButton, 0, 0);
+
+                            // Displayed the updated CardsInHand.
+                            // DisplayCardsInHand(this.Player, PlayerOneHand);
+                        };
+                        menu.Items.Add(playMenuItem);
+                        menu.Items.Add(flipMenuItem);
+
+                        cardButton.ContextMenu = menu;
+                    }
+                    else
+                    {
+                        cardButton.PreviewMouseRightButtonDown += new MouseButtonEventHandler(PlayCardEvent);
+                    }
                 }
                 else
                 {
@@ -773,6 +820,7 @@ namespace MonopolyDeal
                         (cardButton.Tag as Card).Type = CardType.Money;
                         PlayCardEvent(cardButton, null);
                     };
+
                     menu.Items.Add(playAsActionMenuItem);
                     menu.Items.Add(playAsMoneyMenuItem);
                     cardButton.ContextMenu = menu;
@@ -805,7 +853,26 @@ namespace MonopolyDeal
                         flipMenuItem.Header = "Flip Card";
                         flipMenuItem.Click += ( sender2, args2 ) =>
                         {
+                            // Check to see if the flipped card can be added to the player's CardsInPlay.
+                            // If it cannot, do not do anything.
+                            List<PropertyType> colorsOfCurrentMonopolies = new List<PropertyType>();
+                            foreach ( List<Card> cardList in FindMonopolies(Player) )
+                            {
+                                colorsOfCurrentMonopolies.Add(FindCardListColor(cardList));
+                            }
+                            if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.AltColor) )
+                            {
+                                return;
+                            }
+
+                            // Flip the card, swapping its primary and alternative colors.
                             FlipCard(cardBeingAdded);
+
+                            // TODO: If the card list to which the card belonged contains a house, place the house back in the player's hand.
+                            if ( IsCardInCardList("House", FindListContainingCard(cardBeingAdded)) )
+                            {
+
+                            }
 
                             // Remove the card and re-add it to the Player's CardsInPlay.
                             RemoveCardFromCardsInPlay(cardBeingAdded, this.Player);
@@ -923,23 +990,36 @@ namespace MonopolyDeal
             {
                 case CardType.Property:
                 {
-                    TransformGroup transformGroup = new TransformGroup();
+                    TransformGroup transformGroup = (cardButton.RenderTransform as TransformGroup);
 
-                    // Flip properties that are supposed to be flipped.
-                    if ( card.IsFlipped )
+                    // Flip or unflip a two-color property.
+                    if ( HasAltColor(cardButton.Tag as Card) )
                     {
                         RotateTransform horizontalTransform = new RotateTransform();
-                        horizontalTransform.Angle = 180;
-                        cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
-                        transformGroup.Children.Add(horizontalTransform);
+
+                        // Flip properties that are supposed to be flipped.
+                        if ( card.IsFlipped )
+                        {
+                            horizontalTransform.Angle = 180;
+                            //cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                            transformGroup.Children.Add(horizontalTransform);
+                            //transformGroup.Children.Add(horizontalTransform);
+                        }
+                        else
+                        {
+                            // If it is not supposed to be flipped, remove any rotate transform that may have been applied.
+                            RemoveTransformTypeFromGroup(horizontalTransform.GetType(), transformGroup);
+                        }
                     }
 
-                    // Lay properties of compatible colors on top of each other (offset vertically).
-                    TranslateTransform myTranslateTransform = new TranslateTransform();
-                    myTranslateTransform.Y = (numberOfMatchingCards * .10) * gridHeight;
-                    transformGroup.Children.Add(myTranslateTransform);
+                    // Lay properties of compatible colors on top of each other (offset vertically). Before doing this, remove the existed translate transform.
+                    TranslateTransform translateTransform = new TranslateTransform();
+                    RemoveTransformTypeFromGroup(translateTransform.GetType(), transformGroup);
+                    translateTransform.Y = (numberOfMatchingCards * .10) * gridHeight;
+                    transformGroup.Children.Add(translateTransform);
+                    //transformGroup.Children.Add(myTranslateTransform);
 
-                    cardButton.RenderTransform = transformGroup;
+                    //cardButton.RenderTransform = transformGroup;
 
                     break;
                 }
@@ -990,6 +1070,20 @@ namespace MonopolyDeal
             }
         }
 
+        // Remove a type of transform from a given transform group.
+        public bool RemoveTransformTypeFromGroup( Type transformType, TransformGroup transformGroup )
+        {
+            foreach ( Transform transform in transformGroup.Children )
+            {
+                if (transform.GetType() == transformType )
+                {
+                    return transformGroup.Children.Remove(transform);
+                }
+            }
+
+            return false;
+        }
+
         // Find a card in the player's hand given its position in the grid.
         private Button FindButtonInGrid( int buttonIndex, Grid grid )
         {
@@ -1016,8 +1110,10 @@ namespace MonopolyDeal
                 myScaleTransform.ScaleY = 1.2;
                 myScaleTransform.ScaleX = 1.2;
 
-                cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
-                cardButton.RenderTransform = myScaleTransform;
+                //cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                //cardButton.RenderTransform = myScaleTransform;
+
+                (cardButton.RenderTransform as TransformGroup).Children.Add(myScaleTransform);
             }
         }
 
@@ -1026,12 +1122,18 @@ namespace MonopolyDeal
         {
             if ( cardButton != null )
             {
-                ScaleTransform myScaleTransform = new ScaleTransform();
-                myScaleTransform.ScaleY = 1;
-                myScaleTransform.ScaleX = 1;
+                // Instantiating an object of type "ScaleTransform" should not be necessary.
+                // TODO: Find a way to pass the "ScaleTransform" without having to instantiate an object.
+                ScaleTransform scaleTransform = new ScaleTransform();
+                RemoveTransformTypeFromGroup(scaleTransform.GetType(), cardButton.RenderTransform as TransformGroup);
 
-                cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
-                cardButton.RenderTransform = myScaleTransform;
+
+                //ScaleTransform myScaleTransform = new ScaleTransform();
+                //myScaleTransform.ScaleY = 1;
+                //myScaleTransform.ScaleX = 1;
+
+                //cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                //cardButton.RenderTransform = myScaleTransform;
             }
         }
 
@@ -1097,6 +1199,7 @@ namespace MonopolyDeal
             }
         }
 
+        // Shift the position of a card in play either forward or backward.
         public void MoveCardInList( Card cardBeingMoved, int numberOfSpaces )
         {
             foreach ( List<Card> cardList in Player.CardsInPlay )
@@ -1138,6 +1241,19 @@ namespace MonopolyDeal
             }
 
             return null;
+        }
+
+        public bool IsCardInCardList( string name, List<Card> cardList )
+        {
+            foreach ( Card cardInMonopoly in cardList )
+            {
+                if ( name == cardInMonopoly.Name )
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private Player FindPlayerInList( string playerName )
@@ -1239,20 +1355,20 @@ namespace MonopolyDeal
         }
 
         // Return a list of the indices (where each index is a position in the Player's CardsInPlay) of all monopolies.
-        public List<int> FindMonopolies( Player player )
+        public List<List<Card>> FindMonopolies( Player player )
         {
-            List<int> indices = new List<int>();
+            List<List<Card>> monopolies = new List<List<Card>>();
 
             // Iterate through the card lists. Always skip the first one, since it is reserved for money.
             for ( int i = 1; i < player.CardsInPlay.Count; ++i )
             {
                 if ( IsCardListMonopoly(player.CardsInPlay[i]) )
                 {
-                    indices.Add(i);
+                    monopolies.Add(player.CardsInPlay[i]);
                 }
             }
 
-            return indices;
+            return monopolies;
         }
 
         // Determines if a provided card list is a monopoly.
@@ -1276,6 +1392,12 @@ namespace MonopolyDeal
             }
 
             return false;
+        }
+
+        // Determines if a given card is a two-color property (aka 'Property Wild Card')
+        public bool HasAltColor( Card card )
+        {
+            return (card.AltColor != PropertyType.None);
         }
 
         public PropertyType FindCardListColor( List<Card> cardList )
@@ -1307,6 +1429,7 @@ namespace MonopolyDeal
             MonopolyData.Add(PropertyType.Utility, 2);
             MonopolyData.Add(PropertyType.Wild, 0);
             MonopolyData.Add(PropertyType.Yellow, 3);
+            MonopolyData.Add(PropertyType.None, -1);
         }
 
         #endregion
