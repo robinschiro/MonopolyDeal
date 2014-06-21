@@ -34,13 +34,11 @@ namespace MonopolyDeal
         private List<Card> DiscardPile;
         private Dictionary<PropertyType, int> MonopolyData;
 
-        // TODO: The disabling/enabling of buttons should be implemented through binding.
         private bool isCurrentTurnOwner;
         public bool IsCurrentTurnOwner
         {
             get
             {
-                //return (this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name));
                 return isCurrentTurnOwner;
             }
             set
@@ -423,7 +421,7 @@ namespace MonopolyDeal
 
         #region Hand and Field Manipulation
 
-        // Enable or disable certain buttons depending on whether or not the player is the current turn owner.
+        // Update the value of the IsCurrentTurnOwner boolean.
         public void CheckIfCurrentTurnOwner()
         {
             if ( this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name) )
@@ -668,14 +666,7 @@ namespace MonopolyDeal
                         colorsOfCurrentMonopolies.Add(FindCardListColor(cardList));
                     }
 
-                    if ( PropertyType.None != cardBeingAdded.AltColor )
-                    {
-                        if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.Color) && colorsOfCurrentMonopolies.Contains(cardBeingAdded.AltColor) )
-                        {
-                            return false;
-                        }
-                    }
-                    else if ( PropertyType.Wild != cardBeingAdded.Color )
+                    if ( PropertyType.Wild != cardBeingAdded.Color )
                     {
                         if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.Color) )
                         {
@@ -847,7 +838,7 @@ namespace MonopolyDeal
                     };
 
                     // If it is a two-color property card, allow the player to flip it.
-                    if ( PropertyType.None != cardBeingAdded.AltColor )
+                    if ( HasAltColor(cardBeingAdded) )
                     {
                         MenuItem flipMenuItem = new MenuItem();
                         flipMenuItem.Header = "Flip Card";
@@ -949,13 +940,13 @@ namespace MonopolyDeal
             }
             else
             {
+                TransformCardButton(cardButton, 0, 0);
                 if ( cardBeingAdded.Type == CardType.Property )
                 {
                     Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
                 }
                 else if ( cardBeingAdded.Type == CardType.Money )
                 {
-                    TransformCardButton(cardButton, 0, 0);
                     Grid.SetColumn(cardGridWrapper, 0);
                 }
             }
@@ -997,6 +988,9 @@ namespace MonopolyDeal
                     {
                         RotateTransform horizontalTransform = new RotateTransform();
 
+                        // First remove any rotate transform that may have been applied.
+                        RemoveTransformTypeFromGroup(horizontalTransform.GetType(), transformGroup);
+
                         // Flip properties that are supposed to be flipped.
                         if ( card.IsFlipped )
                         {
@@ -1004,11 +998,6 @@ namespace MonopolyDeal
                             //cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
                             transformGroup.Children.Add(horizontalTransform);
                             //transformGroup.Children.Add(horizontalTransform);
-                        }
-                        else
-                        {
-                            // If it is not supposed to be flipped, remove any rotate transform that may have been applied.
-                            RemoveTransformTypeFromGroup(horizontalTransform.GetType(), transformGroup);
                         }
                     }
 
