@@ -124,52 +124,57 @@ namespace MonopolyDeal
             NetIncomingMessage inc;
             bool updateReceived = false;
 
-            // Continue reading messages until the requested update is received.
-            while ( !updateReceived )
+            if ( false == this.BeginCommunication )
             {
-                // Iterate through all of the available messages.
-                while ( (inc = (peer as NetPeer).ReadMessage()) != null )
+                // Continue reading messages until the requested update is received.
+                while ( !updateReceived )
                 {
-                    if ( inc.MessageType == NetIncomingMessageType.Data )
+                    // Iterate through all of the available messages.
+                    while ( (inc = (peer as NetPeer).ReadMessage()) != null )
                     {
-                        Datatype messageType = (Datatype)inc.ReadByte();
-
-                        switch ( messageType )
+                        if ( inc.MessageType == NetIncomingMessageType.StatusChanged )
                         {
-                            case Datatype.UpdatePlayerList:
-                            {
-                                PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
+                            this.BeginCommunication = true;
+                            updateReceived = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                inc = (peer as NetPeer).ReadMessage();
 
-                                //// The parentheses around currentPlayerList are required. See http://bit.ly/19t9NEx.
-                                //ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<List<Player>>(UpdatePlayerListBox), (playerList)); };
-                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(UpdatePlayerListBox), null); };
-                                Thread newThread = new Thread(start);
-                                newThread.Start();
+                if ( null != inc && inc.MessageType == NetIncomingMessageType.Data )
+                {
+                    Datatype messageType = (Datatype)inc.ReadByte();
 
-                                break;
-                            }
+                    switch ( messageType )
+                    {
+                        case Datatype.UpdatePlayerList:
+                        {
+                            PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            case Datatype.LaunchGame:
-                            {
-                                // Receive the data related to the current turn from the server.
-                                Turn Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.LaunchGame);
+                            //// The parentheses around currentPlayerList are required. See http://bit.ly/19t9NEx.
+                            //ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<List<Player>>(UpdatePlayerListBox), (playerList)); };
+                            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(UpdatePlayerListBox), null); };
+                            Thread newThread = new Thread(start);
+                            newThread.Start();
 
-                                ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Turn>(LaunchGame), Turn); };
-                                Thread newThread = new Thread(start);
-                                newThread.SetApartmentState(ApartmentState.STA);
-                                newThread.Start();
-
-                                break;
-                            }
+                            break;
                         }
 
-                        updateReceived = true;
+                        case Datatype.LaunchGame:
+                        {
+                            // Receive the data related to the current turn from the server.
+                            Turn Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.LaunchGame);
 
-                    }
-                    else if ( inc.MessageType == NetIncomingMessageType.StatusChanged )
-                    {
-                        this.BeginCommunication = true;
-                        updateReceived = true;
+                            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Turn>(LaunchGame), Turn); };
+                            Thread newThread = new Thread(start);
+                            newThread.SetApartmentState(ApartmentState.STA);
+                            newThread.Start();
+
+                            break;
+                        }
                     }
                 }
             }

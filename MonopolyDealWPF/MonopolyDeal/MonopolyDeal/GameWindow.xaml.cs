@@ -14,6 +14,7 @@ using GameServer;
 using Lidgren.Network;
 using System.Reactive.Linq;
 using System.Reactive;
+using System.Windows.Media.Animation;
 
 namespace MonopolyDeal
 {
@@ -182,64 +183,69 @@ namespace MonopolyDeal
             NetIncomingMessage inc;
             bool updateReceived = false;
 
-            // Continue reading messages until the requested update is received.
-            while ( !updateReceived )
+            if ( false == this.BeginCommunication )
             {
-                // Iterate through all of the available messages.
-                while ( (inc = (peer as NetPeer).ReadMessage()) != null )
+                // Continue reading messages until the requested update is received.
+                while ( !updateReceived )
                 {
-                    if ( inc.MessageType == NetIncomingMessageType.Data )
+                    // Iterate through all of the available messages.
+                    while ( (inc = (peer as NetPeer).ReadMessage()) != null )
                     {
-                        Datatype messageType = (Datatype)inc.ReadByte();
-
-                        switch ( messageType )
+                        if ( inc.MessageType == NetIncomingMessageType.StatusChanged )
                         {
-                            case Datatype.UpdateDeck:
-                            {
-                                this.Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
+                            this.BeginCommunication = true;
+                            updateReceived = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                inc = (peer as NetPeer).ReadMessage();
 
-                                // I'm not sure if this is necessary.
-                                //Client.Recycle(inc);
+                if ( null != inc &&  inc.MessageType == NetIncomingMessageType.Data )
+                {
+                    Datatype messageType = (Datatype)inc.ReadByte();
 
-                                break;
-                            }
+                    switch ( messageType )
+                    {
+                        case Datatype.UpdateDeck:
+                        {
+                            this.Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            case Datatype.UpdateDiscardPile:
-                            {
-                                this.DiscardPile = (List<Card>)ServerUtilities.ReceiveMessage(inc, messageType);
+                            // I'm not sure if this is necessary.
+                            //Client.Recycle(inc);
 
-                                CreateNewThread(new Action<Object>(DisplayUpdatedDiscardPile));
-
-                                break;
-                            }
-
-                            case Datatype.UpdatePlayerList:
-                            {
-                                this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
-
-                                CreateNewThread(new Action<Object>(DisplayOpponentCards));
-
-                                break;
-                            }
-
-                            case Datatype.EndTurn:
-                            {
-                                this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
-
-                                // Check to see if the player is the current turn owner. 
-                                CheckIfCurrentTurnOwner();
-
-                                break;
-                            }
+                            break;
                         }
 
-                        updateReceived = true;
+                        case Datatype.UpdateDiscardPile:
+                        {
+                            this.DiscardPile = (List<Card>)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                    }
-                    else if ( inc.MessageType == NetIncomingMessageType.StatusChanged )
-                    {
-                        this.BeginCommunication = true;
-                        updateReceived = true;
+                            CreateNewThread(new Action<Object>(DisplayUpdatedDiscardPile));
+
+                            break;
+                        }
+
+                        case Datatype.UpdatePlayerList:
+                        {
+                            this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                            CreateNewThread(new Action<Object>(DisplayOpponentCards));
+
+                            break;
+                        }
+
+                        case Datatype.EndTurn:
+                        {
+                            this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                            // Check to see if the player is the current turn owner. 
+                            CheckIfCurrentTurnOwner();
+
+                            break;
+                        }
                     }
                 }
             }
