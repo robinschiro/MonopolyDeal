@@ -173,7 +173,7 @@ ExcelToProfileConverter.exe
 -hotel.jpg=[
 
     -Name=Hotel
-    -CardType=Property
+    -CardType=Action
     -Value=4
     -Count=2
     -PropertyType=
@@ -183,7 +183,7 @@ ExcelToProfileConverter.exe
 -house.jpg=[
 
     -Name=House
-    -CardType=Property
+    -CardType=Action
     -Value=3
     -Count=3
     -PropertyType=

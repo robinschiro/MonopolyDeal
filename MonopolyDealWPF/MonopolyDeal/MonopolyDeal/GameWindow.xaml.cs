@@ -150,14 +150,6 @@ namespace MonopolyDeal
                 });
         }
 
-        //// Play the song.
-        //public void PlaySong(Object filler)
-        //{
-        //    mediaPlayer.Open(new Uri("C:\\Users\\Robin\\Dropbox\\Songs\\A Fifth of Beethoven.mp3"));
-        //    mediaPlayer.Play();
-        //}
-
-
         #region Client Communication Code
 
         private void InitializeClient( string serverIP )
@@ -780,6 +772,7 @@ namespace MonopolyDeal
                 cardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
 
                 // Prevent the context menu of a card from opening when it shifts into the position of a card that has just been played.
+                // Also, disable the context menus of all cards in the player's hand that are not selected.
                 cardButton.ContextMenuOpening += ( sender, args ) =>
                 {
                     // If the card is not selected, do not open the context menu.
@@ -794,7 +787,7 @@ namespace MonopolyDeal
                 // If it is an action card, it can be played in one of two ways.
                 if ( CardType.Action != cardBeingAdded.Type )
                 {
-                    if ( PropertyType.None != cardBeingAdded.AltColor )
+                    if ( HasAltColor(cardBeingAdded) )
                     {
                         ContextMenu menu = new ContextMenu();
 
@@ -826,9 +819,36 @@ namespace MonopolyDeal
                         cardButton.PreviewMouseRightButtonDown += new MouseButtonEventHandler(PlayCardEvent);
                     }
                 }
+                else if ( "House" == cardBeingAdded.Name || "Hotel" == cardBeingAdded.Name )
+                {
+                    ContextMenu menu = new ContextMenu();
+                    MenuItem playAsActionMenuItem = new MenuItem();
+                    playAsActionMenuItem.Header = "Add to Monopoly";
+                    playAsActionMenuItem.Click += ( sender, args ) =>
+                    {
+                        cardBeingAdded.Type = CardType.Property;
+                        PlayCardEvent(cardButton, null);
+                    };
+                    MenuItem playAsMoneyMenuItem = new MenuItem();
+                    playAsMoneyMenuItem.Header = "Play as Money";
+                    playAsMoneyMenuItem.Click += ( sender, args ) =>
+                    {
+                        cardBeingAdded.Type = CardType.Money;
+                        PlayCardEvent(cardButton, null);
+                    };
+                    MenuItem nextMonopolyMenuItem = new MenuItem();
+                    nextMonopolyMenuItem.Header = "Place on Next Monopoly";
+                    nextMonopolyMenuItem.Click += ( sender, args ) =>
+                    {
+                    };
+
+                    menu.Items.Add(playAsActionMenuItem);
+                    menu.Items.Add(playAsMoneyMenuItem);
+                    menu.Items.Add(nextMonopolyMenuItem);
+                    cardButton.ContextMenu = menu;
+                }
                 else
                 {
-                    // ROBIN TODO: Disable the context menu when the card is not selected.
                     ContextMenu menu = new ContextMenu();
                     MenuItem playAsActionMenuItem = new MenuItem();
                     playAsActionMenuItem.Header = "Play as Action";
@@ -840,7 +860,7 @@ namespace MonopolyDeal
                     playAsMoneyMenuItem.Header = "Play as Money";
                     playAsMoneyMenuItem.Click += ( sender2, args2 ) =>
                     {
-                        (cardButton.Tag as Card).Type = CardType.Money;
+                        cardBeingAdded.Type = CardType.Money;
                         PlayCardEvent(cardButton, null);
                     };
 
@@ -892,7 +912,8 @@ namespace MonopolyDeal
                             FlipCard(cardBeingAdded);
 
                             // TODO: If the card list to which the card belonged contains a house, place the house back in the player's hand.
-                            if ( IsCardInCardList("House", FindListContainingCard(cardBeingAdded)) )
+                            // Or, place the house/hotel in a separate list that can be accessed whenever the player wants to play a house/hotel or use it as money.
+                            if ( IsCardInCardList("House", FindListContainingCard(cardBeingAdded)) || IsCardInCardList("Hotel", FindListContainingCard(cardBeingAdded)) )
                             {
 
                             }
@@ -1189,37 +1210,6 @@ namespace MonopolyDeal
             target.SetValue(InfoBoxAttachedProperty, Player.CardsInHand[location]);
         }
 
-        #endregion
-
-        #region Miscellaneous
-
-        // Create a new thread to run a function that cannot be run on the same thread invoking CreateNewThread().
-        public void CreateNewThread( Action<Object> action )
-        {
-            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, action, null); };
-            Thread newThread = new Thread(start);
-            newThread.Start();
-        }
-
-        public void MoveItemInList<T>( IList<T> list, int oldIndex, int newIndex )
-        {
-            var item = list[oldIndex];
-
-            list.RemoveAt(oldIndex);
-
-            //if ( newIndex > oldIndex ) newIndex--;
-            // the actual index could have shifted due to the removal
-
-            if ( newIndex < list.Count && newIndex >= 0 )
-            {
-                list.Insert(newIndex, item);
-            }
-            else
-            {
-                list.Add(item);
-            }
-        }
-
         // Shift the position of a card in play either forward or backward.
         public void MoveCardInList( Card cardBeingMoved, int numberOfSpaces )
         {
@@ -1240,6 +1230,7 @@ namespace MonopolyDeal
             }
         }
 
+        // Swap a card's Color and AltColor properties and toggle its IsFlipped property.
         public void FlipCard( Card card )
         {
             PropertyType oldColor = card.Color;
@@ -1248,6 +1239,36 @@ namespace MonopolyDeal
             card.IsFlipped = !card.IsFlipped;
         }
 
+        #endregion
+
+        #region Miscellaneous
+
+        // Create a new thread to run a function that cannot be run on the same thread invoking CreateNewThread().
+        public void CreateNewThread( Action<Object> action )
+        {
+            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, action, null); };
+            Thread newThread = new Thread(start);
+            newThread.Start();
+        }
+
+        // Shift the position of an item in a list.
+        public void MoveItemInList<T>( IList<T> list, int oldIndex, int newIndex )
+        {
+            var item = list[oldIndex];
+
+            list.RemoveAt(oldIndex);
+
+            if ( newIndex < list.Count && newIndex >= 0 )
+            {
+                list.Insert(newIndex, item);
+            }
+            else
+            {
+                list.Add(item);
+            }
+        }
+
+        // Given a card, find the card list in the Player's CardsInPlay that contains it.
         public List<Card> FindListContainingCard( Card cardBeingFound )
         {
             foreach ( List<Card> cardList in Player.CardsInPlay )
@@ -1264,19 +1285,7 @@ namespace MonopolyDeal
             return null;
         }
 
-        public bool IsCardInCardList( string name, List<Card> cardList )
-        {
-            foreach ( Card cardInMonopoly in cardList )
-            {
-                if ( name == cardInMonopoly.Name )
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
+        // Given a player's name, find the matching Player object in the PlayerList (there is only one PlayerList).
         private Player FindPlayerInList( string playerName )
         {
             foreach ( Player player in PlayerList )
@@ -1290,6 +1299,7 @@ namespace MonopolyDeal
             return null;
         }
 
+        // Given a player's name, find the position of the player in the PlayerList (there is only one PlayerList).
         private int FindPlayerPositionInPlayerList( string playerName )
         {
             for ( int i = 0; i < PlayerList.Count; ++i )
@@ -1301,6 +1311,80 @@ namespace MonopolyDeal
             }
 
             return -1;
+        }
+
+        // Return a list of the indices (where each index is a position in the Player's CardsInPlay) of all monopolies.
+        public List<List<Card>> FindMonopolies( Player player )
+        {
+            List<List<Card>> monopolies = new List<List<Card>>();
+
+            // Iterate through the card lists. Always skip the first one, since it is reserved for money.
+            for ( int i = 1; i < player.CardsInPlay.Count; ++i )
+            {
+                if ( IsCardListMonopoly(player.CardsInPlay[i]) )
+                {
+                    monopolies.Add(player.CardsInPlay[i]);
+                }
+            }
+
+            return monopolies;
+        }
+
+        // Given a list of cards, determine the color of the monopoly being formed by the cards.
+        public PropertyType FindCardListColor( List<Card> cardList )
+        {
+            foreach ( Card card in cardList )
+            {
+                if ( PropertyType.None != card.Color && PropertyType.Wild != card.Color )
+                {
+                    return card.Color;
+                }
+            }
+            return PropertyType.None;
+
+        }
+
+        // Determine if a card with a given name is in a card list.
+        public bool IsCardInCardList( string name, List<Card> cardList )
+        {
+            foreach ( Card cardInMonopoly in cardList )
+            {
+                if ( name == cardInMonopoly.Name )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Determine if a provided card list is a monopoly.
+        public bool IsCardListMonopoly( List<Card> cardList )
+        {
+            PropertyType monopolyColor = FindCardListColor(cardList);
+            int countOfProperties = 0;
+
+            // First count the number of properties in the list. This algorithm excludes houses and hotels from the count.
+            foreach ( Card card in cardList )
+            {
+                if ( card.Color != PropertyType.None )
+                {
+                    countOfProperties++;
+                }
+            }
+
+            if ( countOfProperties == MonopolyData[monopolyColor] )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Determine if a given card is a two-color property (aka 'Property Wild Card').
+        public bool HasAltColor( Card card )
+        {
+            return (card.AltColor != PropertyType.None);
         }
 
         // This returns the number of a type of card (i.e. money, action, or property) found within
@@ -1323,6 +1407,7 @@ namespace MonopolyDeal
             return count;
         }
 
+        // Determine the number of a certain card type (i.e. money, action, or property) in a given grid.
         private int CountOfCardTypeInGrid( CardType cardType, Grid grid )
         {
             int count = 0;
@@ -1346,6 +1431,7 @@ namespace MonopolyDeal
             return count;
         }
 
+        // Verify that the given player name does not match the name of player than has already joined the lobby. If it does, rename the player.
         private string VerifyPlayerName( string playerName )
         {
             bool hasBeenModified = false;
@@ -1375,65 +1461,6 @@ namespace MonopolyDeal
             return playerName;
         }
 
-        // Return a list of the indices (where each index is a position in the Player's CardsInPlay) of all monopolies.
-        public List<List<Card>> FindMonopolies( Player player )
-        {
-            List<List<Card>> monopolies = new List<List<Card>>();
-
-            // Iterate through the card lists. Always skip the first one, since it is reserved for money.
-            for ( int i = 1; i < player.CardsInPlay.Count; ++i )
-            {
-                if ( IsCardListMonopoly(player.CardsInPlay[i]) )
-                {
-                    monopolies.Add(player.CardsInPlay[i]);
-                }
-            }
-
-            return monopolies;
-        }
-
-        // Determines if a provided card list is a monopoly.
-        public bool IsCardListMonopoly( List<Card> cardList )
-        {
-            PropertyType monopolyColor = FindCardListColor(cardList);
-            int countOfProperties = 0;
-
-            // First count the number of properties in the list. This algorithm excludes houses and hotels from the count.
-            foreach ( Card card in cardList )
-            {
-                if ( card.Color != PropertyType.None )
-                {
-                    countOfProperties++;
-                }
-            }
-
-            if ( countOfProperties == MonopolyData[monopolyColor] )
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        // Determines if a given card is a two-color property (aka 'Property Wild Card')
-        public bool HasAltColor( Card card )
-        {
-            return (card.AltColor != PropertyType.None);
-        }
-
-        public PropertyType FindCardListColor( List<Card> cardList )
-        {
-            foreach ( Card card in cardList )
-            {
-                if ( PropertyType.None != card.Color && PropertyType.Wild != card.Color )
-                {
-                    return card.Color;
-                }
-            }
-            return PropertyType.None;
-
-        }
-
         // For each type of property, store the number of cards of that property type that make up a complete monopoly
         // ROBIN TODO: Think of a way to do this without hardcoding the data.
         public void InstantiateMonopolyData()
@@ -1452,6 +1479,13 @@ namespace MonopolyDeal
             MonopolyData.Add(PropertyType.Yellow, 3);
             MonopolyData.Add(PropertyType.None, -1);
         }
+
+        //// Play the song.
+        //public void PlaySong(Object filler)
+        //{
+        //    mediaPlayer.Open(new Uri("C:\\Users\\Robin\\Dropbox\\Songs\\A Fifth of Beethoven.mp3"));
+        //    mediaPlayer.Play();
+        //}
 
         #endregion
     }
