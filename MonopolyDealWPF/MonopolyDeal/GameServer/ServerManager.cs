@@ -278,7 +278,7 @@ namespace GameServer
                 }
 
                 // While loops run as fast as your computer lets. While(true) can lock your computer up. Even 1ms sleep, lets other programs have piece of your CPU time
-                //System.Threading.Thread.Sleep(1);
+                System.Threading.Thread.Sleep(100);
             }
         }
     }

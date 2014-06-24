@@ -34,6 +34,8 @@ namespace MonopolyDeal
         private Turn Turn;
         private List<Card> DiscardPile;
         private Dictionary<PropertyType, int> MonopolyData;
+        MediaPlayer MediaPlayer;
+
 
         private bool isCurrentTurnOwner;
         public bool IsCurrentTurnOwner
@@ -75,6 +77,10 @@ namespace MonopolyDeal
             this.ServerIP = ipAddress;
             this.HasDrawn = false;
 
+            //// Play theme song.
+            //mediaPlayer = new MediaPlayer();
+            //CreateNewThread(new Action<Object>(PlaySong));
+            
             // Instantiate the Player's Turn object.
             this.Turn = turn;
 
@@ -143,6 +149,14 @@ namespace MonopolyDeal
                     Size_Changed(x);
                 });
         }
+
+        //// Play the song.
+        //public void PlaySong(Object filler)
+        //{
+        //    mediaPlayer.Open(new Uri("C:\\Users\\Robin\\Dropbox\\Songs\\A Fifth of Beethoven.mp3"));
+        //    mediaPlayer.Play();
+        //}
+
 
         #region Client Communication Code
 
@@ -330,8 +344,7 @@ namespace MonopolyDeal
                 SelectCard(sender as Button);
 
                 // Add this card to the InfoBox.
-                InfoBox.Children.Clear();
-                InfoBox.Children.Add(ConvertCardToButton((sender as Button).Tag as Card));
+                DisplayCardInInfobox((sender as Button).Tag as Card);
             }
             else
             {
@@ -513,6 +526,21 @@ namespace MonopolyDeal
                 }
             }
         }
+
+        // Update the card displayed in the InfoBox.
+        public void DisplayCardInInfobox( Card card )
+        {
+            // Add this card to the InfoBox.
+            InfoBox.Children.Clear();
+            Button cardButton = ConvertCardToButton(card);
+            if ( (cardButton.Tag as Card).Type != CardType.Money )
+            {
+                TransformCardButton(cardButton, 0, 0);
+            }
+
+            InfoBox.Children.Add(cardButton);
+        }
+
 
         // Resize UI elements so that they are propotional to the size of the window.
         public void ResizeUIElements( Object filler )
@@ -784,11 +812,9 @@ namespace MonopolyDeal
                             // Flip the card, swapping its primary and alternative colors.
                             FlipCard(cardBeingAdded);
 
-                            // TODO: This is bugged. Fix it.
                             TransformCardButton(cardButton, 0, 0);
 
-                            // Displayed the updated CardsInHand.
-                            // DisplayCardsInHand(this.Player, PlayerOneHand);
+                            DisplayCardInInfobox(cardBeingAdded);
                         };
                         menu.Items.Add(playMenuItem);
                         menu.Items.Add(flipMenuItem);

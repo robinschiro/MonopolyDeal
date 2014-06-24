@@ -137,7 +137,11 @@ namespace MonopolyDeal
                             this.BeginCommunication = true;
                             updateReceived = true;
                         }
+
+                        Thread.Sleep(100);
                     }
+
+                    Thread.Sleep(100);
                 }
             }
             else
