@@ -19,8 +19,8 @@ namespace GameObjects
         public string Name { get; set; }
 
         // This returns the amount of money a player possesses.
-        private int moneyInBank;
-        public int MoneyInBank
+        private List<int> moneyInBank;
+        public List<int> MoneyInBank
         {
             get
             {
@@ -65,22 +65,19 @@ namespace GameObjects
             this.CardsInHand = new List<Card>();
         }
 
-        private int CalculateMoneyInBank()
+        private List<int> CalculateMoneyInBank()
         {
-            int amountOfMoney = 0;
+            List<int> listOfMoney = new List<int>();
 
-            foreach ( List<Card> cardGroup in CardsInPlay )
+            foreach ( Card card in CardsInPlay[0] )
             {
-                foreach ( Card card in cardGroup )
+                if ( card.Type == CardType.Money )
                 {
-                    if ( card.Type == CardType.Money )
-                    {
-                        amountOfMoney += card.Value;
-                    }
+                    listOfMoney.Add(card.Value);
                 }
             }
 
-            return amountOfMoney;
+            return null;
         }
 
 

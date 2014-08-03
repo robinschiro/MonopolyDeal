@@ -73,7 +73,7 @@
                         IsEnabled="{Binding IsCurrentTurnOwner, UpdateSourceTrigger=PropertyChanged}"
                         Grid.Row="0"/>
                 <Button Name='DrawCardButton'
-                        Content="Draw Two"
+                        Content="Draw"
                         Click="DrawCardButton_Click"
                         Grid.Row="1">
                     <Button.IsEnabled>
