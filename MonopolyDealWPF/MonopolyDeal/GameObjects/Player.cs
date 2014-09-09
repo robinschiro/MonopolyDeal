@@ -18,13 +18,17 @@ namespace GameObjects
         // This represents the player's name. Every player in a game must have different name.
         public string Name { get; set; }
 
+        // Stores a breakdown of the quantity of each type of money value the player has.
+        public MoneyList MoneyList { get; set; }
+
         // This returns the amount of money a player possesses.
         private List<int> moneyInBank;
         public List<int> MoneyInBank
         {
             get
             {
-                return CalculateMoneyInBank();
+                moneyInBank = CalculateMoneyInBank();
+                return moneyInBank;
             }
 
             set
