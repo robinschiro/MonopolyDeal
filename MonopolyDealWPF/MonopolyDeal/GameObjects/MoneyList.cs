@@ -20,9 +20,9 @@ namespace GameObjects
             }
         }
 
-        public bool Remove( int value )
+        public bool Remove( Card card )
         {
-            switch ( value )
+            switch ( card.Value )
             {
                 case 1:
                 {
@@ -88,9 +88,9 @@ namespace GameObjects
             return false;
         }
 
-        public void Add( int value )
+        public void Add( Card card )
         {   
-            switch ( value )
+            switch ( card.Value )
             {
                 case 1:
                 {

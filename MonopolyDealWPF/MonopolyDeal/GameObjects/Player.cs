@@ -53,6 +53,8 @@ namespace GameObjects
             }
 
             this.Name = name;
+
+            this.MoneyList = new MoneyList();
         }
 
         public Player( string name, List<List<Card>> cardsInPlay, List<Card> cardsInHand )
@@ -60,6 +62,7 @@ namespace GameObjects
             this.Name = name;
             this.CardsInPlay = cardsInPlay;
             this.CardsInHand = cardsInHand;
+            this.MoneyList = new MoneyList();
         }
 
         public Player( string name )
@@ -67,6 +70,7 @@ namespace GameObjects
             this.Name = name;
             this.CardsInPlay = new List<List<Card>>();
             this.CardsInHand = new List<Card>();
+            this.MoneyList = new MoneyList();
         }
 
         private List<int> CalculateMoneyInBank()

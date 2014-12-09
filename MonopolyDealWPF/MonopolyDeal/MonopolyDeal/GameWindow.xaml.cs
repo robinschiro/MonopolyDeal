@@ -17,8 +17,10 @@ using System.Reactive;
 using System.Windows.Media.Animation;
 using System.Windows.Data;
 
+
 namespace MonopolyDeal
 {
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -506,19 +508,25 @@ namespace MonopolyDeal
         // When the player hovers over his bank, display a break down of his money.
         void cardButtonMoney_MouseEnter( object sender, MouseEventArgs e )
         {
-            ListBox bankBreakdown = new ListBox();
-
-
-
+            InfoBox.Children.Clear();
+            InfoBox.Children.Add(new MoneyListView(this.Player));
         }
 
         #endregion
 
         #region Hand and Field Manipulation
 
-        public void AddMoneyToBank( Card moneyCard )
-        {
 
+        // Add the money card to the player's CardsInPlay and his MoneyList.
+        // This is necessary in order to properly update the UI.
+        public void AddMoneyToBank( Card moneyCard, Player player )
+        {
+            // Add the card to the CardsInPlay and display it on the top of the player's money pile.
+            player.CardsInPlay[0].Add(moneyCard);
+            AddCardToGrid(moneyCard, PlayerFieldDictionary[player.Name], player, false);
+
+            // Update the player's MoneyList.
+            player.MoneyList.Add(moneyCard);
         }
 
         // Update the value of the IsCurrentTurnOwner boolean.
@@ -850,8 +858,7 @@ namespace MonopolyDeal
             }
             else if ( cardBeingAdded.Type == CardType.Money )
             {
-                player.CardsInPlay[0].Add(cardBeingAdded);
-                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false);
+                AddMoneyToBank(cardBeingAdded, player);
                 return true;
             }
 
@@ -1125,8 +1132,12 @@ namespace MonopolyDeal
 
                     case CardType.Money:
                     {
+
                         // Each player should only be to see the breakdown of his own money pile
-                        cardButton.MouseEnter +=new MouseEventHandler(cardButtonMoney_MouseEnter);
+                        if ( this.Player == player )
+                        {
+                            cardButton.MouseEnter += new MouseEventHandler(cardButtonMoney_MouseEnter);
+                        }
 
 
                         // Play money cards horizontally.
