@@ -64,7 +64,6 @@
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
-                    <RowDefinition />
                 </Grid.RowDefinitions>
 
                 <Button Name="EndTurnButton"
@@ -72,19 +71,8 @@
                         Click="EndTurnButton_Click"
                         IsEnabled="{Binding IsCurrentTurnOwner, UpdateSourceTrigger=PropertyChanged}"
                         Grid.Row="0"/>
-                <Button Name='DrawCardButton'
-                        Content="Draw"
-                        Click="DrawCardButton_Click"
-                        Grid.Row="1">
-                    <Button.IsEnabled>
-                        <MultiBinding Converter="{StaticResource multiBoolConverter}">
-                            <Binding Path="HasDrawn" UpdateSourceTrigger="PropertyChanged"/>
-                            <Binding Path="IsCurrentTurnOwner" UpdateSourceTrigger="PropertyChanged"/>
-                        </MultiBinding>
-                    </Button.IsEnabled>
-                </Button>
                 <Grid Name="DiscardPileGrid"
-                      Grid.Row="2" />
+                      Grid.Row="1" />
             </Grid>
             <Grid Name="InfoBox"
                   Grid.Row="1">
@@ -249,6 +237,7 @@
             </Grid>
             
             <Grid Name="GridOne"
+                  AllowDrop="True"
                   Grid.Row="6">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
@@ -256,6 +245,7 @@
                 </Grid.RowDefinitions>
             
                 <Grid Name="PlayerOneField"
+                      Background="Salmon"
                       Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>

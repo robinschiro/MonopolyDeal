@@ -56,21 +56,6 @@ namespace MonopolyDeal
             }
         }
 
-        private bool hasDrawn;
-        public bool HasDrawn
-        {
-            get
-            {
-                return hasDrawn;
-            }
-            set
-            {
-                hasDrawn = value;
-                OnPropertyChanged("HasDrawn");
-            }
-        }
-
-
         //Testing something called AttachedProperties. Allows function calls upon triggers. 
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
         private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
@@ -83,7 +68,6 @@ namespace MonopolyDeal
             this.BeginCommunication = false;
             this.HavePlayersBeenAssigned = false;
             this.ServerIP = ipAddress;
-            this.HasDrawn = false;
 
             //// Play theme song.
             //mediaPlayer = new MediaPlayer();
@@ -116,8 +100,6 @@ namespace MonopolyDeal
             // Assign the hands and playing fields of opponents to appropriate areas of the client's screen.
             AssignPlayersToGrids();
 
-            CheckIfCurrentTurnOwner();
-
             WindowGrid.DataContext = this;
 
             // Re-title the window.
@@ -141,6 +123,9 @@ namespace MonopolyDeal
             {
                 AddCardToGrid(card, PlayerOneHand, Player, true);
             }
+
+            // Because this call automatically draws cards for the player, it must occur after the player's cardsInHand have been placed on the grid.
+            CheckIfCurrentTurnOwner();
 
             // Enable Reactive Extensions (taken from http://goo.gl/0Jr5WU) in order to perform Size_Changed responses at the end of a chain of resizing events
             // (instead performing a Size_Changed response for every resize event). This is used to improve efficiency.
@@ -255,7 +240,7 @@ namespace MonopolyDeal
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
                             // Check to see if the player is the current turn owner. 
-                            CheckIfCurrentTurnOwner();
+                            CreateNewThread(new Action<Object>(CheckIfCurrentTurnOwner));
 
                             break;
                         }
@@ -281,7 +266,7 @@ namespace MonopolyDeal
 
         public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
-            if ( FindPlayerPositionInPlayerList(this.Player.Name) == this.Turn.CurrentTurnOwner && this.Turn.NumberOfActions < 3 && this.HasDrawn )
+            if ( FindPlayerPositionInPlayerList(this.Player.Name) == this.Turn.CurrentTurnOwner && this.Turn.NumberOfActions < 3 )
             {
                 Button cardButton = sender as Button;
 
@@ -302,6 +287,9 @@ namespace MonopolyDeal
                         this.DiscardPile.Add(cardBeingPlayed);
                         AddCardToGrid(cardBeingPlayed, DiscardPileGrid, this.Player, false);
                         cardWasPlayed = true;
+
+                        // Handle the action.
+                        HandleAction(cardBeingPlayed);
                     }
 
                     if ( cardWasPlayed )
@@ -410,7 +398,6 @@ namespace MonopolyDeal
             {
                 DrawCards(5);
             }
-            this.HasDrawn = true;
         }
 
         // End the player's turn.
@@ -429,9 +416,6 @@ namespace MonopolyDeal
             // Reset the number of actions.
             this.Turn.NumberOfActions = 0;
 
-            // Reset the status of the HasDrawn variable so that it is false at the beginning of this player's next turn.
-            this.HasDrawn = false;
-
             // Send the updated Turn object to the server to be distributed to the other clients.
             ServerUtilities.SendMessage(Client, Datatype.EndTurn, this.Turn);
         }
@@ -442,7 +426,7 @@ namespace MonopolyDeal
 
         }
 
-        // When a user "drops" an object onto a card button, trigger a drop event.
+        // When a user clicks and holds onto a card, trigger a drag event.
         private void cardButton_PreviewMouseMove( object sender, MouseEventArgs e )
         {
             Button cardButton = sender as Button;
@@ -474,9 +458,38 @@ namespace MonopolyDeal
 
                     // Update the server's information regarding this player.
                     ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+
+                    // Mark the event as handled.
+                    e.Handled = true;
                 }
             }
         }
+        
+        // When the user drops a Property Wild Card on an empty space in their field, put the card in its own space.
+        private void PlayerOneField_Drop( object sender, DragEventArgs e )
+        {
+            if ( !e.Handled )
+            {
+                Button sourceCardButton = e.Data.GetData(typeof(Button)) as Button;
+                Card sourceCard = sourceCardButton.Tag as Card;
+
+                if ( PropertyType.Wild == sourceCard.Color )
+                {
+                    // Remove the card from its previous position on the player's playing field.
+                    RemoveCardFromCardsInPlay(sourceCard, this.Player);
+
+                    // Add it to a new space on the field.
+                    AddCardToCardsInPlay(sourceCard, this.Player);
+
+                    // Display the updated cards in play.
+                    DisplayCardsInPlay(this.Player, this.PlayerOneField);
+
+                    // Update the server's information regarding this player.
+                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                }
+            }
+        }
+
 
         // Clear the InfoBox when the mouse leaves a card button.
         void cardButton_MouseLeave( object sender, MouseEventArgs e )
@@ -530,11 +543,17 @@ namespace MonopolyDeal
         }
 
         // Update the value of the IsCurrentTurnOwner boolean.
-        public void CheckIfCurrentTurnOwner()
+        public void CheckIfCurrentTurnOwner(Object filler = null)
         {
             if ( this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name) )
             {
                 IsCurrentTurnOwner = true;
+
+                // Draw the cards for the current turn owner automatically.
+                DrawCards(2);
+
+                // Inform the player that it is his/her turn.
+                //MessageBox.Show("It is your turn!");
             }
             else
             {
@@ -829,22 +848,22 @@ namespace MonopolyDeal
                         {
                             return false;
                         }
-                    }
 
-                    // If the card has passed the previous check, add it to the player's CardsInPlay.
-                    for ( int i = 1; i < player.CardsInPlay.Count; ++i )
-                    {
-                        List<Card> cardList = player.CardsInPlay[i];
-
-                        PropertyType cardListColor = FindCardListColor(cardList);
-
-                        // If the cardlist is not a monopoly and is compatible with the card being added, add the card to the list.
-                        if ( !IsCardListMonopoly(cardList) && (cardListColor == cardBeingAdded.Color || PropertyType.Wild == cardBeingAdded.Color || PropertyType.Wild == cardListColor) )
+                        // If the card has passed the previous check, add it to the player's CardsInPlay.
+                        for ( int i = 1; i < player.CardsInPlay.Count; ++i )
                         {
-                            cardList.Add(cardBeingAdded);
-                            AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(cardList));
+                            List<Card> cardList = player.CardsInPlay[i];
 
-                            return true;
+                            PropertyType cardListColor = FindCardListColor(cardList);
+
+                            // If the cardlist is not a monopoly and is compatible with the card being added, add the card to the list.
+                            if ( !IsCardListMonopoly(cardList) && (cardListColor == cardBeingAdded.Color || PropertyType.Wild == cardListColor) )
+                            {
+                                cardList.Add(cardBeingAdded);
+                                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(cardList));
+
+                                return true;
+                            }
                         }
                     }
                 }
@@ -1049,7 +1068,7 @@ namespace MonopolyDeal
                             };
                             MenuItem backwardMenuItem = new MenuItem();
                             backwardMenuItem.Header = "Move Backward";
-                            backwardMenuItem.Click += ( sender2, args2 ) =>
+                            backwardMenuItem.Click += ( sender, args ) =>
                             {
                                 MoveCardInList(cardBeingAdded, -1);
                             };
@@ -1059,7 +1078,7 @@ namespace MonopolyDeal
                             {
                                 MenuItem flipMenuItem = new MenuItem();
                                 flipMenuItem.Header = "Flip Card";
-                                flipMenuItem.Click += ( sender2, args2 ) =>
+                                flipMenuItem.Click += ( sender, args ) =>
                                 {
                                     // Check to see if the flipped card can be added to the player's CardsInPlay.
                                     // If it cannot, do not do anything.
@@ -1095,7 +1114,31 @@ namespace MonopolyDeal
                                     ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
 
                                 };
+
                                 menu.Items.Add(flipMenuItem);
+                            }
+
+                            // If the card is a Property Wild Card, add an option that allows the user to place it on its own space.
+                            else if ( PropertyType.Wild == cardBeingAdded.Color )
+                            {
+                                MenuItem separateMenuItem = new MenuItem();
+                                separateMenuItem.Header = "Separate Wild Card";
+                                separateMenuItem.Click += ( sender, args ) =>
+                                {
+                                    // Remove the card from its previous position on the player's playing field.
+                                    RemoveCardFromCardsInPlay(cardBeingAdded, this.Player);
+
+                                    // Add it to a new space on the field.
+                                    AddCardToCardsInPlay(cardBeingAdded, this.Player);
+
+                                    // Display the updated cards in play.
+                                    DisplayCardsInPlay(this.Player, this.PlayerOneField);
+
+                                    // Update the server's information regarding this player.
+                                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                                };
+
+                                menu.Items.Add(separateMenuItem);
                             }
 
                             menu.Items.Add(forwardMenuItem);
@@ -1107,10 +1150,8 @@ namespace MonopolyDeal
                             cardButton.Drop += new DragEventHandler(cardButton_Drop);
                             cardButton.AllowDrop = true;
 
-                            //if ( PropertyType.Wild == cardBeingAdded.Color )
-                            //{
-                                cardButton.PreviewMouseMove += new MouseEventHandler(cardButton_PreviewMouseMove);
-                            //}
+                            // Allow cards to be dragged and dropped onto other groups.
+                            cardButton.PreviewMouseMove += new MouseEventHandler(cardButton_PreviewMouseMove);
 
                         }
 
@@ -1319,7 +1360,7 @@ namespace MonopolyDeal
         // Increase the size of the currently selected card.
         public void SelectCard( Button cardButton )
         {
-            if ( cardButton != null )
+            if ( (null != cardButton) && (Turn.NumberOfActions < 3) )
             {
                 ScaleTransform myScaleTransform = new ScaleTransform();
                 myScaleTransform.ScaleY = 1.2;
@@ -1332,7 +1373,7 @@ namespace MonopolyDeal
         // Set the currently selected card to its normal size.
         public void DeselectCard( Button cardButton )
         {
-            if ( cardButton != null )
+            if ( null != cardButton )
             {
                 // Instantiating an object of type "ScaleTransform" should not be necessary.
                 // TODO: Find a way to pass the "ScaleTransform" without having to instantiate an object.
@@ -1354,6 +1395,7 @@ namespace MonopolyDeal
             // Remove the given number of cards from the top of the Deck and add them to the Player's hand.
             for ( int i = 0; i < numberOfCards; ++i )
             {
+                // If the deck is empty, transfer all the cards from the discard pile to the deck and shuffle.
                 if ( Deck.CardList.Count == 0 )
                 {
                     Deck.CardList = DiscardPile;
@@ -1409,6 +1451,25 @@ namespace MonopolyDeal
             card.Color = card.AltColor;
             card.AltColor = oldColor;
             card.IsFlipped = !card.IsFlipped;
+        }
+
+        #endregion
+
+        #region Action Card Handling
+
+        // Perform a specific action related to the given action card.
+        private void HandleAction( Card actionCard )
+        {
+            // Temporary, sloppy handling based on action card name.
+            switch ( actionCard.Name )
+            {
+                case "Pass Go":
+                {
+                    DrawCards(2);
+
+                    break;
+                }
+            }
         }
 
         #endregion
