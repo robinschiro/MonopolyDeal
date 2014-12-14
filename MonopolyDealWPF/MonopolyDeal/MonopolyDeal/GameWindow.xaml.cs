@@ -39,7 +39,86 @@ namespace MonopolyDeal
         private bool HavePlayersBeenAssigned;
         private Turn Turn;
         private List<Card> DiscardPile;
-        private Dictionary<PropertyType, int> MonopolyData;
+
+        // For each type of property, store the number of cards of that property type that make up a complete monopoly
+        // ROBIN TODO: Think of a way to do this without hardcoding the data.
+        private Dictionary<PropertyType, int> MonopolyData = new Dictionary<PropertyType, int>()
+        {
+            {PropertyType.Blue, 2},
+            {PropertyType.Brown, 2},
+            {PropertyType.Green, 3},
+            {PropertyType.LightBlue, 3},
+            {PropertyType.Orange, 3},
+            {PropertyType.Pink, 3},
+            {PropertyType.Railroad, 4},
+            {PropertyType.Red, 3},
+            {PropertyType.Utility, 2},
+            {PropertyType.Wild, 0},
+            {PropertyType.Yellow, 3},
+            {PropertyType.None, -1}
+        };
+
+        private Dictionary<PropertyType, Dictionary<int, int>> RentData = new Dictionary<PropertyType, Dictionary<int, int>>()
+        {
+            {PropertyType.Blue, new Dictionary<int, int>() 
+                                    {
+                                        {1, 3},
+                                        {2, 8}
+                                    }},
+            {PropertyType.Brown, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2}
+                                    }},
+            {PropertyType.Green, new Dictionary<int, int>() 
+                                    {
+                                        {1, 2},
+                                        {2, 4},
+                                        {3, 7}
+                                    }},
+            {PropertyType.LightBlue, new Dictionary<int, int>() 
+                                    {
+                                        {1, 3},
+                                        {2, 8}
+                                    }},
+            {PropertyType.Orange, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2},
+                                        {3, 3}
+                                    }},
+            {PropertyType.Pink, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2},
+                                        {3, 4}
+                                    }},
+            {PropertyType.Railroad, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2},
+                                        {3, 3},
+                                        {4, 4}
+                                    }},
+            {PropertyType.Red, new Dictionary<int, int>() 
+                                    {
+                                        {1, 2},
+                                        {2, 3},
+                                        {3, 6},
+                                    }},
+            {PropertyType.Utility, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2}
+                                    }},
+            {PropertyType.Yellow, new Dictionary<int, int>() 
+                                    {
+                                        {1, 2},
+                                        {2, 4},
+                                        {3, 6},
+                                    }},
+        };
+
         private MediaPlayer MediaPlayer;
 
         private bool isCurrentTurnOwner;
@@ -75,9 +154,6 @@ namespace MonopolyDeal
             
             // Instantiate the Player's Turn object.
             this.Turn = turn;
-
-            // Instantiate the MonopolyData object.
-            InstantiateMonopolyData();
 
             // Instantiate the DiscardPile.
             this.DiscardPile = new List<Card>();
@@ -441,7 +517,7 @@ namespace MonopolyDeal
         {
             Button targetCardButton = sender as Button;
             List<Card> targetCardList = FindListContainingCard(targetCardButton.Tag as Card);
-            PropertyType targetCardListColor = FindCardListColor(targetCardList);
+            PropertyType targetCardListColor = GetCardListColor(targetCardList);
 
             Button sourceCardButton = e.Data.GetData(typeof(Button)) as Button;
             Card sourceCard = sourceCardButton.Tag as Card;
@@ -449,7 +525,9 @@ namespace MonopolyDeal
             // Do not allow a drag-drop operation to occur if the source and target are the same objects.
             if ( sourceCardButton != targetCardButton )
             {
-                if ( !IsCardListMonopoly(targetCardList) && (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || PropertyType.Wild == targetCardListColor) )
+                bool isMonopoly = IsCardListMonopoly(targetCardList);
+
+                if ( !isMonopoly && (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || PropertyType.Wild == targetCardListColor) )
                 {
                     RemoveCardFromCardsInPlay(sourceCard, this.Player);
 
@@ -462,6 +540,42 @@ namespace MonopolyDeal
                     // Mark the event as handled.
                     e.Handled = true;
                 }
+                else if (isMonopoly)
+                {
+                    switch ( sourceCard.Name )
+                    {
+                        case ( "House" ):
+                        {
+                            if ( !IsCardInCardList("House", targetCardList) )
+                            {
+                                RemoveCardFromCardsInPlay(sourceCard, this.Player);
+                                targetCardList.Add(sourceCard);
+                                DisplayCardsInPlay(this.Player, this.PlayerOneField);
+
+                                // Update the server's information regarding this player.
+                                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                            }
+                            break;   
+                        }
+
+                        case ( "Hotel" ):
+                        {
+                            if ( IsCardInCardList("House", targetCardList) && !IsCardInCardList("Hotel", targetCardList) )
+                            {
+                                RemoveCardFromCardsInPlay(sourceCard, this.Player);
+                                targetCardList.Add(sourceCard);
+                                DisplayCardsInPlay(this.Player, this.PlayerOneField);
+
+                                // Update the server's information regarding this player.
+                                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                            }
+
+
+                            break;   
+                        }
+                    }
+                }
+
             }
         }
         
@@ -805,7 +919,7 @@ namespace MonopolyDeal
                     {
                         foreach ( List<Card> monopoly in monopolies )
                         {
-                            if ( !IsCardInCardList("House", monopoly  ) )
+                            if ( !IsCardInCardList("House", monopoly) )
                             {
                                 monopoly.Add(cardBeingAdded);
                                 AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
@@ -839,7 +953,7 @@ namespace MonopolyDeal
 
                     foreach ( List<Card> cardList in FindMonopolies(player) )
                     {
-                        colorsOfCurrentMonopolies.Add(FindCardListColor(cardList));
+                        colorsOfCurrentMonopolies.Add(GetCardListColor(cardList));
                     }
 
                     if ( PropertyType.Wild != cardBeingAdded.Color )
@@ -854,7 +968,7 @@ namespace MonopolyDeal
                         {
                             List<Card> cardList = player.CardsInPlay[i];
 
-                            PropertyType cardListColor = FindCardListColor(cardList);
+                            PropertyType cardListColor = GetCardListColor(cardList);
 
                             // If the cardlist is not a monopoly and is compatible with the card being added, add the card to the list.
                             if ( !IsCardListMonopoly(cardList) && (cardListColor == cardBeingAdded.Color || PropertyType.Wild == cardListColor) )
@@ -1012,15 +1126,9 @@ namespace MonopolyDeal
                         cardBeingAdded.Type = CardType.Money;
                         PlayCardEvent(cardButton, null);
                     };
-                    MenuItem nextMonopolyMenuItem = new MenuItem();
-                    nextMonopolyMenuItem.Header = "Place on Next Monopoly";
-                    nextMonopolyMenuItem.Click += ( sender, args ) =>
-                    {
-                    };
 
                     menu.Items.Add(playAsActionMenuItem);
                     menu.Items.Add(playAsMoneyMenuItem);
-                    menu.Items.Add(nextMonopolyMenuItem);
                     cardButton.ContextMenu = menu;
                 }
                 // These apply to all other action cards. Players can play these cards as actions or money.
@@ -1085,7 +1193,7 @@ namespace MonopolyDeal
                                     List<PropertyType> colorsOfCurrentMonopolies = new List<PropertyType>();
                                     foreach ( List<Card> cardList in FindMonopolies(Player) )
                                     {
-                                        colorsOfCurrentMonopolies.Add(FindCardListColor(cardList));
+                                        colorsOfCurrentMonopolies.Add(GetCardListColor(cardList));
                                     }
                                     if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.AltColor) )
                                     {
@@ -1460,14 +1568,40 @@ namespace MonopolyDeal
         // Perform a specific action related to the given action card.
         private void HandleAction( Card actionCard )
         {
-            // Temporary, sloppy handling based on action card name.
-            switch ( actionCard.Name )
+            if ( CardType.Action == actionCard.Type )
             {
-                case "Pass Go":
+                switch ( actionCard.ActionID )
                 {
-                    DrawCards(2);
+                    // "Pass Go" case.
+                    case 8:
+                    {
+                        DrawCards(2);
 
-                    break;
+                        return;
+                    }
+                }
+
+                // If the switch was passed, the action card must be a rent.
+                CollectRent(actionCard);
+
+            }
+        }
+
+        // Collect rent from the other players.
+        private void CollectRent( Card rentCard )
+        {
+            List<List<Card>> matchingPropertyGroups = new List<List<Card>>();
+
+            // Store the card group that would offer the player the highest return in rent.
+            List<Card> selectedRentalGroup;
+
+            // First, determine which lists on the player's field correpond to the rent card.
+            foreach ( List<Card> cardList in this.Player.CardsInPlay )
+            {
+                PropertyType cardListColor = GetCardListColor(cardList);
+                if ( cardListColor == rentCard.Color || cardListColor == rentCard.AltColor )
+                {
+                    matchingPropertyGroups.Add(cardList);
                 }
             }
         }
@@ -1564,7 +1698,7 @@ namespace MonopolyDeal
         }
 
         // Given a list of cards, determine the color of the monopoly being formed by the cards.
-        public PropertyType FindCardListColor( List<Card> cardList )
+        public PropertyType GetCardListColor( List<Card> cardList )
         {
             foreach ( Card card in cardList )
             {
@@ -1594,7 +1728,7 @@ namespace MonopolyDeal
         // Determine if a provided card list is a monopoly.
         public bool IsCardListMonopoly( List<Card> cardList )
         {
-            PropertyType monopolyColor = FindCardListColor(cardList);
+            PropertyType monopolyColor = GetCardListColor(cardList);
             int countOfProperties = 0;
 
             // First count the number of properties in the list. This algorithm excludes houses and hotels from the count.
@@ -1695,26 +1829,6 @@ namespace MonopolyDeal
 
             return playerName;
         }
-
-        // For each type of property, store the number of cards of that property type that make up a complete monopoly
-        // ROBIN TODO: Think of a way to do this without hardcoding the data.
-        public void InstantiateMonopolyData()
-        {
-            MonopolyData = new Dictionary<PropertyType, int>();
-            MonopolyData.Add(PropertyType.Blue, 2);
-            MonopolyData.Add(PropertyType.Brown, 2);
-            MonopolyData.Add(PropertyType.Green, 3);
-            MonopolyData.Add(PropertyType.LightBlue, 3);
-            MonopolyData.Add(PropertyType.Orange, 3);
-            MonopolyData.Add(PropertyType.Pink, 3);
-            MonopolyData.Add(PropertyType.Railroad, 4);
-            MonopolyData.Add(PropertyType.Red, 3);
-            MonopolyData.Add(PropertyType.Utility, 2);
-            MonopolyData.Add(PropertyType.Wild, 0);
-            MonopolyData.Add(PropertyType.Yellow, 3);
-            MonopolyData.Add(PropertyType.None, -1);
-        }
-
 
         //// Play the song.
         //public void PlaySong(Object filler)

@@ -17,6 +17,15 @@ namespace GameObjects
         public List<Card> CardList { get; set; }  // Deck is a list of cards
         private tvProfile Profile;
 
+        // Variables to hold temporary data.
+        string name;
+        CardType cardType;
+        int value;
+        PropertyType propertyType;
+        PropertyType altPropertyType;
+        string uriPath;
+        int actionID;
+
         public Deck(tvProfile profile)
         {
             this.Profile = profile;
@@ -43,14 +52,15 @@ namespace GameObjects
 
                 for ( int a = 0; a < cardProfile.iValue("-Count", 0); ++a )
                 {
-                    string name = cardProfile.sValue("-Name", "");
-                    CardType cardType = (CardType)Enum.Parse(typeof(CardType), cardProfile.sValue("-CardType", ""));
-                    int value = cardProfile.iValue("-Value", 0);
-                    PropertyType propertyType = cardProfile.sValue("-PropertyType", "") == "" ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-PropertyType", ""));
-                    PropertyType altPropertyType = cardProfile.sValue("-AltPropertyType", "") == "" ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-AltPropertyType", ""));
-                    string uriPath = "pack://application:,,,/GameObjects;component/Images/" + files[i];
+                    name = cardProfile.sValue("-Name", "");
+                    cardType = (CardType)Enum.Parse(typeof(CardType), cardProfile.sValue("-CardType", ""));
+                    value = cardProfile.iValue("-Value", 0);
+                    propertyType = (cardProfile.sValue("-PropertyType", "") == "") ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-PropertyType", ""));
+                    altPropertyType = (cardProfile.sValue("-AltPropertyType", "") == "") ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-AltPropertyType", ""));
+                    uriPath = "pack://application:,,,/GameObjects;component/Images/" + files[i];
+                    actionID = (cardProfile.sValue("-ActionID", "") == "") ? -1 : Convert.ToInt32((cardProfile.sValue("-ActionID", "")));
 
-                    CardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath));                  
+                    CardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath, actionID));                  
                 }
             }
 

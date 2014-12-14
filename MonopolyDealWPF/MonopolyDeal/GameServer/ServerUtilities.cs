@@ -113,8 +113,9 @@ namespace GameServer
                 PropertyType color = (PropertyType)inc.ReadByte();
                 PropertyType altColor = (PropertyType)inc.ReadByte();
                 string uriPath = inc.ReadString();
+                string actionID = inc.ReadString();
                 bool isFlipped = inc.ReadBoolean();
-                cards.Add(new Card(name, type, Convert.ToInt32(value), color, altColor, uriPath, isFlipped));
+                cards.Add(new Card(name, type, Convert.ToInt32(value), color, altColor, uriPath, Convert.ToInt32(actionID), isFlipped));
             }
 
             return cards;
@@ -136,6 +137,7 @@ namespace GameServer
                     outmsg.Write((byte)card.Color);
                     outmsg.Write((byte)card.AltColor);
                     outmsg.Write(card.CardImageUriPath);
+                    outmsg.Write(card.ActionID.ToString());
                     outmsg.Write(card.IsFlipped);
                 }
             }

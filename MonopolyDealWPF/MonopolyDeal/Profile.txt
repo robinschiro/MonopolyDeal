@@ -1,125 +1,5 @@
 ExcelToProfileConverter.exe
 
--10million.jpg=[
-
-    -Name="Ten Million"
-    -CardType=Money
-    -Value=10
-    -Count=1
-    -PropertyType=
-    -AltPropertyType=
-
--10million.jpg=]
--1million.jpg=[
-
-    -Name="One Million"
-    -CardType=Money
-    -Value=1
-    -Count=6
-    -PropertyType=
-    -AltPropertyType=
-
--1million.jpg=]
--2million.jpg=[
-
-    -Name="Two Million"
-    -CardType=Money
-    -Value=2
-    -Count=5
-    -PropertyType=
-    -AltPropertyType=
-
--2million.jpg=]
--3million.jpg=[
-
-    -Name="Three Million"
-    -CardType=Money
-    -Value=3
-    -Count=3
-    -PropertyType=
-    -AltPropertyType=
-
--3million.jpg=]
--4million.jpg=[
-
-    -Name="Four Million"
-    -CardType=Money
-    -Value=4
-    -Count=3
-    -PropertyType=
-    -AltPropertyType=
-
--4million.jpg=]
--5million.jpg=[
-
-    -Name="Five Million"
-    -CardType=Money
-    -Value=5
-    -Count=2
-    -PropertyType=
-    -AltPropertyType=
-
--5million.jpg=]
--atlanticavenue.jpg=[
-
-    -Name="Atlantic Avenue"
-    -CardType=Property
-    -Value=3
-    -Count=1
-    -PropertyType=Yellow
-    -AltPropertyType=
-
--atlanticavenue.jpg=]
--balticavenue.jpg=[
-
-    -Name="Baltic Avenue"
-    -CardType=Property
-    -Value=1
-    -Count=1
-    -PropertyType=Brown
-    -AltPropertyType=
-
--balticavenue.jpg=]
--bandorailroad.jpg=[
-
-    -Name="B & O Railroad"
-    -CardType=Property
-    -Value=2
-    -Count=1
-    -PropertyType=Railroad
-    -AltPropertyType=
-
--bandorailroad.jpg=]
--boardwalk.jpg=[
-
-    -Name=Boardwalk
-    -CardType=Property
-    -Value=4
-    -Count=1
-    -PropertyType=Blue
-    -AltPropertyType=
-
--boardwalk.jpg=]
--cardback.jpg=[
-
-    -Name="Card Back"
-    -CardType=
-    -Value=
-    -Count=0
-    -PropertyType=
-    -AltPropertyType=
-
--cardback.jpg=]
--connecticutavenue.jpg=[
-
-    -Name="Connecticut Avenue"
-    -CardType=Property
-    -Value=1
-    -Count=1
-    -PropertyType=LightBlue
-    -AltPropertyType=
-
--connecticutavenue.jpg=]
 -dealbreaker.jpg=[
 
     -Name="Deal Breaker"
@@ -128,6 +8,7 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=
     -AltPropertyType=
+    -ActionID=0
 
 -dealbreaker.jpg=]
 -debtcollector.jpg=[
@@ -138,6 +19,7 @@ ExcelToProfileConverter.exe
     -Count=3
     -PropertyType=
     -AltPropertyType=
+    -ActionID=1
 
 -debtcollector.jpg=]
 -doubletherent.jpg=[
@@ -148,18 +30,9 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=
     -AltPropertyType=
+    -ActionID=2
 
 -doubletherent.jpg=]
--electriccompany.jpg=[
-
-    -Name="Electric Company"
-    -CardType=Property
-    -Value=2
-    -Count=1
-    -PropertyType=Utility
-    -AltPropertyType=
-
--electriccompany.jpg=]
 -forceddeal.jpg=[
 
     -Name="Forced Deal"
@@ -168,6 +41,7 @@ ExcelToProfileConverter.exe
     -Count=3
     -PropertyType=
     -AltPropertyType=
+    -ActionID=3
 
 -forceddeal.jpg=]
 -hotel.jpg=[
@@ -178,6 +52,7 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=
     -AltPropertyType=
+    -ActionID=4
 
 -hotel.jpg=]
 -house.jpg=[
@@ -188,28 +63,9 @@ ExcelToProfileConverter.exe
     -Count=3
     -PropertyType=
     -AltPropertyType=
+    -ActionID=5
 
 -house.jpg=]
--illinoisavenue.jpg=[
-
-    -Name="Illinois Avenue"
-    -CardType=Property
-    -Value=3
-    -Count=1
-    -PropertyType=Red
-    -AltPropertyType=
-
--illinoisavenue.jpg=]
--indianaavenue.jpg=[
-
-    -Name="Indiana Avenue"
-    -CardType=Property
-    -Value=3
-    -Count=1
-    -PropertyType=Red
-    -AltPropertyType=
-
--indianaavenue.jpg=]
 -itsmybirthday.jpg=[
 
     -Name="It's My Birthday"
@@ -218,6 +74,7 @@ ExcelToProfileConverter.exe
     -Count=3
     -PropertyType=
     -AltPropertyType=
+    -ActionID=6
 
 -itsmybirthday.jpg=]
 -justsayno.jpg=[
@@ -228,8 +85,251 @@ ExcelToProfileConverter.exe
     -Count=3
     -PropertyType=
     -AltPropertyType=
+    -ActionID=7
 
 -justsayno.jpg=]
+-passgo.jpg=[
+
+    -Name="Pass Go"
+    -CardType=Action
+    -Value=1
+    -Count=10
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=8
+
+-passgo.jpg=]
+-rentbg.jpg=[
+
+    -Name="Rent Blue-Green"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=Blue
+    -AltPropertyType=Green
+    -ActionID=9
+
+-rentbg.jpg=]
+-rentlbbr.jpg=[
+
+    -Name="Rent Light Blue-Brown"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=LightBlue
+    -AltPropertyType=Brown
+    -ActionID=10
+
+-rentlbbr.jpg=]
+-rentop.jpg=[
+
+    -Name="Rent Orange-Pink"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=Orange
+    -AltPropertyType=Pink
+    -ActionID=11
+
+-rentop.jpg=]
+-rentry.jpg=[
+
+    -Name="Rent Yellow-Red"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=Yellow
+    -AltPropertyType=Red
+    -ActionID=12
+
+-rentry.jpg=]
+-rentut.jpg=[
+
+    -Name="Rent Utility-Railroad"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=Utility
+    -AltPropertyType=Railroad
+    -ActionID=13
+
+-rentut.jpg=]
+-rentwild.jpg=[
+
+    -Name="Rent Wild"
+    -CardType=Action
+    -Value=3
+    -Count=3
+    -PropertyType=Wild
+    -AltPropertyType=
+    -ActionID=14
+
+-rentwild.jpg=]
+-slydeal.jpg=[
+
+    -Name="Sly Deal"
+    -CardType=Action
+    -Value=3
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=15
+
+-slydeal.jpg=]
+-10million.jpg=[
+
+    -Name="Ten Million"
+    -CardType=Money
+    -Value=10
+    -Count=1
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-10million.jpg=]
+-1million.jpg=[
+
+    -Name="One Million"
+    -CardType=Money
+    -Value=1
+    -Count=6
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-1million.jpg=]
+-2million.jpg=[
+
+    -Name="Two Million"
+    -CardType=Money
+    -Value=2
+    -Count=5
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-2million.jpg=]
+-3million.jpg=[
+
+    -Name="Three Million"
+    -CardType=Money
+    -Value=3
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-3million.jpg=]
+-4million.jpg=[
+
+    -Name="Four Million"
+    -CardType=Money
+    -Value=4
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-4million.jpg=]
+-5million.jpg=[
+
+    -Name="Five Million"
+    -CardType=Money
+    -Value=5
+    -Count=2
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-5million.jpg=]
+-atlanticavenue.jpg=[
+
+    -Name="Atlantic Avenue"
+    -CardType=Property
+    -Value=3
+    -Count=1
+    -PropertyType=Yellow
+    -AltPropertyType=
+    -ActionID=
+
+-atlanticavenue.jpg=]
+-balticavenue.jpg=[
+
+    -Name="Baltic Avenue"
+    -CardType=Property
+    -Value=1
+    -Count=1
+    -PropertyType=Brown
+    -AltPropertyType=
+    -ActionID=
+
+-balticavenue.jpg=]
+-bandorailroad.jpg=[
+
+    -Name="B & O Railroad"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Railroad
+    -AltPropertyType=
+    -ActionID=
+
+-bandorailroad.jpg=]
+-boardwalk.jpg=[
+
+    -Name=Boardwalk
+    -CardType=Property
+    -Value=4
+    -Count=1
+    -PropertyType=Blue
+    -AltPropertyType=
+    -ActionID=
+
+-boardwalk.jpg=]
+-connecticutavenue.jpg=[
+
+    -Name="Connecticut Avenue"
+    -CardType=Property
+    -Value=1
+    -Count=1
+    -PropertyType=LightBlue
+    -AltPropertyType=
+    -ActionID=
+
+-connecticutavenue.jpg=]
+-electriccompany.jpg=[
+
+    -Name="Electric Company"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Utility
+    -AltPropertyType=
+    -ActionID=
+
+-electriccompany.jpg=]
+-illinoisavenue.jpg=[
+
+    -Name="Illinois Avenue"
+    -CardType=Property
+    -Value=3
+    -Count=1
+    -PropertyType=Red
+    -AltPropertyType=
+    -ActionID=
+
+-illinoisavenue.jpg=]
+-indianaavenue.jpg=[
+
+    -Name="Indiana Avenue"
+    -CardType=Property
+    -Value=3
+    -Count=1
+    -PropertyType=Red
+    -AltPropertyType=
+    -ActionID=
+
+-indianaavenue.jpg=]
 -kentuckyavenue.jpg=[
 
     -Name="Kentucky Avenue"
@@ -238,6 +338,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Red
     -AltPropertyType=
+    -ActionID=
 
 -kentuckyavenue.jpg=]
 -marvingardens.jpg=[
@@ -248,6 +349,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Yellow
     -AltPropertyType=
+    -ActionID=
 
 -marvingardens.jpg=]
 -mediterraneanavenue.jpg=[
@@ -258,6 +360,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Brown
     -AltPropertyType=
+    -ActionID=
 
 -mediterraneanavenue.jpg=]
 -newyorkavenue.jpg=[
@@ -268,6 +371,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Orange
     -AltPropertyType=
+    -ActionID=
 
 -newyorkavenue.jpg=]
 -northcarolinaavenue.jpg=[
@@ -278,6 +382,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Green
     -AltPropertyType=
+    -ActionID=
 
 -northcarolinaavenue.jpg=]
 -orientalavenue.jpg=[
@@ -288,6 +393,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=LightBlue
     -AltPropertyType=
+    -ActionID=
 
 -orientalavenue.jpg=]
 -pacificavenue.jpg=[
@@ -298,6 +404,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Green
     -AltPropertyType=
+    -ActionID=
 
 -pacificavenue.jpg=]
 -parkplace.jpg=[
@@ -308,18 +415,9 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Blue
     -AltPropertyType=
+    -ActionID=
 
 -parkplace.jpg=]
--passgo.jpg=[
-
-    -Name="Pass Go"
-    -CardType=Action
-    -Value=1
-    -Count=10
-    -PropertyType=
-    -AltPropertyType=
-
--passgo.jpg=]
 -pennsylvaniaavenue.jpg=[
 
     -Name="Pennsylvania Avenue"
@@ -328,6 +426,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Green
     -AltPropertyType=
+    -ActionID=
 
 -pennsylvaniaavenue.jpg=]
 -pennsylvaniarailroad.jpg=[
@@ -338,6 +437,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Railroad
     -AltPropertyType=
+    -ActionID=
 
 -pennsylvaniarailroad.jpg=]
 -propertywildcard.jpg=[
@@ -348,6 +448,7 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=Wild
     -AltPropertyType=
+    -ActionID=
 
 -propertywildcard.jpg=]
 -readingrailroad.jpg=[
@@ -358,68 +459,9 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Railroad
     -AltPropertyType=
+    -ActionID=
 
 -readingrailroad.jpg=]
--rentbg.jpg=[
-
-    -Name="Rent Blue-Green"
-    -CardType=Action
-    -Value=1
-    -Count=2
-    -PropertyType=
-    -AltPropertyType=
-
--rentbg.jpg=]
--rentlbbr.jpg=[
-
-    -Name="Rent Light Blue-Brown"
-    -CardType=Action
-    -Value=1
-    -Count=2
-    -PropertyType=
-    -AltPropertyType=
-
--rentlbbr.jpg=]
--rentop.jpg=[
-
-    -Name="Rent Orange-Pink"
-    -CardType=Action
-    -Value=1
-    -Count=2
-    -PropertyType=
-    -AltPropertyType=
-
--rentop.jpg=]
--rentry.jpg=[
-
-    -Name="Rent Yellow-Red"
-    -CardType=Action
-    -Value=1
-    -Count=2
-    -PropertyType=
-    -AltPropertyType=
-
--rentry.jpg=]
--rentut.jpg=[
-
-    -Name="Rent Utility-Railroad"
-    -CardType=Action
-    -Value=1
-    -Count=2
-    -PropertyType=
-    -AltPropertyType=
-
--rentut.jpg=]
--rentwild.jpg=[
-
-    -Name="Rent Wild"
-    -CardType=Action
-    -Value=3
-    -Count=3
-    -PropertyType=
-    -AltPropertyType=
-
--rentwild.jpg=]
 -shortline.jpg=[
 
     -Name="Short Line"
@@ -428,18 +470,9 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Railroad
     -AltPropertyType=
+    -ActionID=
 
 -shortline.jpg=]
--slydeal.jpg=[
-
-    -Name="Sly Deal"
-    -CardType=Action
-    -Value=3
-    -Count=3
-    -PropertyType=
-    -AltPropertyType=
-
--slydeal.jpg=]
 -statesavenue.jpg=[
 
     -Name="States Avenue"
@@ -448,6 +481,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Pink
     -AltPropertyType=
+    -ActionID=
 
 -statesavenue.jpg=]
 -stcharlesplace.jpg=[
@@ -458,6 +492,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Pink
     -AltPropertyType=
+    -ActionID=
 
 -stcharlesplace.jpg=]
 -stjamesplace.jpg=[
@@ -468,6 +503,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Orange
     -AltPropertyType=
+    -ActionID=
 
 -stjamesplace.jpg=]
 -tennesseeavenue.jpg=[
@@ -478,6 +514,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Orange
     -AltPropertyType=
+    -ActionID=
 
 -tennesseeavenue.jpg=]
 -ventnoravenue.jpg=[
@@ -488,6 +525,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Yellow
     -AltPropertyType=
+    -ActionID=
 
 -ventnoravenue.jpg=]
 -vermontavenue.jpg=[
@@ -498,6 +536,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=LightBlue
     -AltPropertyType=
+    -ActionID=
 
 -vermontavenue.jpg=]
 -virginiaavenue.jpg=[
@@ -508,6 +547,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Pink
     -AltPropertyType=
+    -ActionID=
 
 -virginiaavenue.jpg=]
 -waterworks.jpg=[
@@ -518,6 +558,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Utility
     -AltPropertyType=
+    -ActionID=
 
 -waterworks.jpg=]
 -wildbg.jpg=[
@@ -528,6 +569,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Blue
     -AltPropertyType=Green
+    -ActionID=
 
 -wildbg.jpg=]
 -wildgt.jpg=[
@@ -538,6 +580,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Railroad
     -AltPropertyType=Green
+    -ActionID=
 
 -wildgt.jpg=]
 -wildlbbr.jpg=[
@@ -548,6 +591,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=LightBlue
     -AltPropertyType=Brown
+    -ActionID=
 
 -wildlbbr.jpg=]
 -wildlbt.jpg=[
@@ -558,6 +602,7 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Railroad
     -AltPropertyType=LightBlue
+    -ActionID=
 
 -wildlbt.jpg=]
 -wildop.jpg=[
@@ -568,6 +613,7 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=Orange
     -AltPropertyType=Pink
+    -ActionID=
 
 -wildop.jpg=]
 -wildry.jpg=[
@@ -578,6 +624,7 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=Yellow
     -AltPropertyType=Red
+    -ActionID=
 
 -wildry.jpg=]
 -wildut.jpg=[
@@ -588,5 +635,17 @@ ExcelToProfileConverter.exe
     -Count=1
     -PropertyType=Utility
     -AltPropertyType=Railroad
+    -ActionID=
 
 -wildut.jpg=]
+-cardback.jpg=[
+
+    -Name="Card Back"
+    -CardType=
+    -Value=
+    -Count=0
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-cardback.jpg=]
