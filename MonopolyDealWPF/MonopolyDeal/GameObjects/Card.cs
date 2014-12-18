@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.IO;
+using System.Collections;
 
 
 namespace GameObjects
@@ -46,6 +47,10 @@ namespace GameObjects
         public int ActionID { get; set; }
         public bool IsFlipped { get; set; }
 
+        // Constants
+        public const int BIRTHDAY_AMOUNT = 2;
+        public const int DEBT_AMOUNT = 5;
+
         public Card( CardType type, String name, int value ) // Create a card given a type, name, and value
         {
             this.Type = type;
@@ -79,6 +84,18 @@ namespace GameObjects
             this.Value = value;
             this.CardImageUriPath = path;
             this.Type = CardType.None;
+        }
+
+        public static int SumOfCardValues(IList cards)
+        {
+            int sum = 0;
+
+            foreach ( Card card in cards )
+            {
+                sum += card.Value;
+            }
+
+            return sum;
         }
     }
 }

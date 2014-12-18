@@ -71,6 +71,9 @@
       <DependentUpon>MoneyListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MultiBoolConverter.cs" />
+    <Compile Include="RentWindow.xaml.cs">
+      <DependentUpon>RentWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RoomWindow.xaml.cs">
       <DependentUpon>RoomWindow.xaml</DependentUpon>
     </Compile>
@@ -91,6 +94,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MoneyListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RentWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

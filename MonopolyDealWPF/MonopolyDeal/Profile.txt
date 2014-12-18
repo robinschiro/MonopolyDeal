@@ -1,27 +1,16 @@
 ExcelToProfileConverter.exe
 
--dealbreaker.jpg=[
+-passgo.jpg=[
 
-    -Name="Deal Breaker"
+    -Name="Pass Go"
     -CardType=Action
-    -Value=5
-    -Count=2
+    -Value=1
+    -Count=10
     -PropertyType=
     -AltPropertyType=
     -ActionID=0
 
--dealbreaker.jpg=]
--debtcollector.jpg=[
-
-    -Name="Debt Collector"
-    -CardType=Action
-    -Value=3
-    -Count=3
-    -PropertyType=
-    -AltPropertyType=
-    -ActionID=1
-
--debtcollector.jpg=]
+-passgo.jpg=]
 -doubletherent.jpg=[
 
     -Name="Double The Rent"
@@ -30,20 +19,20 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=
     -AltPropertyType=
-    -ActionID=2
+    -ActionID=1
 
 -doubletherent.jpg=]
--forceddeal.jpg=[
+-justsayno.jpg=[
 
-    -Name="Forced Deal"
+    -Name="Just Say No"
     -CardType=Action
-    -Value=3
+    -Value=4
     -Count=3
     -PropertyType=
     -AltPropertyType=
-    -ActionID=3
+    -ActionID=2
 
--forceddeal.jpg=]
+-justsayno.jpg=]
 -hotel.jpg=[
 
     -Name=Hotel
@@ -52,7 +41,7 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=
     -AltPropertyType=
-    -ActionID=4
+    -ActionID=3
 
 -hotel.jpg=]
 -house.jpg=[
@@ -63,9 +52,42 @@ ExcelToProfileConverter.exe
     -Count=3
     -PropertyType=
     -AltPropertyType=
-    -ActionID=5
+    -ActionID=4
 
 -house.jpg=]
+-dealbreaker.jpg=[
+
+    -Name="Deal Breaker"
+    -CardType=Action
+    -Value=5
+    -Count=2
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=5
+
+-dealbreaker.jpg=]
+-slydeal.jpg=[
+
+    -Name="Sly Deal"
+    -CardType=Action
+    -Value=3
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=6
+
+-slydeal.jpg=]
+-forceddeal.jpg=[
+
+    -Name="Forced Deal"
+    -CardType=Action
+    -Value=3
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=7
+
+-forceddeal.jpg=]
 -itsmybirthday.jpg=[
 
     -Name="It's My Birthday"
@@ -74,42 +96,31 @@ ExcelToProfileConverter.exe
     -Count=3
     -PropertyType=
     -AltPropertyType=
-    -ActionID=6
+    -ActionID=8
 
 -itsmybirthday.jpg=]
--justsayno.jpg=[
+-debtcollector.jpg=[
 
-    -Name="Just Say No"
+    -Name="Debt Collector"
     -CardType=Action
-    -Value=4
+    -Value=3
     -Count=3
     -PropertyType=
     -AltPropertyType=
-    -ActionID=7
-
--justsayno.jpg=]
--passgo.jpg=[
-
-    -Name="Pass Go"
-    -CardType=Action
-    -Value=1
-    -Count=10
-    -PropertyType=
-    -AltPropertyType=
-    -ActionID=8
-
--passgo.jpg=]
--rentbg.jpg=[
-
-    -Name="Rent Blue-Green"
-    -CardType=Action
-    -Value=1
-    -Count=2
-    -PropertyType=Blue
-    -AltPropertyType=Green
     -ActionID=9
 
--rentbg.jpg=]
+-debtcollector.jpg=]
+-rentwild.jpg=[
+
+    -Name="Rent Wild"
+    -CardType=Action
+    -Value=3
+    -Count=3
+    -PropertyType=Wild
+    -AltPropertyType=
+    -ActionID=10
+
+-rentwild.jpg=]
 -rentlbbr.jpg=[
 
     -Name="Rent Light Blue-Brown"
@@ -118,7 +129,7 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=LightBlue
     -AltPropertyType=Brown
-    -ActionID=10
+    -ActionID=11
 
 -rentlbbr.jpg=]
 -rentop.jpg=[
@@ -129,7 +140,7 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=Orange
     -AltPropertyType=Pink
-    -ActionID=11
+    -ActionID=12
 
 -rentop.jpg=]
 -rentry.jpg=[
@@ -140,7 +151,7 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=Yellow
     -AltPropertyType=Red
-    -ActionID=12
+    -ActionID=13
 
 -rentry.jpg=]
 -rentut.jpg=[
@@ -151,31 +162,20 @@ ExcelToProfileConverter.exe
     -Count=2
     -PropertyType=Utility
     -AltPropertyType=Railroad
-    -ActionID=13
-
--rentut.jpg=]
--rentwild.jpg=[
-
-    -Name="Rent Wild"
-    -CardType=Action
-    -Value=3
-    -Count=3
-    -PropertyType=Wild
-    -AltPropertyType=
     -ActionID=14
 
--rentwild.jpg=]
--slydeal.jpg=[
+-rentut.jpg=]
+-rentbg.jpg=[
 
-    -Name="Sly Deal"
+    -Name="Rent Blue-Green"
     -CardType=Action
-    -Value=3
-    -Count=3
-    -PropertyType=
-    -AltPropertyType=
+    -Value=1
+    -Count=2
+    -PropertyType=Blue
+    -AltPropertyType=Green
     -ActionID=15
 
--slydeal.jpg=]
+-rentbg.jpg=]
 -10million.jpg=[
 
     -Name="Ten Million"
