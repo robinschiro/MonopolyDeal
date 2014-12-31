@@ -204,6 +204,19 @@ namespace GameServer
                                     break;
                                 }
 
+                                // Send the rent request to all clients.
+                                case Datatype.RequestRent:
+                                {
+                                    ActionData.RentRequest request = (ActionData.RentRequest)ServerUtilities.ReadRentRequest(inc);
+
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.RequestRent, request);
+                                    }
+
+                                    break;
+                                }
+
                                 case Datatype.EndTurn:
                                 {
                                     Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.EndTurn);
@@ -239,7 +252,7 @@ namespace GameServer
                                     }
 
                                     break;
-                                }
+                                }                                    
                             }
 
                             break;

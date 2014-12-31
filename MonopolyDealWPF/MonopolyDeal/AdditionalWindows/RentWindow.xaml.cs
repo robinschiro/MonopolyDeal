@@ -10,20 +10,24 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using GameObjects;
 using System.Collections;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
+using GameObjects;
 
-namespace MonopolyDeal
+
+namespace AdditionalWindows
 {
     /// <summary>
     /// Interaction logic for RentWindow.xaml
     /// </summary>
     public partial class RentWindow : Window, INotifyPropertyChanged
     {
-        private Player rentee;
-        private Player renter;
         private int amountOwed;
+        private bool closeWindow = false;
+
+        public ObservableCollection<Card> Payment { get; set; }
+        public ObservableCollection<Card> Assets { get; set; }
 
         private int amountGiven;
         public string AmountGivenString
@@ -33,7 +37,7 @@ namespace MonopolyDeal
                 amountGiven = Card.SumOfCardValues(PaymentListView.Items);
 
                 // Update the Pay Rent button.
-                PayButton.IsEnabled = amountGiven >= amountOwed;
+                PayButton.IsEnabled = (amountGiven >= amountOwed) || ( 0 == AssetsListView.Items.Count );
 
                 return "Total Value: " + amountGiven;
             }
@@ -41,12 +45,13 @@ namespace MonopolyDeal
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public RentWindow( Player playerPayingRent, Player playerReceivingRent, int rentAmount, bool rentDoubled )
+        public RentWindow( Player rentee, string renterName, int rentAmount, bool rentDoubled )
         {
+            Payment = new ObservableCollection<Card>();
+            Assets = new ObservableCollection<Card>();
+
             InitializeComponent();
 
-            rentee = playerPayingRent;
-            renter = playerReceivingRent;
             amountOwed = rentAmount * ((rentDoubled) ? (2) : (1));
 
             // Update the window to display the amount owed.
@@ -57,14 +62,15 @@ namespace MonopolyDeal
             {
                 foreach ( Card card in cardList )
                 {
-                    AssetsListView.Items.Add(card);
+                    Assets.Add(card);
                 }
             }
 
             // Update the window title to reflect the player receiving rent.
-            this.Title = "Rental Payment to " + renter.Name;
+            this.Title = "Rental Payment to " + renterName;
 
-            TotalLabel.DataContext = this;
+            // Set the data context of the window.
+            this.DataContext = this;
         }
 
         // Create the OnPropertyChanged method to raise the event.
@@ -87,20 +93,36 @@ namespace MonopolyDeal
             TransferSelectedItems(PaymentListView, AssetsListView);
         }
 
+        // Only allow the player to close the rent window when the 'Pay Rent' button is pressed.
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if ( !closeWindow )
+            {
+                e.Cancel = true;
+            }
+        }
+
         // Transfer all selected items from one listview to another.
         private void TransferSelectedItems(ListView listview1, ListView listview2)
         {
             List<Card> selectedCards = new List<Card>();
 
+            // Retrieve the observable collections that are bound to the listviews.
+            ObservableCollection<Card> listview1Source = (ObservableCollection<Card>)listview1.ItemsSource;
+            ObservableCollection<Card> listview2Source = (ObservableCollection<Card>)listview2.ItemsSource;
+
+            // Add the selected items to a new list. This is necessary for the following foreach loop,
+            // which modifies the value of the SelectedItems collection.
             foreach ( Card card in listview1.SelectedItems )
             {
                 selectedCards.Add(card);
             }
 
+            // Transfer the selected items.
             foreach ( Card card in selectedCards )
             {
-                listview2.Items.Add(card);
-                listview1.Items.Remove(card);
+                listview2Source.Add(card);
+                listview1Source.Remove(card);
             }
 
             // Resize the ListViews' columns.
@@ -129,6 +151,12 @@ namespace MonopolyDeal
                     c.Width = double.NaN;
                 }
             }
+        }
+
+        private void PayButton_Click( object sender, RoutedEventArgs e )
+        {
+            closeWindow = true;
+            this.Close();
         }
     }
 }

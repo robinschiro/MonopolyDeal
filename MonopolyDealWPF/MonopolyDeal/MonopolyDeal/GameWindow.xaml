@@ -245,7 +245,7 @@
                 </Grid.RowDefinitions>
             
                 <Grid Name="PlayerOneField"
-                      Background="Salmon"
+                      Background="LightCoral"
                       Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>

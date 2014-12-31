@@ -34,19 +34,12 @@ namespace GameServer
 
                 case Datatype.UpdatePlayerList:
                 {
-                    // Read the size of the list of players.
-                    int size = inc.ReadInt32();
+                    return ReadPlayerList(inc);
+                }
 
-                    List<Player> playerList = new List<Player>();
-
-                    // Read each name in the message and add it to the list.
-                    for ( int i = 0; i < size; ++i )
-                    {
-                        //playerList.Add(new Player(inc.ReadString(), ReadCards(inc), ReadCards(inc)));
-                        playerList.Add(ReadPlayer(inc));
-                    }
-
-                    return playerList;
+                case Datatype.RequestRent:
+                {
+                    return ReadRentRequest(inc);
                 }
 
                 case Datatype.LaunchGame:
@@ -92,8 +85,23 @@ namespace GameServer
             // This first string in the message is the player's name.
             // The first list of cards is the Player's CardsInPlay list.
             // The second list of cards is the Player's CardsInHand list.
-            //return new Player(inc.ReadString(), ReadCards(inc), ReadCards(inc));
             return new Player(name, cardsInPlay, cardsInHand);
+        }
+
+        public static List<Player> ReadPlayerList( NetIncomingMessage inc )
+        {
+            // Read the size of the list of players.
+            int size = inc.ReadInt32();
+
+            List<Player> playerList = new List<Player>();
+
+            // Read each name in the message and add it to the list.
+            for ( int i = 0; i < size; ++i )
+            {
+                playerList.Add(ReadPlayer(inc));
+            }
+
+            return playerList;
         }
 
         // Read in a list of cards from an incoming message.
@@ -121,6 +129,17 @@ namespace GameServer
             return cards;
         }
 
+        // Parse the information from the rent request.
+        public static ActionData.RentRequest ReadRentRequest( NetIncomingMessage inc )
+        {
+            string renterName = inc.ReadString();
+            List<Player> rentees = ReadPlayerList(inc);
+            int rentAmount = Convert.ToInt32(inc.ReadString());
+            bool isDoubled = inc.ReadBoolean();
+
+            return new ActionData.RentRequest(renterName, rentees, rentAmount, isDoubled);
+        }
+
         public static void WriteCards( NetOutgoingMessage outmsg, List<Card> cardList )
         {
             if ( cardList != null )
@@ -143,6 +162,15 @@ namespace GameServer
             }
         }
 
+        // Write a rent request. 
+        public static void WriteRentRequest( NetOutgoingMessage outmsg, ActionData.RentRequest request)
+        {
+            outmsg.Write(request.RenterName);
+            WritePlayerList(outmsg, request.Rentees);
+            outmsg.Write(request.RentAmount.ToString());
+            outmsg.Write(request.IsDoubled);
+        }
+
         public static void WritePlayer( NetOutgoingMessage outmsg, Player player )
         {
             // Write the Player's name.
@@ -158,6 +186,18 @@ namespace GameServer
 
             // Write the Player's CardsInHand.
             WriteCards(outmsg, player.CardsInHand);
+        }
+
+        public static void WritePlayerList( NetOutgoingMessage outmsg, List<Player> playerList )
+        {
+            // Write the count of players.
+            outmsg.Write(playerList.Count);
+
+            // Write the name of each player in the game.
+            foreach ( Player player in playerList )
+            {
+                WritePlayer(outmsg, player);
+            }
         }
 
         public static void WriteTurn( NetOutgoingMessage outmsg, Turn turn )
@@ -204,25 +244,20 @@ namespace GameServer
 
                     case Datatype.UpdatePlayer:
                     {
-                        Player player = (Player)updatedObject;
-
-                        WritePlayer(outmsg, player);
+                        WritePlayer(outmsg, (updatedObject as Player));
 
                         break;
                     }
 
                     case Datatype.UpdatePlayerList:
                     {
-                        List<Player> players = (List<Player>)updatedObject;
+                        WritePlayerList(outmsg, (updatedObject as List<Player>));
+                        break;
+                    }
 
-                        // Write the count of players.
-                        outmsg.Write(players.Count);
-
-                        // Write the name of each player in the game.
-                        foreach ( Player player in players )
-                        {
-                            WritePlayer(outmsg, player);
-                        }
+                    case Datatype.RequestRent:
+                    {
+                        WriteRentRequest(outmsg, (updatedObject as ActionData.RentRequest));
                         break;
                     }
 
@@ -246,7 +281,7 @@ namespace GameServer
                 }
             }
 
-            // Send it to the server or a client.
+            // Send it to the server or the clients.
             if ( netPeer is NetServer )
             {
                 NetServer server = netPeer as NetServer;

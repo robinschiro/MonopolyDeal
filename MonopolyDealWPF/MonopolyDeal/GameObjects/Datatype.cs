@@ -14,9 +14,11 @@ namespace GameObjects
         UpdateDiscardPile,
         UpdatePlayer,
         UpdatePlayerList,
+        ReceiveRentRequest,
         RequestDeck,
         RequestDiscardPile,
-        RequestPlayerList
+        RequestPlayerList,
+        RequestRent
 
     }
 }

@@ -71,9 +71,6 @@
       <DependentUpon>MoneyListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MultiBoolConverter.cs" />
-    <Compile Include="RentWindow.xaml.cs">
-      <DependentUpon>RentWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="RoomWindow.xaml.cs">
       <DependentUpon>RoomWindow.xaml</DependentUpon>
     </Compile>
@@ -94,10 +91,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MoneyListView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="RentWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -131,6 +124,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AdditionalWindows\AdditionalWindows.csproj">
+      <Project>{EC3F8A8B-4CF8-4615-AAAB-E30263791508}</Project>
+      <Name>AdditionalWindows</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GameObjects\GameObjects.csproj">
       <Project>{F91299E4-DDEF-4FE7-9ADF-0D731A7D99CB}</Project>
       <Name>GameObjects</Name>

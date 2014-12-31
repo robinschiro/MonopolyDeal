@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Card.cs" />
     <Compile Include="MoneyList.cs" />
+    <Compile Include="ActionData.cs" />
     <Compile Include="Turn.cs" />
     <Compile Include="Datatype.cs" />
     <Compile Include="Deck.cs" />

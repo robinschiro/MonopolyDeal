@@ -10,14 +10,14 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using GameObjects;
-using GameServer;
 using Lidgren.Network;
 using System.Reactive.Linq;
 using System.Reactive;
 using System.Windows.Media.Animation;
 using System.Windows.Data;
-
+using GameObjects;
+using GameServer;
+using AdditionalWindows;
 
 namespace MonopolyDeal
 {
@@ -315,6 +315,20 @@ namespace MonopolyDeal
                             break;
                         }
 
+                        case Datatype.RequestRent:
+                        {
+                            // If the player receives a rent request, check if he is one of the players who must pay rent.
+                            ActionData.RentRequest request = (ActionData.RentRequest)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                            // If he is, open the rent window.
+                            if ( request.Rentees.Any(player => player.Name == this.Player.Name) )
+                            {
+                                CreateNewThread(new Action<Object>(DisplayRentWindow), request);
+                            }
+
+                            break;
+                        }
+
                         case Datatype.EndTurn:
                         {
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
@@ -398,7 +412,8 @@ namespace MonopolyDeal
             // Get the index of the button that called this event.
             int buttonIndex = Grid.GetColumn((sender as Button).Parent as Grid);
 
-            if ( buttonIndex != SelectedCard )
+            // The card should be selected if a) it is not already selected and b) it is the player's turn.
+            if ( (buttonIndex != SelectedCard) && isCurrentTurnOwner && (Turn.NumberOfActions < 3) )
             {
                 // Deselect the currently selected card.
                 if ( SelectedCard != -1 )
@@ -1465,7 +1480,7 @@ namespace MonopolyDeal
         // Increase the size of the currently selected card.
         public void SelectCard( Button cardButton )
         {
-            if ( (null != cardButton) && (Turn.NumberOfActions < 3) )
+            if ( null != cardButton )
             {
                 ScaleTransform myScaleTransform = new ScaleTransform();
                 myScaleTransform.ScaleY = 1.2;
@@ -1567,57 +1582,30 @@ namespace MonopolyDeal
         {
             if ( CardType.Action == actionCard.Type )
             {
-                switch ( actionCard.ActionID )
+                if ( 0 == actionCard.ActionID )
                 {
-
                     // "Pass Go" case.
-                    case 0:
-                    {
-                        DrawCards(2);
-
-                        return true;
-                    }
-
-                    case 1:
-                    {
-                        return true;
-                    }
-
-                    case 2:
-                    {
-                        return true;
-                    }
-
-                    case 3:
-                    {
-                        return true;
-                    }
-
-                    case 4:
-                    {
-                        return true;
-                    }
-
-                    case 5:
-                    {
-                        return true;
-                    }
-
-                    case 6:
-                    {
-                        return true;
-                    }
-
-                    case 7:
-                    {
-                        return true;
-                    }
+                    DrawCards(2);
+                    return true;
                 }
-
-                // If the switch was passed, the action card must be a rent.
-                return CollectRent(actionCard);
-
+                else if ( 5 <= actionCard.ActionID && 7 >= actionCard.ActionID )
+                {
+                    // Steal property
+                }
+                else
+                {
+                    // The card must be a rent card.
+                    return CollectRent(actionCard);
+                }
             }
+
+            return false;
+        }
+
+        // Steal a property or set of properties from a player.
+        private bool StealProperty( Card stealCard )
+        {
+
 
             return false;
         }
@@ -1627,10 +1615,12 @@ namespace MonopolyDeal
         {
             int amountToCollect = 0;
             bool rentDoubled = false;
-            bool targetOnePlayer = false;
 
-            // Money is only collected from one player for these actions.
-            if ( 8 <= rentCard.ActionID && 10 >= rentCard.ActionID )
+            // Only one player is targeted for a "Debt Collector" or a Wild Rent.
+            bool targetOnePlayer = (9 == rentCard.ActionID || 10 == rentCard.ActionID);
+            
+            // The amount of money collected through these actions is not affected by properties or "Double the Rent".
+            if ( 8 == rentCard.ActionID || 9 == rentCard.ActionID )
             {
                 switch ( rentCard.ActionID )
                 {
@@ -1648,19 +1638,15 @@ namespace MonopolyDeal
                         break;
                     }
                 }
-
-                // Only collect money from one player.
-                targetOnePlayer = true;
             }
+            // The rent card must be a property rent card.
             else
             {
                 List<List<Card>> matchingPropertyGroups = new List<List<Card>>();
 
-                // Store the card group that would offer the player the highest return in rent.
-                List<Card> selectedRentalGroup;
-
                 // First, determine which lists on the player's field correpond to the rent card.
-                foreach ( List<Card> cardList in this.Player.CardsInPlay )
+                // Skip the money list.
+                foreach ( List<Card> cardList in this.Player.CardsInPlay.Skip(1) )
                 {
                     PropertyType cardListColor = GetCardListColor(cardList);
                     if ( (PropertyType.Wild == rentCard.Color) || (cardListColor == rentCard.Color) || (cardListColor == rentCard.AltColor) )
@@ -1698,51 +1684,80 @@ namespace MonopolyDeal
                         amountToCollect = totalValue;
                     }
                 }
+
+                // If the player has a "Double the Rent" card and at least two actions remaining, ask if he would like to use it.
+                Card doubleRentCard = FindActionCardInList(this.Player.CardsInHand, 1);
+
+                if ( (null != doubleRentCard) && (this.Turn.NumberOfActions >= 2) )
+                {
+                    MessageBoxResult result = MessageBox.Show("You have a " + doubleRentCard.Name + " card. Would you like to apply it to this rent?",
+                                    "Are you sure?",
+                                    MessageBoxButton.YesNo);
+
+                    rentDoubled = (MessageBoxResult.Yes == result);
+
+                    if ( rentDoubled )
+                    {
+                        // Remove the card from the player's hand and add it to the discard pile.
+                        RemoveCardFromHand((PlayerOneHand.Children[this.Player.CardsInHand.IndexOf(doubleRentCard)] as Grid).Tag as Button);
+                        this.DiscardPile.Add(doubleRentCard);
+                        AddCardToGrid(doubleRentCard, DiscardPileGrid, this.Player, false);
+
+                        // Update the number of actions.
+                        this.Turn.NumberOfActions++;
+                    }
+                }
             }
 
-            // If the player has a "Double the Rent" card and at least two actions remaining, ask if he would like to use it.
-            Card doubleRentCard = FindActionCardInList(this.Player.CardsInHand, 1);
-
-            if ( (null != doubleRentCard) && (this.Turn.NumberOfActions >= 2) )
-            {
-                MessageBoxResult result = MessageBox.Show("You have a " + doubleRentCard.Name + " card. Would you like to apply it to this rent?",
-                                "Are you sure?",
-                                MessageBoxButton.YesNo);
-
-                rentDoubled = (MessageBoxResult.Yes == result);
-
-                // Remove the card from the player's hand and add it to the discard pile.
-                RemoveCardFromHand((PlayerOneHand.Children[this.Player.CardsInHand.IndexOf(doubleRentCard)] as Grid).Tag as Button);
-                this.DiscardPile.Add(doubleRentCard);
-                AddCardToGrid(doubleRentCard, DiscardPileGrid, this.Player, false);
-
-                // Update the number of actions.
-                this.Turn.NumberOfActions++;
-
-            }
+            // Create the list of players receiving the rent request.
+            List<Player> rentees = null;
 
             if (targetOnePlayer)
             {
-                // Display the list of players. Send the "Rent" message to the selected player.
+                // Display the list of players.
+                PlayerSelectionDialog dialog = new PlayerSelectionDialog(this.Player.Name, PlayerList);
+                if ( dialog.enoughPlayers && true == dialog.ShowDialog() )
+                {
+                    // Send the rent request to the selected player.
+                    rentees = new List<Player>() { dialog.SelectedPlayer };
+                }                
             }
             else
             {
-                // Send a "Rent" message to all players
-                RentWindow test = new RentWindow(this.Player, this.Player, amountToCollect, rentDoubled);
-                test.Show();
+                // Send a rent request to all players except for the renter.
+                rentees = new List<Player>(this.PlayerList.Where(player => player.Name != this.Player.Name));
             }
+
+            // Send the message to the server.
+            ServerUtilities.SendMessage(Client, Datatype.RequestRent, new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled));
 
             return true;
         }
+
+        // Display the rent window.
+        private void DisplayRentWindow( Object request )
+        {
+            ActionData.RentRequest rentRequest = (ActionData.RentRequest)request;
+
+            RentWindow rentWindow = new RentWindow(this.Player, rentRequest.RenterName, rentRequest.RentAmount, rentRequest.IsDoubled);
+
+            if ( true == rentWindow.ShowDialog() )
+            {
+                // Transfer the selected assets to the renter and update the server with the new player list.
+
+            }
+
+        }
+
 
         #endregion
 
         #region Miscellaneous
 
         // Create a new thread to run a function that cannot be run on the same thread invoking CreateNewThread().
-        public void CreateNewThread( Action<Object> action )
+        public void CreateNewThread( Action<Object> action, object data = null )
         {
-            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, action, null); };
+            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, action, data); };
             Thread newThread = new Thread(start);
             newThread.Start();
         }
@@ -1842,15 +1857,22 @@ namespace MonopolyDeal
         // Given a list of cards, determine the color of the monopoly being formed by the cards.
         public PropertyType GetCardListColor( List<Card> cardList )
         {
-            foreach ( Card card in cardList )
+            if ( cardList.Count > 0 )
             {
-                if ( PropertyType.None != card.Color && PropertyType.Wild != card.Color )
+                foreach ( Card card in cardList )
                 {
-                    return card.Color;
+                    if ( PropertyType.None != card.Color && PropertyType.Wild != card.Color )
+                    {
+                        return card.Color;
+                    }
                 }
-            }
 
-            return PropertyType.Wild;
+                return PropertyType.Wild;
+            }
+            else
+            {
+                return PropertyType.None;
+            }
         }
 
         // Determine if a card with a given name is in a card list.
