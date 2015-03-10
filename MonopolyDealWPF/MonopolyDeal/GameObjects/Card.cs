@@ -45,6 +45,7 @@ namespace GameObjects
         public PropertyType AltColor { get; set; }
         public string CardImageUriPath { get; set; }
         public int ActionID { get; set; }
+        public int CardID { get; set; }
         public bool IsFlipped { get; set; }
 
         // Constants
@@ -58,7 +59,7 @@ namespace GameObjects
             this.Value = value;
         }
 
-        public Card( string name, CardType type, int value, PropertyType color, PropertyType altColor, string uriPath, int actionID, bool isFlipped = false ) // Create a card given a type, name, and value
+        public Card( string name, CardType type, int value, PropertyType color, PropertyType altColor, string uriPath, int actionID, int cardID, bool isFlipped = false ) // Create a card given a type, name, and value
         {
             this.Name = name;
             this.Type = type;
@@ -67,6 +68,7 @@ namespace GameObjects
             this.AltColor = altColor;
             this.CardImageUriPath = uriPath;
             this.ActionID = actionID;
+            this.CardID = cardID;
             this.IsFlipped = isFlipped;
         }
 

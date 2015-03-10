@@ -210,7 +210,7 @@ namespace MonopolyDeal
 
         private void LaunchGameButton_Click( object sender, RoutedEventArgs e )
         {
-            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayerList);
+            ServerUtilities.SendMessage(Client, Datatype.LaunchGame);
         }
 
         #endregion

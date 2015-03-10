@@ -183,13 +183,32 @@ namespace GameServer
                                     break;
                                 }
 
-                                // Update the server's PlayerList. This case should be hit only when a client launches the game.
+                                // Update the server's Player List and send it to the clients.
                                 case Datatype.UpdatePlayerList:
+                                {
+                                    PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
+                                    }
+
+                                    break;
+                                }
+
+                                // Set up the players for the game. This case should be hit only when a client launches the game.
+                                case Datatype.LaunchGame:
                                 {
                                     // Deal the initial hands to the players.
                                     for ( int i = 0; i < PlayerList.Count; ++i )
                                     {
                                         PlayerList[i] = new Player(Deck, PlayerList[i].Name);
+                                    }
+
+                                    // Send the Player List to the clients.
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
                                     }
 
                                     // Generate the Turn object to keep track of the current turn.
@@ -235,11 +254,6 @@ namespace GameServer
                                         ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
                                     }
 
-                                    break;
-                                }
-
-                                case Datatype.RequestDiscardPile:
-                                {
                                     break;
                                 }
 

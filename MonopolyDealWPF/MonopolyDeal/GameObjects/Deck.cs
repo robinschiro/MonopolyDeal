@@ -43,6 +43,9 @@ namespace GameObjects
         {
             CardList = new List<Card>();
             string[] files = GetResourcesInFolder("Images");
+            
+            // Each card must have a unique ID.
+            int cardID = 0;
 
             // Alphabetize the file names.
             files = files.OrderBy(d => d).ToArray();
@@ -60,7 +63,10 @@ namespace GameObjects
                     uriPath = "pack://application:,,,/GameObjects;component/Images/" + files[i];
                     actionID = (cardProfile.sValue("-ActionID", "") == "") ? -1 : Convert.ToInt32((cardProfile.sValue("-ActionID", "")));
 
-                    CardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath, actionID));                  
+                    CardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath, actionID, cardID));
+                  
+                    // Iterate the card ID so that it is different for the next card.
+                    cardID++;
                 }
             }
 

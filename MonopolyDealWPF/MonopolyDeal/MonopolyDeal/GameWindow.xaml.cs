@@ -175,7 +175,7 @@ namespace MonopolyDeal
             while ( this.PlayerList == null ) ;
 
             // Find the Player in the PlayerList.
-            this.Player = FindPlayerInList(playerName);
+            this.Player = (Player)this.PlayerList.Find(player => player.Name == playerName);
 
             // Assign the hands and playing fields of opponents to appropriate areas of the client's screen.
             AssignPlayersToGrids();
@@ -310,7 +310,19 @@ namespace MonopolyDeal
                         {
                             this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            CreateNewThread(new Action<Object>(DisplayOpponentCards));
+                            if ( null != this.Player )
+                            {
+                                this.Player = (Player)this.PlayerList.Find(player => player.Name == this.Player.Name);
+
+                                // Be sure that the player's MoneyList is properly set. This is the quick solution, not necessarily the correct solution.
+                                foreach ( Card card in this.Player.CardsInPlay[0] )
+                                {
+                                    this.Player.MoneyList.Add(card);
+                                }
+                            }
+
+                            // Display everyone's cards in play.
+                            CreateNewThread(new Action<Object>(DisplayAllCardsInPlay));
 
                             break;
                         }
@@ -358,7 +370,7 @@ namespace MonopolyDeal
 
         public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
-            if ( FindPlayerPositionInPlayerList(this.Player.Name) == this.Turn.CurrentTurnOwner && this.Turn.NumberOfActions < 3 )
+            if ( isCurrentTurnOwner && this.Turn.NumberOfActions < 3 )
             {
                 Button cardButton = sender as Button;
 
@@ -383,7 +395,6 @@ namespace MonopolyDeal
                             AddCardToGrid(cardBeingPlayed, DiscardPileGrid, this.Player, false);
                             cardWasPlayed = true;
                         }
-
                     }
 
                     if ( cardWasPlayed )
@@ -772,6 +783,44 @@ namespace MonopolyDeal
             }
         }
 
+        // Display the cards of the player's opponents.
+        public void DisplayOpponentCards( Object filler = null )
+        {
+            // If the other players have not been assigned to their respective areas of the client's window,
+            // assign them now.
+            if ( !HavePlayersBeenAssigned )
+            {
+                AssignPlayersToGrids();
+            }
+
+            foreach ( Player player in PlayerList )
+            {
+                // Skip the player that represents this client.
+                if ( this.Player.Name != player.Name )
+                {
+                    // Update the display of the opponent's cards in play.
+                    DisplayCardsInPlay(player, PlayerFieldDictionary[player.Name]);
+
+                    // Update the display of the opponent's hand.
+                    ClearCardsInGrid(PlayerHandDictionary[player.Name]);
+                    foreach ( Card card in player.CardsInHand )
+                    {
+                        Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
+                        AddCardToGrid(cardBack, PlayerHandDictionary[player.Name], player, true);
+                    }
+                }
+            }
+        }
+
+        public void DisplayAllCardsInPlay( Object filler = null )
+        {
+            // Display the opponents' cards.
+            DisplayOpponentCards();
+
+            // Display the Player's cards in play as well.
+            DisplayCardsInPlay(this.Player, PlayerOneField);            
+        }
+
         // Update the card displayed in the InfoBox.
         public void DisplayCardInInfobox( Card card )
         {
@@ -859,66 +908,11 @@ namespace MonopolyDeal
             }
         }
 
-        // Display the cards of the player's opponents.
-        public void DisplayOpponentCards( Object filler )
-        {
-            // If the other players have not been assigned to their respective areas of the client's window,
-            // assign them now.
-            if ( !HavePlayersBeenAssigned )
-            {
-                AssignPlayersToGrids();
-            }
-
-            foreach ( Player player in PlayerList )
-            {
-                // Skip the player that represents this client.
-                if ( this.Player.Name != player.Name )
-                {
-                    // Update the display of the opponent's cards in play.
-                    DisplayCardsInPlay(player, PlayerFieldDictionary[player.Name]);
-
-                    // Update the display of the opponent's hand.
-                    ClearCardsInGrid(PlayerHandDictionary[player.Name]);
-                    foreach ( Card card in player.CardsInHand )
-                    {
-                        Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
-                        AddCardToGrid(cardBack, PlayerHandDictionary[player.Name], player, true);
-                    }
-                }
-            }
-
-        }
-
-
         // Clear all of the card buttons from a given grid.
         public void ClearCardsInGrid( Grid playerField )
         {
             playerField.Children.Clear();
         }
-
-        // Determines if a property card is of the same color as another property card.
-        // TODO: Account for houses and hotels being added to monopolies.
-        public bool CheckPropertyCompatibility( Card propOne, Card propTwo )
-        {
-            if ( propOne.Type != CardType.Property || propTwo.Type != CardType.Property )
-            {
-                return false;
-            }
-
-            // There is probably a better way to compare the cards' PropertyTypes, but this works for now.
-            if ( ((propOne.Color == propTwo.Color) && (propOne.Color != PropertyType.None)) ||
-                    ((propOne.AltColor == propTwo.AltColor) && (propOne.AltColor != PropertyType.None)) ||
-                    ((propOne.Color == propTwo.AltColor) && (propOne.Color != PropertyType.None)) ||
-                    ((propOne.AltColor == propTwo.Color) && (propOne.Color != PropertyType.None)) ||
-                    ((propOne.Color == PropertyType.Wild) || (propTwo.Color == PropertyType.Wild)) )
-            {
-                return true;
-            }
-
-            return false;
-
-        }
-
 
         // When a card is added to the Player's CardsInPlay, it must be placed in the same list as compatible properties
         // that have already been played. If no compatible properties have been played, a new list is created for the card.
@@ -978,6 +972,7 @@ namespace MonopolyDeal
 
                     if ( PropertyType.Wild != cardBeingAdded.Color )
                     {
+                        // ROBIN TODO: Instead of doing nothing and returning false, the card should be added to a new list.
                         if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.Color) )
                         {
                             return false;
@@ -1055,17 +1050,26 @@ namespace MonopolyDeal
         // Remove a card from a player's CardsInPlay. If it is the last card in a list, remove the list as well (unless it is the money list).
         public void RemoveCardFromCardsInPlay( Card cardBeingRemoved, Player player )
         {
+            int indexOfList = 0;
+
             for ( int i = 0; i < player.CardsInPlay.Count; ++i )
             {
-                if ( player.CardsInPlay[i].Remove(cardBeingRemoved) )
+                // Determine if the card list contains the card being removed.
+                if ( player.CardsInPlay[i].Any(card => card.CardID == cardBeingRemoved.CardID) )
                 {
-                    if ( (0 == player.CardsInPlay[i].Count) && (0 != i) )
-                    {
-                        player.CardsInPlay.Remove(player.CardsInPlay[i]);
-                    }
-                    return;
+                    // Remove the card.
+                    player.CardsInPlay[i] = new List<Card>(player.CardsInPlay[i].Where(card => card.CardID != cardBeingRemoved.CardID));
+                    indexOfList = i;
+                    break; ;
                 }
             }
+
+            // If a card list becomes empty as a result of the previous operation, remove it.
+            if ( (0 != indexOfList) && (0 == player.CardsInPlay[indexOfList].Count) )
+            {
+                player.CardsInPlay.Remove(player.CardsInPlay[indexOfList]);
+            }
+
         }
 
         // Add a card to a specified grid.
@@ -1078,7 +1082,7 @@ namespace MonopolyDeal
             cardButton.MouseLeave += new MouseEventHandler(cardButton_MouseLeave);
 
             // If a card is being added to the client's hand, attach these events to it and display it.
-            if ( isHand && player == this.Player )
+            if ( isHand && player.Name == this.Player.Name )
             {
                 cardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
 
@@ -1193,7 +1197,7 @@ namespace MonopolyDeal
                     {
                         // Create context menu that allows the user to reorder properties.
                         // This if statement is required to prevent players from seeing the context menu of other players' cards in play.
-                        if ( player == this.Player )
+                        if ( player.Name == this.Player.Name )
                         {
                             // Create the appropriate context menu.
                             ContextMenu menu = new ContextMenu();
@@ -1448,7 +1452,7 @@ namespace MonopolyDeal
         public void RemoveCardFromHand( Button cardButton )
         {
             // Remove the card from the Player's CardsInHand list.
-            Player.CardsInHand.Remove(cardButton.Tag as Card);
+            Player.CardsInHand = new List<Card>(Player.CardsInHand.Where(card => card.CardID != (cardButton.Tag as Card).CardID));
 
             // Get the index of the card button.
             int buttonIndex = Grid.GetColumn(cardButton.Parent as Grid);
@@ -1738,15 +1742,31 @@ namespace MonopolyDeal
         private void DisplayRentWindow( Object request )
         {
             ActionData.RentRequest rentRequest = (ActionData.RentRequest)request;
+            String renterName = this.PlayerList.Find(player => player.Name == rentRequest.RenterName).Name;
 
-            RentWindow rentWindow = new RentWindow(this.Player, rentRequest.RenterName, rentRequest.RentAmount, rentRequest.IsDoubled);
+            RentWindow rentWindow = new RentWindow(this.Player, renterName, rentRequest.RentAmount, rentRequest.IsDoubled);
 
             if ( true == rentWindow.ShowDialog() )
             {
                 // Transfer the selected assets to the renter and update the server with the new player list.
+                List<Card> payment = rentWindow.Payment.ToList<Card>();             
+   
+                // Now that the renter's hand has been updated, retrieve the player object representing the renter.
+                Player renter = this.PlayerList.Find(player => player.Name == rentRequest.RenterName);
 
+                foreach ( Card card in payment )
+                {
+                    RemoveCardFromCardsInPlay(card, this.Player);
+                    AddCardToCardsInPlay(card, renter);
+                }
+                
+                // Display this player's updated CardsInPlay.
+                DisplayCardsInPlay(this.Player, PlayerOneField);
+
+                // Send the updated players to the server.
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, renter);
             }
-
         }
 
 
@@ -1786,7 +1806,7 @@ namespace MonopolyDeal
             {
                 foreach ( Card card in cardList )
                 {
-                    if ( card == cardBeingFound )
+                    if ( card.CardID == cardBeingFound.CardID )
                     {
                         return cardList;
                     }
@@ -1803,20 +1823,6 @@ namespace MonopolyDeal
                 if ( actionID == card.ActionID )
                 {
                     return card;
-                }
-            }
-
-            return null;
-        }
-
-        // Given a player's name, find the matching Player object in the PlayerList (there is only one PlayerList).
-        private Player FindPlayerInList( string playerName )
-        {
-            foreach ( Player player in PlayerList )
-            {
-                if ( player.Name == playerName )
-                {
-                    return player;
                 }
             }
 

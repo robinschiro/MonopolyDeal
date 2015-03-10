@@ -156,6 +156,7 @@ namespace AdditionalWindows
         private void PayButton_Click( object sender, RoutedEventArgs e )
         {
             closeWindow = true;
+            this.DialogResult = true;
             this.Close();
         }
     }
