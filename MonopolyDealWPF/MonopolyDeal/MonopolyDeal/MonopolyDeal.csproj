@@ -136,6 +136,10 @@
       <Project>{53DC5651-715E-408D-9245-2CCFB440336A}</Project>
       <Name>GameServer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.csproj">
+      <Project>{6AB015B0-4FF5-43E9-B5BC-48883A62F7B8}</Project>
+      <Name>Utilities</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

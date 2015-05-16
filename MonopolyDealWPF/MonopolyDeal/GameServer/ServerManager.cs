@@ -8,6 +8,7 @@ using System.Windows.Media.Imaging;
 using GameObjects;
 using tvToolbox;
 using Lidgren.Network;
+using Utilities;
 
 
 // Lidgren Network example
@@ -231,6 +232,19 @@ namespace GameServer
                                     if ( Server.ConnectionsCount != 0 )
                                     {
                                         ServerUtilities.SendMessage(Server, Datatype.RequestRent, request);
+                                    }
+
+                                    break;
+                                }
+
+                                // Send the rent response to all clients.
+                                case Datatype.GiveRent:
+                                {
+                                    ActionData.RentResponse request = (ActionData.RentResponse)ServerUtilities.ReadRentResponse(inc);
+
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.GiveRent, request);
                                     }
 
                                     break;

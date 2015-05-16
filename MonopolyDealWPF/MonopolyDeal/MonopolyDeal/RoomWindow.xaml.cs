@@ -19,8 +19,11 @@ namespace MonopolyDeal
         private Player Player;
         private string ServerIP;
         private bool BeginCommunication;
+        private bool Disconnected = false;
         private List<Player> PlayerList;
         private volatile Turn Turn;
+        private string PlayerName;
+        private SendOrPostCallback Callback;
 
         //// This is part of a failed attempt to use Binding. Binding currently does not work because non-UI threads cannot change the contents of
         //// observable collections. We should keep this code here in case we want to revisit binding in the future.
@@ -66,6 +69,7 @@ namespace MonopolyDeal
             this.DataContext = this;
             this.ServerIP = ipAddress;
             this.BeginCommunication = false;
+            this.PlayerName = playerName;
             //this.PlayerList = new ObservableCollection<GameObjects.Player>();
 
             InitializeClient(ipAddress);
@@ -114,7 +118,8 @@ namespace MonopolyDeal
             SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
 
             // Register the 'GotMessage' method as a callback function for received updates.
-            Client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage));
+            this.Callback = new SendOrPostCallback(GotMessage);
+            Client.RegisterReceivedCallback(this.Callback);
         }
 
         // Update the client's window based on messages received from the server. This method is called as soon as the client
@@ -127,8 +132,10 @@ namespace MonopolyDeal
             if ( false == this.BeginCommunication )
             {
                 // Continue reading messages until the requested update is received.
-                while ( !updateReceived )
+                while ( !updateReceived && !this.Disconnected )
                 {
+                    Console.WriteLine(this.PlayerName + " stuck in begin");
+
                     // Iterate through all of the available messages.
                     while ( (inc = (peer as NetPeer).ReadMessage()) != null )
                     {
@@ -169,6 +176,8 @@ namespace MonopolyDeal
 
                         case Datatype.LaunchGame:
                         {
+                            Console.WriteLine(this.Player.Name + " received Launch");
+
                             // Receive the data related to the current turn from the server.
                             Turn Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.LaunchGame);
 
@@ -190,6 +199,8 @@ namespace MonopolyDeal
             // the Client's callback messages were not registering. Therefore, each client is disconnected from the server before launching the game.
             // A new Client object is created and connected to the server when the GameWindow is constructed.
             Client.Disconnect("Bye");
+            Client.UnregisterReceivedCallback(this.Callback);
+            this.Disconnected = true;
 
             GameWindow gameWindow = new GameWindow(this.Player.Name, this.ServerIP, turn);
             gameWindow.Show();

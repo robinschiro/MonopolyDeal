@@ -42,6 +42,11 @@ namespace GameServer
                     return ReadRentRequest(inc);
                 }
 
+                case Datatype.GiveRent:
+                {
+                    return ReadRentResponse(inc);
+                }
+
                 case Datatype.LaunchGame:
                 {
                     return ReadTurn(inc);
@@ -141,6 +146,15 @@ namespace GameServer
             return new ActionData.RentRequest(renterName, rentees, rentAmount, isDoubled);
         }
 
+        // Parse the information from the rent response.
+        public static ActionData.RentResponse ReadRentResponse( NetIncomingMessage inc )
+        {
+            string renterName = inc.ReadString();
+            List<Card> assetsGiven = ReadCards(inc);
+
+            return new ActionData.RentResponse(renterName, assetsGiven);
+        }
+
         public static void WriteCards( NetOutgoingMessage outmsg, List<Card> cardList )
         {
             if ( cardList != null )
@@ -171,6 +185,13 @@ namespace GameServer
             WritePlayerList(outmsg, request.Rentees);
             outmsg.Write(request.RentAmount.ToString());
             outmsg.Write(request.IsDoubled);
+        }
+
+        // Write a rent response. 
+        public static void WriteRentResponse( NetOutgoingMessage outmsg, ActionData.RentResponse request )
+        {
+            outmsg.Write(request.RenterName);
+            WriteCards(outmsg, request.AssetsGiven);
         }
 
         public static void WritePlayer( NetOutgoingMessage outmsg, Player player )
@@ -262,6 +283,13 @@ namespace GameServer
                         WriteRentRequest(outmsg, (updatedObject as ActionData.RentRequest));
                         break;
                     }
+
+                    case Datatype.GiveRent:
+                    {
+                        WriteRentResponse(outmsg, (updatedObject as ActionData.RentResponse));
+                        break;
+                    }
+
 
                     case Datatype.LaunchGame:
                     {

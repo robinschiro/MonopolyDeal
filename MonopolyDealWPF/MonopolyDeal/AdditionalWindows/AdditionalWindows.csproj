@@ -48,6 +48,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MessageDialog.xaml.cs">
+      <DependentUpon>MessageDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PropertyTheftWindow.xaml.cs">
+      <DependentUpon>PropertyTheftWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PlayerSelectionDialog.xaml.cs">
       <DependentUpon>PlayerSelectionDialog.xaml</DependentUpon>
     </Compile>
@@ -57,6 +63,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="MessageDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PropertyTheftWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="PlayerSelectionDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -70,6 +84,10 @@
     <ProjectReference Include="..\GameObjects\GameObjects.csproj">
       <Project>{F91299E4-DDEF-4FE7-9ADF-0D731A7D99CB}</Project>
       <Name>GameObjects</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.csproj">
+      <Project>{6AB015B0-4FF5-43E9-B5BC-48883A62F7B8}</Project>
+      <Name>Utilities</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

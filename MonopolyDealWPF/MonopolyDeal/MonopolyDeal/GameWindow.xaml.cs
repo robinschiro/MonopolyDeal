@@ -18,15 +18,19 @@ using System.Windows.Data;
 using GameObjects;
 using GameServer;
 using AdditionalWindows;
+using Utilities;
 
 namespace MonopolyDeal
 {
 
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for GameWindow.xaml
     /// </summary>
     public partial class GameWindow : Window, IGameClient, INotifyPropertyChanged
     {
+
+        #region Variables
+
         private Deck Deck;
         private Player Player;
         private List<Player> PlayerList;
@@ -40,26 +44,11 @@ namespace MonopolyDeal
         private bool HavePlayersBeenAssigned;
         private Turn Turn;
         private List<Card> DiscardPile;
+        private int NumberOfRentees = 0;
+        private List<Card> AssetsReceived = new List<Card>();
+        WaitDialog WaitMessage;
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-        // For each type of property, store the number of cards of that property type that make up a complete monopoly
-        // ROBIN TODO: Think of a way to do this without hardcoding the data.
-        private Dictionary<PropertyType, int> MonopolyData = new Dictionary<PropertyType, int>()
-        {
-            {PropertyType.Blue, 2},
-            {PropertyType.Brown, 2},
-            {PropertyType.Green, 3},
-            {PropertyType.LightBlue, 3},
-            {PropertyType.Orange, 3},
-            {PropertyType.Pink, 3},
-            {PropertyType.Railroad, 4},
-            {PropertyType.Red, 3},
-            {PropertyType.Utility, 2},
-            {PropertyType.Wild, 0},
-            {PropertyType.Yellow, 3},
-            {PropertyType.None, -1}
-        };
 
         private Dictionary<PropertyType, Dictionary<int, int>> RentData = new Dictionary<PropertyType, Dictionary<int, int>>()
         {
@@ -142,6 +131,8 @@ namespace MonopolyDeal
         //Testing something called AttachedProperties. Allows function calls upon triggers. 
         //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
         private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
+
+        #endregion Variables
 
         public GameWindow( string playerName, string ipAddress, Turn turn )
         {
@@ -329,13 +320,27 @@ namespace MonopolyDeal
 
                         case Datatype.RequestRent:
                         {
-                            // If the player receives a rent request, check if he is one of the players who must pay rent.
+                            // Retrieve the request.
                             ActionData.RentRequest request = (ActionData.RentRequest)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            // If he is, open the rent window.
+                            // Check if the player is one of the players who must pay rent. If he is, open the rent window.
                             if ( request.Rentees.Any(player => player.Name == this.Player.Name) )
                             {
                                 CreateNewThread(new Action<Object>(DisplayRentWindow), request);
+                            }
+
+                            break;
+                        }
+
+                        case Datatype.GiveRent:
+                        {
+                            // Retrieve the request.
+                            ActionData.RentResponse request = (ActionData.RentResponse)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                            // If this player is the renter who originally requested the rent, add the AssetsGiven to the player's AssetsReceived list.
+                            if ( request.RenterName == this.Player.Name )
+                            {
+                                CreateNewThread(new Action<Object>(ProcessReceivedRent), request);
                             }
 
                             break;
@@ -548,7 +553,7 @@ namespace MonopolyDeal
         {
             Button targetCardButton = sender as Button;
             List<Card> targetCardList = FindListContainingCard(targetCardButton.Tag as Card);
-            PropertyType targetCardListColor = GetCardListColor(targetCardList);
+            PropertyType targetCardListColor = ClientUtilities.GetCardListColor(targetCardList);
 
             Button sourceCardButton = e.Data.GetData(typeof(Button)) as Button;
             Card sourceCard = sourceCardButton.Tag as Card;
@@ -556,7 +561,7 @@ namespace MonopolyDeal
             // Do not allow a drag-drop operation to occur if the source and target are the same objects.
             if ( sourceCardButton != targetCardButton )
             {
-                bool isMonopoly = IsCardListMonopoly(targetCardList);
+                bool isMonopoly = ClientUtilities.IsCardListMonopoly(targetCardList);
 
                 if ( !isMonopoly && (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || PropertyType.Wild == targetCardListColor) )
                 {
@@ -927,7 +932,7 @@ namespace MonopolyDeal
                 {
                     // Add the house to an existing monopoly or the hotel to a monopoly that has a house. The card should not be removed from the player's hand
                     // unless it is placed in a monopoly.
-                    List<List<Card>> monopolies = FindMonopolies(player);
+                    List<List<Card>> monopolies = ClientUtilities.FindMonopolies(player);
 
                     if ( "House" == cardBeingAdded.Name )
                     {
@@ -965,9 +970,9 @@ namespace MonopolyDeal
                     // If a monopoly of the card's color already exists, then the card cannot be played.
                     List<PropertyType> colorsOfCurrentMonopolies = new List<PropertyType>();
 
-                    foreach ( List<Card> cardList in FindMonopolies(player) )
+                    foreach ( List<Card> cardList in ClientUtilities.FindMonopolies(player) )
                     {
-                        colorsOfCurrentMonopolies.Add(GetCardListColor(cardList));
+                        colorsOfCurrentMonopolies.Add(ClientUtilities.GetCardListColor(cardList));
                     }
 
                     if ( PropertyType.Wild != cardBeingAdded.Color )
@@ -983,10 +988,10 @@ namespace MonopolyDeal
                         {
                             List<Card> cardList = player.CardsInPlay[i];
 
-                            PropertyType cardListColor = GetCardListColor(cardList);
+                            PropertyType cardListColor = ClientUtilities.GetCardListColor(cardList);
 
                             // If the cardlist is not a monopoly and is compatible with the card being added, add the card to the list.
-                            if ( !IsCardListMonopoly(cardList) && (cardListColor == cardBeingAdded.Color || PropertyType.Wild == cardListColor) )
+                            if ( !ClientUtilities.IsCardListMonopoly(cardList) && (cardListColor == cardBeingAdded.Color || PropertyType.Wild == cardListColor) )
                             {
                                 cardList.Add(cardBeingAdded);
                                 AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(cardList));
@@ -1224,9 +1229,9 @@ namespace MonopolyDeal
                                     // Check to see if the flipped card can be added to the player's CardsInPlay.
                                     // If it cannot, do not do anything.
                                     List<PropertyType> colorsOfCurrentMonopolies = new List<PropertyType>();
-                                    foreach ( List<Card> cardList in FindMonopolies(Player) )
+                                    foreach ( List<Card> cardList in ClientUtilities.FindMonopolies(Player) )
                                     {
-                                        colorsOfCurrentMonopolies.Add(GetCardListColor(cardList));
+                                        colorsOfCurrentMonopolies.Add(ClientUtilities.GetCardListColor(cardList));
                                     }
                                     if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.AltColor) )
                                     {
@@ -1595,6 +1600,7 @@ namespace MonopolyDeal
                 else if ( 5 <= actionCard.ActionID && 7 >= actionCard.ActionID )
                 {
                     // Steal property
+                    StealProperty(actionCard);
                 }
                 else
                 {
@@ -1609,7 +1615,16 @@ namespace MonopolyDeal
         // Steal a property or set of properties from a player.
         private bool StealProperty( Card stealCard )
         {
+            // Display the list of players.
+            PlayerSelectionDialog dialog = new PlayerSelectionDialog(this.Player.Name, PlayerList);
+            if ( dialog.enoughPlayers && true == dialog.ShowDialog() )
+            {
+                // Display the property theft window.
+                PropertyTheftWindow propertyTheftWindow = new PropertyTheftWindow(dialog.SelectedPlayer, this.Player, stealCard.ActionID);
 
+                if ( true == propertyTheftWindow.ShowDialog() ) { };
+
+            }   
 
             return false;
         }
@@ -1652,7 +1667,7 @@ namespace MonopolyDeal
                 // Skip the money list.
                 foreach ( List<Card> cardList in this.Player.CardsInPlay.Skip(1) )
                 {
-                    PropertyType cardListColor = GetCardListColor(cardList);
+                    PropertyType cardListColor = ClientUtilities.GetCardListColor(cardList);
                     if ( (PropertyType.Wild == rentCard.Color) || (cardListColor == rentCard.Color) || (cardListColor == rentCard.AltColor) )
                     {
                         matchingPropertyGroups.Add(cardList);
@@ -1681,7 +1696,7 @@ namespace MonopolyDeal
                     int numProperties = cardList.Count - ( (null != house) ? (1) : (0) ) - ( (null != hotel) ? (1) : (0) );
 
                     // Calculate the total value of the set.
-                    int totalValue = RentData[GetCardListColor(cardList)][numProperties] + ((null != house) ? (house.Value) : (0)) + ((null != hotel) ? (hotel.Value) : (0));
+                    int totalValue = RentData[ClientUtilities.GetCardListColor(cardList)][numProperties] + ((null != house) ? (house.Value) : (0)) + ((null != hotel) ? (hotel.Value) : (0));
 
                     if ( totalValue > amountToCollect )
                     {
@@ -1692,7 +1707,7 @@ namespace MonopolyDeal
                 // If the player has a "Double the Rent" card and at least two actions remaining, ask if he would like to use it.
                 Card doubleRentCard = FindActionCardInList(this.Player.CardsInHand, 1);
 
-                if ( (null != doubleRentCard) && (this.Turn.NumberOfActions >= 2) )
+                if ( (null != doubleRentCard) && (this.Turn.NumberOfActions < 2) )
                 {
                     MessageBoxResult result = MessageBox.Show("You have a " + doubleRentCard.Name + " card. Would you like to apply it to this rent?",
                                     "Are you sure?",
@@ -1718,6 +1733,9 @@ namespace MonopolyDeal
 
             if (targetOnePlayer)
             {
+                // Prevent the renter from performing any action until all rentees have paid their rent.
+                NumberOfRentees = 1;
+
                 // Display the list of players.
                 PlayerSelectionDialog dialog = new PlayerSelectionDialog(this.Player.Name, PlayerList);
                 if ( dialog.enoughPlayers && true == dialog.ShowDialog() )
@@ -1728,12 +1746,20 @@ namespace MonopolyDeal
             }
             else
             {
+                // Prevent the renter from performing any action until all rentees have paid their rent.
+                NumberOfRentees = PlayerList.Count - 1;
+
                 // Send a rent request to all players except for the renter.
                 rentees = new List<Player>(this.PlayerList.Where(player => player.Name != this.Player.Name));
             }
 
             // Send the message to the server.
             ServerUtilities.SendMessage(Client, Datatype.RequestRent, new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled));
+
+            // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
+            // ROBIN TODO: Show some sort of progress bar.
+            WaitMessage = new WaitDialog("Waiting for rentees to pay rent...");
+            WaitMessage.ShowDialog();
 
             return true;
         }
@@ -1742,31 +1768,74 @@ namespace MonopolyDeal
         private void DisplayRentWindow( Object request )
         {
             ActionData.RentRequest rentRequest = (ActionData.RentRequest)request;
-            String renterName = this.PlayerList.Find(player => player.Name == rentRequest.RenterName).Name;
+            //String renterName = this.PlayerList.Find(player => player.Name == rentRequest.RenterName).Name;
+            String renterName = rentRequest.RenterName;
 
             RentWindow rentWindow = new RentWindow(this.Player, renterName, rentRequest.RentAmount, rentRequest.IsDoubled);
 
             if ( true == rentWindow.ShowDialog() )
             {
-                // Transfer the selected assets to the renter and update the server with the new player list.
+                // Retrieve the list of cards that the rentee selected as payment.
                 List<Card> payment = rentWindow.Payment.ToList<Card>();             
    
-                // Now that the renter's hand has been updated, retrieve the player object representing the renter.
+                // Retrieve the player object representing the renter.
                 Player renter = this.PlayerList.Find(player => player.Name == rentRequest.RenterName);
 
+                // Remove the cards of the payment from the rentee.
                 foreach ( Card card in payment )
                 {
                     RemoveCardFromCardsInPlay(card, this.Player);
-                    AddCardToCardsInPlay(card, renter);
                 }
                 
                 // Display this player's updated CardsInPlay.
                 DisplayCardsInPlay(this.Player, PlayerOneField);
 
-                // Send the updated players to the server.
+                // Send the updated rentee to the server and a RentResponse to the renter.
                 ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
-                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, renter);
+                ServerUtilities.SendMessage(Client, Datatype.GiveRent, new ActionData.RentResponse(renterName, payment));
             }
+        }
+
+        // Process a rent response for the renter.
+        private void ProcessReceivedRent( Object request )
+        {
+            ActionData.RentResponse rentResponse = (ActionData.RentResponse)request;
+
+            // Verify that there still exists renters who have not paid their rent.
+            if ( this.NumberOfRentees > 0 )
+            {
+                this.AssetsReceived.AddRange(rentResponse.AssetsGiven);
+
+                // Update the number of remaining rentees.
+                this.NumberOfRentees--;
+
+                // If all rentees have paid their rent, then add the cards from the AssetsReceived to the player's CardsInPlay.
+                if ( 0 == this.NumberOfRentees )
+                {
+                    foreach ( Card card in this.AssetsReceived )
+                    {
+                        AddCardToCardsInPlay(card, this.Player);
+                    }
+
+                    // Clear the list of AssetsReceived.
+                    AssetsReceived.Clear();
+
+                    // Send the updated player to the server.
+                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+
+                    // Update the wait dialog.
+                    if ( null != WaitMessage )
+                    {
+                        WaitMessage.CloseWindow = true;
+                        WaitMessage.Close();
+                    }
+                }
+            }
+            else
+            {
+                throw new Exception("Rent Responses out of sync");
+            }
+            
         }
 
 
@@ -1843,46 +1912,8 @@ namespace MonopolyDeal
             return -1;
         }
 
-        // Return a list of the indices (where each index is a position in the Player's CardsInPlay) of all monopolies.
-        public List<List<Card>> FindMonopolies( Player player )
-        {
-            List<List<Card>> monopolies = new List<List<Card>>();
-
-            // Iterate through the card lists. Always skip the first one, since it is reserved for money.
-            for ( int i = 1; i < player.CardsInPlay.Count; ++i )
-            {
-                if ( IsCardListMonopoly(player.CardsInPlay[i]) )
-                {
-                    monopolies.Add(player.CardsInPlay[i]);
-                }
-            }
-
-            return monopolies;
-        }
-
-        // Given a list of cards, determine the color of the monopoly being formed by the cards.
-        public PropertyType GetCardListColor( List<Card> cardList )
-        {
-            if ( cardList.Count > 0 )
-            {
-                foreach ( Card card in cardList )
-                {
-                    if ( PropertyType.None != card.Color && PropertyType.Wild != card.Color )
-                    {
-                        return card.Color;
-                    }
-                }
-
-                return PropertyType.Wild;
-            }
-            else
-            {
-                return PropertyType.None;
-            }
-        }
-
         // Determine if a card with a given name is in a card list.
-        public bool IsCardInCardList( string name, List<Card> cardList )
+        public static bool IsCardInCardList( string name, List<Card> cardList )
         {
             foreach ( Card cardInMonopoly in cardList )
             {
@@ -1890,31 +1921,6 @@ namespace MonopolyDeal
                 {
                     return true;
                 }
-            }
-
-            return false;
-        }
-
-        // Determine if a provided card list is a monopoly.
-        public bool IsCardListMonopoly( List<Card> cardList )
-        {
-            PropertyType monopolyColor = GetCardListColor(cardList);
-            int countOfProperties = 0;
-
-            // First count the number of properties in the list. This algorithm excludes houses and hotels from the count.
-            foreach ( Card card in cardList )
-            {
-                if ( card.Color != PropertyType.None )
-                {
-                    countOfProperties++;
-                }
-            }
-
-            // If the number of properties in the list matches the number required for a monopoly of that color, it is a monopoly.
-            // If the monopolyColor is 'Wild', then the list must contain only Multicolor Property Wild Card(s).
-            if ( PropertyType.Wild != monopolyColor && countOfProperties == MonopolyData[monopolyColor] )
-            {
-                return true;
             }
 
             return false;

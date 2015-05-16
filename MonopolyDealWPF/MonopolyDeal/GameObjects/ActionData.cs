@@ -24,5 +24,18 @@ namespace GameObjects
                 this.IsDoubled = isDoubled;
             }
         }
+
+        // The response should contain the name of the player collecting the rent and the list of assets given.
+        public class RentResponse
+        {
+            public string RenterName;
+            public List<Card> AssetsGiven;
+
+            public RentResponse( string renterName, List<Card> assetsGiven )
+            {
+                this.RenterName = renterName;
+                this.AssetsGiven = assetsGiven;
+            }
+        }
     }
 }
