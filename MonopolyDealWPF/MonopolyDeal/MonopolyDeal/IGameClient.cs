@@ -14,7 +14,7 @@ namespace MonopolyDeal
 
         void DisplayOpponentCards( Object filler = null );
         void AddCardToGrid( Card card, Grid grid, Player player, bool isHand, int position );
-        void RemoveCardFromHand( Button cardButton );
+        void RemoveCardButtonFromHand( Button cardButton );
         void SelectCard( Button cardButton );
         void DeselectCard( Button cardButton );
 

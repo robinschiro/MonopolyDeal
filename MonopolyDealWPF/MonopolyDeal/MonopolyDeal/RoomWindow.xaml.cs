@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using GameObjects;
 using GameServer;
 using Lidgren.Network;
+using AdditionalWindows;
 
 namespace MonopolyDeal
 {
@@ -24,6 +25,7 @@ namespace MonopolyDeal
         private volatile Turn Turn;
         private string PlayerName;
         private SendOrPostCallback Callback;
+        private MessageDialog WaitMessage;
 
         //// This is part of a failed attempt to use Binding. Binding currently does not work because non-UI threads cannot change the contents of
         //// observable collections. We should keep this code here in case we want to revisit binding in the future.
@@ -70,25 +72,31 @@ namespace MonopolyDeal
             this.ServerIP = ipAddress;
             this.BeginCommunication = false;
             this.PlayerName = playerName;
-            //this.PlayerList = new ObservableCollection<GameObjects.Player>();
 
             InitializeClient(ipAddress);
 
             // Do not continue until the client has successfully established communication with the server.
-            while ( !this.BeginCommunication ) ;
+            WaitMessage = new MessageDialog("Please Wait...", "Waiting to establish communication with server...");
+            if (!this.BeginCommunication)
+            {
+                WaitMessage.ShowDialog();  
+            }
+
+            // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
+            WaitMessage = new MessageDialog("Please Wait...", "Waiting for player list...");
 
             // Receive a list of the players already on the server.
             ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
 
             // Do not continue until the client receives the Player List from the server.
-            while ( this.PlayerList == null ) ;
+            WaitMessage.ShowDialog();
 
             // Verify that the value of 'playerName' does not exist in the list of Player names.
             // If it does, modify the name so that it no longer matches one on the list.
-            playerName = VerifyPlayerName(playerName);
+            this.PlayerName = VerifyPlayerName(this.PlayerName);
 
             // Instantiate the player.
-            this.Player = new Player(playerName);
+            this.Player = new Player(this.PlayerName);
 
             // Send the player's information to the server.
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
@@ -143,6 +151,7 @@ namespace MonopolyDeal
                         {
                             this.BeginCommunication = true;
                             updateReceived = true;
+                            CreateNewThread(new Action<Object>(( sender ) => { WaitMessage.CloseWindow = true; }));
                         }
 
                         Thread.Sleep(100);
@@ -159,6 +168,8 @@ namespace MonopolyDeal
                 {
                     Datatype messageType = (Datatype)inc.ReadByte();
 
+                    MessageBox.Show(this.PlayerName + " received " + messageType.ToString());
+
                     switch ( messageType )
                     {
                         case Datatype.UpdatePlayerList:
@@ -167,9 +178,13 @@ namespace MonopolyDeal
 
                             //// The parentheses around currentPlayerList are required. See http://bit.ly/19t9NEx.
                             //ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<List<Player>>(UpdatePlayerListBox), (playerList)); };
-                            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Object>(UpdatePlayerListBox), null); };
-                            Thread newThread = new Thread(start);
-                            newThread.Start();
+                            CreateNewThread(new Action<Object>(UpdatePlayerListBox));
+
+                            // Close the wait message if it is open.
+                            if (null != WaitMessage && !WaitMessage.CloseWindow)
+                            {
+                                CreateNewThread(new Action<Object>(( sender ) => { WaitMessage.CloseWindow = true; }));
+                            }
 
                             break;
                         }
@@ -181,10 +196,7 @@ namespace MonopolyDeal
                             // Receive the data related to the current turn from the server.
                             Turn Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.LaunchGame);
 
-                            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<Turn>(LaunchGame), Turn); };
-                            Thread newThread = new Thread(start);
-                            newThread.SetApartmentState(ApartmentState.STA);
-                            newThread.Start();
+                            CreateNewThread(new Action<Object>(LaunchGame), Turn);
 
                             break;
                         }
@@ -193,8 +205,10 @@ namespace MonopolyDeal
             }
         }
 
-        private void LaunchGame( Turn turn )
+        private void LaunchGame( Object turnObject )
         {
+            Turn turn = (Turn)turnObject;
+
             // ROBIN: I previously attempted to pass the Client object to the GameWindow's constructor. As a result (for an unknown reason), 
             // the Client's callback messages were not registering. Therefore, each client is disconnected from the server before launching the game.
             // A new Client object is created and connected to the server when the GameWindow is constructed.
@@ -255,6 +269,14 @@ namespace MonopolyDeal
             }
 
             return playerName;
+        }
+
+        // Create a new thread to run a function that cannot be run on the same thread invoking CreateNewThread().
+        public void CreateNewThread( Action<Object> action, object data = null )
+        {
+            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, action, data); };
+            Thread newThread = new Thread(start);
+            newThread.Start();
         }
 
         #endregion

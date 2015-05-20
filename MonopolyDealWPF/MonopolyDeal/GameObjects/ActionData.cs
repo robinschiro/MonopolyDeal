@@ -37,5 +37,41 @@ namespace GameObjects
                 this.AssetsGiven = assetsGiven;
             }
         }
+
+        // The request should contain the name of the thief, the name of the victim, the property the thief is giving,
+        // and the list of properties that the thief wants to take.
+        public class TheftRequest
+        {
+            public string ThiefName;
+            public string VictimName;
+            public int ActionID;
+            public Card PropertyToGive;
+            public List<Card> PropertiesToTake;
+
+            public TheftRequest( string thiefName, string victimName, int actionID, Card propertyToGive, List<Card> propertyToTake )
+            {
+                this.ThiefName = thiefName;
+                this.VictimName = victimName;
+                this.ActionID = actionID;
+                this.PropertyToGive = propertyToGive;
+                this.PropertiesToTake = propertyToTake;
+            }
+        }
+
+        // The response should contain the name of the thief, the name of the victim, and the victim's answer (true if allowing the theft,
+        // false if used "Just Say No".
+        public class TheftResponse
+        {
+            public string ThiefName;
+            public string VictimName;
+            public bool AcceptedDeal;
+
+            public TheftResponse( string thiefName, string victimName, bool answer )
+            {
+                this.ThiefName = thiefName;
+                this.VictimName = victimName;
+                this.AcceptedDeal = answer;
+            }
+        }
     }
 }

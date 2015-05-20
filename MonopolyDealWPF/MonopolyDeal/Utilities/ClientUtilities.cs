@@ -6,6 +6,20 @@ using GameObjects;
 
 namespace Utilities
 {
+
+    #region Enums
+
+    // The integer values of the elements in this enum correspond to the ActionIDs of the associated cards.
+    public enum TheftType
+    {
+        Dealbreaker = 5,
+        SlyDeal,
+        ForcedDeal
+    }
+
+    #endregion
+    
+
     public class ClientUtilities
     {
         #region Static Variables
@@ -26,6 +40,68 @@ namespace Utilities
             {PropertyType.Wild, 0},
             {PropertyType.Yellow, 3},
             {PropertyType.None, -1}
+        };
+
+        public static Dictionary<PropertyType, Dictionary<int, int>> RentData = new Dictionary<PropertyType, Dictionary<int, int>>()
+        {
+            {PropertyType.Blue, new Dictionary<int, int>() 
+                                    {
+                                        {1, 3},
+                                        {2, 8}
+                                    }},
+            {PropertyType.Brown, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2}
+                                    }},
+            {PropertyType.Green, new Dictionary<int, int>() 
+                                    {
+                                        {1, 2},
+                                        {2, 4},
+                                        {3, 7}
+                                    }},
+            {PropertyType.LightBlue, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2},
+                                        {3, 3}
+                                    }},
+            {PropertyType.Orange, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 3},
+                                        {3, 5}
+                                    }},
+            {PropertyType.Pink, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2},
+                                        {3, 4}
+                                    }},
+            {PropertyType.Railroad, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2},
+                                        {3, 3},
+                                        {4, 4}
+                                    }},
+            {PropertyType.Red, new Dictionary<int, int>() 
+                                    {
+                                        {1, 2},
+                                        {2, 3},
+                                        {3, 6},
+                                    }},
+            {PropertyType.Utility, new Dictionary<int, int>() 
+                                    {
+                                        {1, 1},
+                                        {2, 2}
+                                    }},
+            {PropertyType.Yellow, new Dictionary<int, int>() 
+                                    {
+                                        {1, 2},
+                                        {2, 4},
+                                        {3, 6},
+                                    }},
         };
 
         #endregion

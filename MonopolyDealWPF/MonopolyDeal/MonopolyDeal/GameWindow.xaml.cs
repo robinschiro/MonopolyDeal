@@ -46,71 +46,10 @@ namespace MonopolyDeal
         private List<Card> DiscardPile;
         private int NumberOfRentees = 0;
         private List<Card> AssetsReceived = new List<Card>();
-        WaitDialog WaitMessage;
+        private bool VictimAcceptedDeal;
+        private MessageDialog WaitMessage;
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-        private Dictionary<PropertyType, Dictionary<int, int>> RentData = new Dictionary<PropertyType, Dictionary<int, int>>()
-        {
-            {PropertyType.Blue, new Dictionary<int, int>() 
-                                    {
-                                        {1, 3},
-                                        {2, 8}
-                                    }},
-            {PropertyType.Brown, new Dictionary<int, int>() 
-                                    {
-                                        {1, 1},
-                                        {2, 2}
-                                    }},
-            {PropertyType.Green, new Dictionary<int, int>() 
-                                    {
-                                        {1, 2},
-                                        {2, 4},
-                                        {3, 7}
-                                    }},
-            {PropertyType.LightBlue, new Dictionary<int, int>() 
-                                    {
-                                        {1, 1},
-                                        {2, 2},
-                                        {3, 3}
-                                    }},
-            {PropertyType.Orange, new Dictionary<int, int>() 
-                                    {
-                                        {1, 1},
-                                        {2, 3},
-                                        {3, 5}
-                                    }},
-            {PropertyType.Pink, new Dictionary<int, int>() 
-                                    {
-                                        {1, 1},
-                                        {2, 2},
-                                        {3, 4}
-                                    }},
-            {PropertyType.Railroad, new Dictionary<int, int>() 
-                                    {
-                                        {1, 1},
-                                        {2, 2},
-                                        {3, 3},
-                                        {4, 4}
-                                    }},
-            {PropertyType.Red, new Dictionary<int, int>() 
-                                    {
-                                        {1, 2},
-                                        {2, 3},
-                                        {3, 6},
-                                    }},
-            {PropertyType.Utility, new Dictionary<int, int>() 
-                                    {
-                                        {1, 1},
-                                        {2, 2}
-                                    }},
-            {PropertyType.Yellow, new Dictionary<int, int>() 
-                                    {
-                                        {1, 2},
-                                        {2, 4},
-                                        {3, 6},
-                                    }},
-        };
 
         private MediaPlayer MediaPlayer;
 
@@ -301,19 +240,21 @@ namespace MonopolyDeal
                         {
                             this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            if ( null != this.Player )
-                            {
-                                this.Player = (Player)this.PlayerList.Find(player => player.Name == this.Player.Name);
+                            // This piece of code causes this.Player to be overwritten when updates to other players are made.
+                            // Commenting it out fixed that issue; I'm leaving this comment here in case this code is pivotal for some unknown reason.
+                            //if ( null != this.Player )
+                            //{
+                            //    this.Player = (Player)this.PlayerList.Find(player => player.Name == this.Player.Name);
 
-                                // Be sure that the player's MoneyList is properly set. This is the quick solution, not necessarily the correct solution.
-                                foreach ( Card card in this.Player.CardsInPlay[0] )
-                                {
-                                    this.Player.MoneyList.Add(card);
-                                }
-                            }
+                            //    // Be sure that the player's MoneyList is properly set. This is the quick solution, not necessarily the correct solution.
+                            //    foreach ( Card card in this.Player.CardsInPlay[0] )
+                            //    {
+                            //        this.Player.MoneyList.Add(card);
+                            //    }
+                            //}
 
                             // Display everyone's cards in play.
-                            CreateNewThread(new Action<Object>(DisplayAllCardsInPlay));
+                            CreateNewThread(new Action<Object>(DisplayAllCards));
 
                             break;
                         }
@@ -335,12 +276,38 @@ namespace MonopolyDeal
                         case Datatype.GiveRent:
                         {
                             // Retrieve the request.
-                            ActionData.RentResponse request = (ActionData.RentResponse)ServerUtilities.ReceiveMessage(inc, messageType);
+                            ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReceiveMessage(inc, messageType);
 
                             // If this player is the renter who originally requested the rent, add the AssetsGiven to the player's AssetsReceived list.
-                            if ( request.RenterName == this.Player.Name )
+                            if ( response.RenterName == this.Player.Name )
                             {
-                                CreateNewThread(new Action<Object>(ProcessReceivedRent), request);
+                                CreateNewThread(new Action<Object>(ProcessReceivedRent), response);
+                            }
+
+                            break;
+                        }
+
+                        case Datatype.RequestTheft:
+                        {
+                            // Retrieve the request.
+                            ActionData.TheftRequest request = (ActionData.TheftRequest)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                            if ( request.VictimName == this.Player.Name )
+                            {
+                                CreateNewThread(new Action<Object>(ProcessTheftRequest), request);
+                            }
+
+                            break;
+                        }
+
+                        case Datatype.ReplyToTheft:
+                        {
+                            // Retrieve the request.
+                            ActionData.TheftResponse response = (ActionData.TheftResponse)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                            if ( response.ThiefName == this.Player.Name )
+                            {
+                                CreateNewThread(new Action<Object>(ProcessTheftResponse), response);
                             }
 
                             break;
@@ -407,7 +374,7 @@ namespace MonopolyDeal
                         // Update the value of 'SelectedCard' (no card is selected after a card is played).
                         SelectedCard = -1;
 
-                        RemoveCardFromHand(cardButton);
+                        RemoveCardButtonFromHand(cardButton);
 
                         // Update the player's number of actions.
                         this.Turn.NumberOfActions++;
@@ -551,67 +518,59 @@ namespace MonopolyDeal
         // Allow cards to be drag and dropped from one place to another.
         void cardButton_Drop( object sender, DragEventArgs e )
         {
-            Button targetCardButton = sender as Button;
-            List<Card> targetCardList = FindListContainingCard(targetCardButton.Tag as Card);
-            PropertyType targetCardListColor = ClientUtilities.GetCardListColor(targetCardList);
-
-            Button sourceCardButton = e.Data.GetData(typeof(Button)) as Button;
-            Card sourceCard = sourceCardButton.Tag as Card;
-
-            // Do not allow a drag-drop operation to occur if the source and target are the same objects.
-            if ( sourceCardButton != targetCardButton )
+            if ( this.IsCurrentTurnOwner )
             {
-                bool isMonopoly = ClientUtilities.IsCardListMonopoly(targetCardList);
+                Button targetCardButton = sender as Button;
+                List<Card> targetCardList = FindListContainingCard(targetCardButton.Tag as Card);
+                PropertyType targetCardListColor = ClientUtilities.GetCardListColor(targetCardList);
 
-                if ( !isMonopoly && (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || PropertyType.Wild == targetCardListColor) )
+                Button sourceCardButton = e.Data.GetData(typeof(Button)) as Button;
+                Card sourceCard = sourceCardButton.Tag as Card;
+
+                // Do not allow a drag-drop operation to occur if the source and target are the same objects.
+                if ( sourceCardButton != targetCardButton )
                 {
-                    RemoveCardFromCardsInPlay(sourceCard, this.Player);
+                    bool isMonopoly = ClientUtilities.IsCardListMonopoly(targetCardList);
+                    bool performTransfer = false;
 
-                    targetCardList.Add(sourceCard);
-                    DisplayCardsInPlay(this.Player, this.PlayerOneField);
+                    if ( !isMonopoly )
+                    {
+                        performTransfer = (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || PropertyType.Wild == targetCardListColor);
+
+                        //// Mark the event as handled.
+                        //e.Handled = true;
+                    }
+                    else
+                    {
+                        switch ( sourceCard.Name )
+                        {
+                            case ("House"):
+                            {
+                                performTransfer = !IsCardInCardList("House", targetCardList);
+
+                                break;
+                            }
+
+                            case ("Hotel"):
+                            {
+                                performTransfer = IsCardInCardList("House", targetCardList) && !IsCardInCardList("Hotel", targetCardList);
+
+                                break;
+                            }
+                        }
+
+                    }
+
+                    if ( performTransfer )
+                    {
+                        RemoveCardFromCardsInPlay(sourceCard, this.Player);
+                        targetCardList.Add(sourceCard);
+                        DisplayCardsInPlay(this.Player, this.PlayerOneField);
+                    }
 
                     // Update the server's information regarding this player.
-                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
-
-                    // Mark the event as handled.
-                    e.Handled = true;
+                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
                 }
-                else if (isMonopoly)
-                {
-                    switch ( sourceCard.Name )
-                    {
-                        case ( "House" ):
-                        {
-                            if ( !IsCardInCardList("House", targetCardList) )
-                            {
-                                RemoveCardFromCardsInPlay(sourceCard, this.Player);
-                                targetCardList.Add(sourceCard);
-                                DisplayCardsInPlay(this.Player, this.PlayerOneField);
-
-                                // Update the server's information regarding this player.
-                                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
-                            }
-                            break;   
-                        }
-
-                        case ( "Hotel" ):
-                        {
-                            if ( IsCardInCardList("House", targetCardList) && !IsCardInCardList("Hotel", targetCardList) )
-                            {
-                                RemoveCardFromCardsInPlay(sourceCard, this.Player);
-                                targetCardList.Add(sourceCard);
-                                DisplayCardsInPlay(this.Player, this.PlayerOneField);
-
-                                // Update the server's information regarding this player.
-                                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
-                            }
-
-
-                            break;   
-                        }
-                    }
-                }
-
             }
         }
         
@@ -788,6 +747,18 @@ namespace MonopolyDeal
             }
         }
 
+        // Display the cards in the Player's CardsInHand.
+        public void DisplayCardsInHand( Player player, Grid field )
+        {
+            ClearCardsInGrid(field);
+
+            for ( int i = 0; i < player.CardsInHand.Count; ++i )
+            {
+                field.Children.Add(CreateCardGrid(i));
+                AddCardToGrid(player.CardsInHand[i], field, player, true, i);
+            }
+        }
+
         // Display the cards of the player's opponents.
         public void DisplayOpponentCards( Object filler = null )
         {
@@ -817,13 +788,16 @@ namespace MonopolyDeal
             }
         }
 
-        public void DisplayAllCardsInPlay( Object filler = null )
+        public void DisplayAllCards( Object filler = null )
         {
             // Display the opponents' cards.
             DisplayOpponentCards();
 
             // Display the Player's cards in play as well.
-            DisplayCardsInPlay(this.Player, PlayerOneField);            
+            DisplayCardsInPlay(this.Player, PlayerOneField);
+        
+            // Display the Player's cards in hand.
+            //DisplayCardsInHand(this.Player, PlayerOneHand);
         }
 
         // Update the card displayed in the InfoBox.
@@ -1281,7 +1255,7 @@ namespace MonopolyDeal
                                     DisplayCardsInPlay(this.Player, this.PlayerOneField);
 
                                     // Update the server's information regarding this player.
-                                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
                                 };
 
                                 menu.Items.Add(separateMenuItem);
@@ -1289,6 +1263,17 @@ namespace MonopolyDeal
 
                             menu.Items.Add(forwardMenuItem);
                             menu.Items.Add(backwardMenuItem);
+
+                            // When the menu is opened, disable all options if it is not the player's turn.
+                            menu.Opened += ( sender, args ) =>
+                            {
+                                foreach ( MenuItem item in menu.Items )
+                                {
+                                    item.IsEnabled = this.IsCurrentTurnOwner;
+                                }
+                            };
+
+
                             cardButton.ContextMenu = menu;
 
 
@@ -1453,11 +1438,17 @@ namespace MonopolyDeal
             }
         }
 
-        // Remove a card (given its Button wrapper) from the player's hand.
-        public void RemoveCardFromHand( Button cardButton )
+        // Remove a card from the player's hand.
+        public void RemoveCardFromHand( Card cardtoRemove, Player player )
         {
-            // Remove the card from the Player's CardsInHand list.
-            Player.CardsInHand = new List<Card>(Player.CardsInHand.Where(card => card.CardID != (cardButton.Tag as Card).CardID));
+            // Remove the card from the player's CardsInHand list.
+            player.CardsInHand = new List<Card>(player.CardsInHand.Where(card => card.CardID != cardtoRemove.CardID));
+        }
+        
+        // Remove a card (given its Button wrapper) from the player's hand.
+        public void RemoveCardButtonFromHand( Button cardButton )
+        {
+            RemoveCardFromHand(cardButton.Tag as Card, this.Player);
 
             // Get the index of the card button.
             int buttonIndex = Grid.GetColumn(cardButton.Parent as Grid);
@@ -1465,7 +1456,7 @@ namespace MonopolyDeal
             // Remove the card's button from the PlayerOneHand grid.
             PlayerOneHand.Children.RemoveAt(buttonIndex);
 
-            // Shift all subsequetial card buttons to the left.
+            // Shift all subsequential card buttons to the left.
             for ( int i = buttonIndex; i < Player.CardsInHand.Count; ++i )
             {
                 Grid.SetColumn(PlayerOneHand.Children[i], i);
@@ -1544,7 +1535,7 @@ namespace MonopolyDeal
 
             // Send the updated Deck and Player to the server.
             ServerUtilities.SendMessage(Client, Datatype.UpdateDeck, Deck);
-            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
         }
 
         // Again, testing AttachedProperties. Will need to discuss.
@@ -1566,7 +1557,7 @@ namespace MonopolyDeal
                         DisplayCardsInPlay(Player, PlayerOneField);
 
                         // Update the server.
-                        ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                        ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
                         return;
                     }
                 }
@@ -1600,7 +1591,7 @@ namespace MonopolyDeal
                 else if ( 5 <= actionCard.ActionID && 7 >= actionCard.ActionID )
                 {
                     // Steal property
-                    StealProperty(actionCard);
+                    return StealProperty(actionCard);
                 }
                 else
                 {
@@ -1619,14 +1610,60 @@ namespace MonopolyDeal
             PlayerSelectionDialog dialog = new PlayerSelectionDialog(this.Player.Name, PlayerList);
             if ( dialog.enoughPlayers && true == dialog.ShowDialog() )
             {
+                // ROBIN TODO: Verify that both players meet the required criteria for this steal card to be used. If the don't, cancel the action.
+                // Perhaps prevent Dealbreaker if thief has color from selected monopoly
+                {
+                    
+                }
+
                 // Display the property theft window.
                 PropertyTheftWindow propertyTheftWindow = new PropertyTheftWindow(dialog.SelectedPlayer, this.Player, stealCard.ActionID);
+                bool isDealBreaker = TheftType.Dealbreaker == (TheftType)(stealCard.ActionID);
 
-                if ( true == propertyTheftWindow.ShowDialog() ) { };
+                if ( true == propertyTheftWindow.ShowDialog() )
+                {
+                    // Send the Theft Request to the victim. The victim has a chance to say "No" if he has a "Just Say No" card.
+                    {
+                        ServerUtilities.SendMessage(Client, Datatype.RequestTheft, new ActionData.TheftRequest(this.Player.Name, propertyTheftWindow.Victim.Name, stealCard.ActionID, propertyTheftWindow.PropertyToGive, propertyTheftWindow.PropertiesToTake));
+                    }
 
+                    // Display a wait message until the victim has responded to the request.
+                    WaitMessage = new MessageDialog("Please Wait...", "Waiting for victim to respond...");
+                    WaitMessage.ShowDialog();
+
+                    // This is called once the thief has received a reply from the victim.
+                    if ( this.VictimAcceptedDeal )
+                    {
+                        // Transfer the PropertyToGive to the victim.
+                        if ( String.Empty != propertyTheftWindow.PropertyToGive.Name )
+                        {
+                            RemoveCardFromCardsInPlay(propertyTheftWindow.PropertyToGive, this.Player);
+                        }
+                        
+                        // Add the card(s) to the thief's cards in play.
+                        if ( isDealBreaker )
+                        {
+                            this.Player.CardsInPlay.Add(propertyTheftWindow.PropertiesToTake);
+                        }
+                        else
+                        {
+                            AddCardToCardsInPlay(propertyTheftWindow.PropertiesToTake[0], this.Player);
+                        }
+                        
+
+                        // Update the server with the current version of this player (the thief).
+                        ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+                    }
+                    else
+                    {
+                        MessageBox.Show(propertyTheftWindow.Victim.Name + " rejected your deal with a \"Just Say No!\".");
+                    }
+
+
+                }
             }   
 
-            return false;
+            return true;
         }
 
         // Collect rent from the other players.
@@ -1674,7 +1711,7 @@ namespace MonopolyDeal
                     }
                 }
 
-                // If the player will not get any money from playing the rent, confirm the play.
+                // If the player will not get any money from playing the rent, give him the option to cancel his action.
                 if ( 0 == matchingPropertyGroups.Count )
                 {
                     MessageBoxResult result = MessageBox.Show("You do not have " + rentCard.Color.ToString() + " or " + rentCard.AltColor.ToString() + " properties. Are you sure you want to play this card?",
@@ -1696,7 +1733,7 @@ namespace MonopolyDeal
                     int numProperties = cardList.Count - ( (null != house) ? (1) : (0) ) - ( (null != hotel) ? (1) : (0) );
 
                     // Calculate the total value of the set.
-                    int totalValue = RentData[ClientUtilities.GetCardListColor(cardList)][numProperties] + ((null != house) ? (house.Value) : (0)) + ((null != hotel) ? (hotel.Value) : (0));
+                    int totalValue = ClientUtilities.RentData[ClientUtilities.GetCardListColor(cardList)][numProperties] + ((null != house) ? (house.Value) : (0)) + ((null != hotel) ? (hotel.Value) : (0));
 
                     if ( totalValue > amountToCollect )
                     {
@@ -1718,7 +1755,7 @@ namespace MonopolyDeal
                     if ( rentDoubled )
                     {
                         // Remove the card from the player's hand and add it to the discard pile.
-                        RemoveCardFromHand((PlayerOneHand.Children[this.Player.CardsInHand.IndexOf(doubleRentCard)] as Grid).Tag as Button);
+                        RemoveCardButtonFromHand((PlayerOneHand.Children[this.Player.CardsInHand.IndexOf(doubleRentCard)] as Grid).Tag as Button);
                         this.DiscardPile.Add(doubleRentCard);
                         AddCardToGrid(doubleRentCard, DiscardPileGrid, this.Player, false);
 
@@ -1758,7 +1795,7 @@ namespace MonopolyDeal
 
             // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
             // ROBIN TODO: Show some sort of progress bar.
-            WaitMessage = new WaitDialog("Waiting for rentees to pay rent...");
+            WaitMessage = new MessageDialog("Please Wait...", "Waiting for rentees to pay rent...");
             WaitMessage.ShowDialog();
 
             return true;
@@ -1785,6 +1822,12 @@ namespace MonopolyDeal
                 foreach ( Card card in payment )
                 {
                     RemoveCardFromCardsInPlay(card, this.Player);
+
+                    // If a money card is used as payment, remove it from the MoneyList.
+                    if ( CardType.Money == card.Type )
+                    {
+                        this.Player.MoneyList.Remove(card);
+                    }
                 }
                 
                 // Display this player's updated CardsInPlay.
@@ -1797,9 +1840,9 @@ namespace MonopolyDeal
         }
 
         // Process a rent response for the renter.
-        private void ProcessReceivedRent( Object request )
+        private void ProcessReceivedRent( Object response )
         {
-            ActionData.RentResponse rentResponse = (ActionData.RentResponse)request;
+            ActionData.RentResponse rentResponse = (ActionData.RentResponse)response;
 
             // Verify that there still exists renters who have not paid their rent.
             if ( this.NumberOfRentees > 0 )
@@ -1827,7 +1870,6 @@ namespace MonopolyDeal
                     if ( null != WaitMessage )
                     {
                         WaitMessage.CloseWindow = true;
-                        WaitMessage.Close();
                     }
                 }
             }
@@ -1838,6 +1880,96 @@ namespace MonopolyDeal
             
         }
 
+        private void ProcessTheftRequest( Object request )
+        {
+            ActionData.TheftRequest theftRequest = (ActionData.TheftRequest)request;
+
+            MessageDialog requestDialog;
+            bool hasNo = this.Player.CardsInHand.Any(card => 2 == card.ActionID);
+            string message = theftRequest.ThiefName + " has played a " + ((TheftType)theftRequest.ActionID).ToString() + " against you.\n";
+
+            // By default, use the name of the first property in the list.
+            string nameOfPropertyToTake = theftRequest.PropertiesToTake[0].Name;            
+
+            switch ( (TheftType)theftRequest.ActionID )
+            {
+                case TheftType.Dealbreaker:
+                {
+                    // If a Dealbreaker was used, use the name of the monopoly's color.
+                    nameOfPropertyToTake = ClientUtilities.GetCardListColor(theftRequest.PropertiesToTake).ToString();
+
+                    message += "This player would like to take your " + nameOfPropertyToTake + " monopoly.\n";
+                    break;
+                }
+
+                case TheftType.ForcedDeal:
+                {
+                    message += "This player would like to trade " + theftRequest.PropertyToGive.Name + " for " + nameOfPropertyToTake + ".\n";
+                    break;
+                }
+
+                case TheftType.SlyDeal:
+                {
+                    message += "This player would like to steal " + nameOfPropertyToTake + " from you.\n";
+                    break;
+                }
+            }
+
+            if ( hasNo )
+            {
+                message += "Would you like to use your \"Just Say No\" card to reject " + theftRequest.ThiefName + "'s deal?";
+            }
+            else
+            {
+                message += "Press OK to accept the deal.";
+            }
+
+            // Display the message box to the victim.
+            requestDialog = new MessageDialog("Theft Request", message, hasNo ? MessageBoxButton.YesNo : MessageBoxButton.OK);
+            requestDialog.ShowDialog();
+
+            // Determine if the victim accepted the deal. If he didn't, remove his "Just Say No" and update the server.
+            bool acceptedDeal = requestDialog.Result != MessageBoxResult.Yes;
+            if ( !acceptedDeal )
+            {
+                // Remove the Just Say No from the victim's hand.
+                RemoveCardButtonFromHand((PlayerOneHand.Children[this.Player.CardsInHand.FindIndex(card => 2 == card.ActionID)] as Grid).Tag as Button);                
+            }
+            else
+            {
+                // If there is a property to give to the victim, give the property to the victim.
+                if ( String.Empty != theftRequest.PropertyToGive.Name )
+                {
+                    AddCardToCardsInPlay(theftRequest.PropertyToGive, this.Player);
+                }
+
+                // Remove the properties to take from the victim's cards in play.
+                foreach ( Card card in theftRequest.PropertiesToTake )
+                {
+                    RemoveCardFromCardsInPlay(card, this.Player);
+                }
+            }
+
+            // Update the server with this player's current state.
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+
+            // Send the theft reply to the thief.
+            ServerUtilities.SendMessage(Client, Datatype.ReplyToTheft, new ActionData.TheftResponse(theftRequest.ThiefName, this.Player.Name, acceptedDeal));
+        }
+
+        private void ProcessTheftResponse( Object response )
+        {
+            ActionData.TheftResponse theftResponse = (ActionData.TheftResponse)response;
+
+            // Update this global so that the proper action is taken when the wait dialog is closed.
+            this.VictimAcceptedDeal = theftResponse.AcceptedDeal;
+
+            // Update the wait dialog.
+            if ( null != WaitMessage )
+            {
+                WaitMessage.CloseWindow = true;
+            }
+        }
 
         #endregion
 

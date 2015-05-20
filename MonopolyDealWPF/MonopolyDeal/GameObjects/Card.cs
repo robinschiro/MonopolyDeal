@@ -52,11 +52,10 @@ namespace GameObjects
         public const int BIRTHDAY_AMOUNT = 2;
         public const int DEBT_AMOUNT = 5;
 
-        public Card( CardType type, String name, int value ) // Create a card given a type, name, and value
+        public Card()
         {
-            this.Type = type;
-            this.Name = name;
-            this.Value = value;
+            this.Name = String.Empty;
+            this.CardImageUriPath = String.Empty;
         }
 
         public Card( string name, CardType type, int value, PropertyType color, PropertyType altColor, string uriPath, int actionID, int cardID, bool isFlipped = false ) // Create a card given a type, name, and value

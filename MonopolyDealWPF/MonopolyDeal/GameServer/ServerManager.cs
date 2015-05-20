@@ -240,11 +240,37 @@ namespace GameServer
                                 // Send the rent response to all clients.
                                 case Datatype.GiveRent:
                                 {
-                                    ActionData.RentResponse request = (ActionData.RentResponse)ServerUtilities.ReadRentResponse(inc);
+                                    ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReadRentResponse(inc);
 
                                     if ( Server.ConnectionsCount != 0 )
                                     {
-                                        ServerUtilities.SendMessage(Server, Datatype.GiveRent, request);
+                                        ServerUtilities.SendMessage(Server, Datatype.GiveRent, response);
+                                    }
+
+                                    break;
+                                }
+
+                                // Send the theft request to all clients.
+                                case Datatype.RequestTheft:
+                                {
+                                    ActionData.TheftRequest request = (ActionData.TheftRequest)ServerUtilities.ReadTheftRequest(inc);
+
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.RequestTheft, request);
+                                    }
+
+                                    break;
+                                }
+
+                                // Send the theft response to all clients.
+                                case Datatype.ReplyToTheft:
+                                {
+                                    ActionData.TheftResponse response = (ActionData.TheftResponse)ServerUtilities.ReadTheftResponse(inc);
+
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.ReplyToTheft, response);
                                     }
 
                                     break;

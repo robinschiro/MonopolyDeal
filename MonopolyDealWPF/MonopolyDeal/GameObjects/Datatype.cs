@@ -17,6 +17,8 @@ namespace GameObjects
         RequestDeck,
         RequestPlayerList,
         RequestRent,
-        GiveRent
+        GiveRent,
+        RequestTheft,
+        ReplyToTheft
     }
 }

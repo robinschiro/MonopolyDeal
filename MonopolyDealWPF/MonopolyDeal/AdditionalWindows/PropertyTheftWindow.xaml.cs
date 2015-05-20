@@ -24,20 +24,30 @@ namespace AdditionalWindows
     /// </summary>
     public partial class PropertyTheftWindow : Window, INotifyPropertyChanged
     {
-        // The integer values of the elements in this enum correspond to the ActionIDs of the associated cards.
-        private enum TheftType
-        {
-            Dealbreaker = 5,
-            SlyDeal,
-            ForcedDeal
-        }
 
         private bool closeWindow = false;
         private bool showMonopoliesOnly = false;
         private TheftType type;
+        private PropertyHierarchyView propertyViewVictim;
+        private PropertyHierarchyView propertyViewThief;
 
         private Player victim;
+        public Player Victim
+        {
+            get
+            {
+                return victim;
+            }
+        }
+
         private Player thief;
+        public Player Thief
+        {
+            get
+            {
+                return thief;
+            }
+        }
 
         private Card propertyToGive;
         public Card PropertyToGive
@@ -57,14 +67,12 @@ namespace AdditionalWindows
             }
         }
 
-        public ObservableCollection<Card> Payment { get; set; }
         public ObservableCollection<Card> AssetsOfVictim { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public PropertyTheftWindow( Player victim, Player thief, int actionId )
         {
-            Payment = new ObservableCollection<Card>();
             AssetsOfVictim = new ObservableCollection<Card>();
             this.victim = victim;
             this.thief = thief;
@@ -73,34 +81,34 @@ namespace AdditionalWindows
 
             InitializeComponent();
 
-            // Add all the victim's cards in play to the Assets listview.
-            //foreach ( List<Card> cardList in victim.CardsInPlay )
-            //{
-            //    foreach ( Card card in cardList )
-            //    {
-            //        AssetsOfVictim.Add(card);
-            //    }
-            //}
-
+            // Update the label for the victim's assets.
+            this.VictimAssetsLabel.Content = victim.Name + "'s Assets";
 
             // Create a property hierarchy for the victim's properties. This view will be used regardless of the type of theft.
-            PropertyHierarchyView propertyViewVictim = new PropertyHierarchyView(victim, showMonopoliesOnly);
+            propertyViewVictim = new PropertyHierarchyView(victim, showMonopoliesOnly);
             Grid.SetRow(propertyViewVictim, 1);
             Grid.SetColumn(propertyViewVictim, 0);
             WindowGrid.Children.Add(propertyViewVictim);
+            propertyViewVictim.SelectedItemChanged += new RoutedPropertyChangedEventHandler<object>(SelectedItemChanged);
 
+            // If this is a ForcedDeal, create a tree view of the thief's properties.
             if (TheftType.ForcedDeal == type)
             {
-                PropertyHierarchyView propertyViewThief = new PropertyHierarchyView(thief, false);
+                propertyViewThief = new PropertyHierarchyView(thief, false);
                 Grid.SetRow(propertyViewThief, 1);
                 Grid.SetColumn(propertyViewThief, 1);
                 WindowGrid.Children.Add(propertyViewThief);
+                propertyViewThief.SelectedItemChanged += new RoutedPropertyChangedEventHandler<object>(SelectedItemChanged);
             }
             // Otherwise, display only the victim's properties.
             else
             {
                 // Center the victim's properties in the window.
-                Grid.SetColumnSpan(propertyViewVictim, 2);                
+                Grid.SetColumnSpan(propertyViewVictim, 2);
+                Grid.SetColumnSpan(VictimAssetsLabel, 2);
+
+                // Hide the thief assets label.
+                ThiefAssetsLabel.Visibility = System.Windows.Visibility.Hidden;
             }
 
 
@@ -109,6 +117,35 @@ namespace AdditionalWindows
 
             // Set the data context of the window.
             this.DataContext = this;
+        }
+
+        void SelectedItemChanged( object sender, RoutedPropertyChangedEventArgs<object> e )
+        {
+            bool enableSteal = true;
+
+            if ( null != propertyViewThief )
+            {
+                enableSteal &= (null != propertyViewThief.SelectedItem) && ((propertyViewThief.SelectedItem as TreeViewItem).Tag is Card);
+            }
+
+            if ( enableSteal )
+            {
+                enableSteal &= (null != propertyViewVictim.SelectedItem);
+            }
+
+            if ( enableSteal )
+            {
+                if ( TheftType.Dealbreaker == this.type )
+                {
+                    enableSteal &= (propertyViewVictim.SelectedItem as TreeViewItem).Tag is List<Card>;
+                }
+                else
+                {
+                    enableSteal &= (propertyViewVictim.SelectedItem as TreeViewItem).Tag is Card;
+                }
+            }
+
+            StealButton.IsEnabled = enableSteal;
         }
 
         // Create the OnPropertyChanged method to raise the event.
@@ -121,7 +158,7 @@ namespace AdditionalWindows
             }
         }
 
-        // Only allow the player to close the rent window when the 'Pay Rent' button is pressed.
+        // Only allow the player to close the property theft window when the 'Steal' button is pressed.
         protected override void OnClosing(CancelEventArgs e)
         {
             if ( !closeWindow )
@@ -152,6 +189,19 @@ namespace AdditionalWindows
 
         private void StealButton_Click( object sender, RoutedEventArgs e )
         {
+            // Set the PropertyToGive and PropertiesToTake based on the selection of the thief.
+            if ( null != propertyViewThief )
+            {
+                this.propertyToGive = (propertyViewThief.SelectedItem as TreeViewItem).Tag as Card;
+            }
+            else
+            {
+                this.propertyToGive = new Card();
+            }
+
+            Object selectedItemTag = (propertyViewVictim.SelectedItem as TreeViewItem).Tag;
+            this.propertiesToTake = (TheftType.Dealbreaker == this.type) ? (selectedItemTag as List<Card>) : new List<Card>() { (selectedItemTag as Card) };
+
             closeWindow = true;
             this.DialogResult = true;
             this.Close();
@@ -176,7 +226,8 @@ namespace AdditionalWindows
                 foreach ( List<Card> cardList in cardGroups)
                 {
                     // Each parent item will represent a potential monopoly,
-                    TreeViewItem potentialMonopoly = new TreeViewItem();//
+                    TreeViewItem potentialMonopoly = new TreeViewItem();
+                    potentialMonopoly.Tag = cardList;
                     potentialMonopoly.Header = ClientUtilities.GetCardListColor(cardList).ToString() + " Group";
                     this.Items.Add(potentialMonopoly);
 
@@ -185,6 +236,7 @@ namespace AdditionalWindows
                     {
                         TreeViewItem propertyItem = new TreeViewItem();
                         propertyItem.Header = property.Name;
+                        propertyItem.Tag = property;
                         propertyItem.IsEnabled = !onlyMonopoliesSelectable;
                         potentialMonopoly.Items.Add(propertyItem);
                         
@@ -192,8 +244,6 @@ namespace AdditionalWindows
 
                     this.ExpandSubtree(potentialMonopoly);
                 }
-
-
             }
         }
     }

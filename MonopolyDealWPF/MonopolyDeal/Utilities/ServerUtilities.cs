@@ -47,6 +47,16 @@ namespace GameServer
                     return ReadRentResponse(inc);
                 }
 
+                case Datatype.RequestTheft:
+                {
+                    return ReadTheftRequest(inc);
+                }
+
+                case Datatype.ReplyToTheft:
+                {
+                    return ReadTheftResponse(inc);
+                }
+
                 case Datatype.LaunchGame:
                 {
                     return ReadTurn(inc);
@@ -155,6 +165,28 @@ namespace GameServer
             return new ActionData.RentResponse(renterName, assetsGiven);
         }
 
+        // Parse the information from the theft request.
+        public static ActionData.TheftRequest ReadTheftRequest( NetIncomingMessage inc )
+        {
+            string thiefName = inc.ReadString();
+            string victimName = inc.ReadString();
+            string actionID = inc.ReadString();
+            Card propertyToGive = ReadCards(inc)[0];
+            List<Card> propertiesToTake = ReadCards(inc);
+
+            return new ActionData.TheftRequest(thiefName, victimName, Convert.ToInt32(actionID), propertyToGive, propertiesToTake);
+        }
+
+        // Parse the information from the theft response.
+        public static ActionData.TheftResponse ReadTheftResponse( NetIncomingMessage inc )
+        {
+            string thiefName = inc.ReadString();
+            string victimName = inc.ReadString();
+            bool answer = inc.ReadBoolean();
+
+            return new ActionData.TheftResponse(thiefName, victimName, answer);
+        }
+
         public static void WriteCards( NetOutgoingMessage outmsg, List<Card> cardList )
         {
             if ( cardList != null )
@@ -192,6 +224,24 @@ namespace GameServer
         {
             outmsg.Write(request.RenterName);
             WriteCards(outmsg, request.AssetsGiven);
+        }
+
+        // Write a theft request. 
+        public static void WriteTheftRequest( NetOutgoingMessage outmsg, ActionData.TheftRequest request )
+        {
+            outmsg.Write(request.ThiefName);
+            outmsg.Write(request.VictimName);
+            outmsg.Write(request.ActionID.ToString());
+            WriteCards(outmsg, new List<Card>() { request.PropertyToGive });
+            WriteCards(outmsg, request.PropertiesToTake);
+        }
+
+        // Write a theft response. 
+        public static void WriteTheftResponse( NetOutgoingMessage outmsg, ActionData.TheftResponse request )
+        {
+            outmsg.Write(request.ThiefName);
+            outmsg.Write(request.VictimName);
+            outmsg.Write(request.AcceptedDeal);
         }
 
         public static void WritePlayer( NetOutgoingMessage outmsg, Player player )
@@ -287,6 +337,18 @@ namespace GameServer
                     case Datatype.GiveRent:
                     {
                         WriteRentResponse(outmsg, (updatedObject as ActionData.RentResponse));
+                        break;
+                    }
+
+                    case Datatype.RequestTheft:
+                    {
+                        WriteTheftRequest(outmsg, (updatedObject as ActionData.TheftRequest));
+                        break;
+                    }
+
+                    case Datatype.ReplyToTheft:
+                    {
+                        WriteTheftResponse(outmsg, (updatedObject as ActionData.TheftResponse));
                         break;
                     }
 

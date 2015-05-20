@@ -21,22 +21,6 @@ namespace GameObjects
         // Stores a breakdown of the quantity of each type of money value the player has.
         public MoneyList MoneyList { get; set; }
 
-        // This returns the amount of money a player possesses.
-        private List<int> moneyInBank;
-        public List<int> MoneyInBank
-        {
-            get
-            {
-                moneyInBank = CalculateMoneyInBank();
-                return moneyInBank;
-            }
-
-            set
-            {
-                this.moneyInBank = value;
-            }
-        }
-
         // Use this constructor when generating a player for the first time.
         public Player( Deck deck, string name )
         {

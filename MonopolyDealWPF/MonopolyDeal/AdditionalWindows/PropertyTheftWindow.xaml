@@ -17,9 +17,15 @@
         <Label Content="Victim's Assets" 
                HorizontalAlignment="Center" 
                VerticalAlignment="Center"
-               Name="AssetsLabel"
+               Name="VictimAssetsLabel"
                Grid.Column="0"
-               Grid.ColumnSpan="2"
+               Grid.Row="0"/>
+
+        <Label Content="Your Assets" 
+               HorizontalAlignment="Center" 
+               VerticalAlignment="Center"
+               Name="ThiefAssetsLabel"
+               Grid.Column="1"
                Grid.Row="0"/>
 
         <Separator VerticalAlignment="Top"
@@ -29,7 +35,7 @@
 
         <Button Name="StealButton" 
                 Content="Steal Property" 
-                IsEnabled="True"
+                IsEnabled="False"
                 Click="StealButton_Click"
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center"
