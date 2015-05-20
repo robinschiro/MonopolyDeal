@@ -167,8 +167,7 @@ namespace MonopolyDeal
                 if ( null != inc && inc.MessageType == NetIncomingMessageType.Data )
                 {
                     Datatype messageType = (Datatype)inc.ReadByte();
-
-                    MessageBox.Show(this.PlayerName + " received " + messageType.ToString());
+                    //MessageBox.Show(this.PlayerName + " received " + messageType.ToString());
 
                     switch ( messageType )
                     {
@@ -191,6 +190,7 @@ namespace MonopolyDeal
 
                         case Datatype.LaunchGame:
                         {
+
                             Console.WriteLine(this.Player.Name + " received Launch");
 
                             // Receive the data related to the current turn from the server.

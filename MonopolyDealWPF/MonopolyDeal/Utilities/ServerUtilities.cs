@@ -160,9 +160,11 @@ namespace GameServer
         public static ActionData.RentResponse ReadRentResponse( NetIncomingMessage inc )
         {
             string renterName = inc.ReadString();
+            string renteeName = inc.ReadString();
             List<Card> assetsGiven = ReadCards(inc);
+            bool acceptedDeal = inc.ReadBoolean();
 
-            return new ActionData.RentResponse(renterName, assetsGiven);
+            return new ActionData.RentResponse(renterName, renteeName, assetsGiven, acceptedDeal);
         }
 
         // Parse the information from the theft request.
@@ -223,7 +225,9 @@ namespace GameServer
         public static void WriteRentResponse( NetOutgoingMessage outmsg, ActionData.RentResponse request )
         {
             outmsg.Write(request.RenterName);
+            outmsg.Write(request.RenteeName);
             WriteCards(outmsg, request.AssetsGiven);
+            outmsg.Write(request.AcceptedDeal);
         }
 
         // Write a theft request. 

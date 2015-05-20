@@ -29,12 +29,16 @@ namespace GameObjects
         public class RentResponse
         {
             public string RenterName;
+            public string RenteeName;
             public List<Card> AssetsGiven;
+            public bool AcceptedDeal;
 
-            public RentResponse( string renterName, List<Card> assetsGiven )
+            public RentResponse( string renterName, string renteeName, List<Card> assetsGiven, bool acceptedDeal )
             {
                 this.RenterName = renterName;
+                this.RenteeName = renteeName;
                 this.AssetsGiven = assetsGiven;
+                this.AcceptedDeal = acceptedDeal;
             }
         }
 
@@ -66,11 +70,11 @@ namespace GameObjects
             public string VictimName;
             public bool AcceptedDeal;
 
-            public TheftResponse( string thiefName, string victimName, bool answer )
+            public TheftResponse( string thiefName, string victimName, bool acceptedDeal )
             {
                 this.ThiefName = thiefName;
                 this.VictimName = victimName;
-                this.AcceptedDeal = answer;
+                this.AcceptedDeal = acceptedDeal;
             }
         }
     }

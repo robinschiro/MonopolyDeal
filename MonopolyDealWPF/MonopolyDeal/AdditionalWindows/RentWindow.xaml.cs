@@ -71,6 +71,22 @@ namespace AdditionalWindows
 
             // Set the data context of the window.
             this.DataContext = this;
+
+            this.ContentRendered += ( sender, args ) => 
+            {
+                // If the user has a "Just Say No", give him the option to use it.
+                bool hasNo = rentee.CardsInHand.Any(card => 2 == card.ActionID);
+                if ( hasNo )
+                {
+                    if ( MessageBoxResult.Yes == MessageBox.Show("Would you like to use your \"Just Say No\" card to reject " + renterName + "'s rent request?", "Rent Rejection", MessageBoxButton.YesNo) )
+                    {
+                        // Mark the result of the dialog as false and close it.
+                        this.DialogResult = false;
+                        closeWindow = true;
+                        this.Close();
+                    }
+                }        
+            };            
         }
 
         // Create the OnPropertyChanged method to raise the event.

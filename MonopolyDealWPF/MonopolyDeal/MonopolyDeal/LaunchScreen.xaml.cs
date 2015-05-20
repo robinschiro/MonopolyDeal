@@ -13,6 +13,7 @@ namespace MonopolyDeal
         {
             InitializeComponent();
             this.Title = "Monopoly Deal Setup";
+            this.OKButton.Focus();
         }
 
         private void OKButton_Click( object sender, RoutedEventArgs e )

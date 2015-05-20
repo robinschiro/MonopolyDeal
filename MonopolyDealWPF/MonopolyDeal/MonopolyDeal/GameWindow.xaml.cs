@@ -1807,13 +1807,18 @@ namespace MonopolyDeal
             ActionData.RentRequest rentRequest = (ActionData.RentRequest)request;
             //String renterName = this.PlayerList.Find(player => player.Name == rentRequest.RenterName).Name;
             String renterName = rentRequest.RenterName;
+            List<Card> payment = new List<Card>();
+            bool acceptedDeal = false;
 
             RentWindow rentWindow = new RentWindow(this.Player, renterName, rentRequest.RentAmount, rentRequest.IsDoubled);
 
+            // Proceed only if the rentee accepted the deal.
             if ( true == rentWindow.ShowDialog() )
             {
+                acceptedDeal = true;
+
                 // Retrieve the list of cards that the rentee selected as payment.
-                List<Card> payment = rentWindow.Payment.ToList<Card>();             
+                payment = rentWindow.Payment.ToList<Card>();             
    
                 // Retrieve the player object representing the renter.
                 Player renter = this.PlayerList.Find(player => player.Name == rentRequest.RenterName);
@@ -1833,10 +1838,16 @@ namespace MonopolyDeal
                 // Display this player's updated CardsInPlay.
                 DisplayCardsInPlay(this.Player, PlayerOneField);
 
-                // Send the updated rentee to the server and a RentResponse to the renter.
-                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
-                ServerUtilities.SendMessage(Client, Datatype.GiveRent, new ActionData.RentResponse(renterName, payment));
             }
+            else
+            {
+                // Remove the Just Say No from the victim's hand
+                RemoveCardButtonFromHand((PlayerOneHand.Children[this.Player.CardsInHand.FindIndex(card => 2 == card.ActionID)] as Grid).Tag as Button);
+            }
+
+            // Send the updated rentee to the server and a RentResponse to the renter.
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+            ServerUtilities.SendMessage(Client, Datatype.GiveRent, new ActionData.RentResponse(renterName, this.Player.Name, payment, acceptedDeal));
         }
 
         // Process a rent response for the renter.
@@ -1847,7 +1858,14 @@ namespace MonopolyDeal
             // Verify that there still exists renters who have not paid their rent.
             if ( this.NumberOfRentees > 0 )
             {
-                this.AssetsReceived.AddRange(rentResponse.AssetsGiven);
+                if ( rentResponse.AcceptedDeal )
+                {
+                    this.AssetsReceived.AddRange(rentResponse.AssetsGiven);
+                }
+                else
+                {
+                    MessageBox.Show(rentResponse.RenteeName + " rejected your rent request with a \"Just Say No\" card.");
+                }
 
                 // Update the number of remaining rentees.
                 this.NumberOfRentees--;
