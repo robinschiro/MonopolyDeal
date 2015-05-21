@@ -48,7 +48,7 @@ namespace AdditionalWindows
             this.MessageLabel.Content = message;
 
             // Set the window's width to be large enough to contain the message.
-            this.Loaded += new RoutedEventHandler(( sender, args ) => { this.Width = this.MessageLabel.ActualWidth + 50; });            
+            this.Loaded += new RoutedEventHandler(( sender, args ) => { this.Width = this.MessageLabel.ActualWidth + 100; });            
 
             if ( MessageBoxButton.YesNo == option )
             {

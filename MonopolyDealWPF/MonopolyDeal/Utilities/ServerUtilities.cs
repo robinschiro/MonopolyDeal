@@ -62,6 +62,11 @@ namespace GameServer
                     return ReadTurn(inc);
                 }
 
+                case Datatype.TimeToConnect:
+                {
+                    return inc.ReadString();
+                }
+
                 case Datatype.EndTurn:
                 {
                     return ReadTurn(inc);
@@ -362,6 +367,14 @@ namespace GameServer
                         Turn currentTurn = (Turn)updatedObject;
 
                         WriteTurn(outmsg, currentTurn);
+
+                        break;
+                    }
+
+                    case Datatype.TimeToConnect:
+                    {
+                        String playerToConnect = (String)updatedObject;
+                        outmsg.Write(playerToConnect);
 
                         break;
                     }

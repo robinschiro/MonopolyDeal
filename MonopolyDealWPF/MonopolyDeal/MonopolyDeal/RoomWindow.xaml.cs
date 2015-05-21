@@ -175,6 +175,11 @@ namespace MonopolyDeal
                         {
                             PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
+                            if ( null != this.PlayerList && this.PlayerList.Count > 0 )
+                            {
+                                CreateNewThread(new Action<Object>(( sender ) => { this.LaunchGameButton.IsEnabled = (this.PlayerList[0].Name == this.PlayerName); }));
+                            }
+
                             //// The parentheses around currentPlayerList are required. See http://bit.ly/19t9NEx.
                             //ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, new Action<List<Player>>(UpdatePlayerListBox), (playerList)); };
                             CreateNewThread(new Action<Object>(UpdatePlayerListBox));
@@ -190,13 +195,27 @@ namespace MonopolyDeal
 
                         case Datatype.LaunchGame:
                         {
-
                             Console.WriteLine(this.Player.Name + " received Launch");
 
                             // Receive the data related to the current turn from the server.
-                            Turn Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.LaunchGame);
+                            this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.LaunchGame);
 
-                            CreateNewThread(new Action<Object>(LaunchGame), Turn);
+                            if ( this.PlayerList[0].Name == this.PlayerName )
+                            {
+                                CreateNewThread(new Action<Object>(LaunchGame));
+                            }
+
+                            break;
+                        }
+
+                        case Datatype.TimeToConnect:
+                        {
+                            string playerToConnect = (String)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                            if ( this.PlayerName == playerToConnect )
+                            {
+                                CreateNewThread(new Action<Object>(LaunchGame));
+                            }
 
                             break;
                         }
@@ -205,10 +224,8 @@ namespace MonopolyDeal
             }
         }
 
-        private void LaunchGame( Object turnObject )
+        private void LaunchGame( Object filler = null )
         {
-            Turn turn = (Turn)turnObject;
-
             // ROBIN: I previously attempted to pass the Client object to the GameWindow's constructor. As a result (for an unknown reason), 
             // the Client's callback messages were not registering. Therefore, each client is disconnected from the server before launching the game.
             // A new Client object is created and connected to the server when the GameWindow is constructed.
@@ -216,9 +233,9 @@ namespace MonopolyDeal
             Client.UnregisterReceivedCallback(this.Callback);
             this.Disconnected = true;
 
-            GameWindow gameWindow = new GameWindow(this.Player.Name, this.ServerIP, turn);
+            GameWindow gameWindow = new GameWindow(this.Player.Name, this.ServerIP, this.Turn);
             gameWindow.Show();
-            Close();
+            this.Close();
         }
 
         private void UpdatePlayerListBox( Object filler )
@@ -234,8 +251,8 @@ namespace MonopolyDeal
         #region Events
 
         private void LaunchGameButton_Click( object sender, RoutedEventArgs e )
-        {
-            ServerUtilities.SendMessage(Client, Datatype.LaunchGame);
+        {            
+            ServerUtilities.SendMessage(Client, Datatype.LaunchGame);            
         }
 
         #endregion

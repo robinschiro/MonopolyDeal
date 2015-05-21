@@ -14,6 +14,7 @@
                     Grid.Row="0"/>        
         <Button     Name="LaunchGameButton"
                     Content="Launch Game"
+                    IsEnabled="False"
                     Click="LaunchGameButton_Click"
                     Grid.Row="1"/>
     </Grid>

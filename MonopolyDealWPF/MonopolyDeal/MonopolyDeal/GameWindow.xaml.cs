@@ -107,6 +107,13 @@ namespace MonopolyDeal
             // Find the Player in the PlayerList.
             this.Player = (Player)this.PlayerList.Find(player => player.Name == playerName);
 
+            // Inform the next player in the list that he can connect.
+            int pos = FindPlayerPositionInPlayerList(this.Player.Name);
+            if ( pos < (this.PlayerList.Count - 1) )
+            {
+                ServerUtilities.SendMessage(Client, Datatype.TimeToConnect, this.PlayerList[pos + 1].Name);
+            }
+
             // Assign the hands and playing fields of opponents to appropriate areas of the client's screen.
             AssignPlayersToGrids();
 

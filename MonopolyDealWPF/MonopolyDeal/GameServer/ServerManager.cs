@@ -206,11 +206,11 @@ namespace GameServer
                                         PlayerList[i] = new Player(Deck, PlayerList[i].Name);
                                     }
 
-                                    // Send the Player List to the clients.
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
-                                    }
+                                    //// Send the Player List to the clients.
+                                    //if ( Server.ConnectionsCount != 0 )
+                                    //{
+                                    //    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
+                                    //}
 
                                     // Generate the Turn object to keep track of the current turn.
                                     Turn = new Turn(PlayerList.Count);
@@ -219,6 +219,19 @@ namespace GameServer
                                     if ( Server.ConnectionsCount != 0 )
                                     {
                                         ServerUtilities.SendMessage(Server, Datatype.LaunchGame, Turn);
+                                    }
+
+                                    break;
+                                }
+
+                                case Datatype.TimeToConnect:
+                                {
+                                    string playerToConnect = (String)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                                    // Broadcast a message that tells a specific client to launch the game.
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.TimeToConnect, playerToConnect);
                                     }
 
                                     break;
