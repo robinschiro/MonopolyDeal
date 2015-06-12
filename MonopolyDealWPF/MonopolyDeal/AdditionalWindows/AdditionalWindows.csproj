@@ -51,6 +51,7 @@
     <Compile Include="MessageDialog.xaml.cs">
       <DependentUpon>MessageDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ModalWindow.cs" />
     <Compile Include="PropertyTheftWindow.xaml.cs">
       <DependentUpon>PropertyTheftWindow.xaml</DependentUpon>
     </Compile>

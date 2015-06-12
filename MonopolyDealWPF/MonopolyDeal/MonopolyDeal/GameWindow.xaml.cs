@@ -33,10 +33,13 @@ namespace MonopolyDeal
 
         private Deck Deck;
         private Player Player;
+        private string PlayerName;
         private List<Player> PlayerList;
         private String ServerIP;
         private int SelectedCard;
         private bool BeginCommunication;
+        private bool UpdateReceived;
+        private bool ReceivedPlayerList;
         private volatile NetClient Client;
         private List<Grid> PlayerFields;                        // This list is needed in order to resize the grids when the window size changes.
         private Dictionary<String, Grid> PlayerFieldDictionary;
@@ -44,10 +47,13 @@ namespace MonopolyDeal
         private bool HavePlayersBeenAssigned;
         private Turn Turn;
         private List<Card> DiscardPile;
+
+        // Variables for managing the state of Action Cards.
         private int NumberOfRentees = 0;
         private List<Card> AssetsReceived = new List<Card>();
-        private bool VictimAcceptedDeal;
         private MessageDialog WaitMessage;
+        private ActionData.RentRequest LastRentRequest;
+        private ActionData.TheftRequest LastTheftRequest;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -79,8 +85,11 @@ namespace MonopolyDeal
 
             this.SelectedCard = -1;
             this.BeginCommunication = false;
+            this.UpdateReceived = false;
+            this.ReceivedPlayerList = false;
             this.HavePlayersBeenAssigned = false;
             this.ServerIP = ipAddress;
+            this.PlayerName = playerName;
 
             //// Play theme song.
             //mediaPlayer = new MediaPlayer();
@@ -96,16 +105,20 @@ namespace MonopolyDeal
             InitializeClient(ipAddress);
 
             // Do not continue until the client has successfully established communication with the server.
-            while ( !this.BeginCommunication ) ;
+            WaitMessage = new MessageDialog("Please Wait...", "Waiting to establish communication with server...");
+            if ( !this.BeginCommunication )
+            {
+                WaitMessage.ShowDialog();
+            }
+
+            // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
+            WaitMessage = new MessageDialog("Please Wait...", "Waiting for player list...");
 
             // Receive a list of the players already on the server.
             ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
 
             // Do not continue until the client receives the Player List from the server.
-            while ( this.PlayerList == null ) ;
-
-            // Find the Player in the PlayerList.
-            this.Player = (Player)this.PlayerList.Find(player => player.Name == playerName);
+            WaitMessage.ShowDialog();
 
             // Inform the next player in the list that he can connect.
             int pos = FindPlayerPositionInPlayerList(this.Player.Name);
@@ -196,22 +209,35 @@ namespace MonopolyDeal
         public void GotMessage( object peer )
         {
             NetIncomingMessage inc;
-            bool updateReceived = false;
 
             if ( false == this.BeginCommunication )
             {
                 // Continue reading messages until the requested update is received.
-                while ( !updateReceived )
+                while ( !UpdateReceived )
                 {
+                    Console.WriteLine(this.PlayerName + " not received update: " + UpdateReceived);
+
                     // Iterate through all of the available messages.
                     while ( (inc = (peer as NetPeer).ReadMessage()) != null )
                     {
                         if ( inc.MessageType == NetIncomingMessageType.StatusChanged )
                         {
                             this.BeginCommunication = true;
-                            updateReceived = true;
+                            UpdateReceived = true;
+
+                            Console.WriteLine(this.PlayerName + " received update: " + UpdateReceived);
+
+                            // Close the wait message if it is open.
+                            if ( null != this.WaitMessage && !this.WaitMessage.CloseWindow )
+                            {
+                                CreateNewThread(new Action<Object>(( sender ) => { this.WaitMessage.CloseWindow = true; }));
+                            }
                         }
+
+                        Thread.Sleep(100);
                     }
+
+                    Thread.Sleep(100);
                 }
             }
             else
@@ -247,21 +273,21 @@ namespace MonopolyDeal
                         {
                             this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            // This piece of code causes this.Player to be overwritten when updates to other players are made.
-                            // Commenting it out fixed that issue; I'm leaving this comment here in case this code is pivotal for some unknown reason.
-                            //if ( null != this.Player )
-                            //{
-                            //    this.Player = (Player)this.PlayerList.Find(player => player.Name == this.Player.Name);
-
-                            //    // Be sure that the player's MoneyList is properly set. This is the quick solution, not necessarily the correct solution.
-                            //    foreach ( Card card in this.Player.CardsInPlay[0] )
-                            //    {
-                            //        this.Player.MoneyList.Add(card);
-                            //    }
-                            //}
+                            // If the Player associated with this client does not exist yet, retrieve it from the list.
+                            if ( null == this.Player )
+                            {
+                                this.Player = (Player)this.PlayerList.Find(player => player.Name == this.PlayerName);
+                            }
 
                             // Display everyone's cards in play.
                             CreateNewThread(new Action<Object>(DisplayAllCards));
+
+                            // Close the wait message if it is open and we have not received the player list yet.
+                            if ( !this.ReceivedPlayerList && null != this.WaitMessage && !this.WaitMessage.CloseWindow )
+                            {
+                                this.ReceivedPlayerList = true;
+                                CreateNewThread(new Action<Object>(( sender ) => { this.WaitMessage.CloseWindow = true; }));
+                            }
 
                             break;
                         }
@@ -367,30 +393,18 @@ namespace MonopolyDeal
                     else
                     {
                         // Handle the action.
-                        if ( HandleAction(cardBeingPlayed) )
-                        {
-                            // If the action card was handled, add the card to the DiscardPile and display it.
-                            this.DiscardPile.Add(cardBeingPlayed);
-                            AddCardToGrid(cardBeingPlayed, DiscardPileGrid, this.Player, false);
-                            cardWasPlayed = true;
-                        }
+                        cardWasPlayed = HandleAction(cardBeingPlayed);
                     }
 
                     if ( cardWasPlayed )
                     {
-                        // Update the value of 'SelectedCard' (no card is selected after a card is played).
-                        SelectedCard = -1;
-
-                        RemoveCardButtonFromHand(cardButton);
-
                         // Update the player's number of actions.
                         this.Turn.NumberOfActions++;
 
-                        // Update the server's information regarding this player.
-                        ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
-
-                        // Update the server's discard pile.
-                        ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, DiscardPile);
+                        if ( cardBeingPlayed.Type != CardType.Action )
+                        {
+                            RemoveCardFromHand(cardBeingPlayed);
+                        }
                     }
                 }
             }
@@ -470,20 +484,6 @@ namespace MonopolyDeal
         private void Size_Changed( SizeChangedEventArgs e )
         {
             CreateNewThread(new Action<Object>(ResizeUIElements));
-        }
-
-        // Draw two cards from the Deck.
-        private void DrawCardButton_Click( object sender, RoutedEventArgs e )
-        {
-            // In this game, only two cards can generally be drawn at a time. However, if the player has no cards in his hand, he must draw five cards.
-            if ( this.Player.CardsInHand.Count > 0 )
-            {
-                DrawCards(2);
-            }
-            else
-            {
-                DrawCards(5);
-            }
         }
 
         // End the player's turn.
@@ -666,7 +666,15 @@ namespace MonopolyDeal
                 IsCurrentTurnOwner = true;
 
                 // Draw the cards for the current turn owner automatically.
-                DrawCards(2);
+                // In this game, only two cards can generally be drawn at a time. However, if the player has no cards in his hand, he must draw five cards.
+                if ( this.Player.CardsInHand.Count > 0 )
+                {
+                    DrawCards(2);
+                }
+                else
+                {
+                    DrawCards(5);
+                }
 
                 // Inform the player that it is his/her turn.
                 //MessageBox.Show("It is your turn!");
@@ -683,13 +691,38 @@ namespace MonopolyDeal
             return Grid.GetColumn(cardButton.Parent as Grid) == SelectedCard;
         }
 
-        public void DisplayUpdatedDiscardPile( Object filler )
+        // Update the discard pile card so that it displays the last card in the discard pile.
+        public void DisplayUpdatedDiscardPile( Object filler = null )
         {
-            DiscardPileGrid.Children.Clear();
-
-            foreach ( Card card in this.DiscardPile )
+            // If the discard pile is empty, display nothing in its associated grid.
+            if ( 0 == this.DiscardPile.Count )
             {
-                AddCardToGrid(card, DiscardPileGrid, this.Player, false);
+                DiscardPileGrid.Children.Clear();
+            }
+            // Otherwise, display only the last card in the discard pile.
+            else
+            {
+                Button cardButton = ConvertCardToButton(this.DiscardPile[this.DiscardPile.Count - 1]);
+                DiscardPileGrid.Children.Add(cardButton);
+            }
+        }
+
+        // Discard a card, sending it to the discard pile and updating the other players' clients.
+        // This method will only be called by the player associated with this client.
+        private void DiscardCard( Card cardToDiscard )
+        {
+            if ( null != cardToDiscard )
+            {
+                // Remove the card from the player's hand.
+                RemoveCardFromHand(cardToDiscard);
+
+
+                // Add the card to the discard pile and update its display.
+                this.DiscardPile.Add(cardToDiscard);
+                DisplayUpdatedDiscardPile();
+
+                // Update the server's discard pile.
+                ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, this.DiscardPile);
             }
         }
 
@@ -959,10 +992,10 @@ namespace MonopolyDeal
                     if ( PropertyType.Wild != cardBeingAdded.Color )
                     {
                         // ROBIN TODO: Instead of doing nothing and returning false, the card should be added to a new list.
-                        if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.Color) )
-                        {
-                            return false;
-                        }
+                        //if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.Color) )
+                        //{
+                        //    return false;
+                        //}
 
                         // If the card has passed the previous check, add it to the player's CardsInPlay.
                         for ( int i = 1; i < player.CardsInPlay.Count; ++i )
@@ -1146,10 +1179,10 @@ namespace MonopolyDeal
                 {
                     ContextMenu menu = new ContextMenu();
 
-                    // If the action card is not a "Double the Rent", add this option.
-                    // (Double the Rent cards are played only with Rent cards.)
-
-                    if ( 2 != cardBeingAdded.ActionID )
+                    // If the action card is not a "Double the Rent" or "Just Say No", add this option.
+                    // (Double the Rent cards are played only with Rent cards, and Just Say No cards
+                    // are only used in response to actions).
+                    if ( (2 != cardBeingAdded.ActionID) && (1 != cardBeingAdded.ActionID) )
                     {
                         MenuItem playAsActionMenuItem = new MenuItem();
                         playAsActionMenuItem.Header = "Play as Action";
@@ -1446,17 +1479,26 @@ namespace MonopolyDeal
         }
 
         // Remove a card from the player's hand.
-        public void RemoveCardFromHand( Card cardtoRemove, Player player )
+        // This should only be called on the player associated with this client.
+        public void RemoveCardFromHand( Card cardtoRemove )
         {
+            // Remove the card from the grid displaying the player's hand.
+            // This must be done before removing the card from the list.
+            RemoveCardButtonFromHand((PlayerOneHand.Children[this.Player.CardsInHand.FindIndex(card => cardtoRemove.CardID == card.CardID)] as Grid).Tag as Button);
+
             // Remove the card from the player's CardsInHand list.
-            player.CardsInHand = new List<Card>(player.CardsInHand.Where(card => card.CardID != cardtoRemove.CardID));
+            this.Player.CardsInHand = new List<Card>(this.Player.CardsInHand.Where(card => card.CardID != cardtoRemove.CardID));
+
+            // Update the value of 'SelectedCard' (no card is selected after a card is removed from the player's hand).
+            this.SelectedCard = -1;
+
+            // Update the server's information regarding this player.
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
         }
         
         // Remove a card (given its Button wrapper) from the player's hand.
         public void RemoveCardButtonFromHand( Button cardButton )
         {
-            RemoveCardFromHand(cardButton.Tag as Card, this.Player);
-
             // Get the index of the card button.
             int buttonIndex = Grid.GetColumn(cardButton.Parent as Grid);
 
@@ -1464,7 +1506,7 @@ namespace MonopolyDeal
             PlayerOneHand.Children.RemoveAt(buttonIndex);
 
             // Shift all subsequential card buttons to the left.
-            for ( int i = buttonIndex; i < Player.CardsInHand.Count; ++i )
+            for ( int i = buttonIndex; i < PlayerOneHand.Children.Count; ++i )
             {
                 Grid.SetColumn(PlayerOneHand.Children[i], i);
             }
@@ -1525,11 +1567,19 @@ namespace MonopolyDeal
                 // If the deck is empty, transfer all the cards from the discard pile to the deck and shuffle.
                 if ( Deck.CardList.Count == 0 )
                 {
-                    Deck.CardList = DiscardPile;
-                    Deck.Shuffle<Card>(Deck.CardList);
-                    DiscardPile = new List<Card>();
+                    if ( DiscardPile.Count != 0 )
+                    {
+                        Deck.CardList = DiscardPile;
+                        Deck.Shuffle<Card>(Deck.CardList);
+                        DiscardPile = new List<Card>();
 
-                    ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, DiscardPile);
+                        ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, DiscardPile);
+                    }
+                    else
+                    {
+                        // Should send a Game Over message to players because there are no cards to draw.
+                        return;
+                    }                    
                 }
 
                 Card drawnCard = Deck.CardList[0];
@@ -1593,6 +1643,8 @@ namespace MonopolyDeal
                 {
                     // "Pass Go" case.
                     DrawCards(2);
+                    DiscardCard(actionCard);
+
                     return true;
                 }
                 else if ( 5 <= actionCard.ActionID && 7 >= actionCard.ActionID )
@@ -1617,58 +1669,71 @@ namespace MonopolyDeal
             PlayerSelectionDialog dialog = new PlayerSelectionDialog(this.Player.Name, PlayerList);
             if ( dialog.enoughPlayers && true == dialog.ShowDialog() )
             {
-                // ROBIN TODO: Verify that both players meet the required criteria for this steal card to be used. If the don't, cancel the action.
+                TheftType theftType = (TheftType)(stealCard.ActionID);
+
+                // Verify that both players meet the required criteria for this steal card to be used. If they don't, cancel the action.
                 // Perhaps prevent Dealbreaker if thief has color from selected monopoly
+                switch ( theftType )
                 {
-                    
+                    case TheftType.Dealbreaker:
+                    {
+                        // If the other player does not have a monopoly, inform the thief and cancel the action.
+                        if ( !dialog.SelectedPlayer.CardsInPlay.Any(cardGroup => ClientUtilities.IsCardListMonopoly(cardGroup)) )
+                        {
+                            MessageBox.Show(dialog.SelectedPlayer.Name + " does not have any monopolies to steal.", "Cannot Perform Deal");
+                            return false;
+                        }
+
+                        break;
+                    }
+
+                    case TheftType.ForcedDeal:
+                    {
+                        // Both players need to have at least one property in order for the thief to perform a Forced Deal.
+                        if ( !((this.Player.CardsInPlay.Skip(1).Count() > 0) && (dialog.SelectedPlayer.CardsInPlay.Skip(1).Count() > 0)) )
+                        {
+                            MessageBox.Show("Both players need to have at least one property in order to perform a Forced Deal.", "Cannot Perform Deal");
+                            return false;
+                        }
+
+                        break;
+                    }
+
+                    case TheftType.SlyDeal:
+                    {
+                        // The selected player needs to have at least one property in order for the thief to perform a Sly Deal.
+                        if ( !(dialog.SelectedPlayer.CardsInPlay.Skip(1).Count() > 0) )
+                        {
+                            MessageBox.Show(dialog.SelectedPlayer.Name + " does not have any properties to steal.", "Cannot Perform Deal");
+                            return false;
+                        }
+
+                        break;
+                    }                    
                 }
 
                 // Display the property theft window.
                 PropertyTheftWindow propertyTheftWindow = new PropertyTheftWindow(dialog.SelectedPlayer, this.Player, stealCard.ActionID);
-                bool isDealBreaker = TheftType.Dealbreaker == (TheftType)(stealCard.ActionID);
+                bool isDealBreaker = (TheftType.Dealbreaker == theftType);
 
                 if ( true == propertyTheftWindow.ShowDialog() )
                 {
-                    // Send the Theft Request to the victim. The victim has a chance to say "No" if he has a "Just Say No" card.
-                    {
-                        ServerUtilities.SendMessage(Client, Datatype.RequestTheft, new ActionData.TheftRequest(this.Player.Name, propertyTheftWindow.Victim.Name, stealCard.ActionID, propertyTheftWindow.PropertyToGive, propertyTheftWindow.PropertiesToTake));
-                    }
+                    // Discard the action card and send the Theft Request to the victim. The victim has a chance to say "No" if he has a "Just Say No" card.
+                    DiscardCard(stealCard);
+                    
+                    this.LastTheftRequest = new ActionData.TheftRequest(this.Player.Name, propertyTheftWindow.Victim.Name, stealCard.ActionID, propertyTheftWindow.PropertyToGive, propertyTheftWindow.PropertiesToTake);
+                    ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);
 
                     // Display a wait message until the victim has responded to the request.
                     WaitMessage = new MessageDialog("Please Wait...", "Waiting for victim to respond...");
-                    WaitMessage.ShowDialog();
-
-                    // This is called once the thief has received a reply from the victim.
-                    if ( this.VictimAcceptedDeal )
-                    {
-                        // Transfer the PropertyToGive to the victim.
-                        if ( String.Empty != propertyTheftWindow.PropertyToGive.Name )
-                        {
-                            RemoveCardFromCardsInPlay(propertyTheftWindow.PropertyToGive, this.Player);
-                        }
-                        
-                        // Add the card(s) to the thief's cards in play.
-                        if ( isDealBreaker )
-                        {
-                            this.Player.CardsInPlay.Add(propertyTheftWindow.PropertiesToTake);
-                        }
-                        else
-                        {
-                            AddCardToCardsInPlay(propertyTheftWindow.PropertiesToTake[0], this.Player);
-                        }
-                        
-
-                        // Update the server with the current version of this player (the thief).
-                        ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
-                    }
-                    else
-                    {
-                        MessageBox.Show(propertyTheftWindow.Victim.Name + " rejected your deal with a \"Just Say No!\".");
-                    }
-
-
+                    WaitMessage.ShowDialog();                    
                 }
-            }   
+            }
+            else
+            {
+                // If a player was not selected, cancel the action.
+                return false;                
+            }
 
             return true;
         }
@@ -1678,6 +1743,7 @@ namespace MonopolyDeal
         {
             int amountToCollect = 0;
             bool rentDoubled = false;
+            Card doubleRentCard = null;
 
             // Only one player is targeted for a "Debt Collector" or a Wild Rent.
             bool targetOnePlayer = (9 == rentCard.ActionID || 10 == rentCard.ActionID);
@@ -1749,7 +1815,7 @@ namespace MonopolyDeal
                 }
 
                 // If the player has a "Double the Rent" card and at least two actions remaining, ask if he would like to use it.
-                Card doubleRentCard = FindActionCardInList(this.Player.CardsInHand, 1);
+                doubleRentCard = FindActionCardInList(this.Player.CardsInHand, 1);
 
                 if ( (null != doubleRentCard) && (this.Turn.NumberOfActions < 2) )
                 {
@@ -1758,17 +1824,6 @@ namespace MonopolyDeal
                                     MessageBoxButton.YesNo);
 
                     rentDoubled = (MessageBoxResult.Yes == result);
-
-                    if ( rentDoubled )
-                    {
-                        // Remove the card from the player's hand and add it to the discard pile.
-                        RemoveCardButtonFromHand((PlayerOneHand.Children[this.Player.CardsInHand.IndexOf(doubleRentCard)] as Grid).Tag as Button);
-                        this.DiscardPile.Add(doubleRentCard);
-                        AddCardToGrid(doubleRentCard, DiscardPileGrid, this.Player, false);
-
-                        // Update the number of actions.
-                        this.Turn.NumberOfActions++;
-                    }
                 }
             }
 
@@ -1786,7 +1841,12 @@ namespace MonopolyDeal
                 {
                     // Send the rent request to the selected player.
                     rentees = new List<Player>() { dialog.SelectedPlayer };
-                }                
+                }
+                else
+                {
+                    // If a player was not selected, cancel the action.
+                    return false;
+                }
             }
             else
             {
@@ -1797,8 +1857,20 @@ namespace MonopolyDeal
                 rentees = new List<Player>(this.PlayerList.Where(player => player.Name != this.Player.Name));
             }
 
-            // Send the message to the server.
-            ServerUtilities.SendMessage(Client, Datatype.RequestRent, new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled));
+            // Discard the action card and send the message to the server.
+            DiscardCard(rentCard);
+
+            if ( rentDoubled )
+            {
+                // Remove the card from the player's hand and add it to the discard pile.
+                DiscardCard(doubleRentCard);
+
+                // Update the number of actions.
+                this.Turn.NumberOfActions++;
+            }
+
+            this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled);
+            ServerUtilities.SendMessage(Client, Datatype.RequestRent, this.LastRentRequest);
 
             // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
             // ROBIN TODO: Show some sort of progress bar.
@@ -1808,11 +1880,21 @@ namespace MonopolyDeal
             return true;
         }
 
+        // The Just Say No is a special card; it is played in several places and thus deserves its own method.
+        private void PlayJustSayNo( Card justSayNoCard )
+        {
+            // Remove the Just Say No from the victim's hand and add it to the discard pile.
+            DiscardCard(justSayNoCard);
+
+            // Update the server with the current version of this player.
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+            ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, this.DiscardPile);
+        }
+
         // Display the rent window.
         private void DisplayRentWindow( Object request )
         {
             ActionData.RentRequest rentRequest = (ActionData.RentRequest)request;
-            //String renterName = this.PlayerList.Find(player => player.Name == rentRequest.RenterName).Name;
             String renterName = rentRequest.RenterName;
             List<Card> payment = new List<Card>();
             bool acceptedDeal = false;
@@ -1844,12 +1926,15 @@ namespace MonopolyDeal
                 
                 // Display this player's updated CardsInPlay.
                 DisplayCardsInPlay(this.Player, PlayerOneField);
-
             }
             else
             {
-                // Remove the Just Say No from the victim's hand
-                RemoveCardButtonFromHand((PlayerOneHand.Children[this.Player.CardsInHand.FindIndex(card => 2 == card.ActionID)] as Grid).Tag as Button);
+                // Remove the Just Say No from the victim's hand and add it to the discard pile.
+                Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
+                if ( null != justSayNo )
+                {
+                    PlayJustSayNo(justSayNo);
+                }
             }
 
             // Send the updated rentee to the server and a RentResponse to the renter.
@@ -1871,7 +1956,30 @@ namespace MonopolyDeal
                 }
                 else
                 {
-                    MessageBox.Show(rentResponse.RenteeName + " rejected your rent request with a \"Just Say No\" card.");
+                    string message = rentResponse.RenteeName + " rejected your deal with a \"Just Say No!\".";
+
+                    Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
+                    // If the renter has his own Just Say No, ask the renter if he wants to use it.
+                    // If yes, send the rent request again.
+                    if ( MessageBoxResult.Yes == MessageBox.Show((null != justSayNo) ? message + "\nWould you like to use your \"Just Say No!\"?" : message, "\"Just Say No\"", (null != justSayNo) ? MessageBoxButton.YesNo : MessageBoxButton.OK) )
+                    {
+                        // By the time the renter presses "Yes", he may have already used all of his Just Say No cards. Verify that he still have one before moving on.
+                        justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
+
+                        if ( null != justSayNo )
+                        {
+                            // Update the rent number.
+                            this.NumberOfRentees++;
+
+                            PlayJustSayNo(justSayNo);
+                            this.LastRentRequest.Rentees = new List<Player>() { this.PlayerList.First(player => player.Name == rentResponse.RenteeName) };
+                            ServerUtilities.SendMessage(Client, Datatype.RequestRent, this.LastRentRequest);
+                        }
+                        else
+                        {
+                            MessageBox.Show("You have already used all of your \"Just Say No!\" cards.");
+                        }
+                    }
                 }
 
                 // Update the number of remaining rentees.
@@ -1909,8 +2017,7 @@ namespace MonopolyDeal
         {
             ActionData.TheftRequest theftRequest = (ActionData.TheftRequest)request;
 
-            MessageDialog requestDialog;
-            bool hasNo = this.Player.CardsInHand.Any(card => 2 == card.ActionID);
+            Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
             string message = theftRequest.ThiefName + " has played a " + ((TheftType)theftRequest.ActionID).ToString() + " against you.\n";
 
             // By default, use the name of the first property in the list.
@@ -1940,7 +2047,7 @@ namespace MonopolyDeal
                 }
             }
 
-            if ( hasNo )
+            if ( null != justSayNo )
             {
                 message += "Would you like to use your \"Just Say No\" card to reject " + theftRequest.ThiefName + "'s deal?";
             }
@@ -1950,15 +2057,14 @@ namespace MonopolyDeal
             }
 
             // Display the message box to the victim.
-            requestDialog = new MessageDialog("Theft Request", message, hasNo ? MessageBoxButton.YesNo : MessageBoxButton.OK);
-            requestDialog.ShowDialog();
+            MessageBoxResult result = MessageBox.Show(message, "Theft Request", (null != justSayNo) ? MessageBoxButton.YesNo : MessageBoxButton.OK);
 
             // Determine if the victim accepted the deal. If he didn't, remove his "Just Say No" and update the server.
-            bool acceptedDeal = requestDialog.Result != MessageBoxResult.Yes;
+            bool acceptedDeal = result != MessageBoxResult.Yes;
             if ( !acceptedDeal )
             {
                 // Remove the Just Say No from the victim's hand.
-                RemoveCardButtonFromHand((PlayerOneHand.Children[this.Player.CardsInHand.FindIndex(card => 2 == card.ActionID)] as Grid).Tag as Button);                
+                PlayJustSayNo(justSayNo);               
             }
             else
             {
@@ -1986,14 +2092,55 @@ namespace MonopolyDeal
         {
             ActionData.TheftResponse theftResponse = (ActionData.TheftResponse)response;
 
-            // Update this global so that the proper action is taken when the wait dialog is closed.
-            this.VictimAcceptedDeal = theftResponse.AcceptedDeal;
-
             // Update the wait dialog.
             if ( null != WaitMessage )
             {
                 WaitMessage.CloseWindow = true;
             }
+
+            // This is called once the thief has received a reply from the victim.
+            if ( theftResponse.AcceptedDeal )
+            {
+                // Transfer the PropertyToGive to the victim.
+                if ( String.Empty != this.LastTheftRequest.PropertyToGive.Name )
+                {
+                    RemoveCardFromCardsInPlay(this.LastTheftRequest.PropertyToGive, this.Player);
+                }
+
+                // Add the card(s) to the thief's cards in play.
+                if ( (TheftType)(this.LastTheftRequest.ActionID) == TheftType.Dealbreaker )
+                {
+                    this.Player.CardsInPlay.Add(this.LastTheftRequest.PropertiesToTake);
+                }
+                else
+                {
+                    AddCardToCardsInPlay(this.LastTheftRequest.PropertiesToTake[0], this.Player);
+                }
+
+
+                // Update the server with the current version of this player (the thief).
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+            }
+            else
+            {
+                string message = this.LastTheftRequest.VictimName + " rejected your deal with a \"Just Say No!\".";
+
+                Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
+                // If the thief has his own Just Say No, ask the thief if he wants to use it.
+                // If yes, send the theft request again.
+                if ( MessageBoxResult.Yes == MessageBox.Show((null != justSayNo) ? message + "\nWould you like to use your \"Just Say No\"?" : message, "\"Just Say No\"", (null != justSayNo) ? MessageBoxButton.YesNo : MessageBoxButton.OK) )
+                {
+                    PlayJustSayNo(justSayNo);
+                    ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);
+
+                    // Display a wait message until the victim has responded to the request.
+                    WaitMessage = new MessageDialog("Please Wait...", "Waiting for victim to respond...");
+                    WaitMessage.ShowDialog();
+                }
+            }
+
+            // Reset the value of the last theft request.
+            this.LastTheftRequest = null;
         }
 
         #endregion
@@ -2001,11 +2148,19 @@ namespace MonopolyDeal
         #region Miscellaneous
 
         // Create a new thread to run a function that cannot be run on the same thread invoking CreateNewThread().
-        public void CreateNewThread( Action<Object> action, object data = null )
+        public Thread CreateNewThread( Action<Object> action, object data = null, string name = "" )
         {
             ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, action, data); };
             Thread newThread = new Thread(start);
+
+            if ( !String.IsNullOrEmpty(name) )
+            {
+                newThread.Name = name;
+            }
+
             newThread.Start();
+
+            return newThread;
         }
 
         // Shift the position of an item in a list.

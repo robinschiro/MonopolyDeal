@@ -21,10 +21,9 @@ namespace AdditionalWindows
     /// <summary>
     /// Interaction logic for RentWindow.xaml
     /// </summary>
-    public partial class RentWindow : Window, INotifyPropertyChanged
+    public partial class RentWindow : ModalWindow, INotifyPropertyChanged
     {
         private int amountOwed;
-        private bool closeWindow = false;
 
         public ObservableCollection<Card> Payment { get; set; }
         public ObservableCollection<Card> Assets { get; set; }
@@ -81,9 +80,8 @@ namespace AdditionalWindows
                     if ( MessageBoxResult.Yes == MessageBox.Show("Would you like to use your \"Just Say No\" card to reject " + renterName + "'s rent request?", "Rent Rejection", MessageBoxButton.YesNo) )
                     {
                         // Mark the result of the dialog as false and close it.
-                        this.DialogResult = false;
-                        closeWindow = true;
-                        this.Close();
+                        this.dialogResult = false;
+                        this.CloseWindow = true;
                     }
                 }        
             };            
@@ -107,15 +105,6 @@ namespace AdditionalWindows
         private void RemoveButton_Click( object sender, RoutedEventArgs e )
         {
             TransferSelectedItems(PaymentListView, AssetsListView);
-        }
-
-        // Only allow the player to close the rent window when the 'Pay Rent' button is pressed.
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            if ( !closeWindow )
-            {
-                e.Cancel = true;
-            }
         }
 
         // Transfer all selected items from one listview to another.
@@ -169,11 +158,11 @@ namespace AdditionalWindows
             }
         }
 
+        // Close the rent window when the user presses the Pay button.
         private void PayButton_Click( object sender, RoutedEventArgs e )
         {
-            closeWindow = true;
-            this.DialogResult = true;
-            this.Close();
+            this.dialogResult = true;
+            this.CloseWindow = true;
         }
     }
 }

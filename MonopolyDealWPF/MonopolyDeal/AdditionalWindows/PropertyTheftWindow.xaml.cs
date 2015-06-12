@@ -22,10 +22,8 @@ namespace AdditionalWindows
     /// <summary>
     /// Interaction logic for RentWindow.xaml
     /// </summary>
-    public partial class PropertyTheftWindow : Window, INotifyPropertyChanged
+    public partial class PropertyTheftWindow : ModalWindow, INotifyPropertyChanged
     {
-
-        private bool closeWindow = false;
         private bool showMonopoliesOnly = false;
         private TheftType type;
         private PropertyHierarchyView propertyViewVictim;
@@ -158,15 +156,6 @@ namespace AdditionalWindows
             }
         }
 
-        // Only allow the player to close the property theft window when the 'Steal' button is pressed.
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            if ( !closeWindow )
-            {
-                e.Cancel = true;
-            }
-        }
-
         // Resize the columns of a ListView to fit the contents.
         // Taken from: http://stackoverflow.com/questions/845269/force-resize-of-gridview-columns-inside-listview
         public void AutoSizeColumns( ListView listview )
@@ -202,9 +191,8 @@ namespace AdditionalWindows
             Object selectedItemTag = (propertyViewVictim.SelectedItem as TreeViewItem).Tag;
             this.propertiesToTake = (TheftType.Dealbreaker == this.type) ? (selectedItemTag as List<Card>) : new List<Card>() { (selectedItemTag as Card) };
 
-            closeWindow = true;
-            this.DialogResult = true;
-            this.Close();
+            this.dialogResult = true;
+            this.CloseWindow = true;
         }
 
         // A Treeview class used to display the properties of a player.

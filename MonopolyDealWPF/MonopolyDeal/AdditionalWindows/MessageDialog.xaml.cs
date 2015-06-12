@@ -20,30 +20,13 @@ namespace AdditionalWindows
     // <summary>
     /// Interaction logic for MessageDialog.xaml
     /// </summary>
-    public partial class MessageDialog : Window
+    public partial class MessageDialog : ModalWindow
     {
-        private bool closeWindow = false;
-        public bool CloseWindow
-        {
-            get
-            {
-                return closeWindow;
-            }
-            set
-            {
-                closeWindow = value;
-                if (closeWindow)
-                {
-                    this.Close();
-                }
-            }
-        }
-        public MessageBoxResult Result;
+        public MessageBoxResult Result { get; set; }
 
         public MessageDialog( string title, string message, MessageBoxButton option = (MessageBoxButton)(-1) )
         {
             InitializeComponent();
-
             this.Title = title;
             this.MessageLabel.Content = message;
 

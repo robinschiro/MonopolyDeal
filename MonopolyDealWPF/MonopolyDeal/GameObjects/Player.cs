@@ -57,21 +57,6 @@ namespace GameObjects
             this.MoneyList = new MoneyList();
         }
 
-        private List<int> CalculateMoneyInBank()
-        {
-            List<int> listOfMoney = new List<int>();
-
-            foreach ( Card card in CardsInPlay[0] )
-            {
-                if ( card.Type == CardType.Money )
-                {
-                    listOfMoney.Add(card.Value);
-                }
-            }
-
-            return null;
-        }
-
 
     }
 }

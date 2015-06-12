@@ -1,6 +1,7 @@
-﻿<Window x:Class="AdditionalWindows.PropertyTheftWindow"
+﻿<src:ModalWindow x:Class="AdditionalWindows.PropertyTheftWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:src="clr-namespace:AdditionalWindows"
         Title="RentWindow" Height="386" Width="526">
     <Grid Name="WindowGrid">
         <Grid.ColumnDefinitions>
@@ -43,4 +44,4 @@
                 Grid.ColumnSpan="2"
                 Grid.Row="2"/>
     </Grid>
-</Window>
+</src:ModalWindow>

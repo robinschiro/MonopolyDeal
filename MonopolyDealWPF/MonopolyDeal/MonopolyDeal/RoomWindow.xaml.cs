@@ -20,6 +20,7 @@ namespace MonopolyDeal
         private Player Player;
         private string ServerIP;
         private bool BeginCommunication;
+        bool UpdateReceived = false;
         private bool Disconnected = false;
         private List<Player> PlayerList;
         private volatile Turn Turn;
@@ -135,12 +136,11 @@ namespace MonopolyDeal
         public void GotMessage( object peer )
         {
             NetIncomingMessage inc;
-            bool updateReceived = false;
 
             if ( false == this.BeginCommunication )
             {
                 // Continue reading messages until the requested update is received.
-                while ( !updateReceived && !this.Disconnected )
+                while ( !UpdateReceived && !this.Disconnected )
                 {
                     Console.WriteLine(this.PlayerName + " stuck in begin");
 
@@ -150,8 +150,13 @@ namespace MonopolyDeal
                         if ( inc.MessageType == NetIncomingMessageType.StatusChanged )
                         {
                             this.BeginCommunication = true;
-                            updateReceived = true;
-                            CreateNewThread(new Action<Object>(( sender ) => { WaitMessage.CloseWindow = true; }));
+                            UpdateReceived = true;
+
+                            // Close the wait message if it is open.
+                            if ( null != WaitMessage && !WaitMessage.CloseWindow )
+                            {
+                                CreateNewThread(new Action<Object>(( sender ) => { WaitMessage.CloseWindow = true; }));
+                            }
                         }
 
                         Thread.Sleep(100);
