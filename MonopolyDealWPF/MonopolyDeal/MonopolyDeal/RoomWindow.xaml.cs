@@ -121,7 +121,7 @@ namespace MonopolyDeal
             outmsg.Write((byte)PacketTypes.LOGIN);
 
             // Connect client, to ip previously requested from user.
-            Client.Connect(ipAddress, 14242, outmsg);
+            Client.Connect(ipAddress, ServerUtilities.PORT_NUMBER, outmsg);
 
             // Create the synchronization context used by the client to receive updates as soon as they are available.
             SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());

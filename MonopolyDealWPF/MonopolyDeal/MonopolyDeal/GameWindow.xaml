@@ -2,11 +2,17 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:MonopolyDeal"
+        xmlns:utilities="clr-namespace:Utilities"
         Title="GameWindow" Height="800" Width="1200"
         KeyDown="Window_KeyDown">
         <!--SizeChanged="Window_SizeChanged"-->
 
     <Window.Resources>
+        <Style x:Key="FieldSeparator" TargetType="{x:Type Separator}">
+            <Setter Property="Background" Value="Black"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+        </Style>
+        
         <Style x:Key="NoChromeButton" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -25,15 +31,6 @@
                                 <Setter Property="Foreground" Value="#ADADAD"/>
                                 <Setter Property="Opacity" TargetName="Chrome" Value="0.5"/>
                             </Trigger>
-                            <!--<Trigger Property="IsFocused"  Value="true">
-                                <Setter Property="RenderTransformOrigin" Value="0.5, 0.5"/>
-                                <Setter Property="RenderTransform">
-                                    <Setter.Value>
-                                        <ScaleTransform ScaleY="1.2" ScaleX="1.2"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                            -->
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -50,8 +47,21 @@
           Background="LightCoral">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="7*"/>
+            <!--<ColumnDefinition Width="1*"/>-->
         </Grid.ColumnDefinitions>
+        <!--<Grid utilities:GridHelpers.RowCount="5" />-->
+        
+        <!--<Grid Name="PlayerInfoGrid"
+              Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+        </Grid>-->
+              
         
         <Grid Name="SideBar"
               Grid.Column="0">
@@ -90,7 +100,16 @@
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="6*"/>
             </Grid.RowDefinitions>
-            
+
+            <!-- Separators between player grids -->
+            <!--<Separator  Style="{DynamicResource FieldSeparator}"
+                        Grid.Row="1"/>
+            <Separator  Style="{DynamicResource FieldSeparator}"
+                        Grid.Row="3"/>
+            <Separator  Style="{DynamicResource FieldSeparator}"
+                        Grid.Row="5"/>-->
+
+
             <Grid Name="GridFour"
                   Grid.Row="0">
                 <Grid.RowDefinitions>
@@ -101,8 +120,6 @@
                 <Grid Name="PlayerFourField"
                   Grid.Row="0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -133,12 +150,10 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                 </Grid>
             </Grid>
-            
+
             <Grid Name="GridThree"
                   Grid.Row="2">
                 <Grid.RowDefinitions>
@@ -161,16 +176,12 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                 </Grid>
 
                 <Grid Name="PlayerThreeHand"
                   Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -209,16 +220,12 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                 </Grid>
 
                 <Grid Name="PlayerTwoHand"
                   Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -260,8 +267,6 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                 </Grid>
 
@@ -280,59 +285,9 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                 </Grid>
             </Grid>
-        </Grid>
-        
-        
+        </Grid>      
     </Grid>
-
-    <!-- The following canvas serves as test code; it is not used in the applciation.    
-    <Canvas Name="GameCanvas">
-        <Button  Style="{DynamicResource NoChromeButton}"
-                 Name="card"
-                 Canvas.Left="0"
-                 Canvas.Top="0">
-            <Image Source=".\Images\10million.jpg">
-                <Image.RenderTransform>
-                    <ScaleTransform ScaleX=".5" ScaleY=".5"/>
-                </Image.RenderTransform>   
-            </Image>
-        </Button>
-        <Button  Style="{DynamicResource NoChromeButton}"
-                 Name="deckImage"
-                 Canvas.Left="200"
-                 Canvas.Top="0">
-            <Image Source=".\Images\cardback.jpg">
-                <Image.RenderTransform>
-                    <ScaleTransform ScaleX=".5" ScaleY=".5"/>
-                </Image.RenderTransform>
-            </Image>
-        </Button>
-
-    </Canvas>
-    -->
-    
-    <!-- I believe a parent grid would be easier to manage than a parent canvas. Will discuss with Tyler.
-    <Canvas Height="493" Name="GameCanvas" Width="989">
-        <Grid Canvas.Left="189" Canvas.Top="331" Height="150" Name="PlayerHand" Width="800
-              ">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80*" />
-                <ColumnDefinition Width="80*" />
-                <ColumnDefinition Width="80*" />
-                <ColumnDefinition Width="80*" />
-                <ColumnDefinition Width="80*" />
-                <ColumnDefinition Width="80*" />
-                <ColumnDefinition Width="80*" />
-                <ColumnDefinition Width="80*" />
-                <ColumnDefinition Width="80*" />
-                <ColumnDefinition Width="80*" />
-            </Grid.ColumnDefinitions>
-        </Grid>
-    </Canvas>
-    -->
 </Window>

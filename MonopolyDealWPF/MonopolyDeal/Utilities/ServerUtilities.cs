@@ -12,6 +12,8 @@ namespace GameServer
 {
     public class ServerUtilities
     {
+        public const int PORT_NUMBER = 14242;
+
         // Receive an update from either a client or the server, depending on where this method is called.
         public static object ReceiveMessage( NetIncomingMessage inc, Datatype messageType )
         {

@@ -40,6 +40,7 @@ namespace MonopolyDeal
         private bool BeginCommunication;
         private bool UpdateReceived;
         private bool ReceivedPlayerList;
+        private bool ReceivedDeck;
         private volatile NetClient Client;
         private List<Grid> PlayerFields;                        // This list is needed in order to resize the grids when the window size changes.
         private Dictionary<String, Grid> PlayerFieldDictionary;
@@ -87,6 +88,7 @@ namespace MonopolyDeal
             this.BeginCommunication = false;
             this.UpdateReceived = false;
             this.ReceivedPlayerList = false;
+            this.ReceivedDeck = false;
             this.HavePlayersBeenAssigned = false;
             this.ServerIP = ipAddress;
             this.PlayerName = playerName;
@@ -94,7 +96,7 @@ namespace MonopolyDeal
             //// Play theme song.
             //mediaPlayer = new MediaPlayer();
             //CreateNewThread(new Action<Object>(PlaySong));
-            
+
             // Instantiate the Player's Turn object.
             this.Turn = turn;
 
@@ -111,14 +113,30 @@ namespace MonopolyDeal
                 WaitMessage.ShowDialog();
             }
 
-            // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
-            WaitMessage = new MessageDialog("Please Wait...", "Waiting for player list...");
+            // Request the player list and wait for it before continuing.
+            {
+                // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
+                WaitMessage = new MessageDialog("Please Wait...", "Waiting for player list...");
 
-            // Receive a list of the players already on the server.
-            ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
+                // Receive a list of the players already on the server.
+                ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
 
-            // Do not continue until the client receives the Player List from the server.
-            WaitMessage.ShowDialog();
+                // Do not continue until the client receives the Player List from the server.
+                WaitMessage.ShowDialog();
+            }
+
+            // Request the deck and wait for it before continuing.
+            {
+                // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
+                WaitMessage = new MessageDialog("Please Wait...", "Waiting for deck...");
+
+                // Receive a list of the players already on the server.
+                ServerUtilities.SendMessage(Client, Datatype.RequestDeck);
+
+                // Do not continue until the client receives the Player List from the server.
+                WaitMessage.ShowDialog();
+            }
+
 
             // Inform the next player in the list that he can connect.
             int pos = FindPlayerPositionInPlayerList(this.Player.Name);
@@ -147,6 +165,30 @@ namespace MonopolyDeal
             this.PlayerFields.Add(PlayerTwoField);
             this.PlayerFields.Add(PlayerThreeField);
             this.PlayerFields.Add(PlayerFourField);
+
+            // Add player names to each playing field.
+            for ( int i = 0; i < this.PlayerList.Count; i++ )
+            {
+                if ( this.PlayerList[i].Name != this.PlayerName )
+                {
+                    Label playerNameLabel = new Label();
+                    playerNameLabel.Content = "Name: " + this.PlayerList[i].Name;
+                    playerNameLabel.VerticalAlignment = System.Windows.VerticalAlignment.Center;
+
+                    // Create a separator to separate the playing fields.
+                    Separator fieldSeparator = new Separator();
+                    fieldSeparator.Style = (Style)FindResource("FieldSeparator");
+
+                    // Add the UI elements to the playing field.
+                    PlayingField.Children.Add(playerNameLabel);
+                    PlayingField.Children.Add(fieldSeparator);
+
+                    // Set the row positions of the UI elements.
+                    int row = 5 - 2 * (GetRelativePosition(this.PlayerName, PlayerList[i].Name) - 1);
+                    Grid.SetRow(playerNameLabel, row);
+                    Grid.SetRow(fieldSeparator, row);
+                }
+            }
 
             // Display the cards in this player's hand.
             foreach ( Card card in Player.CardsInHand )
@@ -195,7 +237,7 @@ namespace MonopolyDeal
             outmsg.Write("MyName");
 
             // Connect client, to ip previously requested from user.
-            Client.Connect(serverIP, 14242, outmsg);
+            Client.Connect(serverIP, ServerUtilities.PORT_NUMBER, outmsg);
 
             // Create the synchronization context used by the client to receive updates as soon as they are available.
             SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
@@ -254,8 +296,12 @@ namespace MonopolyDeal
                         {
                             this.Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            // I'm not sure if this is necessary.
-                            //Client.Recycle(inc);
+                            // Close the wait message if it is open and we have not received the player list yet.
+                            if ( !this.ReceivedDeck && null != this.WaitMessage && !this.WaitMessage.CloseWindow )
+                            {
+                                this.ReceivedDeck = true;
+                                CreateNewThread(new Action<Object>(( sender ) => { this.WaitMessage.CloseWindow = true; }));
+                            }
 
                             break;
                         }
@@ -456,7 +502,7 @@ namespace MonopolyDeal
             outmsg.Write("MyName");
 
             // Connect to the server.
-            Client.Connect(ServerIP, 14242, outmsg);
+            Client.Connect(ServerIP, ServerUtilities.PORT_NUMBER, outmsg);
         }
 
         // When the client resizes the windows, scale the display of overlaid cards on the players' fields so that they
@@ -1554,45 +1600,47 @@ namespace MonopolyDeal
         // Draw a given amount of cards from the Deck (the cards are placed in the Player's hand).
         private void DrawCards( int numberOfCards )
         {
-            // Reset the Deck.
-            Deck = null;
-            ServerUtilities.SendMessage(Client, Datatype.RequestDeck);
+            //// Reset the Deck.
+            //Deck = null;
+            //ServerUtilities.SendMessage(Client, Datatype.RequestDeck);
 
-            // Do not continue until the updated Deck is received from the server.
-            while ( Deck == null ) ;
+            //// Do not continue until the updated Deck is received from the server.
+            //while ( Deck == null ) ;
 
-            // Remove the given number of cards from the top of the Deck and add them to the Player's hand.
-            for ( int i = 0; i < numberOfCards; ++i )
+            if ( null != this.Deck )
             {
-                // If the deck is empty, transfer all the cards from the discard pile to the deck and shuffle.
-                if ( Deck.CardList.Count == 0 )
+                // Remove the given number of cards from the top of the Deck and add them to the Player's hand.
+                for ( int i = 0; i < numberOfCards; ++i )
                 {
-                    if ( DiscardPile.Count != 0 )
+                    // If the deck is empty, transfer all the cards from the discard pile to the deck and shuffle.
+                    if ( this.Deck.CardList.Count == 0 )
                     {
-                        Deck.CardList = DiscardPile;
-                        Deck.Shuffle<Card>(Deck.CardList);
-                        DiscardPile = new List<Card>();
+                        if ( this.DiscardPile.Count != 0 )
+                        {
+                            this.Deck = new Deck(DiscardPile, true);
+                            this.DiscardPile = new List<Card>();
 
-                        ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, DiscardPile);
+                            ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, this.DiscardPile);
+                        }
+                        else
+                        {
+                            // Should send a Game Over message to players because there are no cards to draw.
+                            return;
+                        }
                     }
-                    else
-                    {
-                        // Should send a Game Over message to players because there are no cards to draw.
-                        return;
-                    }                    
+
+                    Card drawnCard = this.Deck.CardList[0];
+
+                    this.Player.CardsInHand.Add(drawnCard);
+                    AddCardToGrid(drawnCard, PlayerOneHand, this.Player, true);
+                    this.Deck.CardList.Remove(drawnCard);
                 }
 
-                Card drawnCard = Deck.CardList[0];
 
-                Player.CardsInHand.Add(drawnCard);
-                AddCardToGrid(drawnCard, PlayerOneHand, Player, true);
-                Deck.CardList.Remove(drawnCard);
+                // Send the updated Deck and Player to the server.
+                ServerUtilities.SendMessage(Client, Datatype.UpdateDeck, Deck);
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
             }
-            
-
-            // Send the updated Deck and Player to the server.
-            ServerUtilities.SendMessage(Client, Datatype.UpdateDeck, Deck);
-            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
         }
 
         // Again, testing AttachedProperties. Will need to discuss.

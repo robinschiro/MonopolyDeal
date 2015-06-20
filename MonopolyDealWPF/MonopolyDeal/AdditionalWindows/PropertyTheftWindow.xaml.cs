@@ -92,7 +92,7 @@ namespace AdditionalWindows
             // If this is a ForcedDeal, create a tree view of the thief's properties.
             if (TheftType.ForcedDeal == type)
             {
-                propertyViewThief = new PropertyHierarchyView(thief, false);
+                propertyViewThief = new PropertyHierarchyView(thief, false, true);
                 Grid.SetRow(propertyViewThief, 1);
                 Grid.SetColumn(propertyViewThief, 1);
                 WindowGrid.Children.Add(propertyViewThief);
@@ -201,14 +201,22 @@ namespace AdditionalWindows
             private Player player;
             private bool showMonopoliesOnly;
 
-            public PropertyHierarchyView( Player player, bool onlyMonopoliesSelectable )
+            public PropertyHierarchyView( Player player, bool onlyMonopoliesSelectable, bool isThiefAssets = false )
             {
                 // Instantiate member variables.
                 this.player = player;
                 this.showMonopoliesOnly = onlyMonopoliesSelectable;
 
-                List<List<Card>> cardGroups = onlyMonopoliesSelectable ? (ClientUtilities.FindMonopolies(player)) : new List<List<Card>>(player.CardsInPlay.Where(cardList => !ClientUtilities.IsCardListMonopoly(cardList)));
-                cardGroups = onlyMonopoliesSelectable ? cardGroups : new List<List<Card>>(cardGroups.Skip(1));
+                List<List<Card>> cardGroups;
+
+                if ( isThiefAssets )
+                {
+                    cardGroups = new List<List<Card>>(player.CardsInPlay.Skip(1));
+                }
+                else
+                {
+                    cardGroups = onlyMonopoliesSelectable ? (ClientUtilities.FindMonopolies(player)) : new List<List<Card>>(player.CardsInPlay.Skip(1).Where(cardList => !ClientUtilities.IsCardListMonopoly(cardList)));
+                }
 
                 // Populate the tree with cards from the player's cards in play.
                 foreach ( List<Card> cardList in cardGroups)

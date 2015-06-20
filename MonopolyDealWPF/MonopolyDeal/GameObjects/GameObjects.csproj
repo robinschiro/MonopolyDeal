@@ -140,6 +140,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Profile.txt" />
     <Content Include="Resources\tvToolbox\tvMessageBox\images\Alert.png" />
     <Content Include="Resources\tvToolbox\tvMessageBox\images\Default.png" />
     <Content Include="Resources\tvToolbox\tvMessageBox\images\Error.png" />

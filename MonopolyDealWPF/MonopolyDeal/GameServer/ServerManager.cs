@@ -9,6 +9,10 @@ using GameObjects;
 using tvToolbox;
 using Lidgren.Network;
 using Utilities;
+using System.IO;
+using System.Windows;
+using System.Windows.Resources;
+using System.IO.Packaging;
 
 
 // Lidgren Network example
@@ -40,13 +44,27 @@ namespace GameServer
         static List<Player> PlayerList;
         static Turn Turn;
         static List<Card> DiscardPile;
+        static String PATH_TO_PROFILE = "pack://application:,,,/GameObjects;component/Resources/Profile.txt";
 
         [STAThread]
         static void Main( string[] args )
         {
             // Generate a Profile object. When this project is near the end of its development, 
             // we will need to remove the leading "..\\"'s from this file path.
-            Profile = new tvProfile("..\\..\\..\\Profile.txt", false);
+            if ( File.Exists("Profile.txt"))
+            {
+                Profile = new tvProfile("Profile.txt", false);
+            }
+            // If it doesn't exist locally, use the embedded one.
+            else
+            {
+                // Ensure that the pack scheme is known: http://stackoverflow.com/questions/6005398/uriformatexception-invalid-uri-invalid-port-specified
+                string ensurePackSchemeIsKnown = PackUriHelper.UriSchemePack;
+
+                StreamResourceInfo stream = Application.GetResourceStream(new Uri(PATH_TO_PROFILE, UriKind.Absolute));
+                StreamReader reader = new StreamReader(stream.Stream);
+                Profile = new tvProfile(reader.ReadToEnd());
+            }
 
             // Create a new deck.
             Deck = new Deck(Profile);
@@ -61,7 +79,7 @@ namespace GameServer
             Config = new NetPeerConfiguration("game");
 
             // Set server port
-            Config.Port = 14242;
+            Config.Port = ServerUtilities.PORT_NUMBER;
 
             // Max client amount
             Config.MaximumConnections = 200;
@@ -134,6 +152,11 @@ namespace GameServer
                                 case Datatype.UpdateDeck:
                                 {
                                     Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
+                                    }
                                     break;
                                 }
 

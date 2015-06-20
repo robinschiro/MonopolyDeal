@@ -13,35 +13,53 @@ namespace GameObjects
 {
     public class Deck
     {
-        public String TextureName { get; set; }
         public List<Card> CardList { get; set; }  // Deck is a list of cards
-        private tvProfile Profile;
-
-        // Variables to hold temporary data.
-        string name;
-        CardType cardType;
-        int value;
-        PropertyType propertyType;
-        PropertyType altPropertyType;
-        string uriPath;
-        int actionID;
+        static private tvProfile Profile;
 
         public Deck(tvProfile profile)
         {
-            this.Profile = profile;
-            GenerateDeck();
+            Profile = profile;
+            this.CardList = GenerateDeck();
+
+            // Randomize the cards in the deck
+            Shuffle(this.CardList);
         }
 
-        public Deck( List<Card> cardList )
+        public Deck( List<Card> cardList, bool refreshType = false )
         {
             this.CardList = cardList;
+
+            // The 'Type' attribute of each card must be refreshed when cards from the discard pile
+            // are used to make a new deck. This is because some cards may have been played as money or a property
+            // and thus had their 'Type' attribute changed.
+            if (refreshType)
+            {
+                List<Card> fullDeck = GenerateDeck();
+
+                foreach ( Card card in this.CardList )
+                {
+                    card.Type = fullDeck[card.CardID].Type;
+                }
+            }
+
+            // Randomize the cards in the deck
+            Shuffle(this.CardList);
         }
 
         // Scan data from the profile file to generate the cards for the deck.
         // ROBIN TODO: Generalize this method so that it works for cards with any properties (not just those specific to Monopoly Deal).
-        public void GenerateDeck()
+        public List<Card> GenerateDeck()
         {
-            CardList = new List<Card>();
+            // Variables to hold temporary data.
+            string name;
+            CardType cardType;
+            int value;
+            PropertyType propertyType;
+            PropertyType altPropertyType;
+            string uriPath;
+            int actionID;
+
+            List<Card> cardList = new List<Card>();
             string[] files = GetResourcesInFolder("Images");
             
             // Each card must have a unique ID.
@@ -63,20 +81,17 @@ namespace GameObjects
                     uriPath = "pack://application:,,,/GameObjects;component/Images/" + files[i];
                     actionID = (cardProfile.sValue("-ActionID", "") == "") ? -1 : Convert.ToInt32((cardProfile.sValue("-ActionID", "")));
 
-                    CardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath, actionID, cardID));
+                    cardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath, actionID, cardID));
                   
                     // Iterate the card ID so that it is different for the next card.
                     cardID++;
                 }
             }
 
-            // Randomize the cards in the deck
-            Shuffle(CardList);
-
-            TextureName = "cardback";
+            return cardList;
         }
 
-        // Returns a list a file names inside a folder containing resources for the calling assembly.
+        // Returns a list of file names inside a folder containing resources for the calling assembly.
         // This is needed in order to properly embed the images in the .exe (Before we were using relative
         // file paths, which caused the .exe to crash when it was run from a different directory).
         // This method was found here: http://tinyurl.com/m8d8dvl
