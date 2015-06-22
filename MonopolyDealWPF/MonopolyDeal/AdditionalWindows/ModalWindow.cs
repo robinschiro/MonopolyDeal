@@ -12,6 +12,7 @@ namespace AdditionalWindows
         protected bool dialogResult = false;
 
         private bool closeWindow = false;
+        private bool isModal = false;
         public bool CloseWindow
         {
             get
@@ -31,10 +32,16 @@ namespace AdditionalWindows
                 }
             }
         }
+
+        public ModalWindow( bool isModal = true )
+        {
+            this.isModal = isModal;
+        }
+
         // Only allow the this window to be closed when closeWindow has been enabled.
         protected override void OnClosing( CancelEventArgs e )
         {
-            if ( !closeWindow )
+            if ( !closeWindow && isModal )
             {
                 e.Cancel = true;
             }

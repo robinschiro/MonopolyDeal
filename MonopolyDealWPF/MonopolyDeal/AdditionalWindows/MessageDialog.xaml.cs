@@ -24,7 +24,7 @@ namespace AdditionalWindows
     {
         public MessageBoxResult Result { get; set; }
 
-        public MessageDialog( string title, string message, MessageBoxButton option = (MessageBoxButton)(-1) )
+        public MessageDialog( string title, string message, MessageBoxButton option = (MessageBoxButton)(-1), bool isModal = true) : base( isModal )
         {
             InitializeComponent();
             this.Title = title;
@@ -43,34 +43,22 @@ namespace AdditionalWindows
             }
         }
 
-        // Only allow the player to close the dialog when CloseWindow has been enabled.
-        protected override void OnClosing( CancelEventArgs e )
-        {
-            if ( !CloseWindow )
-            {
-                e.Cancel = true;
-            }
-        }
-
         private void YesButton_Click( object sender, RoutedEventArgs e )
         {
             this.Result = MessageBoxResult.Yes;
             CloseWindow = true;
-            this.Close();
         }
 
         private void NoButton_Click( object sender, RoutedEventArgs e )
         {
             this.Result = MessageBoxResult.No;
             CloseWindow = true;
-            this.Close();
         }
 
         private void OkButton_Click( object sender, RoutedEventArgs e )
         {
             this.Result = MessageBoxResult.OK;
             CloseWindow = true;
-            this.Close();
         }
     }
 
