@@ -19,8 +19,11 @@ namespace MonopolyDeal
         private void OKButton_Click( object sender, RoutedEventArgs e )
         {
             RoomWindow roomWindow = new RoomWindow(IPAddress.Text, PlayerName.Text);
-            roomWindow.Show();
-            Close();
+            if ( roomWindow.ShowWindow )
+            {
+                roomWindow.Show();
+            }
+            this.Close();
         }
 
         // The OKButton is enabled only when text exists in the IPAddress textbox.

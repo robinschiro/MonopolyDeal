@@ -72,9 +72,10 @@
             <Grid Name="TopSideBar"
                   Grid.Row="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="3*"/>
+                    <RowDefinition Height="4*"/>
                     <RowDefinition />
-                    <RowDefinition Height="3*"/>
+                    <RowDefinition />
+                    <RowDefinition Height="4*"/>
                 </Grid.RowDefinitions>
 
                 <Button Name="EndTurnButton"
@@ -82,11 +83,20 @@
                         Click="EndTurnButton_Click"
                         IsEnabled="{Binding IsCurrentTurnOwner, UpdateSourceTrigger=PropertyChanged}"
                         Grid.Row="0"/>
-                <Label Name="ActionCount"
-                       Content=""
+                <Label Name="TurnIndicator"
+                       Background="White"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Content="Your Turn"
                        Grid.Row="1"/>
+                <Label Name="ActionCount"
+                       Background="White"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Content="Actions Remaining: 3"
+                       Grid.Row="2"/>
                 <Grid Name="DiscardPileGrid"
-                      Grid.Row="2" />
+                      Grid.Row="3" />
             </Grid>
             <Grid Name="InfoBox"
                   Grid.Row="1">

@@ -60,6 +60,7 @@ namespace GameServer
                 }
 
                 case Datatype.LaunchGame:
+                case Datatype.UpdateTurn:
                 {
                     return ReadTurn(inc);
                 }
@@ -288,7 +289,7 @@ namespace GameServer
         {
             // Write the data related to the current turn.
             outmsg.Write(turn.CurrentTurnOwner);
-            outmsg.Write(turn.NumberOfActions);
+            outmsg.Write(turn.ActionsRemaining);
         }
 
         // Send an update to either a client or the server, depending on where this method is called.
@@ -363,8 +364,8 @@ namespace GameServer
                         break;
                     }
 
-
                     case Datatype.LaunchGame:
+                    case Datatype.UpdateTurn:
                     {
                         Turn currentTurn = (Turn)updatedObject;
 

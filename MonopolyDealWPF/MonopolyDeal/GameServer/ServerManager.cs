@@ -220,6 +220,19 @@ namespace GameServer
                                     break;
                                 }
 
+                                // Send the updated turn to all players.
+                                case Datatype.UpdateTurn:
+                                {
+                                    Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                                    if ( Server.ConnectionsCount != 0 )
+                                    {
+                                        ServerUtilities.SendMessage(Server, Datatype.UpdateTurn, Turn);
+                                    }
+
+                                    break;
+                                }
+
                                 // Set up the players for the game. This case should be hit only when a client launches the game.
                                 case Datatype.LaunchGame:
                                 {

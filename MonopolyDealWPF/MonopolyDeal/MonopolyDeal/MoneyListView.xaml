@@ -20,7 +20,8 @@
                Grid.Row="0" 
                Grid.Column="0" 
                Grid.ColumnSpan="2" 
-               HorizontalAlignment="Center"/>
+               HorizontalAlignment="Center"
+               Background="White" />
         
         <!-- Create a ListView to hold the names of the possible money values. -->
         <ListView Grid.Row="1"

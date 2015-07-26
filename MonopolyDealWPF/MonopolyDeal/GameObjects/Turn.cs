@@ -4,22 +4,24 @@ namespace GameObjects
 {
     public class Turn
     {
+        public const int INITIAL_ACTION_COUNT = 3;
+
         public int CurrentTurnOwner { get; set; }
 
-        public int NumberOfActions { get; set; }
+        public int ActionsRemaining { get; set; }
 
         public Turn( int numberOfPlayers )
         {
             Random randomNumber = new Random();
             CurrentTurnOwner = randomNumber.Next(numberOfPlayers);
 
-            NumberOfActions = 0;
+            ActionsRemaining = INITIAL_ACTION_COUNT;
         }
 
         public Turn( int currentTurnOwner, int numberOfActions )
         {
             CurrentTurnOwner = currentTurnOwner;
-            NumberOfActions = numberOfActions;
+            ActionsRemaining = numberOfActions;
         }
     }
 }

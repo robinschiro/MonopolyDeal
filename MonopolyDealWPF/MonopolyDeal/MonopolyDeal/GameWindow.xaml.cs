@@ -138,6 +138,9 @@ namespace MonopolyDeal
             }
 
 
+            // Update the turn display.
+            UpdateTurnDisplay(null);
+
             // Inform the next player in the list that he can connect.
             int pos = FindPlayerPositionInPlayerList(this.Player.Name);
             if ( pos < (this.PlayerList.Count - 1) )
@@ -338,6 +341,16 @@ namespace MonopolyDeal
                             break;
                         }
 
+                        case Datatype.UpdateTurn:
+                        {
+                            this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                            // Update the turn indicator and action count.
+                            CreateNewThread(new Action<Object>(UpdateTurnDisplay));
+
+                            break;
+                        }
+
                         case Datatype.RequestRent:
                         {
                             // Retrieve the request.
@@ -399,6 +412,9 @@ namespace MonopolyDeal
                             // Check to see if the player is the current turn owner. 
                             CreateNewThread(new Action<Object>(CheckIfCurrentTurnOwner));
 
+                            // Update the turn display.
+                            CreateNewThread(new Action<Object>(UpdateTurnDisplay));
+
                             break;
                         }
                     }
@@ -421,7 +437,7 @@ namespace MonopolyDeal
 
         public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
-            if ( isCurrentTurnOwner && this.Turn.NumberOfActions < 3 )
+            if ( isCurrentTurnOwner && this.Turn.ActionsRemaining > 0 )
             {
                 Button cardButton = sender as Button;
 
@@ -445,7 +461,10 @@ namespace MonopolyDeal
                     if ( cardWasPlayed )
                     {
                         // Update the player's number of actions.
-                        this.Turn.NumberOfActions++;
+                        this.Turn.ActionsRemaining--;
+
+                        // Send the update to all players.
+                        ServerUtilities.SendMessage(this.Client, Datatype.UpdateTurn, this.Turn);
 
                         if ( cardBeingPlayed.Type != CardType.Action )
                         {
@@ -463,7 +482,7 @@ namespace MonopolyDeal
             int buttonIndex = Grid.GetColumn((sender as Button).Parent as Grid);
 
             // The card should be selected if a) it is not already selected and b) it is the player's turn.
-            if ( (buttonIndex != SelectedCard) && isCurrentTurnOwner && (Turn.NumberOfActions < 3) )
+            if ( (buttonIndex != SelectedCard) && isCurrentTurnOwner && (Turn.ActionsRemaining > 0) )
             {
                 // Deselect the currently selected card.
                 if ( SelectedCard != -1 )
@@ -546,7 +565,7 @@ namespace MonopolyDeal
             }
 
             // Reset the number of actions.
-            this.Turn.NumberOfActions = 0;
+            this.Turn.ActionsRemaining = Turn.INITIAL_ACTION_COUNT;
 
             // Send the updated Turn object to the server to be distributed to the other clients.
             ServerUtilities.SendMessage(Client, Datatype.EndTurn, this.Turn);
@@ -908,6 +927,12 @@ namespace MonopolyDeal
             InfoBox.Children.Add(element);
         }
 
+        public void UpdateTurnDisplay( Object filler )
+        {
+            this.ActionCount.Content = "Actions Remaining: " + this.Turn.ActionsRemaining;
+
+            this.TurnIndicator.Content = this.PlayerList[this.Turn.CurrentTurnOwner].Name + "'s Turn";
+        }
 
         // Resize UI elements so that they are propotional to the size of the window.
         public void ResizeUIElements( Object filler )
@@ -1309,7 +1334,6 @@ namespace MonopolyDeal
                                     }
 
                                     // Remove the card and re-add it to the Player's CardsInPlay.
-                                    //RefreshCardsInPlay(player, grid);
                                     RemoveCardFromCardsInPlay(cardBeingAdded, this.Player);
                                     AddCardToCardsInPlay(cardBeingAdded, this.Player);
 
@@ -1318,7 +1342,6 @@ namespace MonopolyDeal
 
                                     // Update the server.
                                     ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
-
                                 };
 
                                 menu.Items.Add(flipMenuItem);
@@ -1865,7 +1888,7 @@ namespace MonopolyDeal
                 // If the player has a "Double the Rent" card and at least two actions remaining, ask if he would like to use it.
                 doubleRentCard = FindActionCardInList(this.Player.CardsInHand, 1);
 
-                if ( (null != doubleRentCard) && (this.Turn.NumberOfActions < 2) )
+                if ( (null != doubleRentCard) && (this.Turn.ActionsRemaining >= 2) )
                 {
                     MessageBoxResult result = MessageBox.Show("You have a " + doubleRentCard.Name + " card. Would you like to apply it to this rent?",
                                     "Are you sure?",
@@ -1914,7 +1937,7 @@ namespace MonopolyDeal
                 DiscardCard(doubleRentCard);
 
                 // Update the number of actions.
-                this.Turn.NumberOfActions++;
+                this.Turn.ActionsRemaining--;
             }
 
             this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled);

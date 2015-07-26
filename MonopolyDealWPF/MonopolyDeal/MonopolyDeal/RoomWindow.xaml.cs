@@ -20,13 +20,15 @@ namespace MonopolyDeal
         private Player Player;
         private string ServerIP;
         private bool BeginCommunication;
-        bool UpdateReceived = false;
+        private bool UpdateReceived = false;
         private bool Disconnected = false;
         private List<Player> PlayerList;
         private volatile Turn Turn;
         private string PlayerName;
         private SendOrPostCallback Callback;
         private MessageDialog WaitMessage;
+
+        public bool ShowWindow = true;
 
         //// This is part of a failed attempt to use Binding. Binding currently does not work because non-UI threads cannot change the contents of
         //// observable collections. We should keep this code here in case we want to revisit binding in the future.
@@ -92,15 +94,23 @@ namespace MonopolyDeal
             // Do not continue until the client receives the Player List from the server.
             WaitMessage.ShowDialog();
 
-            // Verify that the value of 'playerName' does not exist in the list of Player names.
-            // If it does, modify the name so that it no longer matches one on the list.
-            this.PlayerName = VerifyPlayerName(this.PlayerName);
+            // If the PlayerList is still null, the player must have closed the window manually.
+            if ( null == this.PlayerList )
+            {
+                this.ShowWindow = false;
+            }
+            else
+            {
+                // Verify that the value of 'playerName' does not exist in the list of Player names.
+                // If it does, modify the name so that it no longer matches one on the list.
+                this.PlayerName = VerifyPlayerName(this.PlayerName);
 
-            // Instantiate the player.
-            this.Player = new Player(this.PlayerName);
+                // Instantiate the player.
+                this.Player = new Player(this.PlayerName);
 
-            // Send the player's information to the server.
-            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                // Send the player's information to the server.
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+            }
         }
 
         private void InitializeClient( string ipAddress )
