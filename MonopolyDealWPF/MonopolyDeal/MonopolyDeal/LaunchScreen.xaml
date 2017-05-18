@@ -25,6 +25,7 @@
                 <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
             
             <Label Content="Player Name:"
@@ -34,7 +35,7 @@
                    Grid.Row="0"
                    VerticalAlignment="Top"/>
             
-            <TextBox Name="PlayerName" 
+            <TextBox Name="PlayerNameTextBox" 
                      Grid.Column="1"
                      Grid.Row="0"
                      Text="Player"
@@ -50,7 +51,7 @@
                    Grid.Row="1"
                    VerticalAlignment="Top"/>
                         
-            <TextBox Name="IPAddress" 
+            <TextBox Name="IPAddressTextBox" 
                      Grid.Column="1"
                      Grid.Row="1"
                      Text="localhost"
@@ -58,9 +59,24 @@
                      VerticalAlignment="Top"
                      HorizontalAlignment="Left"
                      Width="100"/>
-            
+
+            <Label Content="Port:"
+                   Name="PortLabel"
+                   HorizontalAlignment="Center"
+                   Grid.Column="0"
+                   Grid.Row="2"
+                   VerticalAlignment="Top"/>
+
+            <TextBox Name="PortTextBox" 
+                     Grid.Column="1"
+                     Grid.Row="2"
+                     TextChanged="Port_TextChanged"
+                     VerticalAlignment="Top"
+                     HorizontalAlignment="Left"
+                     Width="100"/>
+
             <Button Content="OK" 
-                    Grid.Row="2" 
+                    Grid.Row="3" 
                     HorizontalAlignment="Center"
                     Name="OKButton" 
                     VerticalAlignment="Top" 

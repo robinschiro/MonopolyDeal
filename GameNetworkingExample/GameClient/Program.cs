@@ -65,7 +65,7 @@ namespace GameClient
             outmsg.Write("MyName");
 
             // Connect client, to ip previously requested from user 
-            Client.Connect(hostip, 14242,outmsg);
+            Client.Connect(hostip, 15001,outmsg);
 
             
             Console.WriteLine("Client Started");

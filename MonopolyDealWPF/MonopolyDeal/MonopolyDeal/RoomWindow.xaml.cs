@@ -19,6 +19,7 @@ namespace MonopolyDeal
         private volatile NetClient Client;
         private Player Player;
         private string ServerIP;
+        private int PortNumber;
         private bool BeginCommunication;
         private bool UpdateReceived = false;
         private bool Disconnected = false;
@@ -68,15 +69,16 @@ namespace MonopolyDeal
         //    }
         //}
 
-        public RoomWindow( string ipAddress, string playerName )
+        public RoomWindow( string ipAddress, int portNumber, string playerName )
         {
             InitializeComponent();
             this.DataContext = this;
             this.ServerIP = ipAddress;
+            this.PortNumber = portNumber;
             this.BeginCommunication = false;
             this.PlayerName = playerName;
 
-            InitializeClient(ipAddress);
+            InitializeClient(ipAddress, portNumber);
 
             // Do not continue until the client has successfully established communication with the server.
             WaitMessage = new MessageDialog("Please Wait...", "Waiting to establish communication with server...", isModal: false);
@@ -113,7 +115,7 @@ namespace MonopolyDeal
             }
         }
 
-        private void InitializeClient( string ipAddress )
+        private void InitializeClient( string ipAddress, int portNumber )
         {
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             NetPeerConfiguration Config = new NetPeerConfiguration("game");
@@ -131,7 +133,7 @@ namespace MonopolyDeal
             outmsg.Write((byte)PacketTypes.LOGIN);
 
             // Connect client, to ip previously requested from user.
-            Client.Connect(ipAddress, ServerUtilities.PORT_NUMBER, outmsg);
+            Client.Connect(ipAddress, portNumber, outmsg);
 
             // Create the synchronization context used by the client to receive updates as soon as they are available.
             SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
@@ -248,7 +250,7 @@ namespace MonopolyDeal
             Client.UnregisterReceivedCallback(this.Callback);
             this.Disconnected = true;
 
-            GameWindow gameWindow = new GameWindow(this.Player.Name, this.ServerIP, this.Turn);
+            GameWindow gameWindow = new GameWindow(this.Player.Name, this.ServerIP, this.PortNumber, this.Turn);
             gameWindow.Show();
             this.Close();
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GameObjects;
+using Lidgren.Network;
 
 namespace Utilities
 {
@@ -22,6 +23,7 @@ namespace Utilities
 
     public class ClientUtilities
     {
+
         #region Static Variables
 
         // For each type of property, store the number of cards of that property type that make up a complete monopoly
@@ -106,7 +108,7 @@ namespace Utilities
 
         #endregion
 
-        #region Functions
+        #region Monopoly Deal Functions
 
         // Given a list of cards, determine the color of the monopoly being formed by the cards.
         public static PropertyType GetCardListColor( List<Card> cardList )
@@ -138,7 +140,7 @@ namespace Utilities
             // First count the number of properties in the list. This algorithm excludes houses and hotels from the count.
             foreach ( Card card in cardList )
             {
-                if ( card.Color != PropertyType.None )
+                if ( card.Type != CardType.Enhancement )
                 {
                     countOfProperties++;
                 }

@@ -80,7 +80,7 @@ namespace MonopolyDeal
 
         #endregion Variables
 
-        public GameWindow( string playerName, string ipAddress, Turn turn )
+        public GameWindow( string playerName, string ipAddress, int portNumber, Turn turn )
         {
             InitializeComponent();
 
@@ -104,7 +104,7 @@ namespace MonopolyDeal
             this.DiscardPile = new List<Card>();
 
             // Connect the client to the server.
-            InitializeClient(ipAddress);
+            InitializeClient(ipAddress, portNumber);
 
             // Do not continue until the client has successfully established communication with the server.
             WaitMessage = new MessageDialog("Please Wait...", "Waiting to establish communication with server...");
@@ -219,7 +219,7 @@ namespace MonopolyDeal
 
         #region Client Communication Code
 
-        private void InitializeClient( string serverIP )
+        private void InitializeClient( string serverIP, int portNumber )
         {
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             NetPeerConfiguration Config = new NetPeerConfiguration("game");
@@ -240,7 +240,7 @@ namespace MonopolyDeal
             outmsg.Write("MyName");
 
             // Connect client, to ip previously requested from user.
-            Client.Connect(serverIP, ServerUtilities.PORT_NUMBER, outmsg);
+            Client.Connect(serverIP, portNumber, outmsg);
 
             // Create the synchronization context used by the client to receive updates as soon as they are available.
             SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
@@ -1187,8 +1187,10 @@ namespace MonopolyDeal
                     }
                 };
 
+                // Add the ability to discard to all cards.
+
                 // If a card is not an action card, there is only one way it can be played.
-                if ( CardType.Action != cardBeingAdded.Type )
+                if ( CardType.Property == cardBeingAdded.Type || CardType.Money == cardBeingAdded.Type )
                 {
                     if ( HasAltColor(cardBeingAdded) )
                     {
@@ -1223,19 +1225,19 @@ namespace MonopolyDeal
                     }
                 }
                 // Houses and hotels have unique menu options. Players can add these to existing monopolies or use them as money.
-                else if ( "House" == cardBeingAdded.Name || "Hotel" == cardBeingAdded.Name )
+                else if ( CardType.Enhancement == cardBeingAdded.Type )
                 {
                     ContextMenu menu = new ContextMenu();
                     MenuItem playAsActionMenuItem = new MenuItem();
                     playAsActionMenuItem.Header = "Add to Monopoly";
-                    playAsActionMenuItem.Click += ( sender, args ) =>
+                    playAsActionMenuItem.Click += (sender, args) =>
                     {
                         cardBeingAdded.Type = CardType.Property;
                         PlayCardEvent(cardButton, null);
                     };
                     MenuItem playAsMoneyMenuItem = new MenuItem();
                     playAsMoneyMenuItem.Header = "Play as Money";
-                    playAsMoneyMenuItem.Click += ( sender, args ) =>
+                    playAsMoneyMenuItem.Click += (sender, args) =>
                     {
                         cardBeingAdded.Type = CardType.Money;
                         PlayCardEvent(cardButton, null);
@@ -1326,10 +1328,24 @@ namespace MonopolyDeal
                                     // Flip the card, swapping its primary and alternative colors.
                                     FlipCard(cardBeingAdded);
 
-                                    // TODO: If the card list to which the card belonged contains a house, place the house back in the player's hand.
-                                    // Or, place the house/hotel in a separate list that can be accessed whenever the player wants to play a house/hotel or use it as money.
-                                    if ( IsCardInCardList("House", FindListContainingCard(cardBeingAdded)) || IsCardInCardList("Hotel", FindListContainingCard(cardBeingAdded)) )
+                                    // Place the house/hotel in a separate list that can be accessed whenever the player wants to play a house/hotel or use it as money.
+                                    List<Card> cardListContainingCard = FindListContainingCard(cardBeingAdded);
+
+                                    // Get all of the cards that are enhancements.
+                                    List<Card> enhancements = cardListContainingCard.FindAll(card => CardType.Enhancement == card.Type);
+
+                                    if ( null != enhancements && enhancements.Count > 0 )
                                     {
+                                        foreach ( Card enhancement in enhancements )
+                                        {
+                                            // Remove the card from the field.
+                                            RemoveCardFromCardsInPlay(enhancement, this.Player);
+
+                                            // Add the card to the pile of Enhancement cards.
+                                            // These cards are located at the last index in the grid.
+                                            Grid field = PlayerFieldDictionary[this.Player.Name];
+                                            AddCardToGrid(enhancement, field, this.Player, false, field.ColumnDefinitions.Count - 1);
+                                        }
 
                                     }
 
@@ -1337,7 +1353,7 @@ namespace MonopolyDeal
                                     RemoveCardFromCardsInPlay(cardBeingAdded, this.Player);
                                     AddCardToCardsInPlay(cardBeingAdded, this.Player);
 
-                                    // Displayed the updated CardsInPlay.
+                                    // Display the updated CardsInPlay.
                                     DisplayCardsInPlay(player, grid);
 
                                     // Update the server.

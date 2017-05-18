@@ -11,123 +11,63 @@ namespace GameObjects
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private Dictionary<int, int> ValueToIndexMap = new Dictionary<int, int>();
+        private int total;
+        public int Total
+        {
+            get { return total; }
+            set
+            {
+                total = value;
+                OnPropertyChanged("Total");
+            }
+        }
+
         public MoneyList()
         {
             // Add six '0's representing each possible money value.
+            // Add a seventh to represent the total.
             for ( int i = 0; i < 6; ++i )
             {
                 this.Add(0);
             }
+
+            // Populate the map.
+            ValueToIndexMap.Add(1, 0);
+            ValueToIndexMap.Add(2, 1);
+            ValueToIndexMap.Add(3, 2);
+            ValueToIndexMap.Add(4, 3);
+            ValueToIndexMap.Add(5, 4);
+            ValueToIndexMap.Add(10, 5);            
         }
+
+        private void SumValues()
+        {
+            this.Total = 0;
+
+            for ( int i = 0; i < 6; i++ )
+            {
+                this.Total += this[i] * ValueToIndexMap.First(keyVal => keyVal.Value == i).Key;
+            }
+        }
+
 
         public bool Remove( Card card )
         {
-            switch ( card.Value )
-            {
-                case 1:
-                {
-                    if ( this[0] != 0 )
-                    {
-                        this[0]--;
-                        return true;
-                    }
-                    break;
-                }
+            this[ValueToIndexMap[card.Value]]--;
 
-                case 2:
-                {
-                    if ( this[1] != 0 )
-                    {
-                        this[1]--;
-                        return true;
-                    }
-                    break;
-                }
-
-                case 3:
-                {
-                    if ( this[2] != 0 )
-                    {
-                        this[2]--;
-                        return true;
-                    }
-                    break;
-                }
-
-                case 4:
-                {
-                    if ( this[3] != 0 )
-                    {
-                        this[3]--;
-                        return true;
-                    }
-                    break;
-                }
-
-                case 5:
-                {
-                    if ( this[4] != 0 )
-                    {
-                        this[4]--;
-                        return true;
-                    }
-                    break;
-                }
-
-                case 10:
-                {
-                    if ( this[5] != 0 )
-                    {
-                        this[5]--;
-                        return true;
-                    }
-                    break;
-                }
-            }
+            // Re-sum the cards
+            SumValues();
 
             return false;
         }
 
         public void Add( Card card )
-        {   
-            switch ( card.Value )
-            {
-                case 1:
-                {
-                    this[0]++;
-                    break;
-                }
+        {
+            this[ValueToIndexMap[card.Value]]++;            
 
-                case 2:
-                {
-                    this[1]++;
-                    break;
-                }
-
-                case 3:
-                {
-                    this[2]++;
-                    break;
-                }
-
-                case 4:
-                {
-                    this[3]++;
-                    break;
-                }
-
-                case 5:
-                {
-                    this[4]++;
-                    break;
-                }
-
-                case 10:
-                {
-                    this[5]++;
-                    break;
-                }
-            }
+            // Re-sum the cards
+            SumValues();
         }
 
         // Create the OnPropertyChanged method to raise the event 

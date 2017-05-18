@@ -16,6 +16,7 @@ namespace GameObjects
         Money,
         Property,
         Action,
+        Enhancement,
         None
     }
 
@@ -35,6 +36,12 @@ namespace GameObjects
         Wild
     }
 
+    public enum EnhancementType
+    {
+        None,
+        House,
+        Hotel
+    }
     
     public class Card
     {       
@@ -43,6 +50,7 @@ namespace GameObjects
         public int Value { get; set; }
         public PropertyType Color { get; set; }
         public PropertyType AltColor { get; set; }
+        public EnhancementType EnhancementType { get; set; }
         public string CardImageUriPath { get; set; }
         public int ActionID { get; set; }
         public int CardID { get; set; }

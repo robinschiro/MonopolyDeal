@@ -53,6 +53,7 @@ namespace GameObjects
             // Variables to hold temporary data.
             string name;
             CardType cardType;
+            EnhancementType enhanceType;
             int value;
             PropertyType propertyType;
             PropertyType altPropertyType;
@@ -75,6 +76,7 @@ namespace GameObjects
                 {
                     name = cardProfile.sValue("-Name", "");
                     cardType = (CardType)Enum.Parse(typeof(CardType), cardProfile.sValue("-CardType", ""));
+                    enhanceType = (EnhancementType)Enum.Parse(typeof(EnhancementType), cardProfile.sValue("-EnhancementType", "None"));
                     value = cardProfile.iValue("-Value", 0);
                     propertyType = (cardProfile.sValue("-PropertyType", "") == "") ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-PropertyType", ""));
                     altPropertyType = (cardProfile.sValue("-AltPropertyType", "") == "") ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-AltPropertyType", ""));
