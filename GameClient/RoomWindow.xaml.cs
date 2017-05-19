@@ -9,7 +9,7 @@ using GameServer;
 using Lidgren.Network;
 using AdditionalWindows;
 
-namespace MonopolyDeal
+namespace GameClient
 {
     /// <summary>
     /// Interaction logic for RoomWindow.xaml

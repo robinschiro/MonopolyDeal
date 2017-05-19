@@ -20,7 +20,7 @@ using GameServer;
 using AdditionalWindows;
 using Utilities;
 
-namespace MonopolyDeal
+namespace GameClient
 {
 
     /// <summary>

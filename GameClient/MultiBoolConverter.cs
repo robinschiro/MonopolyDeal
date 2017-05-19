@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Data;
 
-namespace MonopolyDeal
+namespace GameClient
 {
     class MultiBoolConverter : IMultiValueConverter
     {

@@ -6,7 +6,7 @@ using GameObjects;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace MonopolyDeal
+namespace GameClient
 {
     public interface IGameClient
     {

@@ -13,7 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using GameObjects;
 
-namespace MonopolyDeal
+namespace GameClient
 {
     /// <summary>
     /// Interaction logic for MoneyListView.xaml

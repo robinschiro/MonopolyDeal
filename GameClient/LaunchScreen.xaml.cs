@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Net;
 
-namespace MonopolyDeal
+namespace GameClient
 {
     /// <summary>
     /// Interaction logic for LaunchScreen.xaml
