@@ -1,0 +1,651 @@
+ExcelToProfileConverter.exe
+
+-passgo.jpg=[
+
+    -Name="Pass Go"
+    -CardType=Action
+    -Value=1
+    -Count=10
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=0
+
+-passgo.jpg=]
+-doubletherent.jpg=[
+
+    -Name="Double The Rent"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=1
+
+-doubletherent.jpg=]
+-justsayno.jpg=[
+
+    -Name="Just Say No"
+    -CardType=Action
+    -Value=4
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=2
+
+-justsayno.jpg=]
+-hotel.jpg=[
+
+    -Name=Hotel
+    -CardType=Enhancement
+    -Value=4
+    -Count=2
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=3
+
+-hotel.jpg=]
+-house.jpg=[
+
+    -Name=House
+    -CardType=Enhancement
+    -Value=3
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=4
+
+-house.jpg=]
+-dealbreaker.jpg=[
+
+    -Name="Deal Breaker"
+    -CardType=Action
+    -Value=5
+    -Count=2
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=5
+
+-dealbreaker.jpg=]
+-slydeal.jpg=[
+
+    -Name="Sly Deal"
+    -CardType=Action
+    -Value=3
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=6
+
+-slydeal.jpg=]
+-forceddeal.jpg=[
+
+    -Name="Forced Deal"
+    -CardType=Action
+    -Value=3
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=7
+
+-forceddeal.jpg=]
+-itsmybirthday.jpg=[
+
+    -Name="It's My Birthday"
+    -CardType=Action
+    -Value=2
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=8
+
+-itsmybirthday.jpg=]
+-debtcollector.jpg=[
+
+    -Name="Debt Collector"
+    -CardType=Action
+    -Value=3
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=9
+
+-debtcollector.jpg=]
+-rentwild.jpg=[
+
+    -Name="Rent Wild"
+    -CardType=Action
+    -Value=3
+    -Count=3
+    -PropertyType=Wild
+    -AltPropertyType=
+    -ActionID=10
+
+-rentwild.jpg=]
+-rentlbbr.jpg=[
+
+    -Name="Rent Light Blue-Brown"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=LightBlue
+    -AltPropertyType=Brown
+    -ActionID=11
+
+-rentlbbr.jpg=]
+-rentop.jpg=[
+
+    -Name="Rent Orange-Pink"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=Orange
+    -AltPropertyType=Pink
+    -ActionID=12
+
+-rentop.jpg=]
+-rentry.jpg=[
+
+    -Name="Rent Yellow-Red"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=Yellow
+    -AltPropertyType=Red
+    -ActionID=13
+
+-rentry.jpg=]
+-rentut.jpg=[
+
+    -Name="Rent Utility-Railroad"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=Utility
+    -AltPropertyType=Railroad
+    -ActionID=14
+
+-rentut.jpg=]
+-rentbg.jpg=[
+
+    -Name="Rent Blue-Green"
+    -CardType=Action
+    -Value=1
+    -Count=2
+    -PropertyType=Blue
+    -AltPropertyType=Green
+    -ActionID=15
+
+-rentbg.jpg=]
+-10million.jpg=[
+
+    -Name="Ten Million"
+    -CardType=Money
+    -Value=10
+    -Count=1
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-10million.jpg=]
+-1million.jpg=[
+
+    -Name="One Million"
+    -CardType=Money
+    -Value=1
+    -Count=6
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-1million.jpg=]
+-2million.jpg=[
+
+    -Name="Two Million"
+    -CardType=Money
+    -Value=2
+    -Count=5
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-2million.jpg=]
+-3million.jpg=[
+
+    -Name="Three Million"
+    -CardType=Money
+    -Value=3
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-3million.jpg=]
+-4million.jpg=[
+
+    -Name="Four Million"
+    -CardType=Money
+    -Value=4
+    -Count=3
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-4million.jpg=]
+-5million.jpg=[
+
+    -Name="Five Million"
+    -CardType=Money
+    -Value=5
+    -Count=2
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-5million.jpg=]
+-atlanticavenue.jpg=[
+
+    -Name="Atlantic Avenue"
+    -CardType=Property
+    -Value=3
+    -Count=1
+    -PropertyType=Yellow
+    -AltPropertyType=
+    -ActionID=
+
+-atlanticavenue.jpg=]
+-balticavenue.jpg=[
+
+    -Name="Baltic Avenue"
+    -CardType=Property
+    -Value=1
+    -Count=1
+    -PropertyType=Brown
+    -AltPropertyType=
+    -ActionID=
+
+-balticavenue.jpg=]
+-bandorailroad.jpg=[
+
+    -Name="B & O Railroad"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Railroad
+    -AltPropertyType=
+    -ActionID=
+
+-bandorailroad.jpg=]
+-boardwalk.jpg=[
+
+    -Name=Boardwalk
+    -CardType=Property
+    -Value=4
+    -Count=1
+    -PropertyType=Blue
+    -AltPropertyType=
+    -ActionID=
+
+-boardwalk.jpg=]
+-connecticutavenue.jpg=[
+
+    -Name="Connecticut Avenue"
+    -CardType=Property
+    -Value=1
+    -Count=1
+    -PropertyType=LightBlue
+    -AltPropertyType=
+    -ActionID=
+
+-connecticutavenue.jpg=]
+-electriccompany.jpg=[
+
+    -Name="Electric Company"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Utility
+    -AltPropertyType=
+    -ActionID=
+
+-electriccompany.jpg=]
+-illinoisavenue.jpg=[
+
+    -Name="Illinois Avenue"
+    -CardType=Property
+    -Value=3
+    -Count=1
+    -PropertyType=Red
+    -AltPropertyType=
+    -ActionID=
+
+-illinoisavenue.jpg=]
+-indianaavenue.jpg=[
+
+    -Name="Indiana Avenue"
+    -CardType=Property
+    -Value=3
+    -Count=1
+    -PropertyType=Red
+    -AltPropertyType=
+    -ActionID=
+
+-indianaavenue.jpg=]
+-kentuckyavenue.jpg=[
+
+    -Name="Kentucky Avenue"
+    -CardType=Property
+    -Value=3
+    -Count=1
+    -PropertyType=Red
+    -AltPropertyType=
+    -ActionID=
+
+-kentuckyavenue.jpg=]
+-marvingardens.jpg=[
+
+    -Name="Marvin Gardens"
+    -CardType=Property
+    -Value=3
+    -Count=1
+    -PropertyType=Yellow
+    -AltPropertyType=
+    -ActionID=
+
+-marvingardens.jpg=]
+-mediterraneanavenue.jpg=[
+
+    -Name="Mediterranean Avenue"
+    -CardType=Property
+    -Value=1
+    -Count=1
+    -PropertyType=Brown
+    -AltPropertyType=
+    -ActionID=
+
+-mediterraneanavenue.jpg=]
+-newyorkavenue.jpg=[
+
+    -Name="New York Avenue"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Orange
+    -AltPropertyType=
+    -ActionID=
+
+-newyorkavenue.jpg=]
+-northcarolinaavenue.jpg=[
+
+    -Name="North Carolina Avenue"
+    -CardType=Property
+    -Value=4
+    -Count=1
+    -PropertyType=Green
+    -AltPropertyType=
+    -ActionID=
+
+-northcarolinaavenue.jpg=]
+-orientalavenue.jpg=[
+
+    -Name="Oriental Avenue"
+    -CardType=Property
+    -Value=1
+    -Count=1
+    -PropertyType=LightBlue
+    -AltPropertyType=
+    -ActionID=
+
+-orientalavenue.jpg=]
+-pacificavenue.jpg=[
+
+    -Name="Pacific Avenue"
+    -CardType=Property
+    -Value=4
+    -Count=1
+    -PropertyType=Green
+    -AltPropertyType=
+    -ActionID=
+
+-pacificavenue.jpg=]
+-parkplace.jpg=[
+
+    -Name="Park Place"
+    -CardType=Property
+    -Value=4
+    -Count=1
+    -PropertyType=Blue
+    -AltPropertyType=
+    -ActionID=
+
+-parkplace.jpg=]
+-pennsylvaniaavenue.jpg=[
+
+    -Name="Pennsylvania Avenue"
+    -CardType=Property
+    -Value=4
+    -Count=1
+    -PropertyType=Green
+    -AltPropertyType=
+    -ActionID=
+
+-pennsylvaniaavenue.jpg=]
+-pennsylvaniarailroad.jpg=[
+
+    -Name="Pennsylvania Railroad"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Railroad
+    -AltPropertyType=
+    -ActionID=
+
+-pennsylvaniarailroad.jpg=]
+-propertywildcard.jpg=[
+
+    -Name="Property Wild Card"
+    -CardType=Property
+    -Value=0
+    -Count=2
+    -PropertyType=Wild
+    -AltPropertyType=
+    -ActionID=
+
+-propertywildcard.jpg=]
+-readingrailroad.jpg=[
+
+    -Name="Reading Railroad"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Railroad
+    -AltPropertyType=
+    -ActionID=
+
+-readingrailroad.jpg=]
+-shortline.jpg=[
+
+    -Name="Short Line"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Railroad
+    -AltPropertyType=
+    -ActionID=
+
+-shortline.jpg=]
+-statesavenue.jpg=[
+
+    -Name="States Avenue"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Pink
+    -AltPropertyType=
+    -ActionID=
+
+-statesavenue.jpg=]
+-stcharlesplace.jpg=[
+
+    -Name="St. Charles Place"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Pink
+    -AltPropertyType=
+    -ActionID=
+
+-stcharlesplace.jpg=]
+-stjamesplace.jpg=[
+
+    -Name="St. James Place"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Orange
+    -AltPropertyType=
+    -ActionID=
+
+-stjamesplace.jpg=]
+-tennesseeavenue.jpg=[
+
+    -Name="Tennessee Avenue"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Orange
+    -AltPropertyType=
+    -ActionID=
+
+-tennesseeavenue.jpg=]
+-ventnoravenue.jpg=[
+
+    -Name="Ventnor Avenue"
+    -CardType=Property
+    -Value=3
+    -Count=1
+    -PropertyType=Yellow
+    -AltPropertyType=
+    -ActionID=
+
+-ventnoravenue.jpg=]
+-vermontavenue.jpg=[
+
+    -Name="Vermont Avenue"
+    -CardType=Property
+    -Value=1
+    -Count=1
+    -PropertyType=LightBlue
+    -AltPropertyType=
+    -ActionID=
+
+-vermontavenue.jpg=]
+-virginiaavenue.jpg=[
+
+    -Name="Virginia Avenue"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Pink
+    -AltPropertyType=
+    -ActionID=
+
+-virginiaavenue.jpg=]
+-waterworks.jpg=[
+
+    -Name="Water Works"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Utility
+    -AltPropertyType=
+    -ActionID=
+
+-waterworks.jpg=]
+-wildbg.jpg=[
+
+    -Name="Wild Blue-Green"
+    -CardType=Property
+    -Value=4
+    -Count=1
+    -PropertyType=Blue
+    -AltPropertyType=Green
+    -ActionID=
+
+-wildbg.jpg=]
+-wildgt.jpg=[
+
+    -Name="Wild Railroad-Green"
+    -CardType=Property
+    -Value=4
+    -Count=1
+    -PropertyType=Railroad
+    -AltPropertyType=Green
+    -ActionID=
+
+-wildgt.jpg=]
+-wildlbbr.jpg=[
+
+    -Name="Wild Light Blue-Brown"
+    -CardType=Property
+    -Value=1
+    -Count=1
+    -PropertyType=LightBlue
+    -AltPropertyType=Brown
+    -ActionID=
+
+-wildlbbr.jpg=]
+-wildlbt.jpg=[
+
+    -Name="Wild Railroad-Light Blue"
+    -CardType=Property
+    -Value=4
+    -Count=1
+    -PropertyType=Railroad
+    -AltPropertyType=LightBlue
+    -ActionID=
+
+-wildlbt.jpg=]
+-wildop.jpg=[
+
+    -Name="Wild Orange-Pink"
+    -CardType=Property
+    -Value=2
+    -Count=2
+    -PropertyType=Orange
+    -AltPropertyType=Pink
+    -ActionID=
+
+-wildop.jpg=]
+-wildry.jpg=[
+
+    -Name="Wild Yellow-Red"
+    -CardType=Property
+    -Value=3
+    -Count=2
+    -PropertyType=Yellow
+    -AltPropertyType=Red
+    -ActionID=
+
+-wildry.jpg=]
+-wildut.jpg=[
+
+    -Name="Wild Utility-Railroad"
+    -CardType=Property
+    -Value=2
+    -Count=1
+    -PropertyType=Utility
+    -AltPropertyType=Railroad
+    -ActionID=
+
+-wildut.jpg=]
+-cardback.jpg=[
+
+    -Name="Card Back"
+    -CardType=
+    -Value=
+    -Count=0
+    -PropertyType=
+    -AltPropertyType=
+    -ActionID=
+
+-cardback.jpg=]

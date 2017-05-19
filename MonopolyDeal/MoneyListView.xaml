@@ -1,0 +1,68 @@
+﻿<UserControl x:Class="MonopolyDeal.MoneyListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" >
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+    
+    
+        <Label Content="Your Bank" 
+               Grid.Row="0" 
+               Grid.Column="0" 
+               Grid.ColumnSpan="2" 
+               HorizontalAlignment="Center" />
+
+        <Label Content="Total Value:" 
+               Grid.Row="1"
+               Grid.Column="0"
+               HorizontalAlignment="Center"
+               FontWeight="Bold" 
+               Padding="0"/>
+
+        <Label Content="{Binding MoneyList.Total}" 
+               Grid.Row="1"
+               Grid.Column="1"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Top"
+               FontWeight="Bold" />
+
+        <!-- Create a ListView to hold the names of the possible money values. -->
+        <ListView Grid.Row="2"
+                  Grid.Column="0">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn  Header="Value" />
+                </GridView>
+            </ListView.View>
+            <Label Content="One Million" Padding="0"/>
+            <Label Content="Two Million" Padding="0"/>
+            <Label Content="Three Million" Padding="0"/>
+            <Label Content="Four Million" Padding="0"/>
+            <Label Content="Five Million" Padding="0"/>
+            <Label Content="Ten Million" Padding="0"/>           
+        </ListView>
+        
+        <!-- Create another ListView that is bound to the quantities of each money value with the player's MoneyList. -->
+        <ListView Grid.Row="2"
+                  Grid.Column="1"
+                  ItemsSource="{Binding MoneyList}">            
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn  Header="Quantity" />
+                </GridView>
+            </ListView.View>            
+        </ListView>
+        
+    </Grid>
+</UserControl>
