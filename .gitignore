@@ -2,3 +2,5 @@ obj
 bin
 *.pdb
 *.suo
+*.vshost.exe*
+*.xml
