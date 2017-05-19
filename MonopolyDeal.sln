@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonopolyDeal", "MonopolyDeal\MonopolyDeal.csproj", "{6199831C-E516-41B7-83BF-E82EEBCAA33C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameClient", "GameClient\GameClient.csproj", "{6199831C-E516-41B7-83BF-E82EEBCAA33C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameServer", "GameServer\GameServer.csproj", "{53DC5651-715E-408D-9245-2CCFB440336A}"
 EndProject

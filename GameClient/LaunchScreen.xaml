@@ -1,4 +1,4 @@
-﻿<Window x:Class="MonopolyDeal.LaunchScreen"
+﻿<Window x:Class="GameClient.LaunchScreen"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="LaunchScreen" Height="300" Width="350">

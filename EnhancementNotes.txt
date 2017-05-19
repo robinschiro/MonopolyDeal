@@ -1,0 +1,24 @@
+Triggering Conditions:
+- When player flips a property that is part of a monopoly
+- When a player uses part of a monopoly to pay off rent
+
+When I remove a house/hotel from a card group, what should I do with it?
+	- If there are no other isolated houses/hotels in the CardsInPlay, add it to the CardsInPlay as a new card group of properties. This card group should have property type "Enhancement"
+		- A group of "Enhancement" properties cannot count as a monopoly. 
+		- The properties in this group can be given as rent. 
+		- They cannot be stolen with a Sly/Forced Deal.
+
+	- New Idea: Create an "Enhancement" card type, then create an EnhancementCard class that encapsulates all code custom to houses and hotels.
+	- Easier to implement without major refactoring: Add 'EnhancementType' property to Card class, put EnhancementType methods in there.
+		
+Where will I need to add code to implement this change?
+	- (DONE) Add a new PropertyType called "Enhancement"
+	- (DONE) Modify the profile file for houses/hotels.
+	- Account for "Enhancement" properties in MonopolyRentData
+	- Ignore "Enhancement" props for Sly/Forced deals
+	- Be sure the "Enhancement" props have option to Add to Monopoly or store as money when on the field.
+	- Be sure wild rents do not apply to "Enhancement" prop groups
+	- Need to add enhancements to enhancement pile when receiving as rent.
+    
+ Bugs:
+    - The CardType of Enhancement cards is changed to property when played on a monopoly. This becomes a problem because the Enchancement is counted as a property in the 'IsCardListMonopoly' function in ClientUtilities.
