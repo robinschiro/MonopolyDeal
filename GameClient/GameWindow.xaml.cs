@@ -36,7 +36,6 @@ namespace GameClient
         private string PlayerName;
         private List<Player> PlayerList;
         private String ServerIP;
-        private int SelectedCard;
         private bool BeginCommunication;
         private bool UpdateReceived;
         private bool ReceivedPlayerList;
@@ -84,7 +83,6 @@ namespace GameClient
         {
             InitializeComponent();
 
-            this.SelectedCard = -1;
             this.BeginCommunication = false;
             this.UpdateReceived = false;
             this.ReceivedPlayerList = false;
@@ -441,68 +439,34 @@ namespace GameClient
             {
                 Button cardButton = sender as Button;
 
-                if ( IsCardSelected(cardButton) )
-                {
-                    Card cardBeingPlayed = cardButton.Tag as Card;
-                    bool cardWasPlayed = false;
+                Card cardBeingPlayed = cardButton.Tag as Card;
+                bool cardWasPlayed = false;
 
-                    // Add the card to the Player's playing field (if it is not an action card).
+                // Add the card to the Player's playing field (if it is not an action card).
+                if ( cardBeingPlayed.Type != CardType.Action )
+                {
+                    // Add the card to the Player's CardsInPlay list.
+                    cardWasPlayed = AddCardToCardsInPlay(cardBeingPlayed, this.Player);
+                }
+                else
+                {
+                    // Handle the action.
+                    cardWasPlayed = HandleAction(cardBeingPlayed);
+                }
+
+                if ( cardWasPlayed )
+                {
+                    // Update the player's number of actions.
+                    this.Turn.ActionsRemaining--;
+
+                    // Send the update to all players.
+                    ServerUtilities.SendMessage(this.Client, Datatype.UpdateTurn, this.Turn);
+
                     if ( cardBeingPlayed.Type != CardType.Action )
                     {
-                        // Add the card to the Player's CardsInPlay list.
-                        cardWasPlayed = AddCardToCardsInPlay(cardBeingPlayed, this.Player);
+                        RemoveCardFromHand(cardBeingPlayed);
                     }
-                    else
-                    {
-                        // Handle the action.
-                        cardWasPlayed = HandleAction(cardBeingPlayed);
-                    }
-
-                    if ( cardWasPlayed )
-                    {
-                        // Update the player's number of actions.
-                        this.Turn.ActionsRemaining--;
-
-                        // Send the update to all players.
-                        ServerUtilities.SendMessage(this.Client, Datatype.UpdateTurn, this.Turn);
-
-                        if ( cardBeingPlayed.Type != CardType.Action )
-                        {
-                            RemoveCardFromHand(cardBeingPlayed);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Increase the size of a card when it is selected and decrease its size when another card is selected.
-        public void SelectCardEvent( object sender, MouseButtonEventArgs args )
-        {
-            // Get the index of the button that called this event.
-            int buttonIndex = Grid.GetColumn((sender as Button).Parent as Grid);
-
-            // The card should be selected if a) it is not already selected and b) it is the player's turn.
-            if ( (buttonIndex != SelectedCard) && isCurrentTurnOwner && (Turn.ActionsRemaining > 0) )
-            {
-                // Deselect the currently selected card.
-                if ( SelectedCard != -1 )
-                {
-                    //DeselectCard(FindButtonInGrid(SelectedCard, PlayerOneHand));
-                    DeselectCard((PlayerOneHand.Children[SelectedCard] as Grid).Tag as Button);
-                }
-
-                // Select this card.
-                SelectedCard = buttonIndex;
-                SelectCard(sender as Button);
-
-                // Add this card to the InfoBox.
-                DisplayCardInInfobox((sender as Button).Tag as Card);
-            }
-            else
-            {
-                // Deselect this card if it is already selected.
-                SelectedCard = -1;
-                DeselectCard(sender as Button);
+                }                
             }
         }
 
@@ -748,12 +712,6 @@ namespace GameClient
             {
                 IsCurrentTurnOwner = false;
             }
-        }
-
-        // Given a card button, determine if it is currently selected.
-        public bool IsCardSelected( Button cardButton )
-        {
-            return Grid.GetColumn(cardButton.Parent as Grid) == SelectedCard;
         }
 
         // Update the discard pile card so that it displays the last card in the discard pile.
@@ -1174,35 +1132,32 @@ namespace GameClient
             // If a card is being added to the client's hand, attach these events to it and display it.
             if ( isHand && player.Name == this.Player.Name )
             {
-                cardButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(SelectCardEvent);
+                // Create context menu for all cards in hand.
+                ContextMenu menu = new ContextMenu();
+                cardButton.ContextMenu = menu;
 
-                // Prevent the context menu of a card from opening when it shifts into the position of a card that has just been played.
-                // Also, disable the context menus of all cards in the player's hand that are not selected.
+                // Disable all context menu items except for Discard if there are no actions left.
                 cardButton.ContextMenuOpening += ( sender, args ) =>
                 {
-                    // If the card is not selected, do not open the context menu.
-                    if ( !IsCardSelected(cardButton) )
+                    foreach (MenuItem item in cardButton.ContextMenu.Items )
                     {
-                        args.Handled = true;
+                        item.IsEnabled = isCurrentTurnOwner && this.Turn.ActionsRemaining > 0;
                     }
                 };
-
-                // Add the ability to discard to all cards.
 
                 // If a card is not an action card, there is only one way it can be played.
                 if ( CardType.Property == cardBeingAdded.Type || CardType.Money == cardBeingAdded.Type )
                 {
+                    MenuItem playMenuItem = new MenuItem();
+                    playMenuItem.Header = "Play";
+                    playMenuItem.Click += ( sender, args ) =>
+                    {
+                        PlayCardEvent(cardButton, null);
+                    };
+                    menu.Items.Add(playMenuItem);
+                    
                     if ( HasAltColor(cardBeingAdded) )
                     {
-                        ContextMenu menu = new ContextMenu();
-
-                        MenuItem playMenuItem = new MenuItem();
-                        playMenuItem.Header = "Play as Property";
-                        playMenuItem.Click += ( sender, args ) =>
-                        {
-                            PlayCardEvent(cardButton, null);
-                        };
-
                         MenuItem flipMenuItem = new MenuItem();
                         flipMenuItem.Header = "Flip Card";
                         flipMenuItem.Click += ( sender2, args2 ) =>
@@ -1214,20 +1169,12 @@ namespace GameClient
 
                             DisplayCardInInfobox(cardBeingAdded);
                         };
-                        menu.Items.Add(playMenuItem);
                         menu.Items.Add(flipMenuItem);
-
-                        cardButton.ContextMenu = menu;
-                    }
-                    else
-                    {
-                        cardButton.PreviewMouseRightButtonDown += new MouseButtonEventHandler(PlayCardEvent);
                     }
                 }
                 // Houses and hotels have unique menu options. Players can add these to existing monopolies or use them as money.
                 else if ( CardType.Enhancement == cardBeingAdded.Type )
                 {
-                    ContextMenu menu = new ContextMenu();
                     MenuItem playAsActionMenuItem = new MenuItem();
                     playAsActionMenuItem.Header = "Add to Monopoly";
                     playAsActionMenuItem.Click += (sender, args) =>
@@ -1250,8 +1197,6 @@ namespace GameClient
                 // These apply to all other action cards. Players can play these cards as actions or money.
                 else
                 {
-                    ContextMenu menu = new ContextMenu();
-
                     // If the action card is not a "Double the Rent" or "Just Say No", add this option.
                     // (Double the Rent cards are played only with Rent cards, and Just Say No cards
                     // are only used in response to actions).
@@ -1574,9 +1519,6 @@ namespace GameClient
             // Remove the card from the player's CardsInHand list.
             this.Player.CardsInHand = new List<Card>(this.Player.CardsInHand.Where(card => card.CardID != cardtoRemove.CardID));
 
-            // Update the value of 'SelectedCard' (no card is selected after a card is removed from the player's hand).
-            this.SelectedCard = -1;
-
             // Update the server's information regarding this player.
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
         }
@@ -1609,31 +1551,6 @@ namespace GameClient
             }
 
             return false;
-        }
-        
-        // Increase the size of the currently selected card.
-        public void SelectCard( Button cardButton )
-        {
-            if ( null != cardButton )
-            {
-                ScaleTransform myScaleTransform = new ScaleTransform();
-                myScaleTransform.ScaleY = 1.2;
-                myScaleTransform.ScaleX = 1.2;
-
-                (cardButton.RenderTransform as TransformGroup).Children.Add(myScaleTransform);
-            }
-        }
-
-        // Set the currently selected card to its normal size.
-        public void DeselectCard( Button cardButton )
-        {
-            if ( null != cardButton )
-            {
-                // Instantiating an object of type "ScaleTransform" should not be necessary.
-                // TODO: Find a way to pass the "ScaleTransform" without having to instantiate an object.
-                ScaleTransform scaleTransform = new ScaleTransform();
-                RemoveTransformTypeFromGroup(scaleTransform.GetType(), cardButton.RenderTransform as TransformGroup);
-            }
         }
 
         // Draw a given amount of cards from the Deck (the cards are placed in the Player's hand).
