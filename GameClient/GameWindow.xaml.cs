@@ -19,6 +19,7 @@ using GameObjects;
 using GameServer;
 using AdditionalWindows;
 using Utilities;
+using ResourceList = GameClient.Properties.Resources;
 
 namespace GameClient
 {
@@ -41,7 +42,6 @@ namespace GameClient
         private bool ReceivedPlayerList;
         private bool ReceivedDeck;
         private volatile NetClient Client;
-        private List<Grid> PlayerFields;                        // This list is needed in order to resize the grids when the window size changes.
         private Dictionary<String, Grid> PlayerFieldDictionary;
         private Dictionary<String, Grid> PlayerHandDictionary;
         private bool HavePlayersBeenAssigned;
@@ -72,10 +72,6 @@ namespace GameClient
                 OnPropertyChanged("IsCurrentTurnOwner");
             }
         }
-
-        //Testing something called AttachedProperties. Allows function calls upon triggers. 
-        //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
-        private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
 
         #endregion Variables
 
@@ -153,20 +149,13 @@ namespace GameClient
 
             // Re-title the window.
             this.Title = playerName + "'s Window";
-
+            
             // Add an empty grid as the first element of every field. This grid is used to display each player's money pile.
-            PlayerOneField.Children.Add(CreateCardGrid());
-            PlayerTwoField.Children.Add(CreateCardGrid());
-            PlayerThreeField.Children.Add(CreateCardGrid());
-            PlayerFourField.Children.Add(CreateCardGrid());
-
-            // Add the four player fields to the list.
-            this.PlayerFields = new List<Grid>();
-            this.PlayerFields.Add(PlayerOneField);
-            this.PlayerFields.Add(PlayerTwoField);
-            this.PlayerFields.Add(PlayerThreeField);
-            this.PlayerFields.Add(PlayerFourField);
-
+            foreach ( Grid field in PlayerFieldDictionary.Values )
+            {
+                field.Children.Add(CreateCardGrid());
+            }
+            
             // Add player names to each playing field.
             for ( int i = 0; i < this.PlayerList.Count; i++ )
             {
@@ -439,11 +428,8 @@ namespace GameClient
             {
                 Button cardButton = sender as Button;
 
-                if ( IsCardSelected(cardButton) )
-                {
-                    Card card = cardButton.Tag as Card;
-                    DiscardCard(card);
-                }
+                Card card = cardButton.Tag as Card;
+                DiscardCard(card);
             }
             else
             {
@@ -882,9 +868,6 @@ namespace GameClient
 
             // Display the Player's cards in play as well.
             DisplayCardsInPlay(this.Player, PlayerOneField);
-        
-            // Display the Player's cards in hand.
-            //DisplayCardsInHand(this.Player, PlayerOneHand);
         }
 
         // Update the card displayed in the InfoBox.
@@ -919,9 +902,9 @@ namespace GameClient
         // Resize UI elements so that they are propotional to the size of the window.
         public void ResizeUIElements( Object filler )
         {
-            if ( PlayerFields != null )
+            if ( PlayerFieldDictionary.Values != null )
             {
-                foreach ( Grid field in PlayerFields )
+                foreach ( Grid field in PlayerFieldDictionary.Values )
                 {
                     foreach ( FrameworkElement element in field.Children )
                     {
@@ -1165,16 +1148,16 @@ namespace GameClient
                 ContextMenu menu = new ContextMenu();
                 cardButton.ContextMenu = menu;
 
-                // Disable all context menu items except for Discard if there are no actions left.
-                cardButton.ContextMenuOpening += ( sender, args ) =>
+                // If there are no actions left, disable all context menu items except for Discard.
+                // All menu options are disabled if it is not the player's turn.
+                menu.Opened += ( sender, args ) =>
                 {
-                    foreach (MenuItem item in cardButton.ContextMenu.Items )
+                    foreach (MenuItem item in menu.Items )
                     {
-                        item.IsEnabled = isCurrentTurnOwner && this.Turn.ActionsRemaining > 0;
+                       item.IsEnabled = isCurrentTurnOwner && 
+                                        ((ResourceList.DiscardMenuItemHeader == (string)item.Header) || (this.Turn.ActionsRemaining > 0));
                     }
                 };
-
-                ContextMenu menu = new ContextMenu();
 
                 // If a card is not an action card, there is only one way it can be played.
                 if ( CardType.Property == cardBeingAdded.Type || CardType.Money == cardBeingAdded.Type )
@@ -1189,13 +1172,6 @@ namespace GameClient
                     
                     if ( HasAltColor(cardBeingAdded) )
                     {
-                        MenuItem playMenuItem = new MenuItem();
-                        playMenuItem.Header = "Play as Property";
-                        playMenuItem.Click += ( sender, args ) =>
-                        {
-                            PlayCardEvent(cardButton, null);
-                        };
-
                         MenuItem flipMenuItem = new MenuItem();
                         flipMenuItem.Header = "Flip Card";
                         flipMenuItem.Click += ( sender2, args2 ) =>
@@ -1263,7 +1239,7 @@ namespace GameClient
 
                 // To all cards (regardless of type), add the ability to discard the card.
                 MenuItem discardMenuItem = new MenuItem();
-                discardMenuItem.Header = "Discard";
+                discardMenuItem.Header = ResourceList.DiscardMenuItemHeader;
                 discardMenuItem.Click += ( sender, args ) =>
                 {
                     DiscardCardEvent(cardButton, null);
@@ -1622,7 +1598,7 @@ namespace GameClient
                         }
                         else
                         {
-                            // Should send a Game Over message to players because there are no cards to draw.
+                            // ROBIN TODO: Should send a Game Over message to players because there are no cards to draw.
                             return;
                         }
                     }
@@ -1639,12 +1615,6 @@ namespace GameClient
                 ServerUtilities.SendMessage(Client, Datatype.UpdateDeck, Deck);
                 ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
             }
-        }
-
-        // Again, testing AttachedProperties. Will need to discuss.
-        private void setInfoBox( TriggerBase target, int location )
-        {
-            target.SetValue(InfoBoxAttachedProperty, Player.CardsInHand[location]);
         }
 
         // Shift the position of a card in play either forward or backward.

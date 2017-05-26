@@ -59,5 +59,14 @@ namespace GameClient.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discard.
+        /// </summary>
+        internal static string DiscardMenuItemHeader {
+            get {
+                return ResourceManager.GetString("DiscardMenuItemHeader", resourceCulture);
+            }
+        }
     }
 }
