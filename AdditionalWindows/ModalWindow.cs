@@ -10,9 +10,9 @@ namespace AdditionalWindows
     public class ModalWindow : Window
     {
         protected bool dialogResult = false;
+        protected bool isModal = false;
 
         private bool closeWindow = false;
-        private bool isModal = false;
         public bool CloseWindow
         {
             get

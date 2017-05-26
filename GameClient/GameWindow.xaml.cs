@@ -969,45 +969,9 @@ namespace GameClient
         {
             // Check if any cards currently in play match the color of the card being played (if the card is a property).
             // If it does, lay the card being played over the matching cards.
-            if ( cardBeingAdded.Type == CardType.Property )
+            switch (cardBeingAdded.Type)
             {
-                if ( "House" == cardBeingAdded.Name || "Hotel" == cardBeingAdded.Name )
-                {
-                    // Add the house to an existing monopoly or the hotel to a monopoly that has a house. The card should not be removed from the player's hand
-                    // unless it is placed in a monopoly.
-                    List<List<Card>> monopolies = ClientUtilities.FindMonopolies(player);
-
-                    if ( "House" == cardBeingAdded.Name )
-                    {
-                        foreach ( List<Card> monopoly in monopolies )
-                        {
-                            if ( !IsCardInCardList("House", monopoly) )
-                            {
-                                monopoly.Add(cardBeingAdded);
-                                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
-
-                                return true;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach ( List<Card> monopoly in monopolies )
-                        {
-                            if ( IsCardInCardList("House", monopoly) && !IsCardInCardList("Hotel", monopoly) )
-                            {
-                                monopoly.Add(cardBeingAdded);
-                                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
-
-                                return true;
-                            }
-                        }
-                    }
-
-                    // Do not add the house or hotel if the code is reached.
-                    return false;
-                }
-                else
+                case CardType.Property:
                 {
                     // Before a card is added to the player's CardsInPlay, we must verify that it can be added to the player's CardsInPlay.
                     // If a monopoly of the card's color already exists, then the card cannot be played.
@@ -1043,22 +1007,63 @@ namespace GameClient
                             }
                         }
                     }
+
+                    // If this code is reached, the card must not have matched any existing properties.
+                    // Create a new list for the card.
+                    List<Card> newCardList = new List<Card>();
+                    newCardList.Add(cardBeingAdded);
+                    player.CardsInPlay.Add(newCardList);
+                    AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false);
+                    return true;
                 }
+                // Add the house to an existing monopoly or the hotel to a monopoly that has a house. The card should not be removed from the player's hand
+                // unless it is placed in a monopoly.
+                case CardType.Enhancement:
+                {
+                    List<List<Card>> monopolies = ClientUtilities.FindMonopolies(player);
 
-                // If this code is reached, the card must not have matched any existing properties.
-                List<Card> newCardList = new List<Card>();
-                newCardList.Add(cardBeingAdded);
-                player.CardsInPlay.Add(newCardList);
-                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false);
-                return true;
-            }
-            else if ( cardBeingAdded.Type == CardType.Money )
-            {
-                AddMoneyToBank(cardBeingAdded, player);
-                return true;
-            }
+                    // If the card is a house.
+                    if ( 4 == cardBeingAdded.ActionID )
+                    {
+                        foreach ( List<Card> monopoly in monopolies )
+                        {
+                            if ( !IsCardInCardList("House", monopoly) )
+                            {
+                                monopoly.Add(cardBeingAdded);
+                                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
 
-            return false;
+                                return true;
+                            }
+                        }
+                    }
+                    // If it is a hotel.
+                    else
+                    {
+                        foreach ( List<Card> monopoly in monopolies )
+                        {
+                            if ( IsCardInCardList("House", monopoly) && !IsCardInCardList("Hotel", monopoly) )
+                            {
+                                monopoly.Add(cardBeingAdded);
+                                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
+
+                                return true;
+                            }
+                        }
+                    }
+
+                    // Do not add the house or hotel if the code is reached.
+                    return false;
+                }
+                case CardType.Money:
+                {
+                    AddMoneyToBank(cardBeingAdded, player);
+                    return true;
+                }
+                default:
+                {
+                    return false;
+                }
+            }
         }
 
         //// I do not remember why I created this method. It is flawed in that it does not save the position of wild cards.
@@ -1179,7 +1184,6 @@ namespace GameClient
                     playAsActionMenuItem.Header = "Add to Monopoly";
                     playAsActionMenuItem.Click += (sender, args) =>
                     {
-                        cardBeingAdded.Type = CardType.Property;
                         PlayCardEvent(cardButton, null);
                     };
                     MenuItem playAsMoneyMenuItem = new MenuItem();
@@ -1230,6 +1234,7 @@ namespace GameClient
                 // Play the card in a certain way depending on its type (i.e. property, money, or action).
                 switch ( cardBeingAdded.Type )
                 {
+                    case CardType.Enhancement:
                     case CardType.Property:
                     {
                         // Create context menu that allows the user to reorder properties.
@@ -1238,6 +1243,8 @@ namespace GameClient
                         {
                             // Create the appropriate context menu.
                             ContextMenu menu = new ContextMenu();
+                            cardButton.ContextMenu = menu;
+
                             MenuItem forwardMenuItem = new MenuItem();
                             forwardMenuItem.Header = "Move Forward";
                             forwardMenuItem.Click += ( sender, args ) =>
@@ -1291,7 +1298,6 @@ namespace GameClient
                                             Grid field = PlayerFieldDictionary[this.Player.Name];
                                             AddCardToGrid(enhancement, field, this.Player, false, field.ColumnDefinitions.Count - 1);
                                         }
-
                                     }
 
                                     // Remove the card and re-add it to the Player's CardsInPlay.
@@ -1343,17 +1349,12 @@ namespace GameClient
                                 }
                             };
 
-
-                            cardButton.ContextMenu = menu;
-
-
                             // Add a drop event to receive property cards that are being placed in this card's group.
                             cardButton.Drop += new DragEventHandler(cardButton_Drop);
                             cardButton.AllowDrop = true;
 
                             // Allow cards to be dragged and dropped onto other groups.
                             cardButton.PreviewMouseMove += new MouseEventHandler(cardButton_PreviewMouseMove);
-
                         }
 
                         // Add the property card to the grid in the specified position.
@@ -1374,13 +1375,11 @@ namespace GameClient
 
                     case CardType.Money:
                     {
-
                         // Each player should only be to see the breakdown of his own money pile
                         if ( this.Player == player )
                         {
                             cardButton.MouseEnter += new MouseEventHandler(cardButtonMoney_MouseEnter);
                         }
-
 
                         // Play money cards horizontally.
                         TransformCardButton(cardButton, 0, 0);
@@ -1456,6 +1455,7 @@ namespace GameClient
 
             switch ( card.Type )
             {
+                case CardType.Enhancement:
                 case CardType.Property:
                 {
                     TransformGroup transformGroup = (cardButton.RenderTransform as TransformGroup);
@@ -1731,6 +1731,11 @@ namespace GameClient
                     // Display a wait message until the victim has responded to the request.
                     WaitMessage = new MessageDialog("Please Wait...", "Waiting for victim to respond...");
                     WaitMessage.ShowDialog();                    
+                }
+                else
+                {
+                    // If window was closed without stealing, cancel the action.
+                    return false;
                 }
             }
             else

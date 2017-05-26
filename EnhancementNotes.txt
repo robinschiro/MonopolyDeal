@@ -1,5 +1,6 @@
 Triggering Conditions:
 - When player flips a property that is part of a monopoly
+- When a player moves a Property Wild Card
 - When a player uses part of a monopoly to pay off rent
 
 When I remove a house/hotel from a card group, what should I do with it?

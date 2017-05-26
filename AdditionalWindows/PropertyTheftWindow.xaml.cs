@@ -71,6 +71,7 @@ namespace AdditionalWindows
 
         public PropertyTheftWindow( Player victim, Player thief, int actionId )
         {
+            base.isModal = false;
             AssetsOfVictim = new ObservableCollection<Card>();
             this.victim = victim;
             this.thief = thief;
