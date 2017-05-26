@@ -433,6 +433,24 @@ namespace GameClient
             }
         }
 
+        public void DiscardCardEvent( object sender, MouseButtonEventArgs args )
+        {
+            if ( isCurrentTurnOwner )
+            {
+                Button cardButton = sender as Button;
+
+                if ( IsCardSelected(cardButton) )
+                {
+                    Card card = cardButton.Tag as Card;
+                    DiscardCard(card);
+                }
+            }
+            else
+            {
+                MessageBox.Show("You can only discard a card during your turn!", "Cannot Discard", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
         public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
             if ( isCurrentTurnOwner && this.Turn.ActionsRemaining > 0 )
@@ -518,6 +536,13 @@ namespace GameClient
         // End the player's turn.
         private void EndTurnButton_Click( object sender, RoutedEventArgs e )
         {
+            // Do not let player end turn if have more than 7 cards in hand.
+            if ( this.Player.CardsInHand.Count > 7 )
+            {
+                MessageBox.Show("You cannot have more than 7 cards at the end of your turn. Please discard some cards.", "Too Many Cards", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             // Update the current turn owner by cycling through the player list.
             if ( Turn.CurrentTurnOwner == PlayerList.Count - 1 )
             {
@@ -738,7 +763,6 @@ namespace GameClient
             {
                 // Remove the card from the player's hand.
                 RemoveCardFromHand(cardToDiscard);
-
 
                 // Add the card to the discard pile and update its display.
                 this.DiscardPile.Add(cardToDiscard);
@@ -1150,6 +1174,8 @@ namespace GameClient
                     }
                 };
 
+                ContextMenu menu = new ContextMenu();
+
                 // If a card is not an action card, there is only one way it can be played.
                 if ( CardType.Property == cardBeingAdded.Type || CardType.Money == cardBeingAdded.Type )
                 {
@@ -1163,6 +1189,13 @@ namespace GameClient
                     
                     if ( HasAltColor(cardBeingAdded) )
                     {
+                        MenuItem playMenuItem = new MenuItem();
+                        playMenuItem.Header = "Play as Property";
+                        playMenuItem.Click += ( sender, args ) =>
+                        {
+                            PlayCardEvent(cardButton, null);
+                        };
+
                         MenuItem flipMenuItem = new MenuItem();
                         flipMenuItem.Header = "Flip Card";
                         flipMenuItem.Click += ( sender2, args2 ) =>
@@ -1227,6 +1260,15 @@ namespace GameClient
                     menu.Items.Add(playAsMoneyMenuItem);
                     cardButton.ContextMenu = menu;
                 }
+
+                // To all cards (regardless of type), add the ability to discard the card.
+                MenuItem discardMenuItem = new MenuItem();
+                discardMenuItem.Header = "Discard";
+                discardMenuItem.Click += ( sender, args ) =>
+                {
+                    DiscardCardEvent(cardButton, null);
+                };
+                menu.Items.Add(discardMenuItem);
             }
             // The card is being added to a player's playing field.
             else
@@ -1793,17 +1835,14 @@ namespace GameClient
                     }
                 }
 
-                // If the player will not get any money from playing the rent, give him the option to cancel his action.
+                // If the player will not get any money from playing the rent, prevent him/her from performing the action.
                 if ( 0 == matchingPropertyGroups.Count )
                 {
-                    MessageBoxResult result = MessageBox.Show("You do not have " + rentCard.Color.ToString() + " or " + rentCard.AltColor.ToString() + " properties. Are you sure you want to play this card?",
-                                    "Are you sure?",
-                                    MessageBoxButton.YesNo);
+                    MessageBoxResult result = MessageBox.Show("You do not have " + rentCard.Color.ToString() + " or " + rentCard.AltColor.ToString() + " properties. You cannot perform this action.",
+                                    "Invalid Action",
+                                    MessageBoxButton.OK);
 
-                    if ( MessageBoxResult.No == result )
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 
                 // Determine the maximum amount of money the player can make from the rent.
