@@ -22,4 +22,4 @@ Where will I need to add code to implement this change?
 	- Need to add enhancements to enhancement pile when receiving as rent.
     
  Bugs:
-    - The CardType of Enhancement cards is changed to property when played on a monopoly. This becomes a problem because the Enchancement is counted as a property in the 'IsCardListMonopoly' function in ClientUtilities.
+    - [FIXED] The CardType of Enhancement cards is changed to property when played on a monopoly. This becomes a problem because the Enchancement is counted as a property in the 'IsCardListMonopoly' function in ClientUtilities.

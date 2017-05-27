@@ -582,7 +582,8 @@ namespace GameClient
 
                     if ( !isMonopoly )
                     {
-                        performTransfer = (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || PropertyType.Wild == targetCardListColor);
+                        performTransfer = (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || 
+                                           PropertyType.Wild == targetCardListColor || PropertyType.None == targetCardListColor);
 
                         //// Mark the event as handled.
                         //e.Handled = true;
@@ -593,14 +594,14 @@ namespace GameClient
                         {
                             case ("House"):
                             {
-                                performTransfer = !IsCardInCardList("House", targetCardList);
+                                performTransfer = !ClientUtilities.IsCardInCardList("House", targetCardList);
 
                                 break;
                             }
 
                             case ("Hotel"):
                             {
-                                performTransfer = IsCardInCardList("House", targetCardList) && !IsCardInCardList("Hotel", targetCardList);
+                                performTransfer = ClientUtilities.IsCardInCardList("House", targetCardList) && !ClientUtilities.IsCardInCardList("Hotel", targetCardList);
 
                                 break;
                             }
@@ -1027,35 +1028,13 @@ namespace GameClient
                 // unless it is placed in a monopoly.
                 case CardType.Enhancement:
                 {
-                    List<List<Card>> monopolies = ClientUtilities.FindMonopolies(player);
-
-                    // If the card is a house.
-                    if ( 4 == cardBeingAdded.ActionID )
+                    List<Card> monopoly = (4 == cardBeingAdded.ActionID ) ? ClientUtilities.FindMonopolyWithoutHouse(player) : ClientUtilities.FindMonopolyWithoutHotel(player);
+                    if ( null != monopoly )
                     {
-                        foreach ( List<Card> monopoly in monopolies )
-                        {
-                            if ( !IsCardInCardList("House", monopoly) )
-                            {
-                                monopoly.Add(cardBeingAdded);
-                                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
+                        monopoly.Add(cardBeingAdded);
+                        AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
 
-                                return true;
-                            }
-                        }
-                    }
-                    // If it is a hotel.
-                    else
-                    {
-                        foreach ( List<Card> monopoly in monopolies )
-                        {
-                            if ( IsCardInCardList("House", monopoly) && !IsCardInCardList("Hotel", monopoly) )
-                            {
-                                monopoly.Add(cardBeingAdded);
-                                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
-
-                                return true;
-                            }
-                        }
+                        return true;
                     }
 
                     // Do not add the house or hotel if the code is reached.
@@ -1154,8 +1133,24 @@ namespace GameClient
                 {
                     foreach (MenuItem item in menu.Items )
                     {
-                       item.IsEnabled = isCurrentTurnOwner && 
-                                        ((ResourceList.DiscardMenuItemHeader == (string)item.Header) || (this.Turn.ActionsRemaining > 0));
+                        string header = (string)item.Header;
+                        item.IsEnabled = isCurrentTurnOwner;
+                        if ( ResourceList.AddEnhancementMenuItemHeader == header )
+                        {
+                            item.IsEnabled &= (4 == cardBeingAdded.ActionID) ? 
+                                              (null != ClientUtilities.FindMonopolyWithoutHouse(player)) : 
+                                              (null != ClientUtilities.FindMonopolyWithoutHotel(player));
+                        }
+                        else if ( ResourceList.DiscardMenuItemHeader == header )
+                        {
+                            item.IsEnabled &= (player.CardsInHand.Count > 7);
+                        }
+                        else
+                        {
+                            item.IsEnabled &= (this.Turn.ActionsRemaining > 0);
+                        }
+                       //item.IsEnabled = isCurrentTurnOwner && 
+                       //                 ((ResourceList.DiscardMenuItemHeader == (string)item.Header) || (this.Turn.ActionsRemaining > 0));
                     }
                 };
 
@@ -1190,7 +1185,7 @@ namespace GameClient
                 else if ( CardType.Enhancement == cardBeingAdded.Type )
                 {
                     MenuItem playAsActionMenuItem = new MenuItem();
-                    playAsActionMenuItem.Header = "Add to Monopoly";
+                    playAsActionMenuItem.Header = ResourceList.AddEnhancementMenuItemHeader;
                     playAsActionMenuItem.Click += (sender, args) =>
                     {
                         PlayCardEvent(cardButton, null);
@@ -1205,7 +1200,6 @@ namespace GameClient
 
                     menu.Items.Add(playAsActionMenuItem);
                     menu.Items.Add(playAsMoneyMenuItem);
-                    cardButton.ContextMenu = menu;
                 }
                 // These apply to all other action cards. Players can play these cards as actions or money.
                 else
@@ -1234,7 +1228,6 @@ namespace GameClient
                     };
 
                     menu.Items.Add(playAsMoneyMenuItem);
-                    cardButton.ContextMenu = menu;
                 }
 
                 // To all cards (regardless of type), add the ability to discard the card.
@@ -2240,20 +2233,6 @@ namespace GameClient
             }
 
             return -1;
-        }
-
-        // Determine if a card with a given name is in a card list.
-        public static bool IsCardInCardList( string name, List<Card> cardList )
-        {
-            foreach ( Card cardInMonopoly in cardList )
-            {
-                if ( name == cardInMonopoly.Name )
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         // Determine if a given card is a two-color property (aka 'Property Wild Card').
