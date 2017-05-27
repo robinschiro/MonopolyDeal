@@ -19,6 +19,7 @@ using GameObjects;
 using GameServer;
 using AdditionalWindows;
 using Utilities;
+using ResourceList = GameClient.Properties.Resources;
 
 namespace GameClient
 {
@@ -41,7 +42,6 @@ namespace GameClient
         private bool ReceivedPlayerList;
         private bool ReceivedDeck;
         private volatile NetClient Client;
-        private List<Grid> PlayerFields;                        // This list is needed in order to resize the grids when the window size changes.
         private Dictionary<String, Grid> PlayerFieldDictionary;
         private Dictionary<String, Grid> PlayerHandDictionary;
         private bool HavePlayersBeenAssigned;
@@ -72,10 +72,6 @@ namespace GameClient
                 OnPropertyChanged("IsCurrentTurnOwner");
             }
         }
-
-        //Testing something called AttachedProperties. Allows function calls upon triggers. 
-        //Figured it would be good for the infobox, as it is constantly being updated due to triggers.
-        private DependencyProperty InfoBoxAttachedProperty = DependencyProperty.RegisterAttached("Contents", typeof(Card), typeof(GameWindow));
 
         #endregion Variables
 
@@ -153,20 +149,13 @@ namespace GameClient
 
             // Re-title the window.
             this.Title = playerName + "'s Window";
-
+            
             // Add an empty grid as the first element of every field. This grid is used to display each player's money pile.
-            PlayerOneField.Children.Add(CreateCardGrid());
-            PlayerTwoField.Children.Add(CreateCardGrid());
-            PlayerThreeField.Children.Add(CreateCardGrid());
-            PlayerFourField.Children.Add(CreateCardGrid());
-
-            // Add the four player fields to the list.
-            this.PlayerFields = new List<Grid>();
-            this.PlayerFields.Add(PlayerOneField);
-            this.PlayerFields.Add(PlayerTwoField);
-            this.PlayerFields.Add(PlayerThreeField);
-            this.PlayerFields.Add(PlayerFourField);
-
+            foreach ( Grid field in PlayerFieldDictionary.Values )
+            {
+                field.Children.Add(CreateCardGrid());
+            }
+            
             // Add player names to each playing field.
             for ( int i = 0; i < this.PlayerList.Count; i++ )
             {
@@ -433,6 +422,21 @@ namespace GameClient
             }
         }
 
+        public void DiscardCardEvent( object sender, MouseButtonEventArgs args )
+        {
+            if ( isCurrentTurnOwner )
+            {
+                Button cardButton = sender as Button;
+
+                Card card = cardButton.Tag as Card;
+                DiscardCard(card);
+            }
+            else
+            {
+                MessageBox.Show("You can only discard a card during your turn!", "Cannot Discard", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
         public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
             if ( isCurrentTurnOwner && this.Turn.ActionsRemaining > 0 )
@@ -518,6 +522,13 @@ namespace GameClient
         // End the player's turn.
         private void EndTurnButton_Click( object sender, RoutedEventArgs e )
         {
+            // Do not let player end turn if have more than 7 cards in hand.
+            if ( this.Player.CardsInHand.Count > 7 )
+            {
+                MessageBox.Show("You cannot have more than 7 cards at the end of your turn. Please discard some cards.", "Too Many Cards", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             // Update the current turn owner by cycling through the player list.
             if ( Turn.CurrentTurnOwner == PlayerList.Count - 1 )
             {
@@ -571,7 +582,8 @@ namespace GameClient
 
                     if ( !isMonopoly )
                     {
-                        performTransfer = (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || PropertyType.Wild == targetCardListColor);
+                        performTransfer = (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || 
+                                           PropertyType.Wild == targetCardListColor || PropertyType.None == targetCardListColor);
 
                         //// Mark the event as handled.
                         //e.Handled = true;
@@ -582,14 +594,14 @@ namespace GameClient
                         {
                             case ("House"):
                             {
-                                performTransfer = !IsCardInCardList("House", targetCardList);
+                                performTransfer = !ClientUtilities.IsCardInCardList("House", targetCardList);
 
                                 break;
                             }
 
                             case ("Hotel"):
                             {
-                                performTransfer = IsCardInCardList("House", targetCardList) && !IsCardInCardList("Hotel", targetCardList);
+                                performTransfer = ClientUtilities.IsCardInCardList("House", targetCardList) && !ClientUtilities.IsCardInCardList("Hotel", targetCardList);
 
                                 break;
                             }
@@ -739,7 +751,6 @@ namespace GameClient
                 // Remove the card from the player's hand.
                 RemoveCardFromHand(cardToDiscard);
 
-
                 // Add the card to the discard pile and update its display.
                 this.DiscardPile.Add(cardToDiscard);
                 DisplayUpdatedDiscardPile();
@@ -858,9 +869,6 @@ namespace GameClient
 
             // Display the Player's cards in play as well.
             DisplayCardsInPlay(this.Player, PlayerOneField);
-        
-            // Display the Player's cards in hand.
-            //DisplayCardsInHand(this.Player, PlayerOneHand);
         }
 
         // Update the card displayed in the InfoBox.
@@ -895,9 +903,9 @@ namespace GameClient
         // Resize UI elements so that they are propotional to the size of the window.
         public void ResizeUIElements( Object filler )
         {
-            if ( PlayerFields != null )
+            if ( PlayerFieldDictionary.Values != null )
             {
-                foreach ( Grid field in PlayerFields )
+                foreach ( Grid field in PlayerFieldDictionary.Values )
                 {
                     foreach ( FrameworkElement element in field.Children )
                     {
@@ -1020,35 +1028,13 @@ namespace GameClient
                 // unless it is placed in a monopoly.
                 case CardType.Enhancement:
                 {
-                    List<List<Card>> monopolies = ClientUtilities.FindMonopolies(player);
-
-                    // If the card is a house.
-                    if ( 4 == cardBeingAdded.ActionID )
+                    List<Card> monopoly = (4 == cardBeingAdded.ActionID ) ? ClientUtilities.FindMonopolyWithoutHouse(player) : ClientUtilities.FindMonopolyWithoutHotel(player);
+                    if ( null != monopoly )
                     {
-                        foreach ( List<Card> monopoly in monopolies )
-                        {
-                            if ( !IsCardInCardList("House", monopoly) )
-                            {
-                                monopoly.Add(cardBeingAdded);
-                                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
+                        monopoly.Add(cardBeingAdded);
+                        AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
 
-                                return true;
-                            }
-                        }
-                    }
-                    // If it is a hotel.
-                    else
-                    {
-                        foreach ( List<Card> monopoly in monopolies )
-                        {
-                            if ( IsCardInCardList("House", monopoly) && !IsCardInCardList("Hotel", monopoly) )
-                            {
-                                monopoly.Add(cardBeingAdded);
-                                AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(monopoly));
-
-                                return true;
-                            }
-                        }
+                        return true;
                     }
 
                     // Do not add the house or hotel if the code is reached.
@@ -1141,12 +1127,30 @@ namespace GameClient
                 ContextMenu menu = new ContextMenu();
                 cardButton.ContextMenu = menu;
 
-                // Disable all context menu items except for Discard if there are no actions left.
-                cardButton.ContextMenuOpening += ( sender, args ) =>
+                // If there are no actions left, disable all context menu items except for Discard.
+                // All menu options are disabled if it is not the player's turn.
+                menu.Opened += ( sender, args ) =>
                 {
-                    foreach (MenuItem item in cardButton.ContextMenu.Items )
+                    foreach (MenuItem item in menu.Items )
                     {
-                        item.IsEnabled = isCurrentTurnOwner && this.Turn.ActionsRemaining > 0;
+                        string header = (string)item.Header;
+                        item.IsEnabled = isCurrentTurnOwner;
+                        if ( ResourceList.AddEnhancementMenuItemHeader == header )
+                        {
+                            item.IsEnabled &= (4 == cardBeingAdded.ActionID) ? 
+                                              (null != ClientUtilities.FindMonopolyWithoutHouse(player)) : 
+                                              (null != ClientUtilities.FindMonopolyWithoutHotel(player));
+                        }
+                        else if ( ResourceList.DiscardMenuItemHeader == header )
+                        {
+                            item.IsEnabled &= (player.CardsInHand.Count > 7);
+                        }
+                        else
+                        {
+                            item.IsEnabled &= (this.Turn.ActionsRemaining > 0);
+                        }
+                       //item.IsEnabled = isCurrentTurnOwner && 
+                       //                 ((ResourceList.DiscardMenuItemHeader == (string)item.Header) || (this.Turn.ActionsRemaining > 0));
                     }
                 };
 
@@ -1181,7 +1185,7 @@ namespace GameClient
                 else if ( CardType.Enhancement == cardBeingAdded.Type )
                 {
                     MenuItem playAsActionMenuItem = new MenuItem();
-                    playAsActionMenuItem.Header = "Add to Monopoly";
+                    playAsActionMenuItem.Header = ResourceList.AddEnhancementMenuItemHeader;
                     playAsActionMenuItem.Click += (sender, args) =>
                     {
                         PlayCardEvent(cardButton, null);
@@ -1196,7 +1200,6 @@ namespace GameClient
 
                     menu.Items.Add(playAsActionMenuItem);
                     menu.Items.Add(playAsMoneyMenuItem);
-                    cardButton.ContextMenu = menu;
                 }
                 // These apply to all other action cards. Players can play these cards as actions or money.
                 else
@@ -1225,8 +1228,16 @@ namespace GameClient
                     };
 
                     menu.Items.Add(playAsMoneyMenuItem);
-                    cardButton.ContextMenu = menu;
                 }
+
+                // To all cards (regardless of type), add the ability to discard the card.
+                MenuItem discardMenuItem = new MenuItem();
+                discardMenuItem.Header = ResourceList.DiscardMenuItemHeader;
+                discardMenuItem.Click += ( sender, args ) =>
+                {
+                    DiscardCardEvent(cardButton, null);
+                };
+                menu.Items.Add(discardMenuItem);
             }
             // The card is being added to a player's playing field.
             else
@@ -1580,7 +1591,7 @@ namespace GameClient
                         }
                         else
                         {
-                            // Should send a Game Over message to players because there are no cards to draw.
+                            // ROBIN TODO: Should send a Game Over message to players because there are no cards to draw.
                             return;
                         }
                     }
@@ -1597,12 +1608,6 @@ namespace GameClient
                 ServerUtilities.SendMessage(Client, Datatype.UpdateDeck, Deck);
                 ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
             }
-        }
-
-        // Again, testing AttachedProperties. Will need to discuss.
-        private void setInfoBox( TriggerBase target, int location )
-        {
-            target.SetValue(InfoBoxAttachedProperty, Player.CardsInHand[location]);
         }
 
         // Shift the position of a card in play either forward or backward.
@@ -1793,17 +1798,14 @@ namespace GameClient
                     }
                 }
 
-                // If the player will not get any money from playing the rent, give him the option to cancel his action.
+                // If the player will not get any money from playing the rent, prevent him/her from performing the action.
                 if ( 0 == matchingPropertyGroups.Count )
                 {
-                    MessageBoxResult result = MessageBox.Show("You do not have " + rentCard.Color.ToString() + " or " + rentCard.AltColor.ToString() + " properties. Are you sure you want to play this card?",
-                                    "Are you sure?",
-                                    MessageBoxButton.YesNo);
+                    MessageBoxResult result = MessageBox.Show("You do not have " + rentCard.Color.ToString() + " or " + rentCard.AltColor.ToString() + " properties. You cannot perform this action.",
+                                    "Invalid Action",
+                                    MessageBoxButton.OK);
 
-                    if ( MessageBoxResult.No == result )
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 
                 // Determine the maximum amount of money the player can make from the rent.
@@ -2231,20 +2233,6 @@ namespace GameClient
             }
 
             return -1;
-        }
-
-        // Determine if a card with a given name is in a card list.
-        public static bool IsCardInCardList( string name, List<Card> cardList )
-        {
-            foreach ( Card cardInMonopoly in cardList )
-            {
-                if ( name == cardInMonopoly.Name )
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         // Determine if a given card is a two-color property (aka 'Property Wild Card').

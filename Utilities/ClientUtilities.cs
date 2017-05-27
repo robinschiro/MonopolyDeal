@@ -131,6 +131,20 @@ namespace Utilities
             }
         }
 
+        // Determine if a card with a given name is in a card list.
+        public static bool IsCardInCardList( string name, List<Card> cardList )
+        {
+            foreach ( Card cardInMonopoly in cardList )
+            {
+                if ( name == cardInMonopoly.Name )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         // Determine if a provided card list is a monopoly.
         public static bool IsCardListMonopoly( List<Card> cardList )
         {
@@ -173,6 +187,35 @@ namespace Utilities
             return monopolies;
         }
 
+        // Find a monopoly that does not have a house on it.
+        public static List<Card> FindMonopolyWithoutHouse( Player player )
+        {
+            List<List<Card>> monopolies = ClientUtilities.FindMonopolies(player);
+
+            foreach ( List<Card> monopoly in monopolies )
+            {
+                if ( !ClientUtilities.IsCardInCardList("House", monopoly) )
+                {
+                    return monopoly;
+                }
+            }
+            return null;
+        }
+
+        // Find a monopoly that does not have a hotel on it (but does have a house).
+        public static List<Card> FindMonopolyWithoutHotel( Player player )
+        {
+            List<List<Card>> monopolies = ClientUtilities.FindMonopolies(player);
+
+            foreach ( List<Card> monopoly in monopolies )
+            {
+                if ( ClientUtilities.IsCardInCardList("House", monopoly) && !ClientUtilities.IsCardInCardList("Hotel", monopoly) )
+                {
+                    return monopoly;
+                }
+            }
+            return null;
+        }
         #endregion
 
     }
