@@ -175,8 +175,8 @@ namespace Utilities
         {
             List<List<Card>> monopolies = new List<List<Card>>();
 
-            // Iterate through the card lists. Always skip the first one, since it is reserved for money.
-            for ( int i = 1; i < player.CardsInPlay.Count; ++i )
+            // Iterate through the card lists. Always skip the first two, since they are reserved for money and enhancements.
+            for ( int i = 2; i < player.CardsInPlay.Count; ++i )
             {
                 if ( ClientUtilities.IsCardListMonopoly(player.CardsInPlay[i]) )
                 {

@@ -212,11 +212,11 @@ namespace AdditionalWindows
 
                 if ( isThiefAssets )
                 {
-                    cardGroups = new List<List<Card>>(player.CardsInPlay.Skip(1));
+                    cardGroups = new List<List<Card>>(player.CardsInPlay.Skip(2));
                 }
                 else
                 {
-                    cardGroups = onlyMonopoliesSelectable ? (ClientUtilities.FindMonopolies(player)) : new List<List<Card>>(player.CardsInPlay.Skip(1).Where(cardList => !ClientUtilities.IsCardListMonopoly(cardList)));
+                    cardGroups = onlyMonopoliesSelectable ? (ClientUtilities.FindMonopolies(player)) : new List<List<Card>>(player.CardsInPlay.Skip(2).Where(cardList => !ClientUtilities.IsCardListMonopoly(cardList)));
                 }
 
                 // Populate the tree with cards from the player's cards in play.

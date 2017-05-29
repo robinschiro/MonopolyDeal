@@ -38,7 +38,7 @@ ExcelToProfileConverter.exe
     -Name=Hotel
     -CardType=Enhancement
     -Value=4
-    -Count=2
+    -Count=20
     -PropertyType=
     -AltPropertyType=
     -ActionID=3
@@ -49,7 +49,7 @@ ExcelToProfileConverter.exe
     -Name=House
     -CardType=Enhancement
     -Value=3
-    -Count=3
+    -Count=30
     -PropertyType=
     -AltPropertyType=
     -ActionID=4
@@ -588,7 +588,7 @@ ExcelToProfileConverter.exe
     -Name="Wild Light Blue-Brown"
     -CardType=Property
     -Value=1
-    -Count=1
+    -Count=100
     -PropertyType=LightBlue
     -AltPropertyType=Brown
     -ActionID=

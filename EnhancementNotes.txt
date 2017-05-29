@@ -2,6 +2,7 @@ Triggering Conditions:
 - When player flips a property that is part of a monopoly
 - When a player moves a Property Wild Card
 - When a player uses part of a monopoly to pay off rent
+- When player receives house/hotel as rent
 
 When I remove a house/hotel from a card group, what should I do with it?
 	- If there are no other isolated houses/hotels in the CardsInPlay, add it to the CardsInPlay as a new card group of properties. This card group should have property type "Enhancement"

@@ -131,7 +131,6 @@ namespace GameClient
                 WaitMessage.ShowDialog();
             }
 
-
             // Update the turn display.
             UpdateTurnDisplay(null);
 
@@ -149,12 +148,6 @@ namespace GameClient
 
             // Re-title the window.
             this.Title = playerName + "'s Window";
-            
-            // Add an empty grid as the first element of every field. This grid is used to display each player's money pile.
-            foreach ( Grid field in PlayerFieldDictionary.Values )
-            {
-                field.Children.Add(CreateCardGrid());
-            }
             
             // Add player names to each playing field.
             for ( int i = 0; i < this.PlayerList.Count; i++ )
@@ -813,6 +806,7 @@ namespace GameClient
 
             for ( int i = 0; i < player.CardsInPlay.Count; ++i )
             {
+                Console.WriteLine("Displaying cards in play. Children count: " + field.Children.Count);
                 field.Children.Add(CreateCardGrid(i));
                 foreach ( Card card in player.CardsInPlay[i] )
                 {
@@ -999,7 +993,7 @@ namespace GameClient
                         //}
 
                         // If the card has passed the previous check, add it to the player's CardsInPlay.
-                        for ( int i = 1; i < player.CardsInPlay.Count; ++i )
+                        for ( int i = 2; i < player.CardsInPlay.Count; ++i )
                         {
                             List<Card> cardList = player.CardsInPlay[i];
 
@@ -1052,41 +1046,7 @@ namespace GameClient
             }
         }
 
-        //// I do not remember why I created this method. It is flawed in that it does not save the position of wild cards.
-        //// I will leave it commented out for now.
-        //// Excluding the money list, removes all cards from the CardsInPlay and re-adds them.
-        //public void RefreshCardsInPlay( Player player, Grid playerField )
-        //{
-        //    List<Card> cards = new List<Card>();
-        //    List<Card> moneyList = player.CardsInPlay[0];
-
-        //    // Collect all of the cards from the curent CardsInPlay.
-        //    for ( int i = 1; i < player.CardsInPlay.Count; ++i )
-        //    {
-        //        foreach ( Card card in player.CardsInPlay[i])
-        //        {
-        //            cards.Add(card);
-        //        }
-        //    }
-
-        //    // Reset the player's CardsInPlay.
-        //    player.CardsInPlay = new List<List<Card>>();
-
-        //    // Add the money list to the new CardsInPlay.
-        //    player.CardsInPlay.Add(moneyList);
-
-        //    // Add all of the collected cards to the new CardsInPlay.
-        //    foreach ( Card card in cards )
-        //    {
-        //        AddCardToCardsInPlay(card);
-        //    }
-
-        //    // Display the player's refreshed CardsInPlay.
-        //    DisplayCardsInPlay(player, playerField);
-
-        //}
-
-        // Remove a card from a player's CardsInPlay. If it is the last card in a list, remove the list as well (unless it is the money list).
+        // Remove a card from a player's CardsInPlay. If it is the last card in a list, remove the list as well (unless it is the money or enhancements list).
         public void RemoveCardFromCardsInPlay( Card cardBeingRemoved, Player player )
         {
             int indexOfList = 0;
@@ -1104,7 +1064,7 @@ namespace GameClient
             }
 
             // If a card list becomes empty as a result of the previous operation, remove it.
-            if ( (0 != indexOfList) && (0 == player.CardsInPlay[indexOfList].Count) )
+            if ( (indexOfList > 1) && (0 == player.CardsInPlay[indexOfList].Count) )
             {
                 player.CardsInPlay.Remove(player.CardsInPlay[indexOfList]);
             }
@@ -1127,20 +1087,25 @@ namespace GameClient
                 ContextMenu menu = new ContextMenu();
                 cardButton.ContextMenu = menu;
 
-                // If there are no actions left, disable all context menu items except for Discard.
-                // All menu options are disabled if it is not the player's turn.
+                // If there are no actions left, disable all other context menu items except for Discard.
                 menu.Opened += ( sender, args ) =>
                 {
                     foreach (MenuItem item in menu.Items )
                     {
                         string header = (string)item.Header;
+
+                        // All menu options are disabled if it is not the player's turn.
                         item.IsEnabled = isCurrentTurnOwner;
+
+                        // For enhancement cards (houses and hotels), there must be a suitable monopoly for the option to be enabled.
                         if ( ResourceList.AddEnhancementMenuItemHeader == header )
                         {
-                            item.IsEnabled &= (4 == cardBeingAdded.ActionID) ? 
+                            item.IsEnabled &= (this.Turn.ActionsRemaining > 0) &&
+                                              ((4 == cardBeingAdded.ActionID) ? 
                                               (null != ClientUtilities.FindMonopolyWithoutHouse(player)) : 
-                                              (null != ClientUtilities.FindMonopolyWithoutHotel(player));
+                                              (null != ClientUtilities.FindMonopolyWithoutHotel(player)));
                         }
+                        // Players can only discard if they have more than 7 cards.
                         else if ( ResourceList.DiscardMenuItemHeader == header )
                         {
                             item.IsEnabled &= (player.CardsInHand.Count > 7);
@@ -1149,8 +1114,6 @@ namespace GameClient
                         {
                             item.IsEnabled &= (this.Turn.ActionsRemaining > 0);
                         }
-                       //item.IsEnabled = isCurrentTurnOwner && 
-                       //                 ((ResourceList.DiscardMenuItemHeader == (string)item.Header) || (this.Turn.ActionsRemaining > 0));
                     }
                 };
 
@@ -1305,9 +1268,10 @@ namespace GameClient
                                             RemoveCardFromCardsInPlay(enhancement, this.Player);
 
                                             // Add the card to the pile of Enhancement cards.
-                                            // These cards are located at the last index in the grid.
+                                            // These cards are located at index 1 of the CardsInPlay grid.
                                             Grid field = PlayerFieldDictionary[this.Player.Name];
-                                            AddCardToGrid(enhancement, field, this.Player, false, field.ColumnDefinitions.Count - 1);
+                                            this.Player.CardsInPlay[1].Add(enhancement);
+                                            AddCardToGrid(enhancement, field, this.Player, false, 1);
                                         }
                                     }
 
@@ -1360,12 +1324,15 @@ namespace GameClient
                                 }
                             };
 
-                            // Add a drop event to receive property cards that are being placed in this card's group.
-                            cardButton.Drop += new DragEventHandler(cardButton_Drop);
-                            cardButton.AllowDrop = true;
-
                             // Allow cards to be dragged and dropped onto other groups.
                             cardButton.PreviewMouseMove += new MouseEventHandler(cardButton_PreviewMouseMove);
+                            
+                            // For properties, add a drop event to receive property cards that are being placed in this card's group.
+                            if ( CardType.Property == cardBeingAdded.Type )
+                            {
+                                cardButton.Drop += new DragEventHandler(cardButton_Drop);
+                                cardButton.AllowDrop = true;
+                            }
                         }
 
                         // Add the property card to the grid in the specified position.
@@ -1376,6 +1343,7 @@ namespace GameClient
                             // Lay properties of compatible colors on top of each other (offset vertically).
                             TransformCardButton(cardButton, cardGrid.Children.Count, grid.ActualHeight);
 
+                            // Center the card button into the grid wrapper
                             cardGrid.Children.Add(cardButton);
                             Grid.SetColumn(cardButton, 1);
                             return;
@@ -1428,6 +1396,7 @@ namespace GameClient
                 TransformCardButton(cardButton, 0, 0);
                 if ( cardBeingAdded.Type == CardType.Property )
                 {
+                    Console.WriteLine("Children count: " + grid.Children.Count);
                     Grid.SetColumn(cardGridWrapper, grid.Children.Count - 1);
                 }
                 else if ( cardBeingAdded.Type == CardType.Money )
@@ -1699,7 +1668,7 @@ namespace GameClient
                     case TheftType.ForcedDeal:
                     {
                         // Both players need to have at least one property in order for the thief to perform a Forced Deal.
-                        if ( !((this.Player.CardsInPlay.Skip(1).Count() > 0) && (dialog.SelectedPlayer.CardsInPlay.Skip(1).Count() > 0)) )
+                        if ( !((this.Player.CardsInPlay.Skip(2).Count() > 0) && (dialog.SelectedPlayer.CardsInPlay.Skip(2).Count() > 0)) )
                         {
                             MessageBox.Show("Both players need to have at least one property in order to perform a Forced Deal.", "Cannot Perform Deal");
                             return false;
@@ -1711,7 +1680,7 @@ namespace GameClient
                     case TheftType.SlyDeal:
                     {
                         // The selected player needs to have at least one property in order for the thief to perform a Sly Deal.
-                        if ( !(dialog.SelectedPlayer.CardsInPlay.Skip(1).Count() > 0) )
+                        if ( !(dialog.SelectedPlayer.CardsInPlay.Skip(2).Count() > 0) )
                         {
                             MessageBox.Show(dialog.SelectedPlayer.Name + " does not have any properties to steal.", "Cannot Perform Deal");
                             return false;
@@ -1788,8 +1757,8 @@ namespace GameClient
                 List<List<Card>> matchingPropertyGroups = new List<List<Card>>();
 
                 // First, determine which lists on the player's field correpond to the rent card.
-                // Skip the money list.
-                foreach ( List<Card> cardList in this.Player.CardsInPlay.Skip(1) )
+                // Skip the money and enhancement lists.
+                foreach ( List<Card> cardList in this.Player.CardsInPlay.Skip(2) )
                 {
                     PropertyType cardListColor = ClientUtilities.GetCardListColor(cardList);
                     if ( (PropertyType.Wild == rentCard.Color) || (cardListColor == rentCard.Color) || (cardListColor == rentCard.AltColor) )
