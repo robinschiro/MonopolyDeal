@@ -992,12 +992,6 @@ namespace GameClient
 
                     if ( PropertyType.Wild != cardBeingAdded.Color )
                     {
-                        // ROBIN TODO: Instead of doing nothing and returning false, the card should be added to a new list.
-                        //if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.Color) )
-                        //{
-                        //    return false;
-                        //}
-
                         // If the card has passed the previous check, add it to the player's CardsInPlay.
                         for ( int i = 1; i < player.CardsInPlay.Count; ++i )
                         {
@@ -1149,8 +1143,6 @@ namespace GameClient
                         {
                             item.IsEnabled &= (this.Turn.ActionsRemaining > 0);
                         }
-                       //item.IsEnabled = isCurrentTurnOwner && 
-                       //                 ((ResourceList.DiscardMenuItemHeader == (string)item.Header) || (this.Turn.ActionsRemaining > 0));
                     }
                 };
 
@@ -1168,7 +1160,7 @@ namespace GameClient
                     if ( HasAltColor(cardBeingAdded) )
                     {
                         MenuItem flipMenuItem = new MenuItem();
-                        flipMenuItem.Header = "Flip Card";
+                        flipMenuItem.Header = ResourceList.FlipCardMenuItemHeader;
                         flipMenuItem.Click += ( sender2, args2 ) =>
                         {
                             // Flip the card, swapping its primary and alternative colors.
@@ -1217,7 +1209,6 @@ namespace GameClient
                         };
                         menu.Items.Add(playAsActionMenuItem);
                     }
-
 
                     MenuItem playAsMoneyMenuItem = new MenuItem();
                     playAsMoneyMenuItem.Header = "Play as Money";
@@ -1273,7 +1264,7 @@ namespace GameClient
                             if ( HasAltColor(cardBeingAdded) )
                             {
                                 MenuItem flipMenuItem = new MenuItem();
-                                flipMenuItem.Header = "Flip Card";
+                                flipMenuItem.Header = ResourceList.FlipCardMenuItemHeader;
                                 flipMenuItem.Click += ( sender, args ) =>
                                 {
                                     // Check to see if the flipped card can be added to the player's CardsInPlay.
@@ -1290,26 +1281,6 @@ namespace GameClient
 
                                     // Flip the card, swapping its primary and alternative colors.
                                     FlipCard(cardBeingAdded);
-
-                                    // Place the house/hotel in a separate list that can be accessed whenever the player wants to play a house/hotel or use it as money.
-                                    List<Card> cardListContainingCard = FindListContainingCard(cardBeingAdded);
-
-                                    // Get all of the cards that are enhancements.
-                                    List<Card> enhancements = cardListContainingCard.FindAll(card => CardType.Enhancement == card.Type);
-
-                                    if ( null != enhancements && enhancements.Count > 0 )
-                                    {
-                                        foreach ( Card enhancement in enhancements )
-                                        {
-                                            // Remove the card from the field.
-                                            RemoveCardFromCardsInPlay(enhancement, this.Player);
-
-                                            // Add the card to the pile of Enhancement cards.
-                                            // These cards are located at the last index in the grid.
-                                            Grid field = PlayerFieldDictionary[this.Player.Name];
-                                            AddCardToGrid(enhancement, field, this.Player, false, field.ColumnDefinitions.Count - 1);
-                                        }
-                                    }
 
                                     // Remove the card and re-add it to the Player's CardsInPlay.
                                     RemoveCardFromCardsInPlay(cardBeingAdded, this.Player);
@@ -1329,7 +1300,7 @@ namespace GameClient
                             else if ( PropertyType.Wild == cardBeingAdded.Color )
                             {
                                 MenuItem separateMenuItem = new MenuItem();
-                                separateMenuItem.Header = "Separate Wild Card";
+                                separateMenuItem.Header = ResourceList.SeparateWildCardMenuItemHeader;
                                 separateMenuItem.Click += ( sender, args ) =>
                                 {
                                     // Remove the card from its previous position on the player's playing field.
@@ -1357,6 +1328,13 @@ namespace GameClient
                                 foreach ( MenuItem item in menu.Items )
                                 {
                                     item.IsEnabled = this.IsCurrentTurnOwner;
+
+                                    string header = (string)item.Header;
+                                    if ( ResourceList.FlipCardMenuItemHeader == header || ResourceList.SeparateWildCardMenuItemHeader == header )
+                                    {
+                                        List<Card> cardListContainingCard = FindListContainingCard(cardBeingAdded);
+                                        item.IsEnabled &= !(cardListContainingCard.Any(card => (int)ActionId.House == card.ActionID));
+                                    }
                                 }
                             };
 

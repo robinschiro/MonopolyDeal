@@ -77,5 +77,23 @@ namespace GameClient.Properties {
                 return ResourceManager.GetString("DiscardMenuItemHeader", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Flip Card.
+        /// </summary>
+        internal static string FlipCardMenuItemHeader {
+            get {
+                return ResourceManager.GetString("FlipCardMenuItemHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Separate Wild Card.
+        /// </summary>
+        internal static string SeparateWildCardMenuItemHeader {
+            get {
+                return ResourceManager.GetString("SeparateWildCardMenuItemHeader", resourceCulture);
+            }
+        }
     }
 }

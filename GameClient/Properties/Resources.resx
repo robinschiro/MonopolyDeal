@@ -123,4 +123,10 @@
   <data name="DiscardMenuItemHeader" xml:space="preserve">
     <value>Discard</value>
   </data>
+  <data name="FlipCardMenuItemHeader" xml:space="preserve">
+    <value>Flip Card</value>
+  </data>
+  <data name="SeparateWildCardMenuItemHeader" xml:space="preserve">
+    <value>Separate Wild Card</value>
+  </data>
 </root>
