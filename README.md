@@ -4,6 +4,9 @@ Welcome to Monopoly Deal! This is a digital recreation America's favorite versio
 ## Downloading the game
 To download the latest release of the game, follow [this link](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/robinschiro/MonopolyDeal/tree/master/Release).
 
+## Prerequisites
+You will need to be running Win7+ with the .Net Framework v4 installed. You can download this version of the .Net Framework [here](https://www.microsoft.com/en-us/download/confirmation.aspx?id=17851).
+
 ## Running the game
 Once you have the game downloaded, you will see two executables. 
 
