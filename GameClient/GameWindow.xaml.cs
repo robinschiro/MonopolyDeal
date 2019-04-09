@@ -1025,7 +1025,7 @@ namespace GameClient
                     List<Card> monopoly = (4 == cardBeingAdded.ActionID ) ? ClientUtilities.FindMonopolyWithoutHouse(player) : ClientUtilities.FindMonopolyWithoutHotel(player);
                     if ( null != monopoly && 
                         MessageBoxResult.Yes == MessageBox.Show("Adding a " + cardBeingAdded.Name + " to your monopoly will prevent you from being able to separate any " + 
-                                                                "property wild cards from the set unless you have another monopoly you can move the + " + cardBeingAdded.Name + " to. \n\n" +
+                                                                "property wild cards from the set unless you have another monopoly that you can move the " + cardBeingAdded.Name + " to. \n\n" +
                                                                 "Are you sure you want to do this?", 
                                                                 "Are you sure you want to play your " + cardBeingAdded.Name + "?", MessageBoxButton.YesNo) )
                     {
@@ -1917,21 +1917,28 @@ namespace GameClient
                 }
 
                 // If there are any card lists that contain an enhancement card but are not monopolies, then place the enhancement card(s) in the player's bank.
+                bool enhancementsWereConverted = false;
                 List<List<Card>> nonMonopolies = this.Player.CardsInPlay.Where(cardList => !ClientUtilities.IsCardListMonopoly(cardList)).ToList<List<Card>>();
                 foreach ( List<Card> cardList in nonMonopolies )
                 {
                     List<Card> enhancements = cardList.Where(card => card.Type == CardType.Enhancement).ToList<Card>();
                     foreach (Card enhancement in enhancements)
-                    {                            
+                    {
                         RemoveCardFromCardsInPlay(enhancement, this.Player);
-
                         enhancement.Type = CardType.Money;
-                        AddCardToCardsInPlay(enhancement, this.Player);                         
+                        AddCardToCardsInPlay(enhancement, this.Player);
+
+                        enhancementsWereConverted = true;
                     }                 
                 }
                 
                 // Display this player's updated CardsInPlay.
                 DisplayCardsInPlay(this.Player, PlayerOneField);
+
+                if ( enhancementsWereConverted )
+                {
+                    MessageBox.Show("The Houses/Hotels on any full sets that you needed to break up were converted to money and placed in your bank.");
+                }
             }
             else
             {
