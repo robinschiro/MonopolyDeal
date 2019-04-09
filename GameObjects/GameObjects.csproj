@@ -46,6 +46,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionId.cs" />
     <Compile Include="Cards\Card.cs" />
     <Compile Include="Cards\EnhancementCard.cs" />
     <Compile Include="MoneyList.cs" />
