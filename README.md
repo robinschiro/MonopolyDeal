@@ -2,7 +2,7 @@
 Welcome to Monopoly Deal! This is a digital recreation of America's favorite version of America's most-hated board game.
 
 ## Downloading the game
-To download the latest release of the game, follow [this link](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/robinschiro/MonopolyDeal/tree/master/Release).
+To download the latest release of the game, follow [this link](https://github.com/robinschiro/MonopolyDeal/releases/latest/download/MonopolyDeal.zip).
 
 ## Prerequisites
 You will need to be running Win7+ with the .NET Framework 4.0+ installed. You can install this version of the .NET Framework [here](https://www.microsoft.com/en-us/download/confirmation.aspx?id=17851).
