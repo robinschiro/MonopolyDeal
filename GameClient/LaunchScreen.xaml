@@ -38,13 +38,12 @@
             <TextBox Name="PlayerNameTextBox" 
                      Grid.Column="1"
                      Grid.Row="0"
-                     Text="Player"
                      VerticalAlignment="Top"
                      HorizontalAlignment="Left"
                      Width="150"
                      TextChanged="PlayerName_TextChanged"/>            
             
-            <Label Content="IP Address of Server:"
+            <Label Content="Server IP Address:"
                    Name="IPAddressLabel"
                    HorizontalAlignment="Center"
                    Grid.Column="0"
@@ -54,7 +53,6 @@
             <TextBox Name="IPAddressTextBox" 
                      Grid.Column="1"
                      Grid.Row="1"
-                     Text="localhost"
                      TextChanged="IPAddress_TextChanged"
                      VerticalAlignment="Top"
                      HorizontalAlignment="Left"

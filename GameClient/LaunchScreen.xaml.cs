@@ -2,6 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Net;
+using ResourceList = GameClient.Properties.Resources;
+using tvToolbox;
+using System.IO;
 
 namespace GameClient
 {
@@ -13,15 +16,21 @@ namespace GameClient
         private bool isIPAddressValid = true;
         private bool isPlayerNameValid = true;
         private bool isPortValid = true;
-
+        private tvProfile settings;
 
         public LaunchScreen()
         {
             InitializeComponent();
             this.Title = "Monopoly Deal Setup";
 
-            // Set default port value.
-            this.PortTextBox.Text = "14242";
+            // Load cached settings from Profile.
+            string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ResourceList.SettingsFilePath);
+            settings = new tvProfile(settingsFilePath, tvProfileFileCreateActions.NoPromptCreateFile);
+
+            // Populate fields with settings.
+            this.PlayerNameTextBox.Text = settings.sValue(ResourceList.SettingNameKey, ResourceList.SettingNameDefaultValue);
+            this.IPAddressTextBox.Text = settings.sValue(ResourceList.SettingIpAddressKey, ResourceList.SettingIpAddressDefaultValue);
+            this.PortTextBox.Text = settings.sValue(ResourceList.SettingPortKey, ResourceList.SettingPortDefaultValue);            
 
             this.OKButton.Focus();
         }
@@ -30,6 +39,12 @@ namespace GameClient
         {
             // Retrieve the port number.
             int portNumber = Convert.ToInt32(PortTextBox.Text);
+
+            // Save settings.
+            settings[ResourceList.SettingNameKey] = this.PlayerNameTextBox.Text;
+            settings[ResourceList.SettingIpAddressKey] = this.IPAddressTextBox.Text;
+            settings[ResourceList.SettingPortKey] = this.PortTextBox.Text;
+            settings.Save();
 
             RoomWindow roomWindow = new RoomWindow(IPAddressTextBox.Text, portNumber, PlayerNameTextBox.Text);
             if ( roomWindow.ShowWindow )

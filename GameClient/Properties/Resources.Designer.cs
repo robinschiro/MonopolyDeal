@@ -95,5 +95,68 @@ namespace GameClient.Properties {
                 return ResourceManager.GetString("SeparateWildCardMenuItemHeader", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to localhost.
+        /// </summary>
+        internal static string SettingIpAddressDefaultValue {
+            get {
+                return ResourceManager.GetString("SettingIpAddressDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -ServerIpAddress.
+        /// </summary>
+        internal static string SettingIpAddressKey {
+            get {
+                return ResourceManager.GetString("SettingIpAddressKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Player.
+        /// </summary>
+        internal static string SettingNameDefaultValue {
+            get {
+                return ResourceManager.GetString("SettingNameDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -PlayerName.
+        /// </summary>
+        internal static string SettingNameKey {
+            get {
+                return ResourceManager.GetString("SettingNameKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 14242.
+        /// </summary>
+        internal static string SettingPortDefaultValue {
+            get {
+                return ResourceManager.GetString("SettingPortDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -Port.
+        /// </summary>
+        internal static string SettingPortKey {
+            get {
+                return ResourceManager.GetString("SettingPortKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MonopolyDealSettings.txt.
+        /// </summary>
+        internal static string SettingsFilePath {
+            get {
+                return ResourceManager.GetString("SettingsFilePath", resourceCulture);
+            }
+        }
     }
 }
