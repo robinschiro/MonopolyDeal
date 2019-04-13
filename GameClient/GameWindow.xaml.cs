@@ -88,7 +88,7 @@ namespace GameClient
             this.PlayerName = playerName;
 
             //// Play theme song.
-            //mediaPlayer = new MediaPlayer();
+            //MediaPlayer = new MediaPlayer();
             //CreateNewThread(new Action<Object>(PlaySong));
 
             // Instantiate the Player's Turn object.
@@ -187,7 +187,7 @@ namespace GameClient
             }
 
             // Because this call automatically draws cards for the player, it must occur after the player's cardsInHand have been placed on the grid.
-            CheckIfCurrentTurnOwner();
+            CheckIfCurrentTurnOwner(shouldNotifyUserObject: false);
 
             // Enable Reactive Extensions (taken from http://goo.gl/0Jr5WU) in order to perform Size_Changed responses at the end of a chain of resizing events
             // (instead performing a Size_Changed response for every resize event). This is used to improve efficiency.
@@ -397,7 +397,7 @@ namespace GameClient
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
                             // Check to see if the player is the current turn owner. 
-                            CreateNewThread(new Action<Object>(CheckIfCurrentTurnOwner));
+                            CreateNewThread(new Action<Object>(CheckIfCurrentTurnOwner), true);
 
                             // Update the turn display.
                             CreateNewThread(new Action<Object>(UpdateTurnDisplay));
@@ -700,8 +700,9 @@ namespace GameClient
         }
 
         // Update the value of the IsCurrentTurnOwner boolean.
-        public void CheckIfCurrentTurnOwner(Object filler = null)
+        public void CheckIfCurrentTurnOwner( Object shouldNotifyUserObject )
         {
+            bool shouldNotifyUser = (bool) shouldNotifyUserObject; 
             if ( this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name) )
             {
                 IsCurrentTurnOwner = true;
@@ -718,7 +719,10 @@ namespace GameClient
                 }
 
                 // Inform the player that it is his/her turn.
-                //MessageBox.Show("It is your turn!");
+                if ( shouldNotifyUser )
+                {
+                    MessageBox.Show("It's your turn!");
+                }
             }
             else
             {
@@ -2317,12 +2321,12 @@ namespace GameClient
             return playerName;
         }
 
-        //// Play the song.
-        //public void PlaySong(Object filler)
-        //{
-        //    mediaPlayer.Open(new Uri("C:\\Users\\Robin\\Dropbox\\Songs\\A Fifth of Beethoven.mp3"));
-        //    mediaPlayer.Play();
-        //}
+        // Play the song.
+        public void PlaySong( Object filler )
+        {
+            MediaPlayer.Open(new Uri("C:\\Users\\Robin\\Dropbox\\Songs\\A Fifth of Beethoven.mp3"));
+            MediaPlayer.Play();
+        }
 
         #endregion
     }
