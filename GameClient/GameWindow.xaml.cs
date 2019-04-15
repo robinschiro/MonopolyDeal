@@ -721,7 +721,8 @@ namespace GameClient
                 // Inform the player that it is his/her turn.
                 if ( shouldNotifyUser )
                 {
-                    MessageBox.Show("It's your turn!");
+                    var turnNotificationDialog = new MessageDialog(string.Empty, "It's your turn!", MessageBoxButton.OK);
+                    turnNotificationDialog.ShowDialog();
                 }
             }
             else
