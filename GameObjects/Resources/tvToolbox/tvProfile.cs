@@ -3096,7 +3096,7 @@ Copy and proceed from there?
                     loStreamWriter.Close();
             }
 
-            this.bLockProfileFile(this.sActualPathFile);
+            //this.bLockProfileFile(this.sActualPathFile);
 
             if ( !lbAlreadyThere )
                 this.bFileJustCreated = true;
