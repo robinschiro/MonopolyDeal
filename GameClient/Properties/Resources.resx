@@ -129,14 +129,8 @@
   <data name="SeparateWildCardMenuItemHeader" xml:space="preserve">
     <value>Separate Wild Card</value>
   </data>
-  <data name="SettingIpAddressDefaultValue" xml:space="preserve">
-    <value>localhost</value>
-  </data>
   <data name="SettingIpAddressKey" xml:space="preserve">
     <value>-ServerIpAddress</value>
-  </data>
-  <data name="SettingNameDefaultValue" xml:space="preserve">
-    <value>Player</value>
   </data>
   <data name="SettingNameKey" xml:space="preserve">
     <value>-PlayerName</value>

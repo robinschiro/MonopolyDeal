@@ -22,7 +22,7 @@ namespace GameClient.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace GameClient.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("GameClient.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace GameClient.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace GameClient.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Add to Monopoly.
         /// </summary>
-        internal static string AddEnhancementMenuItemHeader {
+        public static string AddEnhancementMenuItemHeader {
             get {
                 return ResourceManager.GetString("AddEnhancementMenuItemHeader", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace GameClient.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Discard.
         /// </summary>
-        internal static string DiscardMenuItemHeader {
+        public static string DiscardMenuItemHeader {
             get {
                 return ResourceManager.GetString("DiscardMenuItemHeader", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace GameClient.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Flip Card.
         /// </summary>
-        internal static string FlipCardMenuItemHeader {
+        public static string FlipCardMenuItemHeader {
             get {
                 return ResourceManager.GetString("FlipCardMenuItemHeader", resourceCulture);
             }
@@ -90,43 +90,25 @@ namespace GameClient.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Separate Wild Card.
         /// </summary>
-        internal static string SeparateWildCardMenuItemHeader {
+        public static string SeparateWildCardMenuItemHeader {
             get {
                 return ResourceManager.GetString("SeparateWildCardMenuItemHeader", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to localhost.
-        /// </summary>
-        internal static string SettingIpAddressDefaultValue {
-            get {
-                return ResourceManager.GetString("SettingIpAddressDefaultValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to -ServerIpAddress.
         /// </summary>
-        internal static string SettingIpAddressKey {
+        public static string SettingIpAddressKey {
             get {
                 return ResourceManager.GetString("SettingIpAddressKey", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Player.
-        /// </summary>
-        internal static string SettingNameDefaultValue {
-            get {
-                return ResourceManager.GetString("SettingNameDefaultValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to -PlayerName.
         /// </summary>
-        internal static string SettingNameKey {
+        public static string SettingNameKey {
             get {
                 return ResourceManager.GetString("SettingNameKey", resourceCulture);
             }
@@ -135,7 +117,7 @@ namespace GameClient.Properties {
         /// <summary>
         ///   Looks up a localized string similar to 14242.
         /// </summary>
-        internal static string SettingPortDefaultValue {
+        public static string SettingPortDefaultValue {
             get {
                 return ResourceManager.GetString("SettingPortDefaultValue", resourceCulture);
             }
@@ -144,7 +126,7 @@ namespace GameClient.Properties {
         /// <summary>
         ///   Looks up a localized string similar to -Port.
         /// </summary>
-        internal static string SettingPortKey {
+        public static string SettingPortKey {
             get {
                 return ResourceManager.GetString("SettingPortKey", resourceCulture);
             }
@@ -153,7 +135,7 @@ namespace GameClient.Properties {
         /// <summary>
         ///   Looks up a localized string similar to MonopolyDealSettings.txt.
         /// </summary>
-        internal static string SettingsFilePath {
+        public static string SettingsFilePath {
             get {
                 return ResourceManager.GetString("SettingsFilePath", resourceCulture);
             }
