@@ -129,4 +129,19 @@
   <data name="SeparateWildCardMenuItemHeader" xml:space="preserve">
     <value>Separate Wild Card</value>
   </data>
+  <data name="SettingIpAddressKey" xml:space="preserve">
+    <value>-ServerIpAddress</value>
+  </data>
+  <data name="SettingNameKey" xml:space="preserve">
+    <value>-PlayerName</value>
+  </data>
+  <data name="SettingPortDefaultValue" xml:space="preserve">
+    <value>14242</value>
+  </data>
+  <data name="SettingPortKey" xml:space="preserve">
+    <value>-Port</value>
+  </data>
+  <data name="SettingsFilePath" xml:space="preserve">
+    <value>MonopolyDealSettings.txt</value>
+  </data>
 </root>

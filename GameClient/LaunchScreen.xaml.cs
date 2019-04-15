@@ -2,6 +2,10 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Net;
+using ResourceList = GameClient.Properties.Resources;
+using tvToolbox;
+using System.IO;
+using System.Windows.Input;
 
 namespace GameClient
 {
@@ -10,26 +14,34 @@ namespace GameClient
     /// </summary>
     public partial class LaunchScreen : Window
     {
-        private bool isIPAddressValid = true;
-        private bool isPlayerNameValid = true;
-        private bool isPortValid = true;
-
+        private tvProfile settings;
 
         public LaunchScreen()
         {
             InitializeComponent();
+
             this.Title = "Monopoly Deal Setup";
 
-            // Set default port value.
-            this.PortTextBox.Text = "14242";
+            // Load cached settings from Profile.
+            string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ResourceList.SettingsFilePath);
+            settings = new tvProfile(settingsFilePath, tvProfileFileCreateActions.NoPromptCreateFile);
 
-            this.OKButton.Focus();
+            // Populate fields with settings.
+            this.PlayerNameTextBox.Text = settings.sValue(ResourceList.SettingNameKey, string.Empty);
+            this.IPAddressTextBox.Text = settings.sValue(ResourceList.SettingIpAddressKey, string.Empty);
+            this.PortTextBox.Text = settings.sValue(ResourceList.SettingPortKey, ResourceList.SettingPortDefaultValue);
         }
 
-        private void OKButton_Click( object sender, RoutedEventArgs e )
+        private void LaunchLobby()
         {
             // Retrieve the port number.
             int portNumber = Convert.ToInt32(PortTextBox.Text);
+
+            // Save settings.
+            settings[ResourceList.SettingNameKey] = this.PlayerNameTextBox.Text;
+            settings[ResourceList.SettingIpAddressKey] = this.IPAddressTextBox.Text;
+            settings[ResourceList.SettingPortKey] = this.PortTextBox.Text;
+            settings.Save();
 
             RoomWindow roomWindow = new RoomWindow(IPAddressTextBox.Text, portNumber, PlayerNameTextBox.Text);
             if ( roomWindow.ShowWindow )
@@ -39,18 +51,50 @@ namespace GameClient
             this.Close();
         }
 
-        // The OKButton is enabled only when text exists in the IPAddress textbox.
-        private void IPAddress_TextChanged( object sender, TextChangedEventArgs e )
+        #region Events
+
+        private void OKButton_Click( object sender, RoutedEventArgs e )
         {
-            IPAddress filler;
-            isIPAddressValid = (IPAddressTextBox.Text.ToLower() == "localhost") || (IPAddress.TryParse(IPAddressTextBox.Text, out filler));
-            ValidateTextFields();            
+            this.LaunchLobby();
         }
 
-        private void PlayerName_TextChanged( object sender, TextChangedEventArgs e )
+        private void Window_KeyDown( object sender, System.Windows.Input.KeyEventArgs e )
         {
-            isPlayerNameValid = !String.IsNullOrWhiteSpace(PlayerNameTextBox.Text);
-            ValidateTextFields();
+            if ( Key.Enter == e.Key && this.OKButton.IsEnabled)
+            {
+                this.LaunchLobby();
+            }
+        }
+
+        private void Window_Loaded( object sender, RoutedEventArgs e )
+        {
+            this.ValidateTextFields();
+        }
+
+        private void TextBox_TextChanged( object sender, TextChangedEventArgs e )
+        {
+            this.ValidateTextFields();
+        }
+
+        #endregion
+
+        #region Validation
+
+        private bool IsPlayerNameValid()
+        {
+            return !String.IsNullOrWhiteSpace(PlayerNameTextBox.Text);
+        }
+
+        private bool IsIpAddressValid()
+        {
+            IPAddress filler;
+            return (IPAddressTextBox.Text.ToLower() == "localhost") || (IPAddress.TryParse(IPAddressTextBox.Text, out filler));
+        }
+
+        private bool IsPortValid()
+        {
+            int port;
+            return int.TryParse(PortTextBox.Text, out port);
         }
 
         private void ValidateTextFields()
@@ -58,7 +102,7 @@ namespace GameClient
             // The outer try block is necessary because this event is initially fired before the OKButton exists.
             try
             {
-                if ( isIPAddressValid && isPlayerNameValid && isPortValid )
+                if ( this.IsIpAddressValid() && this.IsPlayerNameValid() && this.IsPortValid() )
                 {
                     OKButton.IsEnabled = true;
                 }
@@ -70,20 +114,6 @@ namespace GameClient
             catch { }
         }
 
-        private void Port_TextChanged( object sender, TextChangedEventArgs e )
-        {
-            isPortValid = true;
-
-            try
-            {
-                Convert.ToInt32(PortTextBox.Text);
-            }
-            catch (Exception ex)
-            {
-                isPortValid = false;
-            }
-
-            ValidateTextFields();
-        }
+        #endregion
     }
 }

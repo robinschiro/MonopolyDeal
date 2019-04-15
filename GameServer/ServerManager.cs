@@ -49,8 +49,7 @@ namespace GameServer
         [STAThread]
         static void Main( string[] args )
         {
-            // Generate a Profile object. When this project is near the end of its development, 
-            // we will need to remove the leading "..\\"'s from this file path.
+            // Attempt to load the game configuration from a config file.
             if ( File.Exists("Profile.txt"))
             {
                 Profile = new tvProfile("Profile.txt", false);
