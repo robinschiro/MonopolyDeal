@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Linq;
 
 
 namespace tvToolbox
@@ -14,25 +15,13 @@ namespace tvToolbox
     /// <summary>
     /// Fetches a resource file by name (asResourceName) from the current executable.
     /// </summary>
-    public delegate void FetchResourceToDisk(String asResourceName);
+    public delegate void FetchResourceToDisk( string asResourceName );
 
     /// <summary>
     /// Fetches a resource file by name (asResourceName) from the current executable
     /// using asNamespace. The resulting file is written to asPathFile.
     /// </summary>
-    public delegate void FetchResourceToDisk2(String asNamespace, String asResourceName, String asPathFile);
-
-    /// <summary>
-    /// Supported tvProfile data types.
-    /// </summary>
-    public enum tvProfileSupportedDataTypes
-    {
-         Bool
-        ,DateTime
-        ,Double
-        ,Integer
-        ,String
-    }
+    public delegate void FetchResourceToDisk2( string asNamespace, string asResourceName, string asPathFile );
 
     /// <summary>
     /// Default profile file actions specify how defaults are handled at runtime.
@@ -97,7 +86,7 @@ namespace tvToolbox
         /// to be loaded that do not match any current items will be appended
         /// to the end of the profile. Note: "*" as well as formal regular
         /// expressions can be used to match multiple keys. This means that
-        /// long keys can be referenced on the command line with "*"
+        /// long keys can be referenced on the command-line with "*"
         /// (eg. "-Auto*" matches "-AutoRun" and "-AutoPlay"). Keys with
         /// wildcards will not be appended.
         /// </summary>
@@ -117,7 +106,7 @@ namespace tvToolbox
     /// </p>
     /// <p>
     /// The key feature of tvProfile is its seamless integration of
-    /// file based properties with command line arguments and switches.
+    /// file based properties with command-line arguments and switches.
     /// </p>
     /// <p>
     /// Application parameters (eg. <see langword='-Key1="value one" -Key2=abc
@@ -128,7 +117,7 @@ namespace tvToolbox
     /// '-Switch=True'/>.
     /// </p>
     /// <p>
-    /// tvProfile command line switches / parameters typically override
+    /// tvProfile command-line switches / parameters typically override
     /// corresponding keys found in a profile file.
     /// </p>
     /// <p>
@@ -141,7 +130,7 @@ namespace tvToolbox
     /// populate it with default values.
     /// </p>
     /// <p>
-    /// As an alternative to the default delimited "command line" profile
+    /// As an alternative to the default delimited "command-line" profile
     /// file format, XML can be used instead by passing a boolean to the
     /// class constructor or by setting <see cref="bUseXmlFiles"/>.
     /// </p>
@@ -152,7 +141,7 @@ namespace tvToolbox
     /// Author:     George Schiro (GeoCode@Schiro.name)
     /// </p>
     /// <p>
-    /// Version:    2.1
+    /// Version:    2.2
     /// Copyright:  1996 - 2121
     /// </p>
     /// </summary>
@@ -169,7 +158,7 @@ namespace tvToolbox
     ///     <term>-ini="path/file"</term>
     ///     <description>
     ///     A profile file location used to override the default profile file.
-    ///     Alternatively, if the first argument passed on the command line is
+    ///     Alternatively, if the first argument passed on the command-line is
     ///     actually a file location (ie. a path/file specification) that refers
     ///     to an existing file, that file will be assumed to be a profile file
     ///     to override the default.
@@ -178,9 +167,9 @@ namespace tvToolbox
     /// <item>
     ///     <term>-File="path/file"</term>
     ///     <description>
-    ///     The first command line argument passed to the application, if a
+    ///     The first command-line argument passed to the application, if a
     ///     profile file location has otherwise been provided. In other words,
-    ///     if there is already an "-ini" key passed on the command line
+    ///     if there is already an "-ini" key passed on the command-line
     ///     (after the first argument), then any file passed as the first
     ///     argument (a file that actually exists) will be added to the
     ///     profile as <see langword='-File="path/file"' />.
@@ -191,8 +180,8 @@ namespace tvToolbox
     ///     <description>
     ///     False by default. This and "-ini" (with its alias -ProfileFile) are
     ///     the only parameters that do not appear in a profile file. It is only
-    ///     passed on the application command line. When the switch <see langword='-NoCreate'/>
-    ///     appears on the command line, users are not prompted to create a profile
+    ///     passed on the application command-line. When the switch <see langword='-NoCreate'/>
+    ///     appears on the command-line, users are not prompted to create a profile
     ///     file. If a default profile does not exist at runtime, one will not
     ///     be created and default values will not be persisted. This option only
     ///     makes sense when the application needs to run with its original
@@ -217,14 +206,14 @@ namespace tvToolbox
     ///     <term>-SaveSansCmdLine</term>
     ///     <description>
     ///     True by default. Set this false to prevent automated changes
-    ///     to the profile file after command line merges have occured.
-    ///     When true, everything but command line keys will be saved.
+    ///     to the profile file after command-line merges have occured.
+    ///     When true, everything but command-line keys will be saved.
     ///     </description>
     /// </item>
     /// <item>
     ///     <term>-ShowProfile</term>
     ///     <description>
-    ///     False by default. Display the contents of the profile in "command line"
+    ///     False by default. Display the contents of the profile in "command-line"
     ///     format during application startup. This is sometimes helpful for
     ///     debugging purposes.
     ///     </description>
@@ -234,7 +223,7 @@ namespace tvToolbox
     ///     <description>
     ///     False by default. Set this true to convert the profile file to XML
     ///     format and to maintain it that way. Set it false to convert it
-    ///     back to line delimited "command line" format.
+    ///     back to line delimited "command-line" format.
     ///     </description>
     /// </item>
     /// </list>
@@ -247,10 +236,11 @@ namespace tvToolbox
         /// <summary>
         /// Initializes a new instance of the tvProfile class.
         /// </summary>
-        public tvProfile() : this(
-                                      tvProfileDefaultFileActions.NoDefaultFile
-                                    , tvProfileFileCreateActions.NoFileCreate
-                                    )
+        public tvProfile()
+            : this(
+                       tvProfileDefaultFileActions.NoDefaultFile
+                     , tvProfileFileCreateActions.NoFileCreate
+                     )
         {
         }
 
@@ -261,7 +251,7 @@ namespace tvToolbox
         /// the top of an application during initialization.
         ///
         /// The profile is first initialized using the aeDefaultFileAction
-        /// enum. Then any command line arguments (typically passed from
+        /// enum. Then any command-line arguments (typically passed from
         /// the environment) are merged into the profile. This way command
         /// line arguments override properties in the profile file.
         ///
@@ -276,7 +266,7 @@ namespace tvToolbox
         /// This string array is typically passed from the environment to the
         /// running application (eg. from Environment.GetCommandLineArgs() ).
         /// It is merged with the default profile file or any other profile
-        /// found within the list of command line arguments.
+        /// found within the list of command-line arguments.
         /// </param>
         /// <param name="aeDefaultFileAction">
         /// This enum indicates how to handle automatic loading and saving
@@ -288,14 +278,14 @@ namespace tvToolbox
         /// </param>
         /// <param name="abUseXmlFiles">
         /// If true, XML file format will be used. If false, line delimited
-        /// "command line" format will be used (the default format).
+        /// "command-line" format will be used (the default format).
         /// </param>
         public tvProfile(
 
-                  String[]                      asCommandLineArray
-                , tvProfileDefaultFileActions   aeDefaultFileAction
-                , tvProfileFileCreateActions    aeFileCreateAction
-                , bool                          abUseXmlFiles
+                  string[] asCommandLineArray
+                , tvProfileDefaultFileActions aeDefaultFileAction
+                , tvProfileFileCreateActions aeFileCreateAction
+                , bool abUseXmlFiles
                 )
         {
             this.sInputCommandLineArray = asCommandLineArray;
@@ -310,7 +300,7 @@ namespace tvToolbox
             }
 
             // "bDefaultFileReplaced = True" means that a replacement profile file has been passed on
-            // the command line. Consequently, no attempt to load the default profile file should be made.
+            // the command-line. Consequently, no attempt to load the default profile file should be made.
             if ( !this.bDefaultFileReplaced && tvProfileDefaultFileActions.NoDefaultFile != aeDefaultFileAction )
             {
                 this.Load(null, tvProfileLoadActions.Overwrite);
@@ -322,11 +312,11 @@ namespace tvToolbox
                 this.LoadFromCommandLineArray(asCommandLineArray, tvProfileLoadActions.Merge);
             }
 
-            bool    lbShowProfile = false;
-                    if ( mbAddStandardDefaults || this.ContainsKey("-ShowProfile") )
-                    {
-                        lbShowProfile = this.bValue("-ShowProfile", false);
-                    }
+            bool lbShowProfile = false;
+            if ( mbAddStandardDefaults || this.ContainsKey("-ShowProfile") )
+            {
+                lbShowProfile = this.bValue("-ShowProfile", false);
+            }
 
             if ( lbShowProfile )
             {
@@ -346,7 +336,7 @@ namespace tvToolbox
         /// the top of an application during initialization.
         ///
         /// The profile is first initialized using the aeDefaultFileAction
-        /// enum. Then any command line arguments (typically passed from
+        /// enum. Then any command-line arguments (typically passed from
         /// the environment) are merged into the profile. This way command
         /// line arguments override properties in the profile file.
         ///
@@ -361,7 +351,7 @@ namespace tvToolbox
         /// This string array is typically passed from the environment to the
         /// running application (eg. from Environment.GetCommandLineArgs() ).
         /// It is merged with the default profile file or any other profile
-        /// found within the list of command line arguments.
+        /// found within the list of command-line arguments.
         /// </param>
         /// <param name="aeDefaultFileAction">
         /// This enum indicates how to handle automatic loading and saving
@@ -385,13 +375,13 @@ namespace tvToolbox
         /// </param>
         public tvProfile(
 
-                  String[]                      asCommandLineArray
-                , tvProfileDefaultFileActions   aeDefaultFileAction
-                , tvProfileFileCreateActions    aeFileCreateAction
-                , String                        asXmlFile
-                , String                        asXmlXpath
-                , String                        asXmlKeyKey
-                , String                        asXmlValueKey
+                  string[] asCommandLineArray
+                , tvProfileDefaultFileActions aeDefaultFileAction
+                , tvProfileFileCreateActions aeFileCreateAction
+                , string asXmlFile
+                , string asXmlXpath
+                , string asXmlKeyKey
+                , string asXmlValueKey
                 )
         {
             this.sInputCommandLineArray = asCommandLineArray;
@@ -409,7 +399,7 @@ namespace tvToolbox
             }
 
             // "bDefaultFileReplaced = True" means that a replacement profile file has been passed on
-            // the command line. Consequently, no attempt to load the default profile file should be made.
+            // the command-line. Consequently, no attempt to load the default profile file should be made.
             if ( !this.bDefaultFileReplaced && tvProfileDefaultFileActions.NoDefaultFile != aeDefaultFileAction )
             {
                 this.Load(asXmlFile, tvProfileLoadActions.Overwrite);
@@ -421,11 +411,11 @@ namespace tvToolbox
                 this.LoadFromCommandLineArray(asCommandLineArray, tvProfileLoadActions.Merge);
             }
 
-            bool    lbShowProfile = false;
-                    if ( mbAddStandardDefaults || this.ContainsKey("-ShowProfile") )
-                    {
-                        lbShowProfile = this.bValue("-ShowProfile", false);
-                    }
+            bool lbShowProfile = false;
+            if ( mbAddStandardDefaults || this.ContainsKey("-ShowProfile") )
+            {
+                lbShowProfile = this.bValue("-ShowProfile", false);
+            }
 
             if ( lbShowProfile )
             {
@@ -452,16 +442,17 @@ namespace tvToolbox
         /// </param>
         /// <param name="abUseXmlFiles">
         /// If true, XML file format will be used. If false, line delimited
-        /// "command line" format will be used (the default format).
+        /// "command-line" format will be used (the default format).
         /// </param>
         public tvProfile(
 
-                  String                        asPathFile
-                , tvProfileFileCreateActions    aeFileCreateAction
-                , bool                          abUseXmlFiles
+                  string asPathFile
+                , tvProfileFileCreateActions aeFileCreateAction
+                , bool abUseXmlFiles
                 )
-                : this()
+            : this()
         {
+            this.eDefaultFileAction = tvProfileDefaultFileActions.AutoLoadSaveDefaultFile;
             this.eFileCreateAction = aeFileCreateAction;
             this.bUseXmlFiles = abUseXmlFiles;
 
@@ -476,7 +467,7 @@ namespace tvToolbox
         /// This string array is typically passed from the environment to the
         /// running application (eg. from Environment.GetCommandLineArgs() ).
         /// It is merged with the default profile file or any other profile
-        /// found within the list of command line arguments.
+        /// found within the list of command-line arguments.
         /// </param>
         /// <param name="aeDefaultFileAction">
         /// This enum indicates how to handle automatic loading and saving
@@ -488,15 +479,15 @@ namespace tvToolbox
         /// </param>
         public tvProfile(
 
-                  String[]                      asCommandLineArray
-                , tvProfileDefaultFileActions   aeDefaultFileAction
-                , tvProfileFileCreateActions    aeFileCreateAction
+                  string[] asCommandLineArray
+                , tvProfileDefaultFileActions aeDefaultFileAction
+                , tvProfileFileCreateActions aeFileCreateAction
                 )
-                : this(   asCommandLineArray
-                        , aeDefaultFileAction
-                        , aeFileCreateAction
-                        , false
-                        )
+            : this(asCommandLineArray
+                    , aeDefaultFileAction
+                    , aeFileCreateAction
+                    , false
+                    )
         {
         }
 
@@ -504,7 +495,7 @@ namespace tvToolbox
         /// This is the minimal profile constructor.
         ///
         /// This constructor is typically used to create an empty profile
-        /// object to be populated manually (ie. with <see cref="Add(String, Object)"/> calls).
+        /// object to be populated manually (ie. with <see cref="Add(string, object)"/> calls).
         ///
         /// It is also used in lieu of the main constructor when command
         /// line overrides are not permitted.
@@ -540,7 +531,7 @@ namespace tvToolbox
         }
 
         /// <summary>
-        /// This constructor initializes a profile object from a command line
+        /// This constructor initializes a profile object from a command-line
         /// string (eg. <see langword='-Key1="value one" -Switch1 -Key2=2'/>)
         /// rather than from a string array.
         ///
@@ -549,10 +540,11 @@ namespace tvToolbox
         /// in the body of an application.
         /// </summary>
         /// <param name="asCommandLine">
-        /// This string (not a string array) should contain a command line
+        /// This string (not a string array) should contain a command-line
         /// of <see langword='-key="value"'/> pairs.
         /// </param>
-        public tvProfile(String asCommandLine) : this()
+        public tvProfile( string asCommandLine )
+            : this()
         {
             this.sInputCommandLine = asCommandLine;
 
@@ -573,13 +565,13 @@ namespace tvToolbox
         /// </param>
         public tvProfile(
 
-                  String                        asPathFile
-                , tvProfileFileCreateActions    aeFileCreateAction
+                  string asPathFile
+                , tvProfileFileCreateActions aeFileCreateAction
                 )
-                : this(   asPathFile
-                        , aeFileCreateAction
-                        , false
-                        )
+            : this(asPathFile
+                    , aeFileCreateAction
+                    , false
+                    )
         {
         }
 
@@ -593,17 +585,17 @@ namespace tvToolbox
         /// </param>
         /// <param name="abUseXmlFiles">
         /// If true, XML file format will be used. If false, line delimited
-        /// "command line" format will be used (the default format).
+        /// "command-line" format will be used (the default format).
         /// </param>
         public tvProfile(
 
-                  String    asPathFile
-                , bool      abUseXmlFiles
+                  string asPathFile
+                , bool abUseXmlFiles
                 )
-                : this(   asPathFile
-                        , tvProfileFileCreateActions.NoFileCreate
-                        , abUseXmlFiles
-                        )
+            : this(asPathFile
+                    , tvProfileFileCreateActions.NoFileCreate
+                    , abUseXmlFiles
+                    )
         {
         }
 
@@ -616,7 +608,7 @@ namespace tvToolbox
         /// This string array is typically passed from the environment to the
         /// running application (eg. from Environment.GetCommandLineArgs() ).
         /// It is merged with the default profile file or any other profile
-        /// found within the list of command line arguments.
+        /// found within the list of command-line arguments.
         /// </param>
         /// <param name="asXmlFile">
         /// This is the path/file that contains the XML to load.
@@ -632,20 +624,20 @@ namespace tvToolbox
         /// </param>
         public tvProfile(
 
-                  String[]  asCommandLineArray
-                , String    asXmlFile
-                , String    asXmlXpath
-                , String    asXmlKeyKey
-                , String    asXmlValueKey
+                  string[] asCommandLineArray
+                , string asXmlFile
+                , string asXmlXpath
+                , string asXmlKeyKey
+                , string asXmlValueKey
                 )
-                : this(   asCommandLineArray
-                        , tvProfileDefaultFileActions.AutoLoadSaveDefaultFile
-                        , tvProfileFileCreateActions.PromptToCreateFile
-                        , asXmlFile
-                        , asXmlXpath
-                        , asXmlKeyKey
-                        , asXmlValueKey
-                        )
+            : this(asCommandLineArray
+                    , tvProfileDefaultFileActions.AutoLoadSaveDefaultFile
+                    , tvProfileFileCreateActions.PromptToCreateFile
+                    , asXmlFile
+                    , asXmlXpath
+                    , asXmlKeyKey
+                    , asXmlValueKey
+                    )
         {
         }
 
@@ -658,22 +650,22 @@ namespace tvToolbox
         /// This string array is typically passed from the environment to the
         /// running application (eg. from Environment.GetCommandLineArgs() ).
         /// It is merged with the default profile file or any other profile
-        /// found within the list of command line arguments.
+        /// found within the list of command-line arguments.
         /// </param>
         /// <param name="abUseXmlFiles">
         /// If true, XML file format will be used. If false, line delimited
-        /// "command line" format will be used (the default format).
+        /// "command-line" format will be used (the default format).
         /// </param>
         public tvProfile(
 
-                  String[]  asCommandLineArray
-                , bool      abUseXmlFiles
+                  string[] asCommandLineArray
+                , bool abUseXmlFiles
                 )
-                : this(   asCommandLineArray
-                        , tvProfileDefaultFileActions.AutoLoadSaveDefaultFile
-                        , tvProfileFileCreateActions.PromptToCreateFile
-                        , abUseXmlFiles
-                        )
+            : this(asCommandLineArray
+                    , tvProfileDefaultFileActions.AutoLoadSaveDefaultFile
+                    , tvProfileFileCreateActions.PromptToCreateFile
+                    , abUseXmlFiles
+                    )
         {
         }
 
@@ -686,17 +678,17 @@ namespace tvToolbox
         /// This string array is typically passed from the environment to the
         /// running application (eg. from Environment.GetCommandLineArgs() ).
         /// It is merged with the default profile file or any other profile
-        /// found within the list of command line arguments.
+        /// found within the list of command-line arguments.
         /// </param>
         public tvProfile(
 
-                String[] asCommandLineArray
+                string[] asCommandLineArray
                 )
-                : this(   asCommandLineArray
-                        , tvProfileDefaultFileActions.AutoLoadSaveDefaultFile
-                        , tvProfileFileCreateActions.PromptToCreateFile
-                        , false
-                        )
+            : this(asCommandLineArray
+                    , tvProfileDefaultFileActions.AutoLoadSaveDefaultFile
+                    , tvProfileFileCreateActions.PromptToCreateFile
+                    , false
+                    )
         {
         }
 
@@ -734,17 +726,17 @@ namespace tvToolbox
         /// <param name="aoValue">
         /// The value (as a generic object) to add.
         /// </param>
-        public void Add(String asKey, Object aoValue)
+        public void Add( string asKey, object aoValue )
         {
             DictionaryEntry loEntry = new DictionaryEntry();
-                            loEntry.Key = asKey;
-                            loEntry.Value = aoValue;
+            loEntry.Key = asKey;
+            loEntry.Value = aoValue;
 
             base.Add(loEntry);
         }
 
         /// <summary>
-        /// Overrides the base <see langword='Add(Object)'/> method in ArrayList.
+        /// Overrides the base <see langword='Add(object)'/> method in ArrayList.
         /// It throws an exception if the given object is not a DictionaryEntry.
         /// </summary>
         /// <param name="aoDictionaryEntry">
@@ -753,7 +745,7 @@ namespace tvToolbox
         /// <returns>
         /// The System.Collections.ArrayList index at which the object has been added.
         /// </returns>
-        public override int Add(Object aoDictionaryEntry)
+        public override int Add( object aoDictionaryEntry )
         {
             if ( typeof(DictionaryEntry) != aoDictionaryEntry.GetType() )
             {
@@ -776,11 +768,11 @@ namespace tvToolbox
         /// <returns>
         /// True if found, false if not.
         /// </returns>
-        public override bool Contains(Object aoValue)
+        public override bool Contains( object aoValue )
         {
             if ( "".GetType() == aoValue.GetType() )
             {
-                String lsValue = aoValue.ToString();
+                string lsValue = aoValue.ToString();
 
                 if ( mbUseLiteralsOnly )
                 {
@@ -827,7 +819,7 @@ namespace tvToolbox
         /// <returns>
         /// True if found, false if not.
         /// </returns>
-        public bool ContainsLiteral(String asValue)
+        public bool ContainsLiteral( string asValue )
         {
             foreach ( DictionaryEntry loEntry in this )
             {
@@ -850,7 +842,7 @@ namespace tvToolbox
         /// <returns>
         /// True if found, false if not.
         /// </returns>
-        public bool ContainsKey(String asKey)
+        public bool ContainsKey( string asKey )
         {
             foreach ( DictionaryEntry loEntry in this )
             {
@@ -884,13 +876,13 @@ namespace tvToolbox
         /// <returns>
         /// The zero-based index of the entry found. -1 is returned if no entry is found.
         /// </returns>
-        public int IndexOfKey(String asKey)
+        public int IndexOfKey( string asKey )
         {
             if ( mbUseLiteralsOnly )
             {
                 for ( int i = 0; i <= this.Count - 1; i++ )
                 {
-                    if ( ((DictionaryEntry) base[i]).Key.ToString() == asKey )
+                    if ( ((DictionaryEntry)base[i]).Key.ToString() == asKey )
                     {
                         return i;
                     }
@@ -900,7 +892,7 @@ namespace tvToolbox
             {
                 for ( int i = 0; i <= this.Count - 1; i++ )
                 {
-                    if ( Regex.IsMatch(((DictionaryEntry) base[i]).Key.ToString(), sExpression(asKey), RegexOptions.IgnoreCase) )
+                    if ( Regex.IsMatch(((DictionaryEntry)base[i]).Key.ToString(), sExpression(asKey), RegexOptions.IgnoreCase) )
                     {
                         return i;
                     }
@@ -921,13 +913,13 @@ namespace tvToolbox
         /// <returns>
         /// The zero-based index of the entry found. -1 is returned if no entry is found.
         /// </returns>
-        public int IndexOf(String asValue)
+        public int IndexOf( string asValue )
         {
             if ( mbUseLiteralsOnly )
             {
                 for ( int i = 0; i <= this.Count - 1; i++ )
                 {
-                    if ( ((DictionaryEntry) base[i]).Value.ToString() == asValue )
+                    if ( ((DictionaryEntry)base[i]).Value.ToString() == asValue )
                     {
                         return i;
                     }
@@ -937,7 +929,7 @@ namespace tvToolbox
             {
                 for ( int i = 0; i <= this.Count - 1; i++ )
                 {
-                    if ( Regex.IsMatch(((DictionaryEntry) base[i]).Value.ToString(), sExpression(asValue), RegexOptions.IgnoreCase) )
+                    if ( Regex.IsMatch(((DictionaryEntry)base[i]).Value.ToString(), sExpression(asValue), RegexOptions.IgnoreCase) )
                     {
                         return i;
                     }
@@ -957,7 +949,7 @@ namespace tvToolbox
         /// <returns>
         /// Gets or sets the object value of the first entry found that matches asKey.
         /// </returns>
-        public Object this[String asKey]
+        public object this[string asKey]
         {
             get
             {
@@ -996,11 +988,11 @@ namespace tvToolbox
         /// <returns>
         /// Gets or sets the object value of the entry found at the given zero-based index position.
         /// </returns>
-        public override Object this[int aiIndex]
+        public override object this[int aiIndex]
         {
             get
             {
-                return ((DictionaryEntry) base[aiIndex]).Value;
+                return ((DictionaryEntry)base[aiIndex]).Value;
             }
             set
             {
@@ -1016,7 +1008,7 @@ namespace tvToolbox
         /// The key string to look for. "*" or a regular expression may be
         /// included.
         /// </param>
-        public void Remove(String asKey)
+        public void Remove( string asKey )
         {
             int liIndex;
 
@@ -1043,9 +1035,9 @@ namespace tvToolbox
         /// <param name="aoValue">
         /// The object value that is written to the entry at the given zero-based index position.
         /// </param>
-        public void SetByIndex(int aiIndex, Object aoValue)
+        public void SetByIndex( int aiIndex, object aoValue )
         {
-            String lsKey = ((DictionaryEntry) base[aiIndex]).Key.ToString();
+            string lsKey = ((DictionaryEntry)base[aiIndex]).Key.ToString();
 
             base[aiIndex] = new DictionaryEntry(lsKey, aoValue);
         }
@@ -1067,7 +1059,7 @@ namespace tvToolbox
         /// will be automatically added to the profile. This property
         /// will generally be true within the main constructors.
         /// </summary>
-        public  bool  bAddStandardDefaults
+        public bool bAddStandardDefaults
         {
             get
             {
@@ -1086,7 +1078,7 @@ namespace tvToolbox
         /// (see <see cref="tvProfile"/> remarks). In other words, this property
         /// returns true if the application's default profile file was replaced.
         /// </summary>
-        public  bool  bDefaultFileReplaced
+        public bool bDefaultFileReplaced
         {
             get
             {
@@ -1106,7 +1098,7 @@ namespace tvToolbox
         /// 
         /// The default value of this property is true.
         /// </summary>
-        public  bool  bEnableFileLock
+        public bool bEnableFileLock
         {
             get
             {
@@ -1127,7 +1119,7 @@ namespace tvToolbox
         /// <summary>
         /// Returns true if the user selected "Cancel" in response to a profile message.
         /// </summary>
-        public  bool  bExit
+        public bool bExit
         {
             get
             {
@@ -1149,7 +1141,7 @@ namespace tvToolbox
         /// Returns true if the profile's file was just created. It returns
         /// false if the profile file existed previously (at runtime).
         /// </summary>
-        public  bool  bFileJustCreated
+        public bool bFileJustCreated
         {
             get
             {
@@ -1163,37 +1155,16 @@ namespace tvToolbox
         private bool mbFileJustCreated = false;
 
         /// <summary>
-        /// Returns true after the application informs
-        /// the profile object it has been fully loaded.
-        /// </summary>
-        public  bool  bAppFullyLoaded
-        {
-            get
-            {
-                return mbAppFullyLoaded;
-            }
-            set
-            {
-                mbAppFullyLoaded = value;
-
-                if ( mbAppFullyLoaded && null != moAppLoadingWaitMsg )
-                    mttvMessageBox.InvokeMember("Close", BindingFlags.InvokeMethod, null, moAppLoadingWaitMsg
-                                                , null);
-            }
-        }
-        private bool mbAppFullyLoaded = false;
-
-        /// <summary>
         /// Returns true if the EXE is in a folder (or subfolder) with the same name.
         /// </summary>
         public bool bInOwnFolder
         {
             get
             {
-                String lsPathOnly = Path.GetDirectoryName(this.sExePathFile);
-                String lsFilnameOnly = Path.GetFileNameWithoutExtension(this.sExePathFile);
+                string lsPathOnly = Path.GetDirectoryName(this.sExePathFile);
+                string lsFilnameOnly = Path.GetFileNameWithoutExtension(this.sExePathFile);
 
-                return -1 != lsPathOnly.IndexOf(lsFilnameOnly);
+                return -1 != lsPathOnly.ToLower().IndexOf(lsFilnameOnly.ToLower());
             }
         }
 
@@ -1205,9 +1176,16 @@ namespace tvToolbox
         {
             get
             {
-                String[] lsPathFragArray = new String[]{"\\Program Files\\"};
+                string[] lsPathFragArray = {
+                          Path.GetFileName(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData))
+                        , Path.GetFileName(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData))
+                        , Path.GetFileName(Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles))
+                        , Path.GetFileName(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData))
+                        , Path.GetFileName(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles))
+                        , Path.GetFileName(Environment.GetFolderPath(Environment.SpecialFolder.Programs))
+                        };
 
-                foreach (String lsPathFrag in lsPathFragArray)
+                foreach ( string lsPathFrag in lsPathFragArray )
                 {
                     if ( -1 != this.sExePathFile.IndexOf(lsPathFrag) )
                         return true;
@@ -1225,8 +1203,8 @@ namespace tvToolbox
         /// </p>
         /// <p>
         /// This property will be set false whenever anything is merged into a
-        /// profile (eg. command line arguments) and <see cref="bSaveSansCmdLine"/>
-        /// is false. In other words, command line arguments are not normally 
+        /// profile (eg. command-line arguments) and <see cref="bSaveSansCmdLine"/>
+        /// is false. In other words, command-line arguments are not normally 
         /// written to a profile file. This behavior can be overridden in code 
         /// by setting this property to true after a merge.
         /// </p>
@@ -1236,7 +1214,7 @@ namespace tvToolbox
         /// (see <see cref="tvProfile"/> remarks).
         /// </p>
         /// </summary>
-        public  bool  bSaveEnabled
+        public bool bSaveEnabled
         {
             get
             {
@@ -1256,14 +1234,14 @@ namespace tvToolbox
         private bool mbSaveEnabled = false;
 
         /// <summary>
-        /// Returns true if all but command line merged keys will be saved to a profile
+        /// Returns true if all but command-line merged keys will be saved to a profile
         /// file. The predefined <see langword='-SaveSansCmdLine=false'/> switch can be
         /// used to disable this behavior so that merged profiles are never saved (see 
         /// <see cref="tvProfile"/> remarks). In other words, if this property is set 
-        /// false and command line arguments have been merged into the profile, the 
+        /// false and command-line arguments have been merged into the profile, the 
         /// <see cref="Save()"/> method will be disabled (unless overridden in code).
         /// </summary>
-        public  bool  bSaveSansCmdLine
+        public bool bSaveSansCmdLine
         {
             get
             {
@@ -1287,11 +1265,11 @@ namespace tvToolbox
 
         /// <summary>
         /// Returns true if profile files will be read and written in XML format
-        /// rather than the default line delimited "command line" format.
+        /// rather than the default line delimited "command-line" format.
         /// 
         /// The default value of this property is false.
         /// </summary>
-        public  bool  bUseXmlFiles
+        public bool bUseXmlFiles
         {
             get
             {
@@ -1342,7 +1320,7 @@ namespace tvToolbox
         /// The path/file location most recently used either to load the profile
         /// from a text file or to save the profile to a text file.
         /// </summary>
-        public  String  sActualPathFile
+        public string sActualPathFile
         {
             get
             {
@@ -1354,13 +1332,13 @@ namespace tvToolbox
                 this.bSaveEnabled = true;
             }
         }
-        private String msActualPathFile;
+        private string msActualPathFile;
 
         /// <summary>
         /// The original default file action passed to the constructor.
         /// See <see cref="tvProfileDefaultFileActions"/>.
         /// </summary>
-        public  tvProfileDefaultFileActions  eDefaultFileAction
+        public tvProfileDefaultFileActions eDefaultFileAction
         {
             get
             {
@@ -1377,7 +1355,7 @@ namespace tvToolbox
         /// The original file create action passed to the constructor.
         /// See <see cref="tvProfileFileCreateActions"/>.
         /// </summary>
-        public  tvProfileFileCreateActions  eFileCreateAction
+        public tvProfileFileCreateActions eFileCreateAction
         {
             get
             {
@@ -1401,9 +1379,9 @@ namespace tvToolbox
         private tvProfileFileCreateActions meFileCreateAction = tvProfileFileCreateActions.NoFileCreate;
 
         /// <summary>
-        /// The original "command line string" input passed to the constructor.
+        /// The original "command-line string" input passed to the constructor.
         /// </summary>
-        public  String  sInputCommandLine
+        public string sInputCommandLine
         {
             get
             {
@@ -1414,12 +1392,12 @@ namespace tvToolbox
                 msInputCommandLine = value;
             }
         }
-        private String msInputCommandLine;
+        private string msInputCommandLine;
 
         /// <summary>
-        /// The original "command line string array" input passed to the constructor.
+        /// The original "command-line string array" input passed to the constructor.
         /// </summary>
-        public  String[]  sInputCommandLineArray
+        public string[] sInputCommandLineArray
         {
             get
             {
@@ -1430,20 +1408,20 @@ namespace tvToolbox
                 msInputCommandLineArray = value;
             }
         }
-        private String[] msInputCommandLineArray;
+        private string[] msInputCommandLineArray;
 
         /// <summary>
         /// The path/file location of a text file just created
         /// as an unlocked backup of the current profile file.
         /// </summary>
-        public  String  sBackupPathFile
+        public string sBackupPathFile
         {
             get
             {
-                string  lsPath = Path.GetDirectoryName(this.sLoadedPathFile);
-                string  lsFilename = Path.GetFileName(this.sLoadedPathFile);
-                string  lsExt = Path.GetExtension(this.sLoadedPathFile);
-                string  lsBackupPathFile = Path.Combine(lsPath, lsFilename) + ".backup" + lsExt;
+                string lsPath = Path.GetDirectoryName(this.sLoadedPathFile);
+                string lsFilename = Path.GetFileName(this.sLoadedPathFile);
+                string lsExt = Path.GetExtension(this.sLoadedPathFile);
+                string lsBackupPathFile = Path.Combine(lsPath, lsFilename) + ".backup" + lsExt;
 
                 bool lbSaveEnabled = this.bSaveEnabled;
                 this.Save(lsBackupPathFile);
@@ -1459,7 +1437,7 @@ namespace tvToolbox
         /// <see cref="bUseXmlFiles"/> is true, this method returns ".config",
         /// otherwise it returns ".txt".
         /// </summary>
-        public  String    sDefaultFileExt
+        public string sDefaultFileExt
         {
             get
             {
@@ -1484,14 +1462,14 @@ namespace tvToolbox
                 msDefaultFileExt = value;
             }
         }
-        private String   msDefaultFileExt;
-        private String[] msDefaultFileExtArray = {mcsLoadSaveDefaultExtension, ".config"};
+        private string msDefaultFileExt;
+        private string[] msDefaultFileExtArray = { mcsLoadSaveDefaultExtension, ".config" };
 
         /// <summary>
         /// The default path/file location of the profile's text file. This
         /// property uses <see cref="sExePathFile"/>.
         /// </summary>
-        public String sDefaultPathFile
+        public string sDefaultPathFile
         {
             get
             {
@@ -1507,7 +1485,7 @@ namespace tvToolbox
         /// this property allows a virtual assembly location to be used as an
         /// alternative to the actual location.
         /// </summary>
-        public  String  sExePathFile
+        public string sExePathFile
         {
             get
             {
@@ -1532,13 +1510,13 @@ namespace tvToolbox
                 msExePathFile = value;
             }
         }
-        private String msExePathFile;
+        private string msExePathFile;
 
         /// <summary>
         /// The path/file location most recently used to load the profile from
         /// a text file.
         /// </summary>
-        public  String  sLoadedPathFile
+        public string sLoadedPathFile
         {
             get
             {
@@ -1550,13 +1528,13 @@ namespace tvToolbox
                 this.sActualPathFile = value;
             }
         }
-        private String msLoadedPathFile;
+        private string msLoadedPathFile;
 
         /// <summary>
         /// The key used to find the "key" attribute in XML "key/value" pairs
         /// (ie. "key").
         /// </summary>
-        public  String  sXmlKeyKey
+        public string sXmlKeyKey
         {
             get
             {
@@ -1567,13 +1545,13 @@ namespace tvToolbox
                 msXmlKeyKey = value;
             }
         }
-        private String msXmlKeyKey = "key";
+        private string msXmlKeyKey = "key";
 
         /// <summary>
         /// The key used to find the "value" attribute in XML "key/value" pairs
         ///  (ie. "value").
         /// </summary>
-        public  String  sXmlValueKey
+        public string sXmlValueKey
         {
             get
             {
@@ -1584,14 +1562,14 @@ namespace tvToolbox
                 msXmlValueKey = value;
             }
         }
-        private String msXmlValueKey = "value";
+        private string msXmlValueKey = "value";
 
         /// <summary>
         /// The Xpath expression used to find the profile section in a given
         /// XML document. This expression must have a format similar to the
         /// default of "configuration/appSettings/add" (ie. no wildcards).
         /// </summary>
-        public  String  sXmlXpath
+        public string sXmlXpath
         {
             get
             {
@@ -1602,7 +1580,7 @@ namespace tvToolbox
                 msXmlXpath = value;
             }
         }
-        private String msXmlXpath = "configuration/appSettings/add";
+        private string msXmlXpath = "configuration/appSettings/add";
 
         /// <summary>
         /// The value of the item found in the profile for the given
@@ -1620,9 +1598,9 @@ namespace tvToolbox
         /// Returns the object found for asKey or aoDefault (if asKey
         /// is not found).
         /// </returns>
-        public Object GetAdd(String asKey, Object aoDefault)
+        public object GetAdd( string asKey, object aoDefault )
         {
-            Object loValue;
+            object loValue;
 
             if ( this.ContainsKey(asKey) )
             {
@@ -1645,7 +1623,7 @@ namespace tvToolbox
         #region "Various GetAdd Return Types"
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey, cast as a boolean.
+        /// The "<see cref="GetAdd"/> object" value found for asKey, cast as a boolean.
         /// </summary>
         /// <param name="asKey">
         /// The key string used to find the corresponding value in the profile.
@@ -1656,13 +1634,13 @@ namespace tvToolbox
         /// <returns>
         /// The boolean value found or abDefault (see <see cref="GetAdd"/>).
         /// </returns>
-        public bool bValue(String asKey, bool abDefault)
+        public bool bValue( string asKey, bool abDefault )
         {
             return Convert.ToBoolean(this.GetAdd(asKey, abDefault));
         }
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey, cast as a double.
+        /// The "<see cref="GetAdd"/> object" value found for asKey, cast as a double.
         /// </summary>
         /// <param name="asKey">
         /// The key string used to find the corresponding value in the profile.
@@ -1673,13 +1651,13 @@ namespace tvToolbox
         /// <returns>
         /// The double value found or adDefault (see <see cref="GetAdd"/>).
         /// </returns>
-        public double dValue(String asKey, double adDefault)
+        public double dValue( string asKey, double adDefault )
         {
             return Convert.ToDouble(this.GetAdd(asKey, adDefault));
         }
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey, cast as a DateTime.
+        /// The "<see cref="GetAdd"/> object" value found for asKey, cast as a DateTime.
         /// </summary>
         /// <param name="asKey">
         /// The key string used to find the corresponding value in the profile.
@@ -1690,13 +1668,13 @@ namespace tvToolbox
         /// <returns>
         /// The DateTime value found or adtDefault (see <see cref="GetAdd"/>).
         /// </returns>
-        public DateTime dtValue(String asKey, DateTime adtDefault)
+        public DateTime dtValue( string asKey, DateTime adtDefault )
         {
             return Convert.ToDateTime(this.GetAdd(asKey, adtDefault));
         }
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey, cast as an integer.
+        /// The "<see cref="GetAdd"/> object" value found for asKey, cast as an integer.
         /// </summary>
         /// <param name="asKey">
         /// The key string used to find the corresponding value in the profile.
@@ -1707,7 +1685,7 @@ namespace tvToolbox
         /// <returns>
         /// The integer value found or aiDefault (see <see cref="GetAdd"/>).
         /// </returns>
-        public int iValue(String asKey, int aiDefault)
+        public int iValue( string asKey, int aiDefault )
         {
             return Convert.ToInt32(this.GetAdd(asKey, aiDefault));
         }
@@ -1728,9 +1706,9 @@ namespace tvToolbox
         /// <p></p>
         /// aiIndex is equal to or greater than <see cref="ArrayList.Count"/>.
         /// </exception>
-        public DictionaryEntry oEntry(int aiIndex)
+        public DictionaryEntry oEntry( int aiIndex )
         {
-            return ((DictionaryEntry) base[aiIndex]);
+            return ((DictionaryEntry)base[aiIndex]);
         }
 
         /// <summary>
@@ -1742,13 +1720,13 @@ namespace tvToolbox
         /// <param name="Value">
         /// The DictionaryEntry object to be stored at aiIndex.
         /// </param>
-        public void SetEntry(int aiIndex, DictionaryEntry Value)
+        public void SetEntry( int aiIndex, DictionaryEntry Value )
         {
             base[aiIndex] = Value;
         }
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey.
+        /// The "<see cref="GetAdd"/> object" value found for asKey.
         /// </summary>
         /// <param name="asKey">
         /// The key string used to find the corresponding value in the profile.
@@ -1759,18 +1737,18 @@ namespace tvToolbox
         /// <returns>
         /// The tvProfile object value found or aoDefaultProfile (see <see cref="GetAdd"/>).
         /// </returns>
-        public tvProfile oProfile(String asKey, tvProfile aoDefaultProfile)
+        public tvProfile oProfile( string asKey, tvProfile aoDefaultProfile )
         {
-            object  loProfile = this.GetAdd(asKey, aoDefaultProfile);
-            object  loProfileCast = loProfile as tvProfile;
-                    if ( null == loProfileCast )
-                        loProfileCast = new tvProfile(loProfile.ToString());
+            object loProfile = this.GetAdd(asKey, aoDefaultProfile);
+            object loProfileCast = loProfile as tvProfile;
+            if ( null == loProfileCast )
+                loProfileCast = new tvProfile(loProfile.ToString());
 
             return (tvProfile)loProfileCast;
         }
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey.
+        /// The "<see cref="GetAdd"/> object" value found for asKey.
         /// </summary>
         /// <param name="asKey">
         /// The key string used to find the corresponding value in the profile.
@@ -1783,38 +1761,58 @@ namespace tvToolbox
         /// The tvProfile object value found or asDefaultProfile 
         /// (converted to a tvProfile object, see <see cref="GetAdd"/>).
         /// </returns>
-        public tvProfile oProfile(String asKey, String asDefaultProfile)
+        public tvProfile oProfile( string asKey, string asDefaultProfile )
         {
-            object  loProfile = this.GetAdd(asKey, asDefaultProfile);
-            object  loProfileCast = loProfile as tvProfile;
-                    if ( null == loProfileCast )
-                        loProfileCast = new tvProfile(loProfile.ToString());
+            object loProfile = this.GetAdd(asKey, asDefaultProfile);
+            object loProfileCast = loProfile as tvProfile;
+            if ( null == loProfileCast )
+                loProfileCast = new tvProfile(loProfile.ToString());
 
             return (tvProfile)loProfileCast;
         }
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey.
+        /// The "<see cref="GetAdd"/> object" value found for asKey.
         /// </summary>
         /// <param name="asKey">
         /// The key string used to find the corresponding value in the profile.
         /// </param>
         /// <returns>
-        /// The tvProfile object value found or a default empty
-        /// tvProfile object will be added to the profile, see <see cref="GetAdd"/>).
+        /// The tvProfile object value found or an empty tvProfile
+        /// (nothing is added to the parent profile if nothing is found).
         /// </returns>
-        public tvProfile oProfile(String asKey)
+        public tvProfile oProfile( string asKey )
         {
-            object  loProfile = this.GetAdd(asKey, new tvProfile());
-            object  loProfileCast = loProfile as tvProfile;
-                    if ( null == loProfileCast )
-                        loProfileCast = new tvProfile(loProfile.ToString());
+            object loProfile = this[asKey];
+            object loProfileCast = loProfile as tvProfile;
+            if ( null == loProfileCast )
+                loProfileCast = new tvProfile(null == loProfile ? "" : loProfile.ToString());
 
             return (tvProfile)loProfileCast;
         }
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey.
+        /// The value found for aiIndex.
+        /// </summary>
+        /// <param name="aiIndex">
+        /// The integer index used to find the corresponding value in the profile.
+        /// </param>
+        /// <returns>
+        /// The tvProfile object value found or an empty tvProfile
+        /// (nothing is added to the parent profile if nothing is found).
+        /// </returns>
+        public tvProfile oProfile( int aiIndex )
+        {
+            object loProfile = this[aiIndex];
+            object loProfileCast = loProfile as tvProfile;
+            if ( null == loProfileCast )
+                loProfileCast = new tvProfile(null == loProfile ? "" : loProfile.ToString());
+
+            return (tvProfile)loProfileCast;
+        }
+
+        /// <summary>
+        /// The "<see cref="GetAdd"/> object" value found for asKey.
         /// </summary>
         /// <param name="asKey">
         /// The key string used to find the corresponding value in the profile.
@@ -1825,13 +1823,13 @@ namespace tvToolbox
         /// <returns>
         /// The object value found or aoDefault (see <see cref="GetAdd"/>).
         /// </returns>
-        public Object oValue(String asKey, Object aoDefault)
+        public object oValue( string asKey, object aoDefault )
         {
             return this.GetAdd(asKey, aoDefault);
         }
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey,
+        /// The "<see cref="GetAdd"/> object" value found for asKey,
         /// cast as a trimmed string.
         /// </summary>
         /// <param name="asKey">
@@ -1845,13 +1843,13 @@ namespace tvToolbox
         /// environment variables found in the return string are expanded and the
         /// return string is trimmed of leading and trailing spaces.
         /// </returns>
-        public String sValue(String asKey, String asDefault)
+        public string sValue( string asKey, string asDefault )
         {
             return this.sValueNoTrim(asKey, asDefault).Trim();
         }
 
         /// <summary>
-        /// The "<see cref="GetAdd"/> Object" value found for asKey, cast as a string (not trimmed).
+        /// The "<see cref="GetAdd"/> object" value found for asKey, cast as a string (not trimmed).
         /// </summary>
         /// <param name="asKey">
         /// The key string used to find the corresponding value in the profile.
@@ -1864,9 +1862,9 @@ namespace tvToolbox
         /// environment variables found in the return string are expanded and the
         /// return string is NOT trimmed of leading or trailing spaces.
         /// </returns>
-        public String sValueNoTrim(String asKey, String asDefault)
+        public string sValueNoTrim( string asKey, string asDefault )
         {
-            String lsValue = this.GetAdd(asKey, asDefault).ToString();
+            string lsValue = this.GetAdd(asKey, asDefault).ToString();
 
             // The return limit of ExpandEnvironmentVariables is 32K. The difference allows for variable expansion.
             if ( 32000 > lsValue.Length )
@@ -1895,7 +1893,7 @@ namespace tvToolbox
         /// <returns>
         /// Integer count of the items found.
         /// </returns>
-        public int iKeyCount(String asKey)
+        public int iKeyCount( string asKey )
         {
             int liCount = 0;
 
@@ -1933,32 +1931,32 @@ namespace tvToolbox
         /// <returns>
         /// A "command block" string (not a string array).
         /// </returns>
-        public String sCommandBlock()
+        public string sCommandBlock()
         {
             ++miCommandBlockRecursionLevel;
 
-            string          lcsIndent = "".PadRight(4 * miCommandBlockRecursionLevel);
-            StringBuilder   lsbCommandBlock = new StringBuilder(Environment.NewLine);
+            string lcsIndent = "".PadRight(4 * miCommandBlockRecursionLevel);
+            StringBuilder lsbCommandBlock = new StringBuilder(Environment.NewLine);
 
             foreach ( DictionaryEntry loEntry in this )
             {
-                String lsValue = loEntry.Value.ToString();
+                string lsValue = loEntry.Value.ToString();
 
                 if ( lsValue.Contains(Environment.NewLine) )
                 {
-                    lsbCommandBlock.Append(lcsIndent + loEntry.Key.ToString() + "=" + mcsBeginBlockMark + Environment.NewLine);
+                    lsbCommandBlock.Append(lcsIndent + loEntry.Key.ToString() + mcsAsnMark + mcsBlockBegMark + Environment.NewLine);
                     lsbCommandBlock.Append(lsValue);
-                    lsbCommandBlock.Append(lcsIndent + loEntry.Key.ToString() + "=" + mcsEndBlockMark + Environment.NewLine);
+                    lsbCommandBlock.Append(lcsIndent + loEntry.Key.ToString() + mcsAsnMark + mcsBlockEndMark + Environment.NewLine);
                 }
                 else
                 {
-                    if ( lsValue.Contains(" ") || lsValue.Contains("-") )
+                    if ( lsValue.Contains(mcsSpcMark) || lsValue.Contains(mcsArgMark) )
                     {
-                        lsbCommandBlock.Append(lcsIndent + loEntry.Key.ToString() + "=" + "\"" + lsValue + "\"" + Environment.NewLine);
+                        lsbCommandBlock.Append(lcsIndent + loEntry.Key.ToString() + mcsAsnMark + mcsQteMark1 + lsValue + mcsQteMark1 + Environment.NewLine);
                     }
                     else
                     {
-                        lsbCommandBlock.Append(lcsIndent + loEntry.Key.ToString() + "=" + lsValue + Environment.NewLine);
+                        lsbCommandBlock.Append(lcsIndent + loEntry.Key.ToString() + mcsAsnMark + lsValue + Environment.NewLine);
                     }
                 }
             }
@@ -1972,38 +1970,39 @@ namespace tvToolbox
         private static int miCommandBlockRecursionLevel = 0;
 
         /// <summary>
-        /// Returns the entire contents of the profile as a "command line" string
+        /// Returns the entire contents of the profile as a "command-line" string
         /// (eg. <see langword='-Key1=one -Key2=2 -Key3 -Key4="we have four"'/>).
         /// This feature is handy for minimally serializing profiles, passing them
         /// around easily and storing them elsewhere.
         /// </summary>
         /// <returns>
-        /// A "command line" string (not a string array).
+        /// A "command-line" string (not a string array).
         /// </returns>
-        public String sCommandLine()
+        public string sCommandLine()
         {
+            foreach ( DictionaryEntry loEntry in this )
+                if ( loEntry.Value.ToString().Contains(Environment.NewLine) )
+                    return this.sCommandBlock();
+
             StringBuilder lsbCommandLine = new StringBuilder();
 
             foreach ( DictionaryEntry loEntry in this )
             {
-                String lsValue = loEntry.Value.ToString();
+                string lsValue = loEntry.Value.ToString();
 
-                if ( lsValue.Contains(Environment.NewLine) )
+                if ( !lsValue.Contains(mcsSpcMark) && !lsValue.Contains(mcsArgMark) )
                 {
-                    lsbCommandLine.Append(" " + loEntry.Key.ToString() + "=" + mcsBeginBlockMark + Environment.NewLine);
-                    lsbCommandLine.Append(lsValue);
-                    lsbCommandLine.Append(" " + loEntry.Key.ToString() + "=" + mcsEndBlockMark + Environment.NewLine);
+                    lsbCommandLine.Append(mcsSpcMark + loEntry.Key.ToString() + mcsAsnMark + lsValue);
                 }
                 else
                 {
-                    if ( lsValue.Contains(" ") || lsValue.Contains("-") )
-                    {
-                        lsbCommandLine.Append(" " + loEntry.Key.ToString() + "=" + "\"" + lsValue + "\"");
-                    }
-                    else
-                    {
-                        lsbCommandLine.Append(" " + loEntry.Key.ToString() + "=" + lsValue);
-                    }
+                    int liQteMark1Pos = lsValue.IndexOf(mccQteMark1);
+                    if ( -1 == liQteMark1Pos ) liQteMark1Pos = lsValue.Length;
+                    int liQteMark2Pos = lsValue.IndexOf(mccQteMark2);
+                    if ( -1 == liQteMark2Pos ) liQteMark2Pos = lsValue.Length;
+                    string lsQteMark = liQteMark1Pos < liQteMark2Pos ? mcsQteMark2 : mcsQteMark1;
+
+                    lsbCommandLine.Append(mcsSpcMark + loEntry.Key.ToString() + mcsAsnMark + lsQteMark + lsValue + lsQteMark);
                 }
             }
 
@@ -2011,22 +2010,22 @@ namespace tvToolbox
         }
 
         /// <summary>
-        /// Returns the entire contents of the profile as a "command line" string
+        /// Returns the entire contents of the profile as a "command-line" string
         /// array (eg. <see langword='-Key1=one'/>, <see langword='-Key2=2'/>,
         /// <see langword='-Key3'/>, <see langword='-Key4="we have four"'/>).
         /// </summary>
         /// <returns>
-        /// A "command line" string array.
+        /// A "command-line" string array.
         /// </returns>
-        public String[] sCommandLineArray()
+        public string[] sCommandLineArray()
         {
-            String[] lsCommandLineArray = new String[this.Count];
+            string[] lsCommandLineArray = new String[this.Count];
 
             for ( int i = 0; i <= lsCommandLineArray.GetLength(0) - 1; i++ )
             {
-                DictionaryEntry loEntry = (DictionaryEntry) base[i];
+                DictionaryEntry loEntry = (DictionaryEntry)base[i];
 
-                lsCommandLineArray[i] = loEntry.Key.ToString() + "=" + loEntry.Value.ToString();
+                lsCommandLineArray[i] = loEntry.Key.ToString() + mcsAsnMark + loEntry.Value.ToString();
             }
 
             return lsCommandLineArray;
@@ -2048,7 +2047,7 @@ namespace tvToolbox
         /// <p></p>
         /// aiIndex is equal to or greater than <see cref="ArrayList.Count"/>.
         /// </exception>
-        public String sKey(int aiIndex)
+        public string sKey( int aiIndex )
         {
             return oEntry(aiIndex).Key.ToString();
         }
@@ -2063,9 +2062,9 @@ namespace tvToolbox
         /// <param name="asSource"></param>
         /// The source string to have hyphens replaced.
         /// <returns></returns>
-        public String sSwapHyphens(String asSource)
+        public string sSwapHyphens( string asSource )
         {
-            return asSource.Replace("-", "_");
+            return asSource.Replace(mcsArgMark, "_");
         }
 
         /// <summary>
@@ -2085,100 +2084,100 @@ namespace tvToolbox
         /// <returns>
         /// An XML string.
         /// </returns>
-        public String sXml(bool abStartDocument, bool abStandAlone)
+        public string sXml( bool abStartDocument, bool abStandAlone )
         {
             StringBuilder lsbFileAsStream = new StringBuilder();
+            StringWriter loStringWriter = null;
+            XmlTextWriter loXmlTextWriter = null;
 
-            XmlTextWriter   loXml = new XmlTextWriter(new StringWriter(lsbFileAsStream));
-                            loXml.Formatting = Formatting.Indented;
-
-            if ( abStartDocument )
+            try
             {
-                if ( abStandAlone )
-                {
-                    loXml.WriteStartDocument(true);
-                }
-                else
-                {
-                    // Don't even bother to write a "standalone" attribute.
-                    loXml.WriteStartDocument();
-                }
-            }
+                loXmlTextWriter = new XmlTextWriter(loStringWriter = new StringWriter(lsbFileAsStream));
+                loXmlTextWriter.Formatting = Formatting.Indented;
 
-            String[] lsXpathArray = this.sXmlXpath.Split('/');
-
-            for ( int i = 0; i < lsXpathArray.Length; i++ )
-            {
-                if ( i < lsXpathArray.Length - 1 )
+                if ( abStartDocument )
                 {
-                    loXml.WriteStartElement(lsXpathArray[i]);
-                }
-                else
-                {
-                    foreach ( DictionaryEntry loEntry in this )
+                    if ( abStandAlone )
                     {
-                        loXml.WriteStartElement(lsXpathArray[i]);
-
-                            bool lbTextBlock = -1 != loEntry.Value.ToString().IndexOf(Environment.NewLine);
-
-                            loXml.WriteAttributeString(this.sXmlKeyKey, loEntry.Key.ToString());
-
-                            if ( lbTextBlock )
-                            {
-                                loXml.WriteAttributeString(this.sXmlValueKey, Environment.NewLine + loEntry.Value.ToString() + Environment.NewLine);
-                            }
-                            else
-                            {
-                                loXml.WriteAttributeString(this.sXmlValueKey, loEntry.Value.ToString());
-                            }
-
-                        loXml.WriteEndElement();
+                        loXmlTextWriter.WriteStartDocument(true);
+                    }
+                    else
+                    {
+                        // Don't even bother to write a "standalone" attribute.
+                        loXmlTextWriter.WriteStartDocument();
                     }
                 }
-            }
 
-            for ( int i = 0; i < lsXpathArray.Length - 1; i++ )
+                string[] lsXpathArray = this.sXmlXpath.Split('/');
+
+                for ( int i = 0; i < lsXpathArray.Length; i++ )
+                {
+                    if ( i < lsXpathArray.Length - 1 )
+                    {
+                        loXmlTextWriter.WriteStartElement(lsXpathArray[i]);
+                    }
+                    else
+                    {
+                        // We use "lbSaveSansCmdLine" below instead of "mbSaveSansCmdLine" for the
+                        // needed side effects. Also, we don't want "-SaveSansCmdLine" added here.
+                        bool lbRemoveSaveSansCmdLineKey = !this.ContainsKey("-SaveSansCmdLine");
+                        bool lbSaveSansCmdLine = this.bSaveSansCmdLine;
+                        if ( lbRemoveSaveSansCmdLineKey )
+                            this.Remove("-SaveSansCmdLine");
+
+                        foreach ( DictionaryEntry loEntry in this )
+                        {
+                            string lsKey = loEntry.Key.ToString();
+                            string lsValue = loEntry.Value.ToString();
+
+                            // "lbSaveSansCmdLine" is referenced here (in lieu of "this.bSaveSansCmdLine") to gain a little speed.
+                            if ( !lbSaveSansCmdLine || null == moInputCommandLineProfile
+                                    || (lbSaveSansCmdLine && !moInputCommandLineProfile.ContainsKey(lsKey)) )
+                            {
+                                loXmlTextWriter.WriteStartElement(lsXpathArray[i]);
+
+                                bool lbTextBlock = -1 != lsValue.IndexOf(Environment.NewLine);
+
+                                loXmlTextWriter.WriteAttributeString(this.sXmlKeyKey, lsKey);
+
+                                if ( lbTextBlock )
+                                {
+                                    loXmlTextWriter.WriteAttributeString(this.sXmlValueKey, Environment.NewLine + lsValue + Environment.NewLine);
+                                }
+                                else
+                                {
+                                    loXmlTextWriter.WriteAttributeString(this.sXmlValueKey, lsValue);
+                                }
+
+                                loXmlTextWriter.WriteEndElement();
+                            }
+                        }
+                    }
+                }
+
+                for ( int i = 0; i < lsXpathArray.Length - 1; i++ )
+                {
+                    loXmlTextWriter.WriteEndElement();
+                }
+
+                if ( abStartDocument )
+                    loXmlTextWriter.WriteEndDocument();
+
+                // Replace entities since they have no impact on subsequent successful XML reads.
+                lsbFileAsStream.Replace("&#xD;&#xA;", Environment.NewLine);
+
+                // Replace "utf-16" with "UTF-8" to allow current browser support.
+                lsbFileAsStream.Replace("encoding=\"utf-16\"", "encoding=\"UTF-8\"");
+            }
+            finally
             {
-                loXml.WriteEndElement();
+                if ( null != loXmlTextWriter )
+                    loXmlTextWriter.Close();
+                if ( null != loStringWriter )
+                    loStringWriter.Close();
             }
-
-            if ( abStartDocument )
-                loXml.WriteEndDocument();
-
-            // !!!FIX THIS!!! Replace entities since they have no impact on subsequent successful XML reads.
-            lsbFileAsStream.Replace("&#xD;&#xA;", Environment.NewLine);
-
-            // !!!FIX THIS!!! Replace "utf-16" with "UTF-8" to allow current browser support.
-            lsbFileAsStream.Replace("encoding=\"utf-16\"", "encoding=\"UTF-8\"");
 
             return lsbFileAsStream.ToString();
-        }
-
-        /// <summary>
-        /// Returns a subset of the profile as a new profile using the given
-        /// asKey.
-        /// 
-        /// The first item found with the given asKey is assumed itself to be
-        /// a profile.
-        /// </summary>
-        /// <param name="asKey">
-        /// The key string used to find the nested profile in the current
-        /// profile.
-        /// </param>
-        /// <returns>
-        /// A new object containing the nested profile found.
-        /// </returns>
-        public tvProfile oNestedProfile(String asKey)
-        {
-            tvProfile loNestedProfile = null;
-            tvProfile loOneKeyProfile = this.oOneKeyProfile(asKey);
-
-            if ( 0 == loOneKeyProfile.Count )
-                loNestedProfile = new tvProfile();
-            else
-                loNestedProfile = new tvProfile(loOneKeyProfile[0].ToString());
-
-            return loNestedProfile;
         }
 
         /// <summary>
@@ -2192,7 +2191,7 @@ namespace tvToolbox
         /// <returns>
         /// A new profile object containing the items found.
         /// </returns>
-        public tvProfile oOneKeyProfile(String asKey)
+        public tvProfile oOneKeyProfile( string asKey )
         {
             return this.oOneKeyProfile(asKey, false);
         }
@@ -2213,27 +2212,27 @@ namespace tvToolbox
         /// <returns>
         /// A new profile object containing the items found.
         /// </returns>
-        public tvProfile oOneKeyProfile(String asKey, bool abRemoveKeyPrefix)
+        public tvProfile oOneKeyProfile( string asKey, bool abRemoveKeyPrefix )
         {
-            String  lsKeyPrefixToRemove = asKey.Replace(".*","").Replace("*","");
-                    if ( asKey == lsKeyPrefixToRemove || "" == lsKeyPrefixToRemove )
-                    {
-                        // If the given key contains no wildcards, it's not really a prefix.
-                        abRemoveKeyPrefix = false;
-                    }
+            string lsKeyPrefixToRemove = asKey.Replace(".*", "").Replace("*", "");
+            if ( asKey == lsKeyPrefixToRemove || "" == lsKeyPrefixToRemove )
+            {
+                // If the given key contains no wildcards, it's not really a prefix.
+                abRemoveKeyPrefix = false;
+            }
             tvProfile loProfile = new tvProfile();
 
             if ( mbUseLiteralsOnly )
             {
                 foreach ( DictionaryEntry loEntry in this )
                 {
-                    String lsKey = loEntry.Key.ToString();
+                    string lsKey = loEntry.Key.ToString();
 
                     if ( lsKey == asKey )
                     {
                         if ( abRemoveKeyPrefix )
                         {
-                            loProfile.Add("-" + lsKey.Replace(lsKeyPrefixToRemove, ""), loEntry.Value);
+                            loProfile.Add(mcsArgMark + lsKey.Replace(lsKeyPrefixToRemove, ""), loEntry.Value);
                         }
                         else
                         {
@@ -2246,13 +2245,13 @@ namespace tvToolbox
             {
                 foreach ( DictionaryEntry loEntry in this )
                 {
-                    String lsKey = loEntry.Key.ToString();
+                    string lsKey = loEntry.Key.ToString();
 
                     if ( Regex.IsMatch(lsKey, this.sExpression(asKey), RegexOptions.IgnoreCase) )
                     {
                         if ( abRemoveKeyPrefix )
                         {
-                            loProfile.Add("-" + lsKey.Replace(lsKeyPrefixToRemove, ""), loEntry.Value);
+                            loProfile.Add(mcsArgMark + lsKey.Replace(lsKeyPrefixToRemove, ""), loEntry.Value);
                         }
                         else
                         {
@@ -2279,7 +2278,7 @@ namespace tvToolbox
         /// embedded are expanded and each resulting string is trimmed of leading
         /// and trailing spaces.
         /// </returns>
-        public String[] sOneKeyArray(String asKey)
+        public string[] sOneKeyArray( string asKey )
         {
             StringBuilder lsbList = new StringBuilder();
 
@@ -2289,12 +2288,12 @@ namespace tvToolbox
                 {
                     if ( loEntry.Key.ToString() == asKey )
                     {
-                        String lsValue = loEntry.Value.ToString();
+                        string lsValue = loEntry.Value.ToString();
 
                         // The return limit of ExpandEnvironmentVariables is 32K. The difference allows for variable expansion.
                         if ( 32000 > lsValue.Length )
                         {
-                            lsValue =  Environment.ExpandEnvironmentVariables(lsValue);
+                            lsValue = Environment.ExpandEnvironmentVariables(lsValue);
                         }
 
                         lsbList.Append(lsValue.Trim() + mccSplitMark);
@@ -2307,12 +2306,12 @@ namespace tvToolbox
                 {
                     if ( Regex.IsMatch(loEntry.Key.ToString(), this.sExpression(asKey), RegexOptions.IgnoreCase) )
                     {
-                        String lsValue = loEntry.Value.ToString();
+                        string lsValue = loEntry.Value.ToString();
 
                         // The return limit of ExpandEnvironmentVariables is 32K. The difference allows for variable expansion.
                         if ( 32000 > lsValue.Length )
                         {
-                            lsValue =  Environment.ExpandEnvironmentVariables(lsValue);
+                            lsValue = Environment.ExpandEnvironmentVariables(lsValue);
                         }
 
                         lsbList.Append(lsValue.Trim() + mccSplitMark);
@@ -2320,9 +2319,9 @@ namespace tvToolbox
                 }
             }
 
-            String lsList = lsbList.ToString();
+            string lsList = lsbList.ToString();
 
-            if ( lsList.EndsWith(mccSplitMark.ToString()) )
+            if ( lsList.EndsWith(mcsSplitMark) )
             {
                 return lsList.Remove(lsList.Length - 1, 1).Split(mccSplitMark);
             }
@@ -2346,7 +2345,7 @@ namespace tvToolbox
         /// embedded are expanded and each resulting string is NOT trimmed of
         /// leading or trailing spaces.
         /// </returns>
-        public String[] sOneKeyArrayNoTrim(String asKey)
+        public string[] sOneKeyArrayNoTrim( string asKey )
         {
             StringBuilder lsbList = new StringBuilder();
 
@@ -2356,12 +2355,12 @@ namespace tvToolbox
                 {
                     if ( loEntry.Key.ToString() == asKey )
                     {
-                        String lsValue = loEntry.Value.ToString();
+                        string lsValue = loEntry.Value.ToString();
 
                         // The return limit of ExpandEnvironmentVariables is 32K. The difference allows for variable expansion.
                         if ( 32000 > lsValue.Length )
                         {
-                            lsValue =  Environment.ExpandEnvironmentVariables(lsValue);
+                            lsValue = Environment.ExpandEnvironmentVariables(lsValue);
                         }
 
                         lsbList.Append(lsValue + mccSplitMark);
@@ -2374,12 +2373,12 @@ namespace tvToolbox
                 {
                     if ( Regex.IsMatch(loEntry.Key.ToString(), this.sExpression(asKey), RegexOptions.IgnoreCase) )
                     {
-                        String lsValue = loEntry.Value.ToString();
+                        string lsValue = loEntry.Value.ToString();
 
                         // The return limit of ExpandEnvironmentVariables is 32K. The difference allows for variable expansion.
                         if ( 32000 > lsValue.Length )
                         {
-                            lsValue =  Environment.ExpandEnvironmentVariables(lsValue);
+                            lsValue = Environment.ExpandEnvironmentVariables(lsValue);
                         }
 
                         lsbList.Append(lsValue + mccSplitMark);
@@ -2387,9 +2386,9 @@ namespace tvToolbox
                 }
             }
 
-            String lsList = lsbList.ToString();
+            string lsList = lsbList.ToString();
 
-            if ( lsList.EndsWith(mccSplitMark.ToString()) )
+            if ( lsList.EndsWith(mcsSplitMark) )
             {
                 return lsList.Remove(lsList.Length - 1, 1).Split(mccSplitMark);
             }
@@ -2411,7 +2410,7 @@ namespace tvToolbox
         /// <returns>
         /// A full path/file string.
         /// </returns>
-        public String sRelativeToProfilePathFile(String asPathFile)
+        public string sRelativeToProfilePathFile( string asPathFile )
         {
             if ( null == asPathFile )
             {
@@ -2444,7 +2443,7 @@ namespace tvToolbox
 
         /// <summary>
         /// Reloads the profile from the original text file used to load it and
-        /// merges in the original command line as well. Any changes to the
+        /// merges in the original command-line as well. Any changes to the
         /// profile in memory (not saved) since the last load will be lost.
         /// </summary>
         public void Reload()
@@ -2452,7 +2451,7 @@ namespace tvToolbox
             this.Clear();
 
             if ( null != this.sLoadedPathFile )
-                this.Load(this.sLoadedPathFile , tvProfileLoadActions.Append);
+                this.Load(this.sLoadedPathFile, tvProfileLoadActions.Append);
 
             this.LoadFromCommandLineArray(this.sInputCommandLineArray, tvProfileLoadActions.Merge);
         }
@@ -2462,7 +2461,7 @@ namespace tvToolbox
         /// <p>
         /// If <see cref="bUseXmlFiles"/> is true, text files will be read assuming
         /// standard XML "configuration file" format rather than line delimited
-        /// "command line" format.
+        /// "command-line" format.
         /// </p>
         /// </summary>
         /// <param name="asPathFile">
@@ -2475,15 +2474,14 @@ namespace tvToolbox
         /// </param>
         public void Load(
 
-                  String asPathFile
+                  string asPathFile
                 , tvProfileLoadActions aeLoadAction
                 )
         {
             // If asPathFile is not null, check existence. Otherwise check for the existence
             // of one of several default filenames. Returned null means none exist.
-            String  lsPathFile = this.sFileExistsFromList(this.sRelativeToProfilePathFile(asPathFile));
-            String  lsFilnameOnly = Path.GetFileNameWithoutExtension(this.sExePathFile);
-            String  lcsLoadingMsg = lsFilnameOnly + " loading, please wait ...";
+            string lsPathFile = this.sFileExistsFromList(this.sRelativeToProfilePathFile(asPathFile));
+            string lsFilnameOnly = Path.GetFileNameWithoutExtension(this.sExePathFile);
 
             if ( null == lsPathFile )
             {
@@ -2496,19 +2494,36 @@ namespace tvToolbox
                     lsPathFile = asPathFile;
                 }
 
-                if ( tvProfileFileCreateActions.PromptToCreateFile == this.eFileCreateAction )
-                {
-                    // If the EXE is not already in a folder with a matching name and if the 
-                    // EXE is not already installed in a typical installation folder, proceed.
-                    if ( !this.bInOwnFolder && !this.bInstalledAlready )
-                    {
-                        String lsNewPath = Path.Combine(
-                                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), lsFilnameOnly);
-                        String lsMessage = String.Format(( Directory.Exists(lsNewPath)
-                                ? "an existing folder ({0}) on your desktop"
-                                : "a new folder ({0}) on your desktop" ), lsFilnameOnly);
+                // Pause to allow original instance (if any) to close.
+                System.Threading.Thread.Sleep(200);
 
-                        if ( DialogResult.OK == MessageBox.Show(String.Format(@"
+                // Count running instances.
+                string lsExeName = Path.GetFileNameWithoutExtension(this.sExePathFile);
+                Process[] loProcessesArray = Process.GetProcessesByName(lsExeName);
+
+                if ( loProcessesArray.Length > 1 )
+                {
+                    MessageBox.Show(String.Format("\"{0}\" is already running. Please close it and try again."
+                                    , Path.GetFileName(this.sExePathFile))
+                            , lsExeName);
+                    return;
+                }
+                else
+                    if ( tvProfileFileCreateActions.PromptToCreateFile == this.eFileCreateAction )
+                    {
+                        string lsNewPath = Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), lsFilnameOnly);
+                        string lsNewExePathFile = Path.Combine(lsNewPath, Path.GetFileName(this.sExePathFile));
+
+                        // If the EXE is not already in a folder with a matching name and if the 
+                        // EXE is not already installed in a typical installation folder, proceed.
+                        if ( !this.bInOwnFolder && !this.bInstalledAlready )
+                        {
+                            string lsMessage = String.Format((Directory.Exists(lsNewPath)
+                                    ? "an existing folder ({0}) on your desktop"
+                                    : "a new folder ({0}) on your desktop"), lsFilnameOnly);
+
+                            if ( DialogResult.OK == MessageBox.Show(String.Format(@"
 For your convenience, this program will be copied
 to {0}.
 
@@ -2517,44 +2532,47 @@ Depending on your system, this may take several seconds.
 Copy and proceed from there?
 
 "
-                                    , lsMessage), "Copy EXE to Desktop?", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) )
-                        {
-                            if ( null != mttvMessageBox )
+                                        , lsMessage), "Copy EXE to Desktop?", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) )
                             {
-                                moAppLoadingWaitMsg = Activator.CreateInstance(mttvMessageBox);
-                                mttvMessageBox.InvokeMember("ShowWait", BindingFlags.InvokeMethod, null, moAppLoadingWaitMsg
-                                                            , new object[]{null, lcsLoadingMsg, 250});
+                                if ( !Directory.Exists(lsNewPath) )
+                                    Directory.CreateDirectory(lsNewPath);
+
+                                File.Copy(this.sExePathFile, lsNewExePathFile, true);
+
+                                ProcessStartInfo loStartInfo = new ProcessStartInfo(lsNewExePathFile);
+                                loStartInfo.WorkingDirectory = Path.GetDirectoryName(lsNewExePathFile);
+                                Process loProcess = Process.Start(loStartInfo);
                             }
 
-                            String lsNewExePathFile = Path.Combine(lsNewPath, Path.GetFileName(this.sExePathFile));
-
-                            if ( !Directory.Exists(lsNewPath) )
-                                Directory.CreateDirectory(lsNewPath);
-
-                            File.Copy(this.sExePathFile, lsNewExePathFile, true);
-
-                            ProcessStartInfo    loStartInfo = new ProcessStartInfo(lsNewExePathFile);
-                                                loStartInfo.WorkingDirectory = Path.GetDirectoryName(lsNewExePathFile);
-                            Process             loProcess = Process.Start(loStartInfo);
-
-                            //this.bExit = true;        // This was moved outside the block after disabling the other show below.
+                            this.bExit = true;
                         }
+                        else
+                            if ( this.sExePathFile == lsNewExePathFile )
+                            {
+                                // The EXE has been moved to its own folder on the desktop.
+                                // If it still exists on the desktop directly, remove it.
 
-                        this.bExit = true;
+                                string lsOldExePathFile = Path.Combine(
+                                        Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), Path.GetFileName(this.sExePathFile));
+
+                                try
+                                {
+                                    File.Delete(lsOldExePathFile);
+                                }
+                                catch
+                                {
+                                    // Wait a moment ...
+                                    System.Threading.Thread.Sleep(200);
+
+                                    // Then try again.
+                                    try
+                                    {
+                                        File.Delete(lsOldExePathFile);
+                                    }
+                                    catch { }
+                                }
+                            }
                     }
-
-                    //if ( !this.bExit )
-                    //{
-                    //    if ( !this.bInOwnFolder && DialogResult.Cancel == MessageBox.Show(String.Format(
-                    //                  "The profile file for this program can't be found ({0}).\n\n"
-                    //                + "Create it and proceed anyway?", lsPathFile)
-                    //                        , "Create Profile File?"
-                    //                , MessageBoxButtons.OKCancel, MessageBoxIcon.Question) )
-                    //    {
-                    //        this.bExit = true;
-                    //    }
-                    //}
-                }
 
                 // Although technically the file was not loaded (since it doesn't exist yet),
                 // we consider it empty and we set the property to allow for subsequent saves.
@@ -2563,49 +2581,50 @@ Copy and proceed from there?
             }
             else
             {
-                if ( null != mttvMessageBox )
+                string lsFileAsStream = null;
+                this.UnlockProfileFile();
+
+                StreamReader loStreamReader = null;
+
+                try
                 {
-                    moAppLoadingWaitMsg = Activator.CreateInstance(mttvMessageBox);
-                    mttvMessageBox.InvokeMember("ShowWait", BindingFlags.InvokeMethod, null, moAppLoadingWaitMsg
-                                                , new object[]{null, lcsLoadingMsg, 250});
+                    loStreamReader = new StreamReader(lsPathFile);
+                    lsFileAsStream = loStreamReader.ReadToEnd();
+                }
+                catch ( IOException ex )
+                {
+                    if ( ex.Message.Contains("being used by another process") )
+                    {
+                        // The app is most likely already running.
+                        this.bExit = true;
+                        return;
+                    }
+                    else
+                    {
+                        // Wait a moment ...
+                        System.Threading.Thread.Sleep(200);
+
+                        // Then try again.
+                        if ( null != loStreamReader )
+                            loStreamReader.Close();
+
+                        loStreamReader = new StreamReader(lsPathFile);
+                        lsFileAsStream = loStreamReader.ReadToEnd();
+                    }
+                }
+                finally
+                {
+                    if ( null != loStreamReader )
+                        loStreamReader.Close();
                 }
 
-                String  lsFileAsStream = null;
-                        this.UnlockProfileFile();
-
-                        StreamReader loStreamReader = null;
-
-                        try
-                        {
-                            loStreamReader = new StreamReader(lsPathFile);
-                            lsFileAsStream = loStreamReader.ReadToEnd();
-                        }
-                        catch (IOException ex)
-                        {
-                            if ( !ex.Message.Contains("being used by another process") )
-	                        {
-                                // Wait a moment ...
-                                System.Threading.Thread.Sleep(200);
-
-                                // Then try again.
-                                if ( null != loStreamReader )
-                                    loStreamReader.Close();
-
-                                loStreamReader = new StreamReader(lsPathFile);
-                                lsFileAsStream = loStreamReader.ReadToEnd();
-	                        }
-                        }
-                        finally
-                        {
-                            if ( null != loStreamReader )
-                                loStreamReader.Close();
-                        }
-
-                        if ( !this.bLockProfileFile(lsPathFile) )
-                        {
-                            this.bExit = true;
-                            return;
-                        }
+                // If we can't lock the profile file,
+                // the app is most likely already running.
+                if ( !this.bLockProfileFile(lsPathFile) )
+                {
+                    this.bExit = true;
+                    return;
+                }
 
                 int liDoOver = 1;
 
@@ -2644,10 +2663,9 @@ Copy and proceed from there?
                                 // The profile file format is as expected. No do-over is needed.
                                 liDoOver = 0;
 
-                                // The default file format is line delimited "command line" format.
-                                // The use of all known line delimiters allows for passing profiles between environments.
-                                this.LoadFromCommandLineArray(lsFileAsStream.Replace("\r\n", mccSplitMark.ToString())
-                                        .Replace("\n", mccSplitMark.ToString()).Split(mccSplitMark), aeLoadAction);
+                                // The default file format is line delimited "command-line" format.
+                                this.LoadFromCommandLineArray(lsFileAsStream.Replace(Environment.NewLine, mcsSplitMark)
+                                        .Split(mccSplitMark), aeLoadAction);
 
                                 if ( this.bUseXmlFiles )
                                 {
@@ -2658,6 +2676,7 @@ Copy and proceed from there?
                             {
                                 // mbUseXmlFiles is intentionally used here (instead of "this.bUseXmlFiles") to avoid side effects.
                                 mbUseXmlFiles = true;
+                                this.UnlockProfileFile();
                             }
                         }
                     }
@@ -2665,6 +2684,9 @@ Copy and proceed from there?
                 while ( liDoOver-- > 0 );
 
                 this.sLoadedPathFile = lsPathFile;
+
+                if ( !this.bLockProfileFile(lsPathFile) )
+                    this.bExit = true;
             }
 
             // If it doesn't already exist, create the file.
@@ -2680,7 +2702,7 @@ Copy and proceed from there?
         }
 
         /// <summary>
-        /// Loads the profile with items from the given "command line" string.
+        /// Loads the profile with items from the given "command-line" string.
         /// </summary>
         /// <param name="asCommandLine">
         /// A string (not a string array) of the form:
@@ -2692,7 +2714,7 @@ Copy and proceed from there?
         /// </param>
         public void LoadFromCommandLine(
 
-                  String asCommandLine
+                  string asCommandLine
                 , tvProfileLoadActions aeLoadAction
                 )
         {
@@ -2700,60 +2722,80 @@ Copy and proceed from there?
                 return;
 
             // Remove any leading spaces or tabs so that mccSplitMark becomes the first char.
-            asCommandLine = asCommandLine.TrimStart(' ');
+            asCommandLine = asCommandLine.TrimStart(mccSpcMark);
             asCommandLine = asCommandLine.TrimStart('\t');
 
             if ( -1 != asCommandLine.IndexOf('\n') )
             {
-                // If the command line is actually already line delimited, then we're practically done.
-                // The use of all known line delimiters allows for passing profiles between environments.
-                this.LoadFromCommandLineArray(asCommandLine.Replace("\r\n", mccSplitMark.ToString())
-                        .Replace("\n", mccSplitMark.ToString()).Split(mccSplitMark), aeLoadAction);
+                // If the command-line is actually already line delimited, then we're practically done.
+                this.LoadFromCommandLineArray(asCommandLine.Replace(Environment.NewLine, mcsSplitMark)
+                        .Split(mccSplitMark), aeLoadAction);
             }
             else
             {
                 StringBuilder lsbNewCommandLine = new StringBuilder();
 
-                char lcCurrent = '\u0000';
-                bool lbQuoteOn = false;
+                bool lbQteMark1On = false;
+                bool lbQteMark2On = false;
+                char lcCurrent = mccNulMark;
 
                 for ( int i = 0; i <= asCommandLine.Length - 1; i++ )
                 {
-                    char    lcPrevious;
-                            lcPrevious = lcCurrent;
-                            lcCurrent = asCommandLine[i];
-                            if ( '\"' == lcCurrent )
-                            {
-                                lbQuoteOn = ! lbQuoteOn;
-                            }
+                    char lcPrevious;
+                    lcPrevious = lcCurrent;
+                    lcCurrent = asCommandLine[i];
 
-                    if ( lbQuoteOn || '-' != lcCurrent || '=' == lcPrevious )
+                    if ( mccQteMark1 == lcCurrent )
                     {
-                        // The "|| '=' == lcPrevious" allows for negative numbers.
-                        lsbNewCommandLine.Append(lcCurrent);
+                        if ( lbQteMark1On )
+                        {
+                            lbQteMark1On = false;
+                        }
+                        else
+                            if ( !lbQteMark2On )
+                            {
+                                lbQteMark1On = true;
+                            }
                     }
-                    else if ( '\\' == lcPrevious )
+                    else
+                        if ( mccQteMark2 == lcCurrent )
+                        {
+                            if ( lbQteMark2On )
+                            {
+                                lbQteMark2On = false;
+                            }
+                            else
+                                if ( !lbQteMark1On )
+                                {
+                                    lbQteMark2On = true;
+                                }
+                        }
+
+                    if ( lbQteMark1On || lbQteMark2On || mccAsnMark == lcPrevious || mccArgMark != lcCurrent )
                     {
-                        lsbNewCommandLine.Remove(lsbNewCommandLine.Length - 1, 1);
+                        // Quotes allow for nested argument lists.
+                        // "|| mccAsnMark == lcPrevious" allows for easy negative numbers (ie. without an escape - leading whitespace not allowed).
                         lsbNewCommandLine.Append(lcCurrent);
                     }
                     else
                     {
-                        lsbNewCommandLine = new StringBuilder(lsbNewCommandLine.ToString().Trim() + mccSplitMark + "-");
+                        // Eliminate whitespace between arguments as we go.
+                        lsbNewCommandLine = new StringBuilder(lsbNewCommandLine.ToString().Trim());
+                        lsbNewCommandLine.Append(mccSplitMark);
+                        lsbNewCommandLine.Append(mcsArgMark);
                     }
                 }
 
                 //Cleanup any remaining tabs.
-                lsbNewCommandLine.Replace('\t', ' ');
+                lsbNewCommandLine.Replace('\t', mccSpcMark);
 
                 //The first occurrence of the separator must be removed.
-                this.LoadFromCommandLineArray(lsbNewCommandLine.ToString()
-                        .TrimStart(mccSplitMark).Split(mccSplitMark), aeLoadAction);
+                this.LoadFromCommandLineArray(lsbNewCommandLine.ToString().TrimStart(mccSplitMark).Split(mccSplitMark), aeLoadAction);
             }
         }
 
         /// <summary>
-        /// Loads the profile with items from the given "command line"
+        /// Loads the profile with items from the given "command-line"
         /// string array.
         /// </summary>
         /// <param name="asCommandLineArray">
@@ -2766,7 +2808,7 @@ Copy and proceed from there?
         /// </param>
         public void LoadFromCommandLineArray(
 
-                  String[] asCommandLineArray
+                  string[] asCommandLineArray
                 , tvProfileLoadActions aeLoadAction
                 )
         {
@@ -2777,28 +2819,28 @@ Copy and proceed from there?
 
             if ( null != asCommandLineArray )
             {
-                String lsBlockKey = null;
-                String lsBlockValue = null;
+                string lsBlockKey = null;
+                string lsBlockValue = "";
                 Hashtable loMergeKeysMap = new Hashtable();
 
-                foreach ( String lsItem in asCommandLineArray )
+                foreach ( string lsItem in asCommandLineArray )
                 {
-                    if ( !lsItem.TrimStart().StartsWith("-") )
+                    if ( !lsItem.TrimStart().StartsWith(mcsArgMark) )
                     {
                         if ( null != lsBlockKey )
                         {
                             lsBlockValue += lsItem + Environment.NewLine;
                         }
 
-                        // If an item does not start with a "-"
+                        // If an item does not start with a mcsArgMark
                         // and is not within a block, ignore it.
                     }
                     else
                     {
-                        String lsKey;
-                        String lsValue;
-                        Object loValue;
-                        int liPos = lsItem.IndexOf("=");
+                        string lsKey;
+                        string lsValue;
+                        object loValue;
+                        int liPos = lsItem.IndexOf(mcsAsnMark);
 
                         if ( -1 == liPos )
                         {
@@ -2807,20 +2849,30 @@ Copy and proceed from there?
                         }
                         else
                         {
+                            bool lbQteMark1 = false;
+                            bool lbQteMark2 = false;
+
                             lsKey = lsItem.Substring(0, liPos).Trim();
                             lsValue = lsItem.Substring(liPos + 1).Trim();
 
-                            if ( lsValue.StartsWith("\"") && lsValue.EndsWith("\"") )
+                            if ( lsValue.StartsWith(mcsQteMark1) && lsValue.EndsWith(mcsQteMark1) )
+                                lbQteMark1 = true;
+                            else
+                                if ( lsValue.StartsWith(mcsQteMark2) && lsValue.EndsWith(mcsQteMark2) )
+                                    lbQteMark2 = true;
+
+                            if ( !lbQteMark1 && !lbQteMark2 )
                             {
+                                // This is intentionally not trimmed.
+                                loValue = lsItem.Substring(liPos + 1);
+                            }
+                            else
+                            {
+                                // First, remove quotation marks (if any).
                                 if ( lsValue.Length < 2 )
                                     loValue = "";
                                 else
                                     loValue = lsValue.Substring(1, lsValue.Length - 2);
-                            }
-                            else
-                            {
-                                // This is intentionally not trimmed.
-                                loValue = lsItem.Substring(liPos + 1);
                             }
                         }
 
@@ -2828,7 +2880,7 @@ Copy and proceed from there?
 
                         if ( null != lsBlockKey )
                         {
-                            if ( mcsEndBlockMark == lsValue && lsBlockKey == lsKey )
+                            if ( mcsBlockEndMark == lsValue && lsBlockKey == lsKey )
                             {
                                 lsBlockKey = null;
                                 loValue = lsBlockValue;
@@ -2838,10 +2890,10 @@ Copy and proceed from there?
                                 lsBlockValue += lsItem + Environment.NewLine;
                             }
                         }
-                        else if ( mcsBeginBlockMark == lsValue )
+                        else if ( mcsBlockBegMark == lsValue )
                         {
                             lsBlockKey = lsKey;
-                            lsBlockValue = null;
+                            lsBlockValue = "";
                         }
 
                         if ( null == lsBlockKey )
@@ -2851,48 +2903,48 @@ Copy and proceed from there?
                                 case tvProfileLoadActions.Append:
                                 case tvProfileLoadActions.Overwrite:
 
-                                    this.Add(lsKey, loValue);
-                                    break;
+                                this.Add(lsKey, loValue);
+                                break;
 
                                 case tvProfileLoadActions.Merge:
 
-                                    // Only disable saving after merges if the "bSaveSansCmdLine" switch is turned off.
-                                    // Likewise, only after merges do we bother to check for command line keys to remove.
-                                    if ( !this.bSaveSansCmdLine )
-                                        this.bSaveEnabled = false;
+                                // Only disable saving after merges if the "bSaveSansCmdLine" switch is turned off.
+                                // Likewise, only after merges do we bother to check for command-line keys to remove.
+                                if ( !this.bSaveSansCmdLine )
+                                    this.bSaveEnabled = false;
 
-                                    int liIndex = this.IndexOfKey(lsKey);
+                                int liIndex = this.IndexOfKey(lsKey);
 
-                                    // Replace wildcard keys with the first key match, if any.
-                                    lsKey = ( -1 == liIndex ? lsKey : this.sKey(liIndex) );
+                                // Replace wildcard keys with the first key match, if any.
+                                lsKey = (-1 == liIndex ? lsKey : this.sKey(liIndex));
 
-                                    if ( loMergeKeysMap.ContainsKey(lsKey) )
+                                if ( loMergeKeysMap.ContainsKey(lsKey) )
+                                {
+                                    // Set the search index to force adding this key.
+                                    liIndex = -1;
+                                }
+                                else
+                                {
+                                    if ( -1 != liIndex )
                                     {
-                                        // Set the search index to force adding this key.
+                                        // Remove all previous entries with this key (presumably from a file).
+                                        this.Remove(lsKey);
+
+                                        // Set the search index to force adding this key with its overriding value.
                                         liIndex = -1;
                                     }
-                                    else
-                                    {
-                                        if ( -1 != liIndex )
-                                        {
-                                            // Remove all previous entries with this key (presumably from a file).
-                                            this.Remove(lsKey);
 
-                                            // Set the search index to force adding this key with its overriding value.
-                                            liIndex = -1;
-                                        }
+                                    // Add to the merge key map to prevent any further removals of this key.
+                                    loMergeKeysMap.Add(lsKey, null);
+                                }
 
-                                        // Add to the merge key map to prevent any further removals of this key.
-                                        loMergeKeysMap.Add(lsKey, null);
-                                    }
-
-                                    if ( -1 == liIndex )
-                                    {
-                                        // Don't add keys that contain '*'.
-                                        if ( -1 == lsKey.IndexOf('*') )
-                                            this.Add(lsKey, loValue);
-                                    }
-                                    break;
+                                if ( -1 == liIndex )
+                                {
+                                    // Don't add keys that contain '*'.
+                                    if ( -1 == lsKey.IndexOf('*') )
+                                        this.Add(lsKey, loValue);
+                                }
+                                break;
                             }
                         }
                     }
@@ -2915,7 +2967,7 @@ Copy and proceed from there?
         /// </param>
         public void LoadFromXml(
 
-                  String asXml
+                  string asXml
                 , tvProfileLoadActions aeLoadAction
                 )
         {
@@ -2925,12 +2977,12 @@ Copy and proceed from there?
             }
 
             XmlDocument loXmlDoc = new XmlDocument();
-                        loXmlDoc.LoadXml(asXml);
+            loXmlDoc.LoadXml(asXml);
 
             foreach ( XmlNode loNode in loXmlDoc.SelectNodes(this.sXmlXpath) )
             {
-                String lsKey = loNode.Attributes[this.sXmlKeyKey].Value;
-                String lsValue = loNode.Attributes[this.sXmlValueKey].Value.StartsWith(Environment.NewLine)
+                string lsKey = loNode.Attributes[this.sXmlKeyKey].Value;
+                string lsValue = loNode.Attributes[this.sXmlValueKey].Value.StartsWith(Environment.NewLine)
                         ? loNode.Attributes[this.sXmlValueKey].Value.Substring(Environment.NewLine.Length
                                 , loNode.Attributes[this.sXmlValueKey].Value.Length - 2 * Environment.NewLine.Length)
                         : loNode.Attributes[this.sXmlValueKey].Value;
@@ -2940,59 +2992,33 @@ Copy and proceed from there?
                     case tvProfileLoadActions.Append:
                     case tvProfileLoadActions.Overwrite:
 
-                        this.Add(lsKey, lsValue);
-                        break;
+                    this.Add(lsKey, lsValue);
+                    break;
 
                     case tvProfileLoadActions.Merge:
 
-                        this.bSaveEnabled = false;
+                    this.bSaveEnabled = false;
 
-                        int liIndex = this.IndexOfKey(lsKey);
+                    int liIndex = this.IndexOfKey(lsKey);
 
-                        if ( -1 != liIndex )
+                    if ( -1 != liIndex )
+                    {
+                        // Set each entry with a matching key to the given value.
+
+                        foreach ( DictionaryEntry loEntry in this.oOneKeyProfile(lsKey, false) )
                         {
-                            // Set each entry with a matching key to the given value.
-
-                            foreach ( DictionaryEntry loEntry in this.oOneKeyProfile(lsKey, false) )
-                            {
-                                this.SetByIndex(this.IndexOfKey(loEntry.Key.ToString()), lsValue);
-                            }
+                            this.SetByIndex(this.IndexOfKey(loEntry.Key.ToString()), lsValue);
                         }
-                        else
-                        {
-                            // Don't add keys that contain '*'.
-                            if ( -1 == lsKey.IndexOf('*') )
-                                this.Add(lsKey, lsValue);
-                        }
-                        break;
+                    }
+                    else
+                    {
+                        // Don't add keys that contain '*'.
+                        if ( -1 == lsKey.IndexOf('*') )
+                            this.Add(lsKey, lsValue);
+                    }
+                    break;
                 }
             }
-        }
-
-        /// <summary>
-        /// Presents a grid UI for editing the contents of this profile object.
-        /// Well known application independent tvProfile parameters are excluded.
-        /// </summary>
-        public void Edit()
-        {
-            this.Edit(this);
-        }
-
-        /// <summary>
-        /// Presents a grid UI for editing the contents of a profile object.
-        /// Well known application independent tvProfile parameters are excluded.
-        /// </summary>
-        /// <param name="aoProfile">
-        /// The given profile object to edit.
-        /// </param>
-        public void Edit(tvProfile aoProfile)
-        {
-            // This is done via late-binding so that the editor class files
-            // are not required for successful compilation if they are not used.
-            Type    loType = Assembly.GetExecutingAssembly().GetType("tvToolbox.tvProfileEditor", true);
-            Object  loEditor = Activator.CreateInstance(loType, aoProfile);
-
-            loType.GetMethod("ShowDialog", Type.EmptyTypes).Invoke(loEditor, null);
         }
 
         /// <summary>
@@ -3002,7 +3028,7 @@ Copy and proceed from there?
         /// The path/file location to save the profile file to. This value will
         /// be used to set <see cref="sActualPathFile"/> after a successful save.
         /// </param>
-        public void Save(String asPathFile)
+        public void Save( string asPathFile )
         {
             this.sActualPathFile = asPathFile;
             this.Save();
@@ -3018,7 +3044,7 @@ Copy and proceed from there?
         /// <p>
         /// If <see cref="bUseXmlFiles"/> is true, text files will be written in
         /// standard XML "configuration file" format rather than line delimited
-        /// "command line" format.
+        /// "command-line" format.
         /// </p>
         /// </summary>
         public void Save()
@@ -3028,37 +3054,83 @@ Copy and proceed from there?
                 return;
             }
 
-            String lsFileAsStream = null;
+            bool lbAlreadyThere = File.Exists(this.sActualPathFile);
+            string lsFileAsStream = null;
 
             if ( this.bUseXmlFiles )
             {
-                lsFileAsStream = this.sXml(true, false);
+                if ( !lbAlreadyThere )
+                {
+                    lsFileAsStream = this.sXml(true, false);
+                }
+                else
+                {
+                    string lsXmlXpath = this.sXmlXpath;
+                    XmlDocument loXmlDocument = new XmlDocument();
+                    loXmlDocument.Load(this.sActualPathFile);
+                    XmlNode loXmlNode = loXmlDocument.SelectSingleNode("configuration/appSettings");
+                    if ( null != loXmlNode )
+                    {
+                        // Replace all application settings already there.
+                        this.sXmlXpath = "add";
+                        loXmlNode.InnerXml = this.sXml(false, false);
+                        this.sXmlXpath = lsXmlXpath;
+                    }
+                    else
+                    {
+                        loXmlNode = loXmlDocument.SelectSingleNode("configuration");
+                        if ( null == loXmlNode )
+                        {
+                            throw new Exception("XML configuration tags missing. Can't continue.");
+                        }
+                        else
+                        {
+                            // Add an application settings section.
+                            this.sXmlXpath = "appSettings/add";
+                            XmlDocumentFragment loXmlDocumentFragment = loXmlDocument.CreateDocumentFragment();
+                            loXmlDocumentFragment.InnerXml = this.sXml(false, false);
+
+                            loXmlDocument.DocumentElement.InsertBefore(loXmlDocumentFragment, loXmlDocument.DocumentElement.FirstChild);
+                            this.sXmlXpath = lsXmlXpath;
+                        }
+                    }
+
+                    // Replace entities since they have no impact on subsequent successful XML reads.
+                    lsFileAsStream = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + XDocument.Parse(loXmlDocument.InnerXml).ToString().Replace("&#xD;&#xA;", Environment.NewLine);
+                }
             }
             else
             {
                 StringBuilder lsbFileAsStream = new StringBuilder(Path.GetFileName(this.sExePathFile) + Environment.NewLine + Environment.NewLine);
 
+                // We use "lbSaveSansCmdLine" below instead of "mbSaveSansCmdLine" for the
+                // needed side effects. Also, we don't want "-SaveSansCmdLine" added here.
+                bool lbRemoveSaveSansCmdLineKey = !this.ContainsKey("-SaveSansCmdLine");
+                bool lbSaveSansCmdLine = this.bSaveSansCmdLine;
+                if ( lbRemoveSaveSansCmdLineKey )
+                    this.Remove("-SaveSansCmdLine");
+
                 foreach ( DictionaryEntry loEntry in this )
                 {
-                    String lsKey = loEntry.Key.ToString();
-                    String lsValue = loEntry.Value.ToString();
+                    string lsKey = loEntry.Key.ToString();
+                    string lsValue = loEntry.Value.ToString();
 
-                    // "mbSaveSansCmdLine" is referenced here directly to gain a little speed.
-                    if ( !mbSaveSansCmdLine || null == moInputCommandLineProfile
-                            || (mbSaveSansCmdLine && !moInputCommandLineProfile.ContainsKey(lsKey)) )
+                    // "lbSaveSansCmdLine" is referenced here (in lieu of "this.bSaveSansCmdLine") to gain a little speed.
+                    if ( !lbSaveSansCmdLine || null == moInputCommandLineProfile
+                            || (lbSaveSansCmdLine && !moInputCommandLineProfile.ContainsKey(lsKey)) )
                     {
                         if ( -1 == lsValue.IndexOf(Environment.NewLine) )
                         {
-                            if ( -1 == lsValue.IndexOf(" ") )
-                                lsbFileAsStream.Append(lsKey + "=" + lsValue + Environment.NewLine);
+                            if ( -1 == lsValue.IndexOf(mcsSpcMark) )
+                                lsbFileAsStream.Append(lsKey + mcsAsnMark + lsValue + Environment.NewLine);
                             else
-                                lsbFileAsStream.Append(lsKey + "=" + "\"" + lsValue + "\"" + Environment.NewLine);
+                                lsbFileAsStream.Append(lsKey + mcsAsnMark + mcsQteMark1 + lsValue + mcsQteMark1 + Environment.NewLine);
                         }
                         else
                         {
-                            lsbFileAsStream.Append(lsKey + "=" + mcsBeginBlockMark + Environment.NewLine);
+                            lsbFileAsStream.Append(lsKey + mcsAsnMark + mcsBlockBegMark + Environment.NewLine);
                             lsbFileAsStream.Append(lsValue + ((lsValue.EndsWith(Environment.NewLine)) ? "" : Environment.NewLine).ToString());
-                            lsbFileAsStream.Append(lsKey + "=" + mcsEndBlockMark + Environment.NewLine);
+                            lsbFileAsStream.Append(lsKey + mcsAsnMark + mcsBlockEndMark + Environment.NewLine);
                         }
                     }
                 }
@@ -3066,34 +3138,24 @@ Copy and proceed from there?
                 lsFileAsStream = lsbFileAsStream.ToString();
             }
 
-            bool lbAlreadyThere = File.Exists(this.sActualPathFile);
-
             this.UnlockProfileFile();
 
-            StreamWriter loStreamWriter = null;
+            string lsPath = Path.GetDirectoryName(this.sActualPathFile);
+            if ( !String.IsNullOrEmpty(lsPath) )
+                Directory.CreateDirectory(lsPath);
 
             try
             {
-                loStreamWriter = new StreamWriter(this.sActualPathFile, false);
-                loStreamWriter.Write(lsFileAsStream);
+                File.WriteAllText(this.sActualPathFile, lsFileAsStream);
             }
-            catch (Exception)
+            catch ( Exception )
             {
                 // Wait a moment ...
                 System.Windows.Forms.Application.DoEvents();
                 System.Threading.Thread.Sleep(200);
 
                 // Then try again.
-                if ( null != loStreamWriter )
-                    loStreamWriter.Close();
-
-                loStreamWriter = new StreamWriter(this.sActualPathFile, false);
-                loStreamWriter.Write(lsFileAsStream);
-            }
-            finally
-            {
-                if ( null != loStreamWriter )
-                    loStreamWriter.Close();
+                File.WriteAllText(this.sActualPathFile, lsFileAsStream);
             }
 
             //this.bLockProfileFile(this.sActualPathFile);
@@ -3113,7 +3175,7 @@ Copy and proceed from there?
         }
 
         /// <summary>
-        /// This exception is thrown by <see langword='Add(Object)'/> if the given object
+        /// This exception is thrown by <see langword='Add(object)'/> if the given object
         /// is anything other than a DictionaryEntry.
         /// </summary>
         public class InvalidAddType : Exception
@@ -3121,7 +3183,7 @@ Copy and proceed from there?
             /// <summary>
             /// Returns "Only DictionaryEntry objects may be added with this method."
             /// </summary>
-            public override String Message
+            public override string Message
             {
                 get
                 {
@@ -3133,90 +3195,89 @@ Copy and proceed from there?
 
         #region "Private Members"
 
-        private void ReplaceDefaultProfileFromCommandLine(String[] asCommandLineArray)
+        private void ReplaceDefaultProfileFromCommandLine( string[] asCommandLineArray )
         {
             this.LoadFromCommandLineArray(asCommandLineArray, tvProfileLoadActions.Overwrite);
 
-            String[] lsIniKeys = new String[] { "-ini", "-ProfileFile" };
+            string[] lsIniKeys = { "-ini", "-ProfileFile" };
 
-            int     liIniKeyIndex = - 1;
-                    if (      this.ContainsKey(lsIniKeys[0]) )
-                    {
-                        liIniKeyIndex = 0;
-                    }
-                    else if ( this.ContainsKey(lsIniKeys[1]) )
-                    {
-                        liIniKeyIndex = 1;
-                    }
-            String  lsProfilePathFile = null;
-                    if ( -1 != liIniKeyIndex )
-                    {
-                        lsProfilePathFile = this.sValue(lsIniKeys[liIniKeyIndex], "");
-                    }
-            bool    lbFirstArgIsFile = false;
-            String  lsFirstArg = null;
-                    try
-                    {
-                        if ( -1 != this.sInputCommandLineArray[0].IndexOf(".vshost.")
-                                || this.sInputCommandLineArray[0] == this.sExePathFile )
-                        {
-                            lsFirstArg = this.sInputCommandLineArray[1];
-                        }
-                        else
-                        {
-                            lsFirstArg = this.sInputCommandLineArray[0];
-                        }
-                    }
-                    catch {}
-
-            if ( null != lsFirstArg
-                    && File.Exists(this.sRelativeToProfilePathFile(lsFirstArg)) )
+            int liIniKeyIndex = -1;
+            if ( this.ContainsKey(lsIniKeys[0]) )
             {
-                if ( null != lsProfilePathFile )
+                liIniKeyIndex = 0;
+            }
+            else if ( this.ContainsKey(lsIniKeys[1]) )
+            {
+                liIniKeyIndex = 1;
+            }
+            string lsProfilePathFile = null;
+            if ( -1 != liIniKeyIndex )
+            {
+                lsProfilePathFile = this.sValue(lsIniKeys[liIniKeyIndex], "");
+            }
+            bool lbFirstArgIsFile = false;
+            string lsFirstArg = null;
+            try
+            {
+                if ( -1 != this.sInputCommandLineArray[0].IndexOf(".vshost.")
+                        || this.sRelativeToProfilePathFile(this.sInputCommandLineArray[0]) == this.sExePathFile )
                 {
-                    // If the first argument passed on the command line is actually
-                    // a file (that exists) and if an -ini key was also provided, then
-                    // add the file reference to the profile using the "-File" key.
-                    lbFirstArgIsFile = true;
+                    lsFirstArg = this.sInputCommandLineArray[1];
                 }
                 else
                 {
-                    // If no -ini key was passed, then assume the referenced file is
-                    // actually a profile file to be loaded.
-                    lsProfilePathFile = lsFirstArg;
+                    lsFirstArg = this.sInputCommandLineArray[0];
+                }
+
+                if ( null != lsFirstArg
+                        && File.Exists(this.sRelativeToProfilePathFile(lsFirstArg)) )
+                {
+                    if ( null != lsProfilePathFile )
+                    {
+                        // If the first argument passed on the command-line is actually
+                        // a file (that exists) and if an -ini key was also provided, then
+                        // add the file reference to the profile using the "-File" key.
+                        lbFirstArgIsFile = true;
+                    }
+                    else
+                    {
+                        // If no -ini key was passed, then assume the referenced file is
+                        // actually a profile file to be loaded.
+                        lsProfilePathFile = lsFirstArg;
+                    }
                 }
             }
+            catch { }
 
             if ( null != lsProfilePathFile )
             {
                 // Load the referenced profile file.
-                tvProfile   loNewProfile = new tvProfile();
-                            loNewProfile.eFileCreateAction = this.eFileCreateAction;
-                            loNewProfile.bUseXmlFiles = this.bUseXmlFiles;
-                            loNewProfile.bAddStandardDefaults = this.bAddStandardDefaults;
-                            loNewProfile.Load(lsProfilePathFile, tvProfileLoadActions.Overwrite);
+                tvProfile loNewProfile = new tvProfile();
+                loNewProfile.eFileCreateAction = this.eFileCreateAction;
+                loNewProfile.bUseXmlFiles = this.bUseXmlFiles;
+                loNewProfile.bAddStandardDefaults = this.bAddStandardDefaults;
+                loNewProfile.Load(lsProfilePathFile, tvProfileLoadActions.Overwrite);
 
-                            this.sActualPathFile = loNewProfile.sActualPathFile;
-                            this.sLoadedPathFile = loNewProfile.sLoadedPathFile;
-                            this.bExit = loNewProfile.bExit;
+                this.sActualPathFile = loNewProfile.sActualPathFile;
+                this.sLoadedPathFile = loNewProfile.sLoadedPathFile;
+                this.bExit = loNewProfile.bExit;
 
                 if ( !this.bExit )
                 {
                     this.bFileJustCreated = loNewProfile.bFileJustCreated;
 
-                    // We now need a slightly modified version of the given command line
+                    // We now need a slightly modified version of the given command-line
                     // (ie. sans the -ini key but with a -File key, if appropriate).
-                    tvProfile   loCommandLine = new tvProfile();
-                                loCommandLine.LoadFromCommandLineArray(
-                                        this.sInputCommandLineArray, tvProfileLoadActions.Overwrite);
-                                if ( -1 != liIniKeyIndex )
-                                    loCommandLine.Remove(lsIniKeys[liIniKeyIndex]);
-                                if ( lbFirstArgIsFile )
-                                    loCommandLine.Add("-File", lsFirstArg);
+                    tvProfile loCommandLine = new tvProfile();
+                    loCommandLine.LoadFromCommandLineArray(
+                            this.sInputCommandLineArray, tvProfileLoadActions.Overwrite);
+                    if ( -1 != liIniKeyIndex )
+                        loCommandLine.Remove(lsIniKeys[liIniKeyIndex]);
+                    if ( lbFirstArgIsFile )
+                        loCommandLine.Add("-File", lsFirstArg);
 
-
-                    // Now merge in the original command line (with the above
-                    // adjustments). Command line items take precedence over file items.
+                    // Now merge in the original command-line (with the above
+                    // adjustments). command-line items take precedence over file items.
                     loNewProfile.LoadFromCommandLineArray(loCommandLine.sCommandLineArray(), tvProfileLoadActions.Merge);
                     this.bSaveEnabled = loNewProfile.bSaveEnabled;
 
@@ -3229,9 +3290,9 @@ Copy and proceed from there?
             }
         }
 
-        private String sExpression(String asSource)
+        private string sExpression( string asSource )
         {
-            String lsExpression = asSource;
+            string lsExpression = asSource;
 
             if ( -1 == lsExpression.IndexOf(".*") )
                 lsExpression = lsExpression.Replace("*", ".*");
@@ -3242,7 +3303,7 @@ Copy and proceed from there?
             return lsExpression;
         }
 
-        private String sFileExistsFromList(String asPathFile)
+        private string sFileExistsFromList( string asPathFile )
         {
             if ( null != asPathFile )
             {
@@ -3253,12 +3314,12 @@ Copy and proceed from there?
             }
             else
             {
-                String lsDefaultPathFileNoExt = Path.Combine(Path.GetDirectoryName(this.sDefaultPathFile)
+                string lsDefaultPathFileNoExt = Path.Combine(Path.GetDirectoryName(this.sDefaultPathFile)
                                                         , Path.GetFileNameWithoutExtension(this.sDefaultPathFile));
 
-                foreach ( String lsItem in msDefaultFileExtArray )
+                foreach ( string lsItem in msDefaultFileExtArray )
                 {
-                    String lsDefaultPathFile = lsDefaultPathFileNoExt + lsItem;
+                    string lsDefaultPathFile = lsDefaultPathFileNoExt + lsItem;
 
                     if ( File.Exists(lsDefaultPathFile) )
                         return lsDefaultPathFile;
@@ -3268,9 +3329,9 @@ Copy and proceed from there?
             return null;
         }
 
-        private String sReformatProfileFile(String asPathFile)
+        private string sReformatProfileFile( string asPathFile )
         {
-            if ( null != asPathFile)
+            if ( null != asPathFile )
             {
                 if ( this.bDefaultFileReplaced )
                 {
@@ -3279,7 +3340,7 @@ Copy and proceed from there?
                 }
                 else
                 {
-                    String lsPreviousPathFile = asPathFile;
+                    string lsPreviousPathFile = asPathFile;
 
                     // Use a new pathfile (perhaps).
                     asPathFile = this.sDefaultPathFile;
@@ -3293,7 +3354,7 @@ Copy and proceed from there?
             return asPathFile;
         }
 
-        private bool bLockProfileFile(string asPathFile)
+        private bool bLockProfileFile( string asPathFile )
         {
             bool lbLockProfileFile = false;
 
@@ -3305,8 +3366,10 @@ Copy and proceed from there?
             {
                 try
                 {
-                    moFileStreamProfileFileLock =
-                            File.Open(asPathFile, FileMode.Open, FileAccess.Read, FileShare.None);
+                    // mbUseXmlFiles is intentionally used here (instead of "this.bUseXmlFiles") to avoid side effects.
+                    if ( !mbUseXmlFiles )
+                        moFileStreamProfileFileLock =
+                                File.Open(asPathFile, FileMode.Open, FileAccess.Read, FileShare.None);
 
                     lbLockProfileFile = true;
                 }
@@ -3321,21 +3384,31 @@ Copy and proceed from there?
             if ( null != moFileStreamProfileFileLock )
             {
                 moFileStreamProfileFileLock.Close();
-                moFileStreamProfileFileLock.Dispose();
                 moFileStreamProfileFileLock = null;
                 GC.Collect();
             }
         }
 
 
-        private const String mcsLoadSaveDefaultExtension = ".txt";
-        private const String mcsBeginBlockMark = "[";
-        private const String mcsEndBlockMark = "]";
-        private const char   mccSplitMark = '\u0001';
-        private FileStream   moFileStreamProfileFileLock;
-        private tvProfile    moInputCommandLineProfile;
-        private Type         mttvMessageBox = null;
-        private object       moAppLoadingWaitMsg;
+        private const string mcsLoadSaveDefaultExtension = ".txt";
+        private const char mccArgMark = '-';
+        private const string mcsArgMark = "-";
+        private const char mccAsnMark = '=';
+        private const string mcsAsnMark = "=";
+        private const string mcsBlockBegMark = "[";
+        private const string mcsBlockEndMark = "]";
+        private const char mccNulMark = '\u0000';
+        private string mcsNulMark = '\u0000'.ToString();
+        private const char mccQteMark1 = '\"';
+        private const string mcsQteMark1 = "\"";
+        private const char mccQteMark2 = '\'';
+        private const string mcsQteMark2 = "'";
+        private const char mccSpcMark = ' ';
+        private const string mcsSpcMark = " ";
+        private const char mccSplitMark = '\u0001';
+        private string mcsSplitMark = '\u0001'.ToString();
+        private FileStream moFileStreamProfileFileLock;
+        private tvProfile moInputCommandLineProfile;
 
 
         private class tvProfileEnumerator : IEnumerator
@@ -3343,9 +3416,9 @@ Copy and proceed from there?
             int miIndex = -1;
             tvProfile moProfile;
 
-            private tvProfileEnumerator(){}
+            private tvProfileEnumerator() { }
 
-            public tvProfileEnumerator(tvProfile aoProfile)
+            public tvProfileEnumerator( tvProfile aoProfile )
             {
                 moProfile = aoProfile;
             }
@@ -3357,7 +3430,7 @@ Copy and proceed from there?
                 miIndex = -1;
             }
 
-            public Object Current
+            public object Current
             {
                 get
                 {

@@ -133,7 +133,7 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to MonopolyDealSettings.txt.
+        ///   Looks up a localized string similar to MonopolyDeal\MonopolyDealSettings.txt.
         /// </summary>
         public static string SettingsFilePath {
             get {

@@ -142,6 +142,6 @@
     <value>-Port</value>
   </data>
   <data name="SettingsFilePath" xml:space="preserve">
-    <value>MonopolyDealSettings.txt</value>
+    <value>MonopolyDeal\MonopolyDealSettings.txt</value>
   </data>
 </root>
