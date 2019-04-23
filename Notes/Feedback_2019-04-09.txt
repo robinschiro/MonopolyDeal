@@ -1,19 +1,19 @@
 Hi Pri Items:
-- [DONE] Notification for when it's your turn
+- [MD45] Notification for when it's your turn
 
 Low Pri:
-- Remember person's last name and other settings.
-- When you receive rent, have pop up to show what you received from players
-- Change 'End Turn' button color when you are out of actions
-- Confirmation for discards
-- Flip in hand should always be enabled
+- [MD47] Remember person's last name and other settings.
+- [MD48] When you receive rent, have pop up to show what you received from players
+- [MD49] Change 'End Turn' button color when you are out of actions
+- [MD51] Confirmation for discards
+- [MD50] Flip in hand should always be enabled
 - Have log of events that are occurring so everyone knows what's going on
-- When someone's renting you, have one row color for money and another for properties
+- [MD52] When someone's renting you, have one row color for money and another for properties
 
-- In rent window, give hint as to what the card is (i.e. thumbnail)
+- [MD55] In rent window, give hint as to what the card is (i.e. thumbnail)
 	- This is because it is important for rentee to know what color the property card he is giving is.
 	
-- Re-evaluate phrasing of JustSayNo dialog
+- [MD54] Re-evaluate phrasing of JustSayNo dialog
 	- People might accidentally click yes
 	- Check if YesNo order is same on dialog
 	- Maybe have confirmation
@@ -22,4 +22,4 @@ Bugs:
 - Re-consolidate monopolies when rent is paid (minor, probably not worth fixing)
 - Prevent discard after 7
     - This bug doesn't actually exist! (Already have a check for this)
-- Player is not able to use 2 'Double the Rent' cards
+- [MD56] Player is not able to use 2 'Double the Rent' cards
