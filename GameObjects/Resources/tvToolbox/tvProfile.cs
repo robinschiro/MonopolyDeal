@@ -3158,7 +3158,7 @@ Copy and proceed from there?
                 File.WriteAllText(this.sActualPathFile, lsFileAsStream);
             }
 
-            //this.bLockProfileFile(this.sActualPathFile);
+            this.bLockProfileFile(this.sActualPathFile);
 
             if ( !lbAlreadyThere )
                 this.bFileJustCreated = true;
@@ -3369,7 +3369,7 @@ Copy and proceed from there?
                     // mbUseXmlFiles is intentionally used here (instead of "this.bUseXmlFiles") to avoid side effects.
                     if ( !mbUseXmlFiles )
                         moFileStreamProfileFileLock =
-                                File.Open(asPathFile, FileMode.Open, FileAccess.Read, FileShare.None);
+                                File.Open(asPathFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
                     lbLockProfileFile = true;
                 }
