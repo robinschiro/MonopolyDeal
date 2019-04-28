@@ -77,6 +77,10 @@
     <Compile Include="RoomWindow.xaml.cs">
       <DependentUpon>RoomWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Styles\NoChromeButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="GameWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -89,7 +93,7 @@
       <DependentUpon>GameWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="WatermarkTextBoxStyle.xaml">
+    <Page Include="Styles\WatermarkTextBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

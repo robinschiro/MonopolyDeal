@@ -5,7 +5,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="WatermarkTextBoxStyle.xaml" />
+                <ResourceDictionary Source="Styles\WatermarkTextBox.xaml" />
+                <ResourceDictionary Source="Styles\NoChromeButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
