@@ -174,7 +174,7 @@ namespace GameClient
                     PlayingField.Children.Add(fieldSeparator);
 
                     // Set the row positions of the UI elements.
-                    int row = 5 - 2 * (GetRelativePosition(this.PlayerName, PlayerList[i].Name) - 1);
+                    int row = -2 * GetRelativePosition(this.PlayerName, PlayerList[i].Name) + 9;
                     Grid.SetRow(playerNameLabel, row);
                     Grid.SetRow(fieldSeparator, row);
                 }
@@ -776,10 +776,6 @@ namespace GameClient
             cardButton.RenderTransform = new TransformGroup();
             cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
 
-            //Binding buttonWidthToImageWidth = new Binding("ActualWidth");
-            //buttonWidthToImageWidth.Source = (cardButton.Content as Image);
-            //cardButton.SetBinding(Button.WidthProperty, buttonWidthToImageWidth);
-
             return cardButton;
         }
 
@@ -963,6 +959,13 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFourField);
                         PlayerHandDictionary.Add(player.Name, PlayerFourHand);
+                        break;
+                    }
+
+                    case 4:
+                    {
+                        PlayerFieldDictionary.Add(player.Name, PlayerFiveField);
+                        PlayerHandDictionary.Add(player.Name, PlayerFiveHand);
                         break;
                     }
                 }
