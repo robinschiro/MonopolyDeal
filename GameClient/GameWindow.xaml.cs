@@ -161,21 +161,25 @@ namespace GameClient
             {
                 if ( this.PlayerList[i].Name != this.PlayerName )
                 {
-                    Label playerNameLabel = new Label();
-                    playerNameLabel.Content = "Name: " + this.PlayerList[i].Name;
-                    playerNameLabel.VerticalAlignment = System.Windows.VerticalAlignment.Center;
+                    TextBlock playerNameTextBlock = new TextBlock();
+                    playerNameTextBlock.Text = "Name: " + this.PlayerList[i].Name;
+
+                    Viewbox playerNameViewbox = new Viewbox();
+                    playerNameViewbox.VerticalAlignment = System.Windows.VerticalAlignment.Center;
+                    playerNameViewbox.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+                    playerNameViewbox.Child = playerNameTextBlock;
 
                     // Create a separator to separate the playing fields.
                     Separator fieldSeparator = new Separator();
                     fieldSeparator.Style = (Style)FindResource("FieldSeparator");
 
                     // Add the UI elements to the playing field.
-                    PlayingField.Children.Add(playerNameLabel);
+                    PlayingField.Children.Add(playerNameViewbox);
                     PlayingField.Children.Add(fieldSeparator);
 
                     // Set the row positions of the UI elements.
                     int row = -2 * GetRelativePosition(this.PlayerName, PlayerList[i].Name) + 9;
-                    Grid.SetRow(playerNameLabel, row);
+                    Grid.SetRow(playerNameViewbox, row);
                     Grid.SetRow(fieldSeparator, row);
                 }
             }
@@ -491,28 +495,6 @@ namespace GameClient
             // Connect to the server.
             Client.Connect(ServerIP, ServerUtilities.PORT_NUMBER, outmsg);
         }
-
-        // When the client resizes the windows, scale the display of overlaid cards on the players' fields so that they
-        // are always spaced proportionally.
-        //private void Window_SizeChanged( object sender, SizeChangedEventArgs e )
-        //{
-        //    if ( PlayerFields != null )
-        //    {
-        //        foreach ( Grid field in PlayerFields )
-        //        {
-        //            foreach ( FrameworkElement element in field.Children )
-        //            {
-        //                Grid cardGrid = (Grid)element;
-        //                for ( int i = 0; i < cardGrid.Children.Count; ++i )
-        //                {
-        //                    Button cardButton = (Button)cardGrid.Children[i];
-
-        //                    TransformCardButton(cardButton, i, field.ActualHeight);
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
 
         private void Size_Changed( SizeChangedEventArgs e )
         {
@@ -852,23 +834,16 @@ namespace GameClient
                     // Update the display of the opponent's cards in play.
                     DisplayCardsInPlay(player, PlayerFieldDictionary[player.Name]);
 
-                    // Update the display of the opponent's hand.
-                    ClearCardsInGrid(PlayerHandDictionary[player.Name]);
-                    foreach ( Card card in player.CardsInHand )
-                    {
-                        Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
-                        AddCardToGrid(cardBack, PlayerHandDictionary[player.Name], player, true);
-                    }
+                    // Update the field displaying the count of cards in the player's hand.
+                    PlayerHandDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
                 }
             }
         }
 
+        // Display cards of the player and the player's opponents.
         public void DisplayAllCards( Object filler = null )
         {
-            // Display the opponents' cards.
             DisplayOpponentCards();
-
-            // Display the Player's cards in play as well.
             DisplayCardsInPlay(this.Player, PlayerOneField);
         }
 
@@ -945,6 +920,7 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerTwoField);
                         PlayerHandDictionary.Add(player.Name, PlayerTwoHand);
+                        PlayerTwoHand.Visibility = System.Windows.Visibility.Visible;
                         break;
                     }
 
@@ -952,6 +928,7 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerThreeField);
                         PlayerHandDictionary.Add(player.Name, PlayerThreeHand);
+                        PlayerThreeHand.Visibility = System.Windows.Visibility.Visible;
                         break;
                     }
 
@@ -959,6 +936,7 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFourField);
                         PlayerHandDictionary.Add(player.Name, PlayerFourHand);
+                        PlayerFourHand.Visibility = System.Windows.Visibility.Visible;
                         break;
                     }
 
@@ -966,6 +944,7 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFiveField);
                         PlayerHandDictionary.Add(player.Name, PlayerFiveHand);
+                        PlayerFiveHand.Visibility = System.Windows.Visibility.Visible;
                         break;
                     }
                 }
@@ -1497,7 +1476,7 @@ namespace GameClient
                     horizontalTransform.Angle = -90;
 
                     cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
-                    cardButton.RenderTransform = horizontalTransform;
+                    cardButton.LayoutTransform = horizontalTransform;
                     break;
                 }
 
