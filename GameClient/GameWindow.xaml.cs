@@ -834,29 +834,16 @@ namespace GameClient
                     // Update the display of the opponent's cards in play.
                     DisplayCardsInPlay(player, PlayerFieldDictionary[player.Name]);
 
-                    // Update the display of the opponent's hand.
-                    //ClearCardsInGrid(PlayerHandDictionary[player.Name]);
-                    //foreach ( Card card in player.CardsInHand )
-                    //{
-                    //    Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
-                    //    AddCardToGrid(cardBack, PlayerHandDictionary[player.Name], player, true);
-                    //}
-
-                    // Replace the existing cardback (inefficient) and update the count
-                    //Card cardBack = new Card(-1, "pack://application:,,,/GameObjects;component/Images/cardback.jpg");
-                    //AddCardToGrid(cardBack, PlayerFieldDictionary[player.Name], player, true);
-
-                    PlayerTwoHandCount.Text = "x" + player.CardsInHand.Count;
+                    // Update the field displaying the count of cards in the player's hand.
+                    PlayerHandDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
                 }
             }
         }
 
+        // Display cards of the player and the player's opponents.
         public void DisplayAllCards( Object filler = null )
         {
-            // Display the opponents' cards.
             DisplayOpponentCards();
-
-            // Display the Player's cards in play as well.
             DisplayCardsInPlay(this.Player, PlayerOneField);
         }
 
@@ -932,7 +919,8 @@ namespace GameClient
                     case 1:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerTwoField);
-                        //PlayerHandDictionary.Add(player.Name, PlayerTwoHand);
+                        PlayerHandDictionary.Add(player.Name, PlayerTwoHand);
+                        PlayerTwoHand.Visibility = System.Windows.Visibility.Visible;
                         break;
                     }
 
@@ -940,6 +928,7 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerThreeField);
                         PlayerHandDictionary.Add(player.Name, PlayerThreeHand);
+                        PlayerThreeHand.Visibility = System.Windows.Visibility.Visible;
                         break;
                     }
 
@@ -947,6 +936,7 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFourField);
                         PlayerHandDictionary.Add(player.Name, PlayerFourHand);
+                        PlayerFourHand.Visibility = System.Windows.Visibility.Visible;
                         break;
                     }
 
@@ -954,6 +944,7 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFiveField);
                         PlayerHandDictionary.Add(player.Name, PlayerFiveHand);
+                        PlayerFiveHand.Visibility = System.Windows.Visibility.Visible;
                         break;
                     }
                 }

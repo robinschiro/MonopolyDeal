@@ -82,11 +82,17 @@
                   Grid.Row="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
-                    <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
 
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="13*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
                 <Grid Name="PlayerFiveField"
-                  Grid.Row="0">
+                      Grid.Row="0"
+                      Grid.Column="0"
+                      ClipToBounds="True">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -104,21 +110,18 @@
                 </Grid>
 
                 <Grid Name="PlayerFiveHand"
-                  Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                      Visibility="Hidden"
+                      Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Image Source="pack://application:,,,/GameObjects;component/Images/cardback.jpg" 
+                           Grid.Row="0"/>
+                    <Viewbox Grid.Row="1"
+                             HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerFiveHand}"/>
+                    </Viewbox>
                 </Grid>
             </Grid>
 
@@ -126,11 +129,17 @@
                   Grid.Row="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
-                    <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
 
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="13*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
                 <Grid Name="PlayerFourField"
-                  Grid.Row="0">
+                      Grid.Row="0"
+                      Grid.Column="0"
+                      ClipToBounds="True">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -148,21 +157,18 @@
                 </Grid>
 
                 <Grid Name="PlayerFourHand"
-                  Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                      Visibility="Hidden"
+                      Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Image Source="pack://application:,,,/GameObjects;component/Images/cardback.jpg" 
+                           Grid.Row="0"/>
+                    <Viewbox Grid.Row="1"
+                             HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerFourHand}"/>
+                    </Viewbox>
                 </Grid>
             </Grid>
 
@@ -170,11 +176,17 @@
                   Grid.Row="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
-                    <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
 
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="13*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
                 <Grid Name="PlayerThreeField"
-                  Grid.Row="0">
+                      Grid.Row="0"
+                      Grid.Column="0"
+                      ClipToBounds="True">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -192,23 +204,19 @@
                 </Grid>
 
                 <Grid Name="PlayerThreeHand"
-                  Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                      Visibility="Hidden"
+                      Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Image Source="pack://application:,,,/GameObjects;component/Images/cardback.jpg" 
+                           Grid.Row="0"/>
+                    <Viewbox Grid.Row="1"
+                             HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerThreeHand}"/>
+                    </Viewbox>
                 </Grid>
-
             </Grid>
             <Grid Name="GridTwo"
                   Grid.Row="6">
@@ -242,7 +250,8 @@
                 </Grid>
                 
                 <Grid Name="PlayerTwoHand"
-                            Grid.Column="1">
+                      Visibility="Hidden"
+                      Grid.Column="1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3*"/>
                         <RowDefinition Height="1*"/>
@@ -251,10 +260,9 @@
                            Grid.Row="0"/>
                     <Viewbox Grid.Row="1"
                              HorizontalAlignment="Center">
-                        <TextBlock Name ="PlayerTwoHandCount"/>
+                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerTwoHand}"/>
                     </Viewbox>
-                </Grid>
-                
+                </Grid>                
             </Grid>
             
             <Grid Name="GridOne"
