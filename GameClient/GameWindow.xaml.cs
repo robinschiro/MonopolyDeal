@@ -426,21 +426,6 @@ namespace GameClient
             }
         }
 
-        public void DiscardCardEvent( object sender, MouseButtonEventArgs args )
-        {
-            if ( isCurrentTurnOwner )
-            {
-                Button cardButton = sender as Button;
-
-                Card card = cardButton.Tag as Card;
-                DiscardCard(card);
-            }
-            else
-            {
-                MessageBox.Show("You can only discard a card during your turn!", "Cannot Discard", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
         public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
             if ( isCurrentTurnOwner && this.Turn.ActionsRemaining > 0 )
@@ -1129,6 +1114,10 @@ namespace GameClient
                         {
                             item.IsEnabled &= (player.CardsInHand.Count > 7);
                         }
+                        else if ( ResourceList.FlipCardMenuItemHeader == header )
+                        {
+                            item.IsEnabled = true;
+                        }
                         else
                         {
                             item.IsEnabled &= (this.Turn.ActionsRemaining > 0);
@@ -1216,7 +1205,10 @@ namespace GameClient
                 discardMenuItem.Header = ResourceList.DiscardMenuItemHeader;
                 discardMenuItem.Click += ( sender, args ) =>
                 {
-                    DiscardCardEvent(cardButton, null);
+                    if ( MessageBoxResult.Yes == MessageBox.Show("Are you sure you want to discard this card?", "Discard Confirmation", MessageBoxButton.YesNo) )
+                    {
+                        DiscardCard(cardBeingAdded);
+                    }
                 };
                 menu.Items.Add(discardMenuItem);
             }
