@@ -1986,7 +1986,7 @@ namespace GameClient
                     foreach ( Card card in this.AssetsReceived )
                     {
                         AddCardToCardsInPlay(card, this.Player);
-                        assetsSummary.Append(card.Name + "\n");
+                        assetsSummary.Append(card.Name + " (" + (PropertyType.None != card.Color ? (card.Color + " ") : string.Empty) + card.Type + ")\n");
                     }
 
                     // Show message dialog with summary of assets received.
