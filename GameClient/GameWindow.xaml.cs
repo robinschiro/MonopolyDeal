@@ -20,6 +20,7 @@ using GameServer;
 using AdditionalWindows;
 using Utilities;
 using ResourceList = GameClient.Properties.Resources;
+using System.Text;
 
 namespace GameClient
 {
@@ -1258,6 +1259,7 @@ namespace GameClient
                                     }
                                     if ( colorsOfCurrentMonopolies.Contains(cardBeingAdded.AltColor) )
                                     {
+                                        MessageBox.Show("You cannot flip this property because you already have a " + cardBeingAdded.AltColor + " monopoly on the field.");
                                         return;
                                     }
 
@@ -1980,10 +1982,15 @@ namespace GameClient
                 // If all rentees have paid their rent, then add the cards from the AssetsReceived to the player's CardsInPlay.
                 if ( 0 == this.NumberOfRentees )
                 {
+                    StringBuilder assetsSummary = new StringBuilder();
                     foreach ( Card card in this.AssetsReceived )
                     {
                         AddCardToCardsInPlay(card, this.Player);
+                        assetsSummary.Append(card.Name + "\n");
                     }
+
+                    // Show message dialog with summary of assets received.
+                    MessageBox.Show("You received the following assets:\n" + assetsSummary.ToString(), "Assets Received");
 
                     // Clear the list of AssetsReceived.
                     AssetsReceived.Clear();

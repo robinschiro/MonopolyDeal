@@ -60,6 +60,15 @@ namespace AdditionalWindows
             this.Result = MessageBoxResult.OK;
             CloseWindow = true;
         }
+
+        private void ModalWindow_KeyDown( object sender, KeyEventArgs e )
+        {
+            if ( Key.Enter == e.Key && Visibility.Visible == this.OkButton.Visibility )
+            {
+                this.Result = MessageBoxResult.OK;
+                CloseWindow = true;
+            }
+        }
     }
 
 

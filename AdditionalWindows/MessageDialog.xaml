@@ -5,7 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:src="clr-namespace:AdditionalWindows" 
              mc:Ignorable="d"               
-             Title="Message" Width="250" Height="200">
+             Title="Message" 
+             Width="250" 
+             Height="200"
+             KeyDown="ModalWindow_KeyDown">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
