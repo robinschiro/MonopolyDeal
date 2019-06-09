@@ -33,7 +33,12 @@ namespace AdditionalWindows
             }
         }
 
-        public ModalWindow( bool isModal = true )
+        public ModalWindow()
+        {
+            this.isModal = true;
+        }
+
+        public ModalWindow( bool isModal )
         {
             this.isModal = isModal;
         }

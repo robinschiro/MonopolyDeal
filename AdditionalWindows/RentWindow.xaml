@@ -3,6 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:src="clr-namespace:AdditionalWindows" 
         Title="RentWindow" Height="386" Width="526">
+    
+    <Window.Resources>
+        <ResourceDictionary Source="pack://application:,,,/AdditionalWindows;component/Styles/CardListView.xaml"/>
+    </Window.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -32,35 +37,15 @@
 
         <ListView Name="AssetsListView"
                   ItemsSource="{Binding Assets, Mode=TwoWay}"
-                  HorizontalAlignment="Stretch" 
-                  VerticalAlignment="Top"
+                  Style="{StaticResource CardListViewStyle}"
                   Grid.Column="0"
-                  Grid.Row="1">
-            
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Value" DisplayMemberBinding="{Binding Value}"/>
-                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
-                </GridView>
-            </ListView.View>
-            
-        </ListView>
+                  Grid.Row="1"/>            
 
         <ListView Name="PaymentListView"
                   ItemsSource="{Binding Payment, Mode=TwoWay}"
-                  HorizontalAlignment="Stretch" 
-                  VerticalAlignment="Top"
+                  Style="{StaticResource CardListViewStyle}"
                   Grid.Column="1"
-                  Grid.Row="1">
-            
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Value" DisplayMemberBinding="{Binding Value}"/>
-                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
-                </GridView>
-            </ListView.View>
-
-        </ListView>
+                  Grid.Row="1"/>
 
         <Button Name="GiveButton" 
                 Content="Give Selected" 
