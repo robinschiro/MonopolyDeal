@@ -11,6 +11,7 @@
                 <GridView>
                     <GridViewColumn Header="Value" DisplayMemberBinding="{Binding Value}"/>
                     <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="Type" DisplayMemberBinding="{Binding Type}"/>
                 </GridView>
             </Setter.Value>
         </Setter>
