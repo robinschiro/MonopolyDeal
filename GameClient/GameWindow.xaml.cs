@@ -1950,12 +1950,13 @@ namespace GameClient
                 }
                 else
                 {
-                    string message = rentResponse.RenteeName + " rejected your deal with a \"Just Say No!\".";
+                    string message = rentResponse.RenteeName + " rejected your rent request with a \"Just Say No!\".";
 
                     Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
                     // If the renter has his own Just Say No, ask the renter if he wants to use it.
                     // If yes, send the rent request again.
-                    if ( MessageBoxResult.Yes == MessageBox.Show((null != justSayNo) ? message + "\nWould you like to use your \"Just Say No!\"?" : message, "\"Just Say No\"", (null != justSayNo) ? MessageBoxButton.YesNo : MessageBoxButton.OK) )
+                    bool playerWantsToUseJustSayNo = ClientUtilities.AskPlayerAboutJustSayNo("Rest Request Rejected", message, playerHasJustSayNo: null != justSayNo);
+                    if ( playerWantsToUseJustSayNo )
                     {
                         // By the time the renter presses "Yes", he may have already used all of his Just Say No cards. Verify that he still have one before moving on.
                         justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
@@ -1986,11 +1987,8 @@ namespace GameClient
                     foreach ( Card card in this.AssetsReceived )
                     {
                         AddCardToCardsInPlay(card, this.Player);
-                        assetsSummary.Append(card.Name + " (" + (PropertyType.None != card.Color ? (card.Color + " ") : string.Empty) + card.Type + ")\n");
+                        assetsSummary.Append(card.Name + " (" + (CardType.Property == card.Type ? (card.Color + " ") : string.Empty) + card.Type + ")\n");
                     }
-
-                    // Show message dialog with summary of assets received.
-                    MessageBox.Show("You received the following assets:\n" + assetsSummary.ToString(), "Assets Received");
 
                     // Clear the list of AssetsReceived.
                     AssetsReceived.Clear();
@@ -2003,6 +2001,9 @@ namespace GameClient
                     {
                         WaitMessage.CloseWindow = true;
                     }
+
+                    // Show message dialog with summary of assets received.
+                    MessageBox.Show("You received " + (string.IsNullOrWhiteSpace(assetsSummary.ToString()) ? "no assets." : "the following assets:\n" + assetsSummary.ToString()), "Assets Received");
                 }
             }
             else
@@ -2016,8 +2017,7 @@ namespace GameClient
         {
             ActionData.TheftRequest theftRequest = (ActionData.TheftRequest)request;
 
-            Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
-            string message = theftRequest.ThiefName + " has played a " + ((TheftType)theftRequest.ActionID).ToString() + " against you.\n";
+            string message = theftRequest.ThiefName + " has played a " + ((TheftType)theftRequest.ActionID).ToString() + " against you.";
 
             // By default, use the name of the first property in the list.
             string nameOfPropertyToTake = theftRequest.PropertiesToTake[0].Name;            
@@ -2029,38 +2029,28 @@ namespace GameClient
                     // If a Dealbreaker was used, use the name of the monopoly's color.
                     nameOfPropertyToTake = ClientUtilities.GetCardListColor(theftRequest.PropertiesToTake).ToString();
 
-                    message += "This player would like to take your " + nameOfPropertyToTake + " monopoly.\n";
+                    message += "\nThis player would like to take your " + nameOfPropertyToTake + " monopoly.";
                     break;
                 }
 
                 case TheftType.ForcedDeal:
                 {
-                    message += "This player would like to trade " + theftRequest.PropertyToGive.Name + " for " + nameOfPropertyToTake + ".\n";
+                    message += "\nThis player would like to trade " + theftRequest.PropertyToGive.Name + " for " + nameOfPropertyToTake + ".";
                     break;
                 }
 
                 case TheftType.SlyDeal:
                 {
-                    message += "This player would like to steal " + nameOfPropertyToTake + " from you.\n";
+                    message += "\nThis player would like to steal " + nameOfPropertyToTake + ".";
                     break;
                 }
             }
 
-            if ( null != justSayNo )
-            {
-                message += "Would you like to use your \"Just Say No\" card to reject " + theftRequest.ThiefName + "'s deal?";
-            }
-            else
-            {
-                message += "Press OK to accept the deal.";
-            }
-
             // Display the message box to the victim.
-            MessageBoxResult result = MessageBox.Show(message, "Theft Request", (null != justSayNo) ? MessageBoxButton.YesNo : MessageBoxButton.OK);
+            Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
+            bool playerWantsToUseJustSayNo = ClientUtilities.AskPlayerAboutJustSayNo("Theft Request", message, playerHasJustSayNo: null != justSayNo);
 
-            // Determine if the victim accepted the deal. If he didn't, remove his "Just Say No" and update the server.
-            bool acceptedDeal = result != MessageBoxResult.Yes;
-            if ( !acceptedDeal )
+            if ( playerWantsToUseJustSayNo )
             {
                 // Remove the Just Say No from the victim's hand.
                 PlayJustSayNo(justSayNo);               
@@ -2084,7 +2074,7 @@ namespace GameClient
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
 
             // Send the theft reply to the thief.
-            ServerUtilities.SendMessage(Client, Datatype.ReplyToTheft, new ActionData.TheftResponse(theftRequest.ThiefName, this.Player.Name, acceptedDeal));
+            ServerUtilities.SendMessage(Client, Datatype.ReplyToTheft, new ActionData.TheftResponse(theftRequest.ThiefName, this.Player.Name, !playerWantsToUseJustSayNo));
         }
 
         private void ProcessTheftResponse( Object response )
@@ -2124,10 +2114,10 @@ namespace GameClient
             {
                 string message = this.LastTheftRequest.VictimName + " rejected your deal with a \"Just Say No!\".";
 
+                // If the thief chooses to play a Just Say No, send the theft request again.
                 Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
-                // If the thief has his own Just Say No, ask the thief if he wants to use it.
-                // If yes, send the theft request again.
-                if ( MessageBoxResult.Yes == MessageBox.Show((null != justSayNo) ? message + "\nWould you like to use your \"Just Say No\"?" : message, "\"Just Say No\"", (null != justSayNo) ? MessageBoxButton.YesNo : MessageBoxButton.OK) )
+                bool playerWantsToUseJustSayNo = ClientUtilities.AskPlayerAboutJustSayNo("Deal Rejected", message, playerHasJustSayNo: null != justSayNo);
+                if ( playerWantsToUseJustSayNo )
                 {
                     PlayJustSayNo(justSayNo);
                     ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);

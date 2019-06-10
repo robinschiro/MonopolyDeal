@@ -14,6 +14,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using GameObjects;
+using Utilities;
 
 
 namespace AdditionalWindows
@@ -74,10 +75,13 @@ namespace AdditionalWindows
             this.ContentRendered += ( sender, args ) => 
             {
                 // If the user has a "Just Say No", give him the option to use it.
-                bool hasNo = rentee.CardsInHand.Any(card => 2 == card.ActionID);
-                if ( hasNo )
+                bool playerHasJustSayNo = rentee.CardsInHand.Any(card => 2 == card.ActionID);
+                if ( playerHasJustSayNo )
                 {
-                    if ( MessageBoxResult.Yes == MessageBox.Show("Would you like to use your \"Just Say No\" card to reject " + renterName + "'s rent request?", "Rent Rejection", MessageBoxButton.YesNo) )
+                    string message = "You could use your \"Just Say No!\" card to reject " + renterName + "'s rent request.";
+                    bool playerWantsToUseJustSayNo = ClientUtilities.AskPlayerAboutJustSayNo("Rent Rejection", message, playerHasJustSayNo: true);
+
+                    if ( playerWantsToUseJustSayNo )
                     {
                         // Mark the result of the dialog as false and close it.
                         this.dialogResult = false;

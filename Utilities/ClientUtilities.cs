@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using GameObjects;
 using Lidgren.Network;
+using System.Windows;
 
 namespace Utilities
 {
@@ -108,7 +109,7 @@ namespace Utilities
 
         #endregion
 
-        #region Monopoly Deal Functions
+        #region Card List Functions
 
         // Given a list of cards, determine the color of the monopoly being formed by the cards.
         public static PropertyType GetCardListColor( List<Card> cardList )
@@ -216,6 +217,29 @@ namespace Utilities
             }
             return null;
         }
+        #endregion
+
+        #region Just Say No Handling
+
+        public static bool AskPlayerAboutJustSayNo(string title, string baseMessage, bool playerHasJustSayNo)
+        {
+            MessageBoxResult result;
+            if (playerHasJustSayNo)
+            {
+                result = MessageBox.Show(baseMessage + "\n\nWould you like to use your \"Just Say No!\" card?", title, MessageBoxButton.YesNo);  
+                if (MessageBoxResult.Yes == result)
+                {
+                    result = MessageBox.Show("Are you sure you want to use your \"Just Say No!\" card?", "Confirmation", MessageBoxButton.YesNo);
+                }
+            }
+            else
+            {
+                result = MessageBox.Show(baseMessage + "\n\nPress OK to contine.", title, MessageBoxButton.OK);
+            }
+
+            return MessageBoxResult.Yes == result;
+        }
+
         #endregion
 
     }
