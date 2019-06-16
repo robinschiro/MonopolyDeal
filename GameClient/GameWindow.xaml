@@ -12,8 +12,7 @@
             <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
 
-        <local:MultiBoolConverter x:Key="multiBoolConverter" />
-        
+        <local:MultiBoolConverter x:Key="multiBoolConverter" />        
     </Window.Resources>
 
     <Grid Name="WindowGrid"

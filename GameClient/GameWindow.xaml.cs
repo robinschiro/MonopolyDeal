@@ -2310,7 +2310,8 @@ namespace GameClient
             ColorAnimation colorAnimation = new ColorAnimation();
             colorAnimation.To = Colors.LawnGreen;
             colorAnimation.RepeatBehavior = RepeatBehavior.Forever;
-            colorAnimation.Duration = new Duration(TimeSpan.FromSeconds(2));            
+            colorAnimation.Duration = new Duration(TimeSpan.FromSeconds(1));
+            colorAnimation.AutoReverse = true;
             return colorAnimation;
         }
 
