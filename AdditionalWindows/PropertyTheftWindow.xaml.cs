@@ -235,8 +235,8 @@ namespace AdditionalWindows
                         propertyItem.Header = property.Name;
                         propertyItem.Tag = property;
                         propertyItem.IsEnabled = !onlyMonopoliesSelectable;
-                        potentialMonopoly.Items.Add(propertyItem);
-                        
+                        propertyItem.ToolTip = new Image() { Source = new BitmapImage(new Uri(property.CardImageUriPath, UriKind.Absolute)) };
+                        potentialMonopoly.Items.Add(propertyItem);                        
                     }
 
                     this.ExpandSubtree(potentialMonopoly);
