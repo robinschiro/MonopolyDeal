@@ -48,6 +48,7 @@ namespace GameClient
         private bool HavePlayersBeenAssigned;
         private Turn Turn;
         private List<Card> DiscardPile;
+        private ColorAnimation EndTurnButtonAnimation;
 
         // Variables for managing the state of Action Cards.
         private int NumberOfRentees = 0;
@@ -207,6 +208,8 @@ namespace GameClient
                 {
                     Size_Changed(x);
                 });
+
+            this.EndTurnButtonAnimation = this.CreateEndTurnButtonAnimation();
         }
 
         #region Client Communication Code
@@ -460,6 +463,12 @@ namespace GameClient
                     {
                         RemoveCardFromHand(cardBeingPlayed);
                     }
+
+                    // Update animation on end turn button.
+                    if ( 0 == this.Turn.ActionsRemaining )
+                    {
+                        this.AnimateEndTurnButton();
+                    }
                 }                
             }
         }
@@ -512,12 +521,8 @@ namespace GameClient
 
             // Send the updated Turn object to the server to be distributed to the other clients.
             ServerUtilities.SendMessage(Client, Datatype.EndTurn, this.Turn);
-        }
 
-        // Use this event to respond to key presses.
-        private void Window_KeyDown( object sender, KeyEventArgs e )
-        {
-
+            this.EndTurnButton.ClearValue(Button.BackgroundProperty);
         }
 
         // When a user clicks and holds onto a card, trigger a drag event.
@@ -2298,6 +2303,21 @@ namespace GameClient
         {
             MediaPlayer.Open(new Uri("C:\\Users\\Robin\\Dropbox\\Songs\\A Fifth of Beethoven.mp3"));
             MediaPlayer.Play();
+        }
+
+        private ColorAnimation CreateEndTurnButtonAnimation()
+        {
+            ColorAnimation colorAnimation = new ColorAnimation();
+            colorAnimation.To = Colors.LawnGreen;
+            colorAnimation.RepeatBehavior = RepeatBehavior.Forever;
+            colorAnimation.Duration = new Duration(TimeSpan.FromSeconds(2));            
+            return colorAnimation;
+        }
+
+        private void AnimateEndTurnButton()
+        {
+            this.EndTurnButton.Background = new SolidColorBrush(Colors.Gray);
+            this.EndTurnButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, this.EndTurnButtonAnimation);
         }
 
         #endregion
