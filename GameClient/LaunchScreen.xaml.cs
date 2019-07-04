@@ -24,7 +24,7 @@ namespace GameClient
 
             // Load cached settings from Profile.
             string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ResourceList.SettingsFilePath);
-            settings = new tvProfile(settingsFilePath, tvProfileFileCreateActions.NoPromptCreateFile);
+            settings = new tvProfile(settingsFilePath, tvProfileFileCreateActions.NoPromptCreateFile, abUseXmlFiles: true);
 
             // Populate fields with settings.
             this.PlayerNameTextBox.Text = settings.sValue(ResourceList.SettingNameKey, string.Empty);
