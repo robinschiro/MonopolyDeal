@@ -234,7 +234,7 @@ namespace Utilities
             }
             else
             {
-                result = MessageBox.Show(baseMessage + "\n\nPress OK to contine.", title, MessageBoxButton.OK);
+                result = MessageBox.Show(baseMessage + "\n\nPress OK to continue.", title, MessageBoxButton.OK);
             }
 
             return MessageBoxResult.Yes == result;

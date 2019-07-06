@@ -1,26 +1,27 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Media;
+using System.Reactive.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Lidgren.Network;
-using System.Reactive.Linq;
-using System.Reactive;
-using System.Windows.Media.Animation;
-using System.Windows.Data;
+
+using AdditionalWindows;
 using GameObjects;
 using GameServer;
-using AdditionalWindows;
+using Lidgren.Network;
 using Utilities;
 using ResourceList = GameClient.Properties.Resources;
-using System.Text;
 
 namespace GameClient
 {
@@ -59,7 +60,7 @@ namespace GameClient
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private MediaPlayer MediaPlayer;
+        private SoundPlayer SoundPlayer;
 
         private bool isCurrentTurnOwner;
         public bool IsCurrentTurnOwner
@@ -88,10 +89,8 @@ namespace GameClient
             this.HavePlayersBeenAssigned = false;
             this.ServerIP = ipAddress;
             this.PlayerName = playerName;
-
-            //// Play theme song.
-            //MediaPlayer = new MediaPlayer();
-            //CreateNewThread(new Action<Object>(PlaySong));
+            this.SoundPlayer = new SoundPlayer();
+            this.EndTurnButtonAnimation = this.CreateEndTurnButtonAnimation();
 
             // Instantiate the Player's Turn object.
             this.Turn = turn;
@@ -208,8 +207,6 @@ namespace GameClient
                 {
                     Size_Changed(x);
                 });
-
-            this.EndTurnButtonAnimation = this.CreateEndTurnButtonAnimation();
         }
 
         #region Client Communication Code
@@ -715,8 +712,14 @@ namespace GameClient
             // Otherwise, display only the last card in the discard pile.
             else
             {
-                Button cardButton = ConvertCardToButton(this.DiscardPile[this.DiscardPile.Count - 1]);
+                Card discardedCard = this.DiscardPile[this.DiscardPile.Count - 1];
+                Button cardButton = ConvertCardToButton(discardedCard);
                 DiscardPileGrid.Children.Add(cardButton);
+
+                if ( (int)ActionId.ItsMyBirthday == discardedCard.ActionID )
+                {
+                    this.PlaySong(ResourceList.UriPathItsMyBirthday);
+                }
             }
         }
 
@@ -2139,6 +2142,37 @@ namespace GameClient
 
         #endregion
 
+        #region Sound and Animation
+
+        // Play the song.
+        public void PlaySong( Object filler )
+        {
+            string uriPath = filler as string;
+            Stream resourceStream = Application.GetResourceStream(new Uri(uriPath)).Stream;
+            this.SoundPlayer.Stream = resourceStream;
+                        
+            this.SoundPlayer.Play();
+        }
+
+        private ColorAnimation CreateEndTurnButtonAnimation()
+        {
+            ColorAnimation colorAnimation = new ColorAnimation();
+            colorAnimation.To = Colors.LawnGreen;
+            colorAnimation.RepeatBehavior = RepeatBehavior.Forever;
+            colorAnimation.Duration = new Duration(TimeSpan.FromSeconds(1));
+            colorAnimation.AutoReverse = true;
+
+            return colorAnimation;
+        }
+
+        private void AnimateEndTurnButton()
+        {
+            this.EndTurnButton.Background = new SolidColorBrush(Colors.Gray);
+            this.EndTurnButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, this.EndTurnButtonAnimation);
+        }
+
+        #endregion
+
         #region Miscellaneous
 
         // Create a new thread to run a function that cannot be run on the same thread invoking CreateNewThread().
@@ -2296,31 +2330,9 @@ namespace GameClient
             }
 
             return playerName;
-        }
-
-        // Play the song.
-        public void PlaySong( Object filler )
-        {
-            MediaPlayer.Open(new Uri("C:\\Users\\Robin\\Dropbox\\Songs\\A Fifth of Beethoven.mp3"));
-            MediaPlayer.Play();
-        }
-
-        private ColorAnimation CreateEndTurnButtonAnimation()
-        {
-            ColorAnimation colorAnimation = new ColorAnimation();
-            colorAnimation.To = Colors.LawnGreen;
-            colorAnimation.RepeatBehavior = RepeatBehavior.Forever;
-            colorAnimation.Duration = new Duration(TimeSpan.FromSeconds(1));
-            colorAnimation.AutoReverse = true;
-            return colorAnimation;
-        }
-
-        private void AnimateEndTurnButton()
-        {
-            this.EndTurnButton.Background = new SolidColorBrush(Colors.Gray);
-            this.EndTurnButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, this.EndTurnButtonAnimation);
-        }
+        }        
 
         #endregion
+
     }
 }

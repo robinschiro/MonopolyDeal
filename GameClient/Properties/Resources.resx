@@ -144,4 +144,7 @@
   <data name="SettingsFilePath" xml:space="preserve">
     <value>MonopolyDeal\MonopolyDealSettings.txt</value>
   </data>
+  <data name="UriPathItsMyBirthday" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Audio/ItsMyBirthdayClip.wav</value>
+  </data>
 </root>

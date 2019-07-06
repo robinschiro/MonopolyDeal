@@ -140,5 +140,14 @@ namespace GameClient.Properties {
                 return ResourceManager.GetString("SettingsFilePath", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/ItsMyBirthdayClip.wav.
+        /// </summary>
+        public static string UriPathItsMyBirthday {
+            get {
+                return ResourceManager.GetString("UriPathItsMyBirthday", resourceCulture);
+            }
+        }
     }
 }
