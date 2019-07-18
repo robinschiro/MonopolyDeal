@@ -293,7 +293,7 @@ namespace GameServer
         }
 
         // Send an update to either a client or the server, depending on where this method is called.
-        public static void SendMessage( NetPeer netPeer, Datatype messageType, object updatedObject = null )
+        public static void SendMessage( NetPeer netPeer, Datatype messageType, object updatedObject = null, long idOfClientToExclude = -1 )
         {
             NetOutgoingMessage outmsg;
 
@@ -397,10 +397,11 @@ namespace GameServer
             if ( netPeer is NetServer )
             {
                 NetServer server = netPeer as NetServer;
+                List<NetConnection> connectionsForFanout = server.Connections.Where(connection => connection.RemoteUniqueIdentifier != idOfClientToExclude).ToList();
 
-                if ( server.Connections.Count > 0 )
+                if ( connectionsForFanout.Count > 0 )
                 {
-                    server.SendMessage(outmsg, server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+                    server.SendMessage(outmsg, connectionsForFanout, NetDeliveryMethod.ReliableOrdered, 0);
                 }
             }
             else

@@ -102,7 +102,7 @@ namespace GameClient
             InitializeClient(ipAddress, portNumber);
 
             // Do not continue until the client has successfully established communication with the server.
-            WaitMessage = new MessageDialog("Please Wait...", "Waiting to establish communication with server...");
+            WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting to establish communication with server...");
             if ( !this.BeginCommunication )
             {
                 WaitMessage.ShowDialog();
@@ -111,7 +111,7 @@ namespace GameClient
             // Request the player list and wait for it before continuing.
             {
                 // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
-                WaitMessage = new MessageDialog("Please Wait...", "Waiting for player list...");
+                WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for player list...");
 
                 // Receive a list of the players already on the server.
                 ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
@@ -123,7 +123,7 @@ namespace GameClient
             // Request the deck and wait for it before continuing.
             {
                 // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
-                WaitMessage = new MessageDialog("Please Wait...", "Waiting for deck...");
+                WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for deck...");
 
                 // Receive a list of the players already on the server.
                 ServerUtilities.SendMessage(Client, Datatype.RequestDeck);
@@ -131,7 +131,6 @@ namespace GameClient
                 // Do not continue until the client receives the Player List from the server.
                 WaitMessage.ShowDialog();
             }
-
 
             // Update the turn display.
             UpdateTurnDisplay(null);
@@ -677,6 +676,15 @@ namespace GameClient
             {
                 IsCurrentTurnOwner = true;
 
+                // Inform the player that it is his/her turn.
+                if ( shouldNotifyUser )
+                {
+                    this.PlaySound(ResourceList.UriPathTurnDing);
+
+                    var turnNotificationDialog = new MessageDialog(this, string.Empty, "It's your turn!", MessageBoxButton.OK);
+                    turnNotificationDialog.ShowDialog();
+                }
+
                 // Draw the cards for the current turn owner automatically.
                 // In this game, only two cards can generally be drawn at a time. However, if the player has no cards in his hand, he must draw five cards.
                 if ( this.Player.CardsInHand.Count > 0 )
@@ -686,13 +694,6 @@ namespace GameClient
                 else
                 {
                     DrawCards(5);
-                }
-
-                // Inform the player that it is his/her turn.
-                if ( shouldNotifyUser )
-                {
-                    var turnNotificationDialog = new MessageDialog(string.Empty, "It's your turn!", MessageBoxButton.OK);
-                    turnNotificationDialog.ShowDialog();
                 }
             }
             else
@@ -716,10 +717,7 @@ namespace GameClient
                 Button cardButton = ConvertCardToButton(discardedCard);
                 DiscardPileGrid.Children.Add(cardButton);
 
-                if ( (int)ActionId.ItsMyBirthday == discardedCard.ActionID )
-                {
-                    this.PlaySong(ResourceList.UriPathItsMyBirthday);
-                }
+                this.PlaySoundForAction((ActionId)discardedCard.ActionID);
             }
         }
 
@@ -734,7 +732,6 @@ namespace GameClient
 
                 // Add the card to the discard pile and update its display.
                 this.DiscardPile.Add(cardToDiscard);
-                DisplayUpdatedDiscardPile();
 
                 // Update the server's discard pile.
                 ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, this.DiscardPile);
@@ -1704,7 +1701,7 @@ namespace GameClient
                     ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);
 
                     // Display a wait message until the victim has responded to the request.
-                    WaitMessage = new MessageDialog("Please Wait...", "Waiting for victim to respond...");
+                    WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for victim to respond...");
                     WaitMessage.ShowDialog();                    
                 }
                 else
@@ -1855,7 +1852,7 @@ namespace GameClient
 
             // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
             // ROBIN TODO: Show some sort of progress bar.
-            WaitMessage = new MessageDialog("Please Wait...", "Waiting for rentees to pay rent...");
+            WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for rentees to pay rent...");
             WaitMessage.ShowDialog();
 
             return true;
@@ -2131,7 +2128,7 @@ namespace GameClient
                     ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);
 
                     // Display a wait message until the victim has responded to the request.
-                    WaitMessage = new MessageDialog("Please Wait...", "Waiting for victim to respond...");
+                    WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for victim to respond...");
                     WaitMessage.ShowDialog();
                 }
             }
@@ -2144,8 +2141,30 @@ namespace GameClient
 
         #region Sound and Animation
 
-        // Play the song.
-        public void PlaySong( Object filler )
+        private void PlaySoundForAction(Object actionId)
+        {
+            this.PlaySoundForAction((ActionId)actionId);
+        }
+
+        private void PlaySoundForAction(ActionId actionId)
+        {
+            switch ( actionId )
+            {
+                case ActionId.ItsMyBirthday:
+                {
+                    this.PlaySound(ResourceList.UriPathItsMyBirthday);
+                    break;
+                }
+
+                case ActionId.JustSayNo:
+                {
+                    this.PlaySound(ResourceList.UriPathNoSound);
+                    break;
+                }
+            }               
+        }
+
+        private void PlaySound( Object filler )
         {
             string uriPath = filler as string;
             Stream resourceStream = Application.GetResourceStream(new Uri(uriPath)).Stream;

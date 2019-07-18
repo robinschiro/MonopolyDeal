@@ -16,7 +16,7 @@ using System.IO.Packaging;
 
 // The server/client architecture of MonopolyDeal is built on the Lidgren Networking framework.
 // Lidgren Networking Resources:
-// Download LidgreNetwork at: http://code.google.com/p/lidgren-network-gen3/
+// Download LidgreNetwork at: https://github.com/lidgren/lidgren-network-gen3
 // Blog: http://xnacoding.blogspot.com/
 namespace GameServer
 {
@@ -139,9 +139,8 @@ namespace GameServer
                         {
                             Datatype messageType = (Datatype)inc.ReadByte();
                             
-                            // Get all connections excluding the sender connection.
-                            long idOfSender = inc.SenderConnection.RemoteUniqueIdentifier;
-                            List<NetConnection> connectionsForFanout = Server.Connections.Where(connection => connection.RemoteUniqueIdentifier != idOfSender).ToList();
+                            // Exclude the sender from the fanout.
+                            long idOfSender = inc.SenderConnection.RemoteUniqueIdentifier;                            
 
                             switch ( messageType )
                             {
@@ -150,7 +149,7 @@ namespace GameServer
                                 {
                                     Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
                                     ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
-                                    
+
                                     break;
                                 }
 
@@ -235,43 +234,39 @@ namespace GameServer
                                     string playerToConnect = (String)ServerUtilities.ReceiveMessage(inc, messageType);
 
                                     // Broadcast a message that tells a specific client to launch the game.
-                                    ServerUtilities.SendMessage(Server, Datatype.TimeToConnect, playerToConnect);                                    
+                                    ServerUtilities.SendMessage(Server, Datatype.TimeToConnect, playerToConnect);                                   
 
                                     break;
                                 }
 
-                                // Send the rent request to all clients.
                                 case Datatype.RequestRent:
                                 {
                                     ActionData.RentRequest request = (ActionData.RentRequest)ServerUtilities.ReadRentRequest(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.RequestRent, request);
+                                    ServerUtilities.SendMessage(Server, Datatype.RequestRent, request, idOfClientToExclude: idOfSender);
 
                                     break;
                                 }
 
-                                // Send the rent response to all clients.
                                 case Datatype.GiveRent:
                                 {
                                     ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReadRentResponse(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.GiveRent, response);
+                                    ServerUtilities.SendMessage(Server, Datatype.GiveRent, response, idOfClientToExclude: idOfSender);
 
                                     break;
                                 }
 
-                                // Send the theft request to all clients.
                                 case Datatype.RequestTheft:
                                 {
                                     ActionData.TheftRequest request = (ActionData.TheftRequest)ServerUtilities.ReadTheftRequest(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.RequestTheft, request);
+                                    ServerUtilities.SendMessage(Server, Datatype.RequestTheft, request, idOfClientToExclude: idOfSender);
 
                                     break;
                                 }
-
-                                // Send the theft response to all clients.
+                                                                
                                 case Datatype.ReplyToTheft:
                                 {
                                     ActionData.TheftResponse response = (ActionData.TheftResponse)ServerUtilities.ReadTheftResponse(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.ReplyToTheft, response);
+                                    ServerUtilities.SendMessage(Server, Datatype.ReplyToTheft, response, idOfClientToExclude: idOfSender);
 
                                     break;
                                 }
