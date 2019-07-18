@@ -88,6 +88,15 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please Wait....
+        /// </summary>
+        public static string PleaseWaitWindowTitle {
+            get {
+                return ResourceManager.GetString("PleaseWaitWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Separate Wild Card.
         /// </summary>
         public static string SeparateWildCardMenuItemHeader {
@@ -147,6 +156,24 @@ namespace GameClient.Properties {
         public static string UriPathItsMyBirthday {
             get {
                 return ResourceManager.GetString("UriPathItsMyBirthday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/No.wav.
+        /// </summary>
+        public static string UriPathNoSound {
+            get {
+                return ResourceManager.GetString("UriPathNoSound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/TurnDing.wav.
+        /// </summary>
+        public static string UriPathTurnDing {
+            get {
+                return ResourceManager.GetString("UriPathTurnDing", resourceCulture);
             }
         }
     }

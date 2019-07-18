@@ -126,6 +126,9 @@
   <data name="FlipCardMenuItemHeader" xml:space="preserve">
     <value>Flip Card</value>
   </data>
+  <data name="PleaseWaitWindowTitle" xml:space="preserve">
+    <value>Please Wait...</value>
+  </data>
   <data name="SeparateWildCardMenuItemHeader" xml:space="preserve">
     <value>Separate Wild Card</value>
   </data>
@@ -146,5 +149,11 @@
   </data>
   <data name="UriPathItsMyBirthday" xml:space="preserve">
     <value>pack://application:,,,/GameObjects;component/Audio/ItsMyBirthdayClip.wav</value>
+  </data>
+  <data name="UriPathNoSound" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Audio/No.wav</value>
+  </data>
+  <data name="UriPathTurnDing" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Audio/TurnDing.wav</value>
   </data>
 </root>
