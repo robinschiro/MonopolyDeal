@@ -14,23 +14,17 @@ using System.Windows;
 using System.Windows.Resources;
 using System.IO.Packaging;
 
-
-// Lidgren Network example
-// Made by: Riku Koskinen
-// http://xnacoding.blogspot.com/
-// Download LidgreNetwork at: http://code.google.com/p/lidgren-network-gen3/
-//
-// You can use this code in anyway you want
-// Code is not perfect, but it works
-// It's example of console based game, where new players can join and move
-// Movement is updated to all clients.
-
-
-// THIS IS VERY VERY VERY BASIC EXAMPLE OF NETWORKING IN GAMES
-// NO PREDICTION, NO LAG COMPENSATION OF ANYKIND
-
+// The server/client architecture of MonopolyDeal is built on the Lidgren Networking framework.
+// Lidgren Networking Resources:
+// Download LidgreNetwork at: https://github.com/lidgren/lidgren-network-gen3
+// Blog: http://xnacoding.blogspot.com/
 namespace GameServer
 {
+    public enum PacketTypes
+    {
+        LOGIN,
+    }
+
     public class ServerManager
     {
         // Server object
@@ -134,7 +128,7 @@ namespace GameServer
                                 inc.SenderConnection.Approve();
 
                                 // Debug
-                                Console.WriteLine("Approved new connection and updated the world status");
+                                Console.WriteLine("Approved new connection.");
                             }
 
                             break;
@@ -144,6 +138,9 @@ namespace GameServer
                         case NetIncomingMessageType.Data:
                         {
                             Datatype messageType = (Datatype)inc.ReadByte();
+                            
+                            // Exclude the sender from the fanout.
+                            long idOfSender = inc.SenderConnection.RemoteUniqueIdentifier;                            
 
                             switch ( messageType )
                             {
@@ -151,11 +148,8 @@ namespace GameServer
                                 case Datatype.UpdateDeck:
                                 {
                                     Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
+                                    ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
 
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
-                                    }
                                     break;
                                 }
 
@@ -163,12 +157,7 @@ namespace GameServer
                                 case Datatype.UpdateDiscardPile:
                                 {
                                     DiscardPile = (List<Card>)ServerUtilities.ReceiveMessage(inc, messageType);
-
-                                    // Send the updated DiscardPile to all clients.
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.UpdateDiscardPile, DiscardPile);
-                                    }
+                                    ServerUtilities.SendMessage(Server, Datatype.UpdateDiscardPile, DiscardPile);
 
                                     break;
                                 }
@@ -198,11 +187,9 @@ namespace GameServer
                                         PlayerList.Add(updatedPlayer);
                                     }
 
-                                    // Send the updated PlayerList to all clients.
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
-                                    }
+                                    // Send the updated PlayerList to all clients.                                    
+                                    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
+                                    
                                     break;
                                 }
 
@@ -210,11 +197,7 @@ namespace GameServer
                                 case Datatype.UpdatePlayerList:
                                 {
                                     PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
-
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
-                                    }
+                                    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
 
                                     break;
                                 }
@@ -223,11 +206,7 @@ namespace GameServer
                                 case Datatype.UpdateTurn:
                                 {
                                     Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
-
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.UpdateTurn, Turn);
-                                    }
+                                    ServerUtilities.SendMessage(Server, Datatype.UpdateTurn, Turn);
 
                                     break;
                                 }
@@ -241,20 +220,11 @@ namespace GameServer
                                         PlayerList[i] = new Player(Deck, PlayerList[i].Name);
                                     }
 
-                                    //// Send the Player List to the clients.
-                                    //if ( Server.ConnectionsCount != 0 )
-                                    //{
-                                    //    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
-                                    //}
-
                                     // Generate the Turn object to keep track of the current turn.
                                     Turn = new Turn(PlayerList.Count);
 
                                     // Tell all clients to launch the game and send them the Turn object.
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.LaunchGame, Turn);
-                                    }
+                                    ServerUtilities.SendMessage(Server, Datatype.LaunchGame, Turn);                                   
 
                                     break;
                                 }
@@ -264,62 +234,39 @@ namespace GameServer
                                     string playerToConnect = (String)ServerUtilities.ReceiveMessage(inc, messageType);
 
                                     // Broadcast a message that tells a specific client to launch the game.
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.TimeToConnect, playerToConnect);
-                                    }
+                                    ServerUtilities.SendMessage(Server, Datatype.TimeToConnect, playerToConnect);                                   
 
                                     break;
                                 }
 
-                                // Send the rent request to all clients.
                                 case Datatype.RequestRent:
                                 {
                                     ActionData.RentRequest request = (ActionData.RentRequest)ServerUtilities.ReadRentRequest(inc);
-
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.RequestRent, request);
-                                    }
+                                    ServerUtilities.SendMessage(Server, Datatype.RequestRent, request, idOfClientToExclude: idOfSender);
 
                                     break;
                                 }
 
-                                // Send the rent response to all clients.
                                 case Datatype.GiveRent:
                                 {
                                     ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReadRentResponse(inc);
-
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.GiveRent, response);
-                                    }
+                                    ServerUtilities.SendMessage(Server, Datatype.GiveRent, response, idOfClientToExclude: idOfSender);
 
                                     break;
                                 }
 
-                                // Send the theft request to all clients.
                                 case Datatype.RequestTheft:
                                 {
                                     ActionData.TheftRequest request = (ActionData.TheftRequest)ServerUtilities.ReadTheftRequest(inc);
-
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.RequestTheft, request);
-                                    }
+                                    ServerUtilities.SendMessage(Server, Datatype.RequestTheft, request, idOfClientToExclude: idOfSender);
 
                                     break;
                                 }
-
-                                // Send the theft response to all clients.
+                                                                
                                 case Datatype.ReplyToTheft:
                                 {
                                     ActionData.TheftResponse response = (ActionData.TheftResponse)ServerUtilities.ReadTheftResponse(inc);
-
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.ReplyToTheft, response);
-                                    }
+                                    ServerUtilities.SendMessage(Server, Datatype.ReplyToTheft, response, idOfClientToExclude: idOfSender);
 
                                     break;
                                 }
@@ -337,22 +284,14 @@ namespace GameServer
                                 // Send the server's Deck to all clients.
                                 case Datatype.RequestDeck:
                                 {
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
-                                    }
-
+                                    ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
                                     break;
                                 }
 
                                 // Send the server's PlayerList to all clients.
                                 case Datatype.RequestPlayerList:
                                 {
-                                    if ( Server.ConnectionsCount != 0 )
-                                    {
-                                        ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
-                                    }
-
+                                    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
                                     break;
                                 }                                    
                             }
@@ -372,16 +311,14 @@ namespace GameServer
                             // NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with disconnect()
                             Console.WriteLine(inc.SenderConnection.ToString() + " status changed. " + (NetConnectionStatus)inc.SenderConnection.Status);
                             if ( inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting )
-                            {
-
+                            {                                
+                                Console.WriteLine("Client was disconnected.");
                             }
                             break;
                         }
                         default:
                         {
-                            // As i statet previously, theres few other kind of messages also, but i dont cover those in this example
-                            // Uncommenting next line, informs you, when ever some other kind of message is received
-                            //Console.WriteLine("Not Important Message");
+                            Console.WriteLine("Message of type: " + inc.MessageType + " received");
                             break;
                         }
                     }
@@ -397,16 +334,5 @@ namespace GameServer
                 System.Threading.Thread.Sleep(100);
             }
         }
-    }
-
-    // This is good way to handle different kind of packets
-    // there has to be some way, to detect, what kind of packet/message is incoming.
-    // With this, you can read message in correct order ( ie. Can't read int, if its string etc )
-
-    // Best thing about this method is, that even if you change the order of the entrys in enum, the system won't break up
-    // Enum can be casted ( converted ) to byte
-    public enum PacketTypes
-    {
-        LOGIN,
     }
 }

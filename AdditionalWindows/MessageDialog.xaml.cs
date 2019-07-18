@@ -15,8 +15,7 @@ using System.Threading;
 using System.ComponentModel;
 
 namespace AdditionalWindows
-{
-    
+{    
     // <summary>
     /// Interaction logic for MessageDialog.xaml
     /// </summary>
@@ -24,11 +23,16 @@ namespace AdditionalWindows
     {
         public MessageBoxResult Result { get; set; }
 
-        public MessageDialog( string title, string message, MessageBoxButton option = (MessageBoxButton)(-1), bool isModal = true) : base( isModal )
+        public MessageDialog( Window owner, string title, string message, MessageBoxButton option = (MessageBoxButton)(-1), bool isModal = true ) : base( isModal )
         {
             InitializeComponent();
             this.Title = title;
             this.MessageLabel.Content = message;
+
+            if ( owner.IsVisible )
+            {
+                this.Owner = owner;
+            }
 
             // Set the window's width to be large enough to contain the message.
             this.Loaded += new RoutedEventHandler(( sender, args ) => { this.Width = this.MessageLabel.ActualWidth + 100; });            

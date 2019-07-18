@@ -8,6 +8,7 @@ using GameObjects;
 using GameServer;
 using Lidgren.Network;
 using AdditionalWindows;
+using ResourceList = GameClient.Properties.Resources;
 
 namespace GameClient
 {
@@ -81,14 +82,14 @@ namespace GameClient
             InitializeClient(ipAddress, portNumber);
 
             // Do not continue until the client has successfully established communication with the server.
-            WaitMessage = new MessageDialog("Please Wait...", "Waiting to establish communication with server...", isModal: false);
+            WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting to establish communication with server...", isModal: false);
             if (!this.BeginCommunication)
             {
                 WaitMessage.ShowDialog();  
             }
 
             // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
-            WaitMessage = new MessageDialog("Please Wait...", "Waiting for player list...", isModal: false);
+            WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for player list...", isModal: false);
 
             // Receive a list of the players already on the server.
             ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
