@@ -8,7 +8,8 @@
              Title="Message" 
              Width="250" 
              Height="200"
-             KeyDown="ModalWindow_KeyDown">
+             KeyDown="ModalWindow_KeyDown"
+             WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
