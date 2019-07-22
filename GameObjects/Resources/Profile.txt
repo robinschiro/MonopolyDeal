@@ -1,6 +1,6 @@
 ExcelToProfileConverter.exe
 
--passgo.jpg=[
+-passgo=[
 
     -Name="Pass Go"
     -CardType=Action
@@ -10,8 +10,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=0
 
--passgo.jpg=]
--doubletherent.jpg=[
+-passgo=]
+-doubletherent=[
 
     -Name="Double The Rent"
     -CardType=Action
@@ -21,8 +21,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=1
 
--doubletherent.jpg=]
--justsayno.jpg=[
+-doubletherent=]
+-justsayno=[
 
     -Name="Just Say No"
     -CardType=Action
@@ -31,9 +31,10 @@ ExcelToProfileConverter.exe
     -PropertyType=
     -AltPropertyType=
     -ActionID=2
+    -SoundEffectFile=JustSayNo.wav
 
--justsayno.jpg=]
--hotel.jpg=[
+-justsayno=]
+-hotel=[
 
     -Name=Hotel
     -CardType=Enhancement
@@ -43,8 +44,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=3
 
--hotel.jpg=]
--house.jpg=[
+-hotel=]
+-house=[
 
     -Name=House
     -CardType=Enhancement
@@ -54,8 +55,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=4
 
--house.jpg=]
--dealbreaker.jpg=[
+-house=]
+-dealbreaker=[
 
     -Name="Deal Breaker"
     -CardType=Action
@@ -65,8 +66,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=5
 
--dealbreaker.jpg=]
--slydeal.jpg=[
+-dealbreaker=]
+-slydeal=[
 
     -Name="Sly Deal"
     -CardType=Action
@@ -76,8 +77,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=6
 
--slydeal.jpg=]
--forceddeal.jpg=[
+-slydeal=]
+-forceddeal=[
 
     -Name="Forced Deal"
     -CardType=Action
@@ -87,8 +88,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=7
 
--forceddeal.jpg=]
--itsmybirthday.jpg=[
+-forceddeal=]
+-itsmybirthday=[
 
     -Name="It's My Birthday"
     -CardType=Action
@@ -98,8 +99,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=8
 
--itsmybirthday.jpg=]
--debtcollector.jpg=[
+-itsmybirthday=]
+-debtcollector=[
 
     -Name="Debt Collector"
     -CardType=Action
@@ -109,8 +110,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=9
 
--debtcollector.jpg=]
--rentwild.jpg=[
+-debtcollector=]
+-rentwild=[
 
     -Name="Rent Wild"
     -CardType=Action
@@ -120,8 +121,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=10
 
--rentwild.jpg=]
--rentlbbr.jpg=[
+-rentwild=]
+-rentlbbr=[
 
     -Name="Rent Light Blue-Brown"
     -CardType=Action
@@ -131,8 +132,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Brown
     -ActionID=11
 
--rentlbbr.jpg=]
--rentop.jpg=[
+-rentlbbr=]
+-rentop=[
 
     -Name="Rent Orange-Pink"
     -CardType=Action
@@ -142,8 +143,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Pink
     -ActionID=12
 
--rentop.jpg=]
--rentry.jpg=[
+-rentop=]
+-rentry=[
 
     -Name="Rent Yellow-Red"
     -CardType=Action
@@ -153,8 +154,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Red
     -ActionID=13
 
--rentry.jpg=]
--rentut.jpg=[
+-rentry=]
+-rentut=[
 
     -Name="Rent Utility-Railroad"
     -CardType=Action
@@ -164,8 +165,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Railroad
     -ActionID=14
 
--rentut.jpg=]
--rentbg.jpg=[
+-rentut=]
+-rentbg=[
 
     -Name="Rent Blue-Green"
     -CardType=Action
@@ -175,8 +176,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Green
     -ActionID=15
 
--rentbg.jpg=]
--10million.jpg=[
+-rentbg=]
+-10million=[
 
     -Name="Ten Million"
     -CardType=Money
@@ -186,8 +187,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--10million.jpg=]
--1million.jpg=[
+-10million=]
+-1million=[
 
     -Name="One Million"
     -CardType=Money
@@ -197,8 +198,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--1million.jpg=]
--2million.jpg=[
+-1million=]
+-2million=[
 
     -Name="Two Million"
     -CardType=Money
@@ -208,8 +209,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--2million.jpg=]
--3million.jpg=[
+-2million=]
+-3million=[
 
     -Name="Three Million"
     -CardType=Money
@@ -219,8 +220,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--3million.jpg=]
--4million.jpg=[
+-3million=]
+-4million=[
 
     -Name="Four Million"
     -CardType=Money
@@ -230,8 +231,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--4million.jpg=]
--5million.jpg=[
+-4million=]
+-5million=[
 
     -Name="Five Million"
     -CardType=Money
@@ -241,8 +242,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--5million.jpg=]
--atlanticavenue.jpg=[
+-5million=]
+-atlanticavenue=[
 
     -Name="Atlantic Avenue"
     -CardType=Property
@@ -252,8 +253,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--atlanticavenue.jpg=]
--balticavenue.jpg=[
+-atlanticavenue=]
+-balticavenue=[
 
     -Name="Baltic Avenue"
     -CardType=Property
@@ -263,8 +264,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--balticavenue.jpg=]
--bandorailroad.jpg=[
+-balticavenue=]
+-bandorailroad=[
 
     -Name="B & O Railroad"
     -CardType=Property
@@ -274,8 +275,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--bandorailroad.jpg=]
--boardwalk.jpg=[
+-bandorailroad=]
+-boardwalk=[
 
     -Name=Boardwalk
     -CardType=Property
@@ -285,8 +286,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--boardwalk.jpg=]
--connecticutavenue.jpg=[
+-boardwalk=]
+-connecticutavenue=[
 
     -Name="Connecticut Avenue"
     -CardType=Property
@@ -296,8 +297,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--connecticutavenue.jpg=]
--electriccompany.jpg=[
+-connecticutavenue=]
+-electriccompany=[
 
     -Name="Electric Company"
     -CardType=Property
@@ -307,8 +308,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--electriccompany.jpg=]
--illinoisavenue.jpg=[
+-electriccompany=]
+-illinoisavenue=[
 
     -Name="Illinois Avenue"
     -CardType=Property
@@ -318,8 +319,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--illinoisavenue.jpg=]
--indianaavenue.jpg=[
+-illinoisavenue=]
+-indianaavenue=[
 
     -Name="Indiana Avenue"
     -CardType=Property
@@ -329,8 +330,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--indianaavenue.jpg=]
--kentuckyavenue.jpg=[
+-indianaavenue=]
+-kentuckyavenue=[
 
     -Name="Kentucky Avenue"
     -CardType=Property
@@ -340,8 +341,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--kentuckyavenue.jpg=]
--marvingardens.jpg=[
+-kentuckyavenue=]
+-marvingardens=[
 
     -Name="Marvin Gardens"
     -CardType=Property
@@ -351,8 +352,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--marvingardens.jpg=]
--mediterraneanavenue.jpg=[
+-marvingardens=]
+-mediterraneanavenue=[
 
     -Name="Mediterranean Avenue"
     -CardType=Property
@@ -362,8 +363,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--mediterraneanavenue.jpg=]
--newyorkavenue.jpg=[
+-mediterraneanavenue=]
+-newyorkavenue=[
 
     -Name="New York Avenue"
     -CardType=Property
@@ -373,8 +374,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--newyorkavenue.jpg=]
--northcarolinaavenue.jpg=[
+-newyorkavenue=]
+-northcarolinaavenue=[
 
     -Name="North Carolina Avenue"
     -CardType=Property
@@ -384,8 +385,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--northcarolinaavenue.jpg=]
--orientalavenue.jpg=[
+-northcarolinaavenue=]
+-orientalavenue=[
 
     -Name="Oriental Avenue"
     -CardType=Property
@@ -395,8 +396,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--orientalavenue.jpg=]
--pacificavenue.jpg=[
+-orientalavenue=]
+-pacificavenue=[
 
     -Name="Pacific Avenue"
     -CardType=Property
@@ -406,8 +407,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--pacificavenue.jpg=]
--parkplace.jpg=[
+-pacificavenue=]
+-parkplace=[
 
     -Name="Park Place"
     -CardType=Property
@@ -417,8 +418,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--parkplace.jpg=]
--pennsylvaniaavenue.jpg=[
+-parkplace=]
+-pennsylvaniaavenue=[
 
     -Name="Pennsylvania Avenue"
     -CardType=Property
@@ -428,8 +429,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--pennsylvaniaavenue.jpg=]
--pennsylvaniarailroad.jpg=[
+-pennsylvaniaavenue=]
+-pennsylvaniarailroad=[
 
     -Name="Pennsylvania Railroad"
     -CardType=Property
@@ -439,8 +440,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--pennsylvaniarailroad.jpg=]
--propertywildcard.jpg=[
+-pennsylvaniarailroad=]
+-propertywildcard=[
 
     -Name="Property Wild Card"
     -CardType=Property
@@ -450,8 +451,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--propertywildcard.jpg=]
--readingrailroad.jpg=[
+-propertywildcard=]
+-readingrailroad=[
 
     -Name="Reading Railroad"
     -CardType=Property
@@ -461,8 +462,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--readingrailroad.jpg=]
--shortline.jpg=[
+-readingrailroad=]
+-shortline=[
 
     -Name="Short Line"
     -CardType=Property
@@ -472,8 +473,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--shortline.jpg=]
--statesavenue.jpg=[
+-shortline=]
+-statesavenue=[
 
     -Name="States Avenue"
     -CardType=Property
@@ -483,8 +484,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--statesavenue.jpg=]
--stcharlesplace.jpg=[
+-statesavenue=]
+-stcharlesplace=[
 
     -Name="St. Charles Place"
     -CardType=Property
@@ -494,8 +495,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--stcharlesplace.jpg=]
--stjamesplace.jpg=[
+-stcharlesplace=]
+-stjamesplace=[
 
     -Name="St. James Place"
     -CardType=Property
@@ -505,8 +506,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--stjamesplace.jpg=]
--tennesseeavenue.jpg=[
+-stjamesplace=]
+-tennesseeavenue=[
 
     -Name="Tennessee Avenue"
     -CardType=Property
@@ -516,8 +517,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--tennesseeavenue.jpg=]
--ventnoravenue.jpg=[
+-tennesseeavenue=]
+-ventnoravenue=[
 
     -Name="Ventnor Avenue"
     -CardType=Property
@@ -527,8 +528,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--ventnoravenue.jpg=]
--vermontavenue.jpg=[
+-ventnoravenue=]
+-vermontavenue=[
 
     -Name="Vermont Avenue"
     -CardType=Property
@@ -538,8 +539,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--vermontavenue.jpg=]
--virginiaavenue.jpg=[
+-vermontavenue=]
+-virginiaavenue=[
 
     -Name="Virginia Avenue"
     -CardType=Property
@@ -549,8 +550,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--virginiaavenue.jpg=]
--waterworks.jpg=[
+-virginiaavenue=]
+-waterworks=[
 
     -Name="Water Works"
     -CardType=Property
@@ -560,8 +561,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--waterworks.jpg=]
--wildbg.jpg=[
+-waterworks=]
+-wildbg=[
 
     -Name="Wild Blue-Green"
     -CardType=Property
@@ -571,8 +572,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Green
     -ActionID=
 
--wildbg.jpg=]
--wildgt.jpg=[
+-wildbg=]
+-wildgt=[
 
     -Name="Wild Railroad-Green"
     -CardType=Property
@@ -582,8 +583,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Green
     -ActionID=
 
--wildgt.jpg=]
--wildlbbr.jpg=[
+-wildgt=]
+-wildlbbr=[
 
     -Name="Wild Light Blue-Brown"
     -CardType=Property
@@ -593,8 +594,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Brown
     -ActionID=
 
--wildlbbr.jpg=]
--wildlbt.jpg=[
+-wildlbbr=]
+-wildlbt=[
 
     -Name="Wild Railroad-Light Blue"
     -CardType=Property
@@ -604,8 +605,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=LightBlue
     -ActionID=
 
--wildlbt.jpg=]
--wildop.jpg=[
+-wildlbt=]
+-wildop=[
 
     -Name="Wild Orange-Pink"
     -CardType=Property
@@ -615,8 +616,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Pink
     -ActionID=
 
--wildop.jpg=]
--wildry.jpg=[
+-wildop=]
+-wildry=[
 
     -Name="Wild Yellow-Red"
     -CardType=Property
@@ -626,8 +627,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Red
     -ActionID=
 
--wildry.jpg=]
--wildut.jpg=[
+-wildry=]
+-wildut=[
 
     -Name="Wild Utility-Railroad"
     -CardType=Property
@@ -637,8 +638,8 @@ ExcelToProfileConverter.exe
     -AltPropertyType=Railroad
     -ActionID=
 
--wildut.jpg=]
--cardback.jpg=[
+-wildut=]
+-cardback=[
 
     -Name="Card Back"
     -CardType=
@@ -648,4 +649,4 @@ ExcelToProfileConverter.exe
     -AltPropertyType=
     -ActionID=
 
--cardback.jpg=]
+-cardback=]

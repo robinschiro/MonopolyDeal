@@ -40,7 +40,7 @@
                                 <RowDefinition Height="3*"/>
                                 <RowDefinition Height="1*"/>
                             </Grid.RowDefinitions>
-                            <Image Source="pack://application:,,,/GameObjects;component/Images/cardback.jpg" 
+                            <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}" 
                                Grid.Row="0"/>
                             <Viewbox Grid.Row="1"
                                  HorizontalAlignment="Center">

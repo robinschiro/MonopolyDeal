@@ -1,7 +1,7 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:GameClient">
+    xmlns:local="clr-namespace:GameClient;assembly=GameClient">
 
     <Style x:Key="WatermarkTextBoxStyle" TargetType="TextBox">
         <Setter Property="Focusable" Value="False"/>

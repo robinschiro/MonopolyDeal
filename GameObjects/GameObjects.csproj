@@ -64,70 +64,6 @@
     <None Include="Resources\tvToolbox\tvToolbox.Net.chm" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\10million.jpg" />
-    <Resource Include="Images\1million.jpg" />
-    <Resource Include="Images\2million.jpg" />
-    <Resource Include="Images\3million.jpg" />
-    <Resource Include="Images\4million.jpg" />
-    <Resource Include="Images\5million.jpg" />
-    <Resource Include="Images\atlanticavenue.jpg" />
-    <Resource Include="Images\balticavenue.jpg" />
-    <Resource Include="Images\bandorailroad.jpg" />
-    <Resource Include="Images\boardwalk.jpg" />
-    <Resource Include="Images\cardback.jpg" />
-    <Resource Include="Images\connecticutavenue.jpg" />
-    <Resource Include="Images\dealbreaker.jpg" />
-    <Resource Include="Images\debtcollector.jpg" />
-    <Resource Include="Images\doubletherent.jpg" />
-    <Resource Include="Images\electriccompany.jpg" />
-    <Resource Include="Images\forceddeal.jpg" />
-    <Resource Include="Images\hotel.jpg" />
-    <Resource Include="Images\house.jpg" />
-    <Resource Include="Images\illinoisavenue.jpg" />
-    <Resource Include="Images\indianaavenue.jpg" />
-    <Resource Include="Images\itsmybirthday.jpg" />
-    <Resource Include="Images\justsayno.jpg" />
-    <Resource Include="Images\kentuckyavenue.jpg" />
-    <Resource Include="Images\marvingardens.jpg" />
-    <Resource Include="Images\mediterraneanavenue.jpg" />
-    <Resource Include="Images\newyorkavenue.jpg" />
-    <Resource Include="Images\northcarolinaavenue.jpg" />
-    <Resource Include="Images\orientalavenue.jpg" />
-    <Resource Include="Images\pacificavenue.jpg" />
-    <Resource Include="Images\parkplace.jpg" />
-    <Resource Include="Images\passgo.jpg" />
-    <Resource Include="Images\pennsylvaniaavenue.jpg" />
-    <Resource Include="Images\pennsylvaniarailroad.jpg" />
-    <Resource Include="Images\propertywildcard.jpg" />
-    <Resource Include="Images\readingrailroad.jpg" />
-    <Resource Include="Images\rentbg.jpg" />
-    <Resource Include="Images\rentlbbr.jpg" />
-    <Resource Include="Images\rentop.jpg" />
-    <Resource Include="Images\rentry.jpg" />
-    <Resource Include="Images\rentut.jpg" />
-    <Resource Include="Images\rentwild.jpg" />
-    <Resource Include="Images\shortline.jpg" />
-    <Resource Include="Images\slydeal.jpg" />
-    <Resource Include="Images\statesavenue.jpg" />
-    <Resource Include="Images\stcharlesplace.jpg" />
-    <Resource Include="Images\stjamesplace.jpg" />
-    <Resource Include="Images\tennesseeavenue.jpg" />
-    <Resource Include="Images\ventnoravenue.jpg" />
-    <Resource Include="Images\vermontavenue.jpg" />
-    <Resource Include="Images\virginiaavenue.jpg" />
-    <Resource Include="Images\waterworks.jpg" />
-    <Resource Include="Images\wildbg.jpg" />
-    <Resource Include="Images\wildgt.jpg" />
-    <Resource Include="Images\wildlbbr.jpg" />
-    <Resource Include="Images\wildlbt.jpg" />
-    <Resource Include="Images\wildop.jpg" />
-    <Resource Include="Images\wildry.jpg" />
-    <Resource Include="Images\wildut.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Profile.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <COMReference Include="Microsoft.Office.Core">
       <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
       <VersionMajor>2</VersionMajor>
@@ -146,15 +82,6 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
-    <COMReference Include="VBIDE">
-      <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
-      <VersionMajor>5</VersionMajor>
-      <VersionMinor>3</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>primary</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Audio\ItsMyBirthdayClip.wav" />
@@ -164,6 +91,19 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Audio\No.wav" />
+    <Page Include="Images\MonopolyDealCardImages.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\propertywildcardman.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\propertywildcard.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Profile.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

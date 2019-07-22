@@ -61,16 +61,14 @@ namespace GameObjects
             int actionID;
 
             List<Card> cardList = new List<Card>();
-            string[] files = GetResourcesInFolder("Images");
             
             // Each card must have a unique ID.
             int cardID = 0;
 
-            // Alphabetize the file names.
-            files = files.OrderBy(d => d).ToArray();
-            for ( int i = 0; i < files.Length; i++ )
+            foreach ( DictionaryEntry keyVal in Profile )
             {
-                tvProfile cardProfile = Profile.oProfile("-" + files[i]);
+                string resourceName = keyVal.Key as string;
+                tvProfile cardProfile = Profile.oProfile(resourceName);
 
                 for ( int a = 0; a < cardProfile.iValue("-Count", 0); ++a )
                 {
@@ -80,11 +78,11 @@ namespace GameObjects
                     value = cardProfile.iValue("-Value", 0);
                     propertyType = (cardProfile.sValue("-PropertyType", "") == "") ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-PropertyType", ""));
                     altPropertyType = (cardProfile.sValue("-AltPropertyType", "") == "") ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-AltPropertyType", ""));
-                    uriPath = "pack://application:,,,/GameObjects;component/Images/" + files[i];
+                    uriPath = resourceName.Replace("-", string.Empty) + "DrawingImage";
                     actionID = (cardProfile.sValue("-ActionID", "") == "") ? -1 : Convert.ToInt32((cardProfile.sValue("-ActionID", "")));
 
                     cardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath, actionID, cardID));
-                  
+
                     // Iterate the card ID so that it is different for the next card.
                     cardID++;
                 }

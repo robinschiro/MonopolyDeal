@@ -62,6 +62,7 @@
     <Compile Include="RentWindow.xaml.cs">
       <DependentUpon>RentWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="StaticResourceConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MessageDialog.xaml">

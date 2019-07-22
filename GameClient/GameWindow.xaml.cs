@@ -742,8 +742,10 @@ namespace GameClient
         public Button ConvertCardToButton( Card card )
         {
             Button cardButton = new Button();
+
             cardButton.Content = new Image();
-            (cardButton.Content as Image).Source = new BitmapImage(new Uri(card.CardImageUriPath, UriKind.Absolute));
+            (cardButton.Content as Image).Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
+            
             cardButton.Tag = card;
             cardButton.Style = (Style)FindResource("NoChromeButton");
             cardButton.RenderTransform = new TransformGroup();
