@@ -2154,13 +2154,13 @@ namespace GameClient
             {
                 case ActionId.ItsMyBirthday:
                 {
-                    this.PlaySound(ResourceList.UriPathItsMyBirthday);
+                    this.PlaySound(ResourceList.UriPathItsMyBirthdaySound);
                     break;
                 }
 
                 case ActionId.JustSayNo:
                 {
-                    this.PlaySound(ResourceList.UriPathNoSound);
+                    this.PlaySound(ResourceList.UriPathJustSayNoSound);
                     break;
                 }
             }               

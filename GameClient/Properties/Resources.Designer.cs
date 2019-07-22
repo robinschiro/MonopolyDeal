@@ -151,20 +151,47 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/ItsMyBirthdayClip.wav.
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/Dealbreaker.wav.
         /// </summary>
-        public static string UriPathItsMyBirthday {
+        public static string UriPathDealbreakerSound {
             get {
-                return ResourceManager.GetString("UriPathItsMyBirthday", resourceCulture);
+                return ResourceManager.GetString("UriPathDealbreakerSound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/No.wav.
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/DebtCollector.wav.
         /// </summary>
-        public static string UriPathNoSound {
+        public static string UriPathDebtCollectorSound {
             get {
-                return ResourceManager.GetString("UriPathNoSound", resourceCulture);
+                return ResourceManager.GetString("UriPathDebtCollectorSound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/ForcedDeal.wav.
+        /// </summary>
+        public static string UriPathForcedDealSound {
+            get {
+                return ResourceManager.GetString("UriPathForcedDealSound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/ItsMyBirthday.wav.
+        /// </summary>
+        public static string UriPathItsMyBirthdaySound {
+            get {
+                return ResourceManager.GetString("UriPathItsMyBirthdaySound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/JustSayNo.wav.
+        /// </summary>
+        public static string UriPathJustSayNoSound {
+            get {
+                return ResourceManager.GetString("UriPathJustSayNoSound", resourceCulture);
             }
         }
         

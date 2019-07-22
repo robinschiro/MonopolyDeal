@@ -84,13 +84,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Audio\ItsMyBirthdayClip.wav" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Audio\TurnDing.wav" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Audio\No.wav" />
     <Page Include="Images\MonopolyDealCardImages.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -104,6 +100,13 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Profile.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Audio\Dealbreaker.wav" />
+    <Resource Include="Audio\DebtCollector.wav" />
+    <Resource Include="Audio\ForcedDeal.wav" />
+    <Resource Include="Audio\ItsMyBirthday.wav" />
+    <Resource Include="Audio\JustSayNo.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
