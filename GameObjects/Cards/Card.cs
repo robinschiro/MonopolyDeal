@@ -67,7 +67,7 @@ namespace GameObjects
             this.CardImageUriPath = String.Empty;
         }
 
-        public Card( string name, CardType type, int value, PropertyType color, PropertyType altColor, string uriPath, int actionID, int cardID, bool isFlipped = false ) // Create a card given a type, name, and value
+        public Card( string name, CardType type, int value, PropertyType color, PropertyType altColor, string uriPath, string soundUriPath, int actionID, int cardID, bool isFlipped = false ) // Create a card given a type, name, and value
         {
             this.Name = name;
             this.Type = type;
@@ -75,6 +75,7 @@ namespace GameObjects
             this.Color = color;
             this.AltColor = altColor;
             this.CardImageUriPath = uriPath;
+            this.CardSoundUriPath = soundUriPath;
             this.ActionID = actionID;
             this.CardID = cardID;
             this.IsFlipped = isFlipped;

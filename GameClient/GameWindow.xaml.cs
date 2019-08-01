@@ -21,7 +21,8 @@ using GameObjects;
 using GameServer;
 using Lidgren.Network;
 using Utilities;
-using ResourceList = GameClient.Properties.Resources;
+using ClientResourceList = GameClient.Properties.Resources;
+using GameObjectsResourceList = GameObjects.Properties.Resources;
 
 namespace GameClient
 {
@@ -102,7 +103,7 @@ namespace GameClient
             InitializeClient(ipAddress, portNumber);
 
             // Do not continue until the client has successfully established communication with the server.
-            WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting to establish communication with server...");
+            WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting to establish communication with server...");
             if ( !this.BeginCommunication )
             {
                 WaitMessage.ShowDialog();
@@ -111,7 +112,7 @@ namespace GameClient
             // Request the player list and wait for it before continuing.
             {
                 // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
-                WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for player list...");
+                WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for player list...");
 
                 // Receive a list of the players already on the server.
                 ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
@@ -123,7 +124,7 @@ namespace GameClient
             // Request the deck and wait for it before continuing.
             {
                 // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
-                WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for deck...");
+                WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for deck...");
 
                 // Receive a list of the players already on the server.
                 ServerUtilities.SendMessage(Client, Datatype.RequestDeck);
@@ -679,7 +680,7 @@ namespace GameClient
                 // Inform the player that it is his/her turn.
                 if ( shouldNotifyUser )
                 {
-                    this.PlaySound(ResourceList.UriPathTurnDing);
+                    this.PlaySound(ClientResourceList.UriPathTurnDing);
 
                     var turnNotificationDialog = new MessageDialog(this, string.Empty, "It's your turn!", MessageBoxButton.OK);
                     turnNotificationDialog.ShowDialog();
@@ -717,7 +718,7 @@ namespace GameClient
                 Button cardButton = ConvertCardToButton(discardedCard);
                 DiscardPileGrid.Children.Add(cardButton);
 
-                this.PlaySoundForAction((ActionId)discardedCard.ActionID);
+                this.PlaySoundForCard(discardedCard);
             }
         }
 
@@ -1112,17 +1113,17 @@ namespace GameClient
                     {
                         string header = (string)item.Header;
                         item.IsEnabled = isCurrentTurnOwner;
-                        if ( ResourceList.AddEnhancementMenuItemHeader == header )
+                        if ( ClientResourceList.AddEnhancementMenuItemHeader == header )
                         {
                             item.IsEnabled &= (4 == cardBeingAdded.ActionID) ? 
                                               (null != ClientUtilities.FindMonopolyWithoutHouse(player)) : 
                                               (null != ClientUtilities.FindMonopolyWithoutHotel(player));
                         }
-                        else if ( ResourceList.DiscardMenuItemHeader == header )
+                        else if ( ClientResourceList.DiscardMenuItemHeader == header )
                         {
                             item.IsEnabled &= (player.CardsInHand.Count > 7);
                         }
-                        else if ( ResourceList.FlipCardMenuItemHeader == header )
+                        else if ( ClientResourceList.FlipCardMenuItemHeader == header )
                         {
                             item.IsEnabled = true;
                         }
@@ -1147,7 +1148,7 @@ namespace GameClient
                     if ( HasAltColor(cardBeingAdded) )
                     {
                         MenuItem flipMenuItem = new MenuItem();
-                        flipMenuItem.Header = ResourceList.FlipCardMenuItemHeader;
+                        flipMenuItem.Header = ClientResourceList.FlipCardMenuItemHeader;
                         flipMenuItem.Click += ( sender2, args2 ) =>
                         {
                             // Flip the card, swapping its primary and alternative colors.
@@ -1164,7 +1165,7 @@ namespace GameClient
                 else if ( CardType.Enhancement == cardBeingAdded.Type )
                 {
                     MenuItem playAsActionMenuItem = new MenuItem();
-                    playAsActionMenuItem.Header = ResourceList.AddEnhancementMenuItemHeader;
+                    playAsActionMenuItem.Header = ClientResourceList.AddEnhancementMenuItemHeader;
                     playAsActionMenuItem.Click += (sender, args) =>
                     {
                         PlayCardEvent(cardButton, null);
@@ -1210,7 +1211,7 @@ namespace GameClient
 
                 // To all cards (regardless of type), add the ability to discard the card.
                 MenuItem discardMenuItem = new MenuItem();
-                discardMenuItem.Header = ResourceList.DiscardMenuItemHeader;
+                discardMenuItem.Header = ClientResourceList.DiscardMenuItemHeader;
                 discardMenuItem.Click += ( sender, args ) =>
                 {
                     if ( MessageBoxResult.Yes == MessageBox.Show("Are you sure you want to discard this card?", "Discard Confirmation", MessageBoxButton.YesNo) )
@@ -1254,7 +1255,7 @@ namespace GameClient
                             if ( HasAltColor(cardBeingAdded) )
                             {
                                 MenuItem flipMenuItem = new MenuItem();
-                                flipMenuItem.Header = ResourceList.FlipCardMenuItemHeader;
+                                flipMenuItem.Header = ClientResourceList.FlipCardMenuItemHeader;
                                 flipMenuItem.Click += ( sender, args ) =>
                                 {
                                     // Check to see if the flipped card can be added to the player's CardsInPlay.
@@ -1291,7 +1292,7 @@ namespace GameClient
                             else if ( PropertyType.Wild == cardBeingAdded.Color )
                             {
                                 MenuItem separateMenuItem = new MenuItem();
-                                separateMenuItem.Header = ResourceList.SeparateWildCardMenuItemHeader;
+                                separateMenuItem.Header = ClientResourceList.SeparateWildCardMenuItemHeader;
                                 separateMenuItem.Click += ( sender, args ) =>
                                 {
                                     // Remove the card from its previous position on the player's playing field.
@@ -1321,7 +1322,7 @@ namespace GameClient
                                     item.IsEnabled = this.IsCurrentTurnOwner;
 
                                     string header = (string)item.Header;
-                                    if ( ResourceList.FlipCardMenuItemHeader == header || ResourceList.SeparateWildCardMenuItemHeader == header )
+                                    if ( ClientResourceList.FlipCardMenuItemHeader == header || ClientResourceList.SeparateWildCardMenuItemHeader == header )
                                     {
                                         List<Card> cardListContainingCard = FindListContainingCard(cardBeingAdded);
                                         item.IsEnabled &= !(cardListContainingCard.Any(card => (int)ActionId.House == card.ActionID));
@@ -1703,7 +1704,7 @@ namespace GameClient
                     ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);
 
                     // Display a wait message until the victim has responded to the request.
-                    WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for victim to respond...");
+                    WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for victim to respond...");
                     WaitMessage.ShowDialog();                    
                 }
                 else
@@ -1854,7 +1855,7 @@ namespace GameClient
 
             // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
             // ROBIN TODO: Show some sort of progress bar.
-            WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for rentees to pay rent...");
+            WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for rentees to pay rent...");
             WaitMessage.ShowDialog();
 
             return true;
@@ -2130,7 +2131,7 @@ namespace GameClient
                     ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);
 
                     // Display a wait message until the victim has responded to the request.
-                    WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for victim to respond...");
+                    WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for victim to respond...");
                     WaitMessage.ShowDialog();
                 }
             }
@@ -2143,9 +2144,12 @@ namespace GameClient
 
         #region Sound and Animation
 
-        private void PlaySoundForAction(Object actionId)
+        private void PlaySoundForCard( Card card )
         {
-            this.PlaySoundForAction((ActionId)actionId);
+            if (card.CardSoundUriPath != GameObjectsResourceList.UriPathEmpty)
+            {
+                this.PlaySound(card.CardSoundUriPath);
+            }
         }
 
         private void PlaySoundForAction(ActionId actionId)
@@ -2154,13 +2158,13 @@ namespace GameClient
             {
                 case ActionId.ItsMyBirthday:
                 {
-                    this.PlaySound(ResourceList.UriPathItsMyBirthdaySound);
+                    this.PlaySound(ClientResourceList.UriPathItsMyBirthdaySound);
                     break;
                 }
 
                 case ActionId.JustSayNo:
                 {
-                    this.PlaySound(ResourceList.UriPathJustSayNoSound);
+                    this.PlaySound(ClientResourceList.UriPathJustSayNoSound);
                     break;
                 }
             }               

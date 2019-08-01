@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Resources;
 using System.Collections;
 using tvToolbox;
+using ResourceList = GameObjects.Properties.Resources;
 
 namespace GameObjects
 {
@@ -58,6 +59,7 @@ namespace GameObjects
             PropertyType propertyType;
             PropertyType altPropertyType;
             string uriPath;
+            string soundUriPath;
             int actionID;
 
             List<Card> cardList = new List<Card>();
@@ -79,9 +81,13 @@ namespace GameObjects
                     propertyType = (cardProfile.sValue("-PropertyType", "") == "") ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-PropertyType", ""));
                     altPropertyType = (cardProfile.sValue("-AltPropertyType", "") == "") ? PropertyType.None : (PropertyType)Enum.Parse(typeof(PropertyType), cardProfile.sValue("-AltPropertyType", ""));
                     uriPath = resourceName.Replace("-", string.Empty) + "DrawingImage";
+
+                    string soundEffectFileName = cardProfile.sValue("-SoundEffectFile", string.Empty);
+                    soundUriPath = string.IsNullOrWhiteSpace(soundEffectFileName) ? ResourceList.UriPathEmpty : ResourceList.UriPathAudioFolder + soundEffectFileName;
+                    
                     actionID = (cardProfile.sValue("-ActionID", "") == "") ? -1 : Convert.ToInt32((cardProfile.sValue("-ActionID", "")));
 
-                    cardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath, actionID, cardID));
+                    cardList.Add(new Card(name, cardType, value, propertyType, altPropertyType, uriPath, soundUriPath, actionID, cardID));
 
                     // Iterate the card ID so that it is different for the next card.
                     cardID++;
