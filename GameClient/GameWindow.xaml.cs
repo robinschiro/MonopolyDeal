@@ -2152,24 +2152,6 @@ namespace GameClient
             }
         }
 
-        private void PlaySoundForAction(ActionId actionId)
-        {
-            switch ( actionId )
-            {
-                case ActionId.ItsMyBirthday:
-                {
-                    this.PlaySound(ClientResourceList.UriPathItsMyBirthdaySound);
-                    break;
-                }
-
-                case ActionId.JustSayNo:
-                {
-                    this.PlaySound(ClientResourceList.UriPathJustSayNoSound);
-                    break;
-                }
-            }               
-        }
-
         private void PlaySound( Object filler )
         {
             string uriPath = filler as string;

@@ -65,6 +65,7 @@ ExcelToProfileConverter.exe
     -PropertyType=
     -AltPropertyType=
     -ActionID=5
+    -SoundEffectFile=Dealbreaker.wav
 
 -dealbreaker=]
 -slydeal=[
@@ -87,6 +88,7 @@ ExcelToProfileConverter.exe
     -PropertyType=
     -AltPropertyType=
     -ActionID=7
+    -SoundEffectFile=ForcedDeal.wav
 
 -forceddeal=]
 -itsmybirthday=[
@@ -98,6 +100,7 @@ ExcelToProfileConverter.exe
     -PropertyType=
     -AltPropertyType=
     -ActionID=8
+    -SoundEffectFile=ItsMyBirthday.wav
 
 -itsmybirthday=]
 -debtcollector=[
@@ -109,6 +112,7 @@ ExcelToProfileConverter.exe
     -PropertyType=
     -AltPropertyType=
     -ActionID=9
+    -SoundEffectFile=DebtCollector.wav
 
 -debtcollector=]
 -rentwild=[
