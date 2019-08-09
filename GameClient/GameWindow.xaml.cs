@@ -71,6 +71,30 @@ namespace GameClient
             }
         }
 
+        private bool areSoundEffectsEnabled;
+        public bool AreSoundEffectsEnabled
+        {
+            get
+            {
+                return areSoundEffectsEnabled;
+            }
+            set
+            {
+                areSoundEffectsEnabled = value;
+
+                if (this.areSoundEffectsEnabled)
+                {
+                    ClientUtilities.SetClientVolume(Convert.ToInt32(ClientResourceList.DefaultVolume));
+                }
+                else
+                {
+                    ClientUtilities.SetClientVolume(0);
+                }
+
+                OnPropertyChanged("AreSoundEffectsEnabled");
+            }
+        }
+
         #endregion Variables
 
         public GameWindow( string playerName, string ipAddress, int portNumber, Turn turn )
@@ -202,7 +226,7 @@ namespace GameClient
                 });
 
             // Set game volume to half system volume to not annoy players.
-            ClientUtilities.SetClientVolume(50);
+            this.AreSoundEffectsEnabled = true;
         }
 
         #region Client Communication Code
@@ -613,7 +637,6 @@ namespace GameClient
             }
         }
 
-
         // Clear the InfoBox when the mouse leaves a card button.
         void cardButton_MouseLeave( object sender, MouseEventArgs e )
         {
@@ -639,7 +662,6 @@ namespace GameClient
             
             DisplayCardInInfobox(cardButton.Tag as Card);
         }
-
 
         // When the player hovers over his bank, display a break down of his money.
         void cardButtonMoney_MouseEnter( object sender, MouseEventArgs e )
@@ -2331,6 +2353,5 @@ namespace GameClient
         }        
 
         #endregion
-
     }
 }

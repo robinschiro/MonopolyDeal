@@ -120,6 +120,9 @@
   <data name="AddEnhancementMenuItemHeader" xml:space="preserve">
     <value>Add to Monopoly</value>
   </data>
+  <data name="DefaultVolume" xml:space="preserve">
+    <value>50</value>
+  </data>
   <data name="DiscardMenuItemHeader" xml:space="preserve">
     <value>Discard</value>
   </data>

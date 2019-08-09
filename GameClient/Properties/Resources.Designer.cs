@@ -70,6 +70,15 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 50.
+        /// </summary>
+        public static string DefaultVolume {
+            get {
+                return ResourceManager.GetString("DefaultVolume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Discard.
         /// </summary>
         public static string DiscardMenuItemHeader {
