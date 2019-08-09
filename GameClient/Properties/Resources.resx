@@ -147,20 +147,8 @@
   <data name="SettingsFilePath" xml:space="preserve">
     <value>MonopolyDeal\MonopolyDealSettings.txt</value>
   </data>
-  <data name="UriPathDealbreakerSound" xml:space="preserve">
-    <value>pack://application:,,,/GameObjects;component/Audio/Dealbreaker.wav</value>
-  </data>
-  <data name="UriPathDebtCollectorSound" xml:space="preserve">
-    <value>pack://application:,,,/GameObjects;component/Audio/DebtCollector.wav</value>
-  </data>
-  <data name="UriPathForcedDealSound" xml:space="preserve">
-    <value>pack://application:,,,/GameObjects;component/Audio/ForcedDeal.wav</value>
-  </data>
-  <data name="UriPathItsMyBirthdaySound" xml:space="preserve">
-    <value>pack://application:,,,/GameObjects;component/Audio/ItsMyBirthday.wav</value>
-  </data>
-  <data name="UriPathJustSayNoSound" xml:space="preserve">
-    <value>pack://application:,,,/GameObjects;component/Audio/JustSayNo.wav</value>
+  <data name="UriPathSilence" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Audio/Silence.wav</value>
   </data>
   <data name="UriPathTurnDing" xml:space="preserve">
     <value>pack://application:,,,/GameObjects;component/Audio/TurnDing.wav</value>

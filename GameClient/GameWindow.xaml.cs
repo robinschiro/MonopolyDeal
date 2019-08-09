@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Media;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
@@ -13,7 +11,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 using AdditionalWindows;
@@ -26,7 +23,6 @@ using GameObjectsResourceList = GameObjects.Properties.Resources;
 
 namespace GameClient
 {
-
     /// <summary>
     /// Interaction logic for GameWindow.xaml
     /// </summary>
@@ -61,8 +57,6 @@ namespace GameClient
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private SoundPlayer SoundPlayer;
-
         private bool isCurrentTurnOwner;
         public bool IsCurrentTurnOwner
         {
@@ -90,7 +84,6 @@ namespace GameClient
             this.HavePlayersBeenAssigned = false;
             this.ServerIP = ipAddress;
             this.PlayerName = playerName;
-            this.SoundPlayer = new SoundPlayer();
             this.EndTurnButtonAnimation = this.CreateEndTurnButtonAnimation();
 
             // Instantiate the Player's Turn object.
@@ -207,6 +200,9 @@ namespace GameClient
                 {
                     Size_Changed(x);
                 });
+
+            // Set game volume to half system volume to not annoy players.
+            ClientUtilities.SetClientVolume(50);
         }
 
         #region Client Communication Code
@@ -680,7 +676,7 @@ namespace GameClient
                 // Inform the player that it is his/her turn.
                 if ( shouldNotifyUser )
                 {
-                    this.PlaySound(ClientResourceList.UriPathTurnDing);
+                    ClientUtilities.PlaySound(ClientResourceList.UriPathTurnDing);
 
                     var turnNotificationDialog = new MessageDialog(this, string.Empty, "It's your turn!", MessageBoxButton.OK);
                     turnNotificationDialog.ShowDialog();
@@ -2142,24 +2138,19 @@ namespace GameClient
 
         #endregion
 
-        #region Sound and Animation
+        #region Sound
 
         private void PlaySoundForCard( Card card )
         {
             if (card.CardSoundUriPath != GameObjectsResourceList.UriPathEmpty)
             {
-                this.PlaySound(card.CardSoundUriPath);
+                ClientUtilities.PlaySound(card.CardSoundUriPath);
             }
         }
 
-        private void PlaySound( Object filler )
-        {
-            string uriPath = filler as string;
-            Stream resourceStream = Application.GetResourceStream(new Uri(uriPath)).Stream;
-            this.SoundPlayer.Stream = resourceStream;
-                        
-            this.SoundPlayer.Play();
-        }
+        #endregion
+
+        #region Animation
 
         private ColorAnimation CreateEndTurnButtonAnimation()
         {

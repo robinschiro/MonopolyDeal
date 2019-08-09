@@ -6,6 +6,7 @@ using ResourceList = GameClient.Properties.Resources;
 using tvToolbox;
 using System.IO;
 using System.Windows.Input;
+using Utilities;
 
 namespace GameClient
 {
@@ -30,6 +31,10 @@ namespace GameClient
             this.PlayerNameTextBox.Text = settings.sValue(ResourceList.SettingNameKey, string.Empty);
             this.IPAddressTextBox.Text = settings.sValue(ResourceList.SettingIpAddressKey, string.Empty);
             this.PortTextBox.Text = settings.sValue(ResourceList.SettingPortKey, ResourceList.SettingPortDefaultValue);
+
+            // Play the sound of silence to allow the game client to adjust the volume of the application.
+            // Without this, the volume would not be able to be adjusted until after the first sound is played.
+            ClientUtilities.PlaySound(ResourceList.UriPathSilence);
         }
 
         private void LaunchLobby()

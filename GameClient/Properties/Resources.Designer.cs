@@ -151,47 +151,11 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/Dealbreaker.wav.
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/Silence.wav.
         /// </summary>
-        public static string UriPathDealbreakerSound {
+        public static string UriPathSilence {
             get {
-                return ResourceManager.GetString("UriPathDealbreakerSound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/DebtCollector.wav.
-        /// </summary>
-        public static string UriPathDebtCollectorSound {
-            get {
-                return ResourceManager.GetString("UriPathDebtCollectorSound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/ForcedDeal.wav.
-        /// </summary>
-        public static string UriPathForcedDealSound {
-            get {
-                return ResourceManager.GetString("UriPathForcedDealSound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/ItsMyBirthday.wav.
-        /// </summary>
-        public static string UriPathItsMyBirthdaySound {
-            get {
-                return ResourceManager.GetString("UriPathItsMyBirthdaySound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/JustSayNo.wav.
-        /// </summary>
-        public static string UriPathJustSayNoSound {
-            get {
-                return ResourceManager.GetString("UriPathJustSayNoSound", resourceCulture);
+                return ResourceManager.GetString("UriPathSilence", resourceCulture);
             }
         }
         

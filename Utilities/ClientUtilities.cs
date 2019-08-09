@@ -5,6 +5,9 @@ using System.Text;
 using GameObjects;
 using Lidgren.Network;
 using System.Windows;
+using System.Media;
+using System.IO;
+using System.Diagnostics;
 
 namespace Utilities
 {
@@ -20,7 +23,6 @@ namespace Utilities
     }
 
     #endregion
-    
 
     public class ClientUtilities
     {
@@ -106,6 +108,8 @@ namespace Utilities
                                         {3, 6},
                                     }},
         };
+
+        private static SoundPlayer UtilitySoundPlayer = new SoundPlayer();
 
         #endregion
 
@@ -242,5 +246,22 @@ namespace Utilities
 
         #endregion
 
+        #region Sound
+
+        public static void PlaySound( String uriPath )
+        {
+            Stream resourceStream = Application.GetResourceStream(new Uri(uriPath)).Stream;
+            UtilitySoundPlayer.Stream = resourceStream;
+
+            UtilitySoundPlayer.Play();
+        }
+
+        public static void SetClientVolume( int volume )
+        {
+            int currentProcessPid = Process.GetCurrentProcess().Id;
+            VolumeMixer.SetApplicationVolume(currentProcessPid, Convert.ToSingle(volume));
+        }
+
+        #endregion
     }
 }
