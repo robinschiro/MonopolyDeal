@@ -677,12 +677,32 @@ namespace GameClient
         // This is necessary in order to properly update the UI.
         public void AddMoneyToBank( Card moneyCard, Player player )
         {
-            // Add the card to the CardsInPlay and display it on the top of the player's money pile.
-            player.CardsInPlay[0].Add(moneyCard);
-            AddCardToGrid(moneyCard, PlayerFieldDictionary[player.Name], player, false);
+            // Determine the correct position of the money card (in order to keep money pile ordered)
+            // and add it to the cards in play.
+            List<Card> playerMoneyPile = player.CardsInPlay[0];
+            int moneyCardIndex = DetermineOrderedPositionOfMoneyCard(moneyCard, playerMoneyPile);
+
+            playerMoneyPile.Insert(moneyCardIndex, moneyCard);
+            AddCardToGrid(moneyCard, PlayerFieldDictionary[player.Name], player, false, moneyCardIndex);
 
             // Update the player's MoneyList.
             player.MoneyList.Add(moneyCard);
+        }
+
+        // The money card pile should be in descending order so that the smallest card value is displayed on top.
+        // This method finds the correct index to insert the money card in order to guarantee this ordering.
+        private int DetermineOrderedPositionOfMoneyCard( Card moneyCard, List<Card> playerMoneyPile )
+        {
+            int orderedPosition;
+            for ( orderedPosition = 0; orderedPosition < playerMoneyPile.Count; orderedPosition++ )
+            {
+                if (moneyCard.Value > playerMoneyPile[orderedPosition].Value)
+                {
+                    break;
+                }
+            }
+
+            return orderedPosition;
         }
 
         // Update the value of the IsCurrentTurnOwner boolean.
@@ -1046,40 +1066,6 @@ namespace GameClient
             }
         }
 
-        //// I do not remember why I created this method. It is flawed in that it does not save the position of wild cards.
-        //// I will leave it commented out for now.
-        //// Excluding the money list, removes all cards from the CardsInPlay and re-adds them.
-        //public void RefreshCardsInPlay( Player player, Grid playerField )
-        //{
-        //    List<Card> cards = new List<Card>();
-        //    List<Card> moneyList = player.CardsInPlay[0];
-
-        //    // Collect all of the cards from the curent CardsInPlay.
-        //    for ( int i = 1; i < player.CardsInPlay.Count; ++i )
-        //    {
-        //        foreach ( Card card in player.CardsInPlay[i])
-        //        {
-        //            cards.Add(card);
-        //        }
-        //    }
-
-        //    // Reset the player's CardsInPlay.
-        //    player.CardsInPlay = new List<List<Card>>();
-
-        //    // Add the money list to the new CardsInPlay.
-        //    player.CardsInPlay.Add(moneyList);
-
-        //    // Add all of the collected cards to the new CardsInPlay.
-        //    foreach ( Card card in cards )
-        //    {
-        //        AddCardToCardsInPlay(card);
-        //    }
-
-        //    // Display the player's refreshed CardsInPlay.
-        //    DisplayCardsInPlay(player, playerField);
-
-        //}
-
         // Remove a card from a player's CardsInPlay. If it is the last card in a list, remove the list as well (unless it is the money list).
         public void RemoveCardFromCardsInPlay( Card cardBeingRemoved, Player player )
         {
@@ -1102,7 +1088,6 @@ namespace GameClient
             {
                 player.CardsInPlay.Remove(player.CardsInPlay[indexOfList]);
             }
-
         }
 
         // Add a card to a specified grid.
@@ -1381,8 +1366,17 @@ namespace GameClient
                         // Play money cards horizontally.
                         TransformCardButton(cardButton, 0, 0);
 
-                        (grid.Children[0] as Grid).Children.Add(cardButton);
+                        Grid moneyCardGrid = grid.Children[0] as Grid;
+                        if ( -1 != position )
+                        {
+                            moneyCardGrid.Children.Add(cardButton);
+                        }
+                        else
+                        {
+                            moneyCardGrid.Children.Insert(position, cardButton);
+                        }
                         Grid.SetColumn(cardButton, 1);
+
                         return;
                     }
 
@@ -1885,7 +1879,6 @@ namespace GameClient
 
             // Update the server with the current version of this player.
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
-            ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, this.DiscardPile);
         }
 
         // Display the rent window.
