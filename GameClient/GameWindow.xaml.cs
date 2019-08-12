@@ -17,6 +17,7 @@ using AdditionalWindows;
 using GameObjects;
 using GameServer;
 using Lidgren.Network;
+using tvToolbox;
 using Utilities;
 using ClientResourceList = GameClient.Properties.Resources;
 using GameObjectsResourceList = GameObjects.Properties.Resources;
@@ -47,6 +48,7 @@ namespace GameClient
         private Turn Turn;
         private List<Card> DiscardPile;
         private ColorAnimation EndTurnButtonAnimation;
+        private tvProfile ClientSettings;
 
         // Variables for managing the state of Action Cards.
         private int NumberOfRentees = 0;
@@ -82,14 +84,9 @@ namespace GameClient
             {
                 areSoundEffectsEnabled = value;
 
-                if (this.areSoundEffectsEnabled)
-                {
-                    ClientUtilities.SetClientVolume(Convert.ToInt32(ClientResourceList.DefaultVolume));
-                }
-                else
-                {
-                    ClientUtilities.SetClientVolume(0);
-                }
+                ClientUtilities.SetClientVolume(value ? Convert.ToInt32(ClientResourceList.DefaultVolume) : 0);
+                this.ClientSettings[ClientResourceList.SettingSoundEffectsEnabledKey] = value;
+                this.ClientSettings.Save();
 
                 OnPropertyChanged("AreSoundEffectsEnabled");
             }
@@ -225,8 +222,9 @@ namespace GameClient
                     Size_Changed(x);
                 });
 
-            // Set game volume to half system volume to not annoy players.
-            this.AreSoundEffectsEnabled = true;
+            // Load and apply client settings.
+            this.ClientSettings = ClientUtilities.GetClientSettings(ClientResourceList.SettingsFilePath);
+            this.AreSoundEffectsEnabled = this.ClientSettings.bValue(ClientResourceList.SettingSoundEffectsEnabledKey, Convert.ToBoolean(ClientResourceList.SettingSoundEffectsEnabledDefaultValue));
         }
 
         #region Client Communication Code

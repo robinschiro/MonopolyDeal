@@ -160,6 +160,24 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to true.
+        /// </summary>
+        public static string SettingSoundEffectsEnabledDefaultValue {
+            get {
+                return ResourceManager.GetString("SettingSoundEffectsEnabledDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -SoundEffectsEnabled.
+        /// </summary>
+        public static string SettingSoundEffectsEnabledKey {
+            get {
+                return ResourceManager.GetString("SettingSoundEffectsEnabledKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/Silence.wav.
         /// </summary>
         public static string UriPathSilence {

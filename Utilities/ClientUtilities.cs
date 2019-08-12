@@ -8,6 +8,7 @@ using System.Windows;
 using System.Media;
 using System.IO;
 using System.Diagnostics;
+using tvToolbox;
 
 namespace Utilities
 {
@@ -260,6 +261,16 @@ namespace Utilities
         {
             int currentProcessPid = Process.GetCurrentProcess().Id;
             VolumeMixer.SetApplicationVolume(currentProcessPid, Convert.ToSingle(volume));
+        }
+
+        #endregion
+
+        #region Client Settings
+
+        public static tvProfile GetClientSettings(string settingsPath)
+        {
+            string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), settingsPath);
+            return new tvProfile(settingsFilePath, tvProfileFileCreateActions.NoPromptCreateFile, abUseXmlFiles: true);
         }
 
         #endregion

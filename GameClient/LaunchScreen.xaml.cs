@@ -24,8 +24,7 @@ namespace GameClient
             this.Title = "Monopoly Deal Setup";
 
             // Load cached settings from Profile.
-            string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ResourceList.SettingsFilePath);
-            settings = new tvProfile(settingsFilePath, tvProfileFileCreateActions.NoPromptCreateFile, abUseXmlFiles: true);
+            settings = ClientUtilities.GetClientSettings(ResourceList.SettingsFilePath);
 
             // Populate fields with settings.
             this.PlayerNameTextBox.Text = settings.sValue(ResourceList.SettingNameKey, string.Empty);

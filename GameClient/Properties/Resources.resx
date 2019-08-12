@@ -150,6 +150,12 @@
   <data name="SettingsFilePath" xml:space="preserve">
     <value>MonopolyDeal\MonopolyDealSettings.txt</value>
   </data>
+  <data name="SettingSoundEffectsEnabledDefaultValue" xml:space="preserve">
+    <value>true</value>
+  </data>
+  <data name="SettingSoundEffectsEnabledKey" xml:space="preserve">
+    <value>-SoundEffectsEnabled</value>
+  </data>
   <data name="UriPathSilence" xml:space="preserve">
     <value>pack://application:,,,/GameObjects;component/Audio/Silence.wav</value>
   </data>
