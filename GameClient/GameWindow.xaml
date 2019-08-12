@@ -17,14 +17,28 @@
 
     <Grid Name="WindowGrid"
           Background="LightCoral">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="7*"/>
         </Grid.ColumnDefinitions>
         <!--<Grid utilities:GridHelpers.RowCount="5" />-->
+
+        <Menu Grid.Row="0"
+              Grid.ColumnSpan="2">
+            <MenuItem Header="Options">
+                <MenuItem Header="Sound Effects" 
+                          IsCheckable="True"
+                          IsChecked="{Binding AreSoundEffectsEnabled}"/>
+            </MenuItem>
+        </Menu>
         
         <Grid Name="SideBar"
-              Grid.Column="0">
+              Grid.Column="0"
+              Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -66,7 +80,8 @@
         </Grid>
         
         <Grid Name="PlayingField"
-              Grid.Column="1">
+              Grid.Column="1"
+              Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="6*"/>
                 <RowDefinition Height="1*"/>

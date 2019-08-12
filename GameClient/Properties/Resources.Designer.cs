@@ -70,6 +70,15 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 50.
+        /// </summary>
+        public static string DefaultVolume {
+            get {
+                return ResourceManager.GetString("DefaultVolume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Discard.
         /// </summary>
         public static string DiscardMenuItemHeader {
@@ -151,20 +160,29 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/ItsMyBirthdayClip.wav.
+        ///   Looks up a localized string similar to true.
         /// </summary>
-        public static string UriPathItsMyBirthday {
+        public static string SettingSoundEffectsEnabledDefaultValue {
             get {
-                return ResourceManager.GetString("UriPathItsMyBirthday", resourceCulture);
+                return ResourceManager.GetString("SettingSoundEffectsEnabledDefaultValue", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/No.wav.
+        ///   Looks up a localized string similar to -SoundEffectsEnabled.
         /// </summary>
-        public static string UriPathNoSound {
+        public static string SettingSoundEffectsEnabledKey {
             get {
-                return ResourceManager.GetString("UriPathNoSound", resourceCulture);
+                return ResourceManager.GetString("SettingSoundEffectsEnabledKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/Silence.wav.
+        /// </summary>
+        public static string UriPathSilence {
+            get {
+                return ResourceManager.GetString("UriPathSilence", resourceCulture);
             }
         }
         

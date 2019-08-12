@@ -48,9 +48,13 @@
   <ItemGroup>
     <Compile Include="ActionId.cs" />
     <Compile Include="Cards\Card.cs" />
-    <Compile Include="Cards\EnhancementCard.cs" />
     <Compile Include="MoneyList.cs" />
     <Compile Include="ActionData.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Turn.cs" />
     <Compile Include="Datatype.cs" />
     <Compile Include="Deck.cs" />
@@ -84,13 +88,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Audio\ItsMyBirthdayClip.wav" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Audio\TurnDing.wav" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Audio\No.wav" />
     <Page Include="Images\MonopolyDealCardImages.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -104,6 +104,22 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Profile.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Audio\Dealbreaker.wav" />
+    <Resource Include="Audio\DebtCollector.wav" />
+    <Resource Include="Audio\ForcedDeal.wav" />
+    <Resource Include="Audio\ItsMyBirthday.wav" />
+    <Resource Include="Audio\JustSayNo.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Audio\Silence.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

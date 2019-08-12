@@ -117,49 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddEnhancementMenuItemHeader" xml:space="preserve">
-    <value>Add to Monopoly</value>
+  <data name="UriPathAudioFolder" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Audio/</value>
   </data>
-  <data name="DefaultVolume" xml:space="preserve">
-    <value>50</value>
-  </data>
-  <data name="DiscardMenuItemHeader" xml:space="preserve">
-    <value>Discard</value>
-  </data>
-  <data name="FlipCardMenuItemHeader" xml:space="preserve">
-    <value>Flip Card</value>
-  </data>
-  <data name="PleaseWaitWindowTitle" xml:space="preserve">
-    <value>Please Wait...</value>
-  </data>
-  <data name="SeparateWildCardMenuItemHeader" xml:space="preserve">
-    <value>Separate Wild Card</value>
-  </data>
-  <data name="SettingIpAddressKey" xml:space="preserve">
-    <value>-ServerIpAddress</value>
-  </data>
-  <data name="SettingNameKey" xml:space="preserve">
-    <value>-PlayerName</value>
-  </data>
-  <data name="SettingPortDefaultValue" xml:space="preserve">
-    <value>14242</value>
-  </data>
-  <data name="SettingPortKey" xml:space="preserve">
-    <value>-Port</value>
-  </data>
-  <data name="SettingsFilePath" xml:space="preserve">
-    <value>MonopolyDeal\MonopolyDealSettings.txt</value>
-  </data>
-  <data name="SettingSoundEffectsEnabledDefaultValue" xml:space="preserve">
-    <value>true</value>
-  </data>
-  <data name="SettingSoundEffectsEnabledKey" xml:space="preserve">
-    <value>-SoundEffectsEnabled</value>
-  </data>
-  <data name="UriPathSilence" xml:space="preserve">
-    <value>pack://application:,,,/GameObjects;component/Audio/Silence.wav</value>
-  </data>
-  <data name="UriPathTurnDing" xml:space="preserve">
-    <value>pack://application:,,,/GameObjects;component/Audio/TurnDing.wav</value>
+  <data name="UriPathEmpty" xml:space="preserve">
+    <value>None</value>
   </data>
 </root>
