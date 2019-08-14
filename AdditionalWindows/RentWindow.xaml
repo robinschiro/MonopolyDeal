@@ -39,13 +39,15 @@
                   ItemsSource="{Binding Assets, Mode=TwoWay}"
                   Style="{StaticResource CardListViewStyle}"
                   Grid.Column="0"
-                  Grid.Row="1"/>            
+                  Grid.Row="1"
+                  MouseDoubleClick="AssetsListView_MouseDoubleClick"/>            
 
         <ListView Name="PaymentListView"
                   ItemsSource="{Binding Payment, Mode=TwoWay}"
                   Style="{StaticResource CardListViewStyle}"
                   Grid.Column="1"
-                  Grid.Row="1"/>
+                  Grid.Row="1"
+                  MouseDoubleClick="PaymentListView_MouseDoubleClick"/>
 
         <Button Name="GiveButton" 
                 Content="Give Selected" 

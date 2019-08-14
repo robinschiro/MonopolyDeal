@@ -168,5 +168,15 @@ namespace AdditionalWindows
             this.dialogResult = true;
             this.CloseWindow = true;
         }
+
+        private void AssetsListView_MouseDoubleClick( object sender, MouseButtonEventArgs e )
+        {
+            TransferSelectedItems(AssetsListView, PaymentListView);
+        }
+
+        private void PaymentListView_MouseDoubleClick( object sender, MouseButtonEventArgs e )
+        {
+            TransferSelectedItems(PaymentListView, AssetsListView);
+        }
     }
 }
