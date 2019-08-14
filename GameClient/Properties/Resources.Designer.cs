@@ -178,6 +178,24 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to true.
+        /// </summary>
+        public static string SettingTurnNotificationDialogEnabledDefaultValue {
+            get {
+                return ResourceManager.GetString("SettingTurnNotificationDialogEnabledDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -TurnNotificationDialogEnabled.
+        /// </summary>
+        public static string SettingTurnNotificationDialogEnabledKey {
+            get {
+                return ResourceManager.GetString("SettingTurnNotificationDialogEnabledKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/Silence.wav.
         /// </summary>
         public static string UriPathSilence {

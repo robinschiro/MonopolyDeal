@@ -92,6 +92,23 @@ namespace GameClient
             }
         }
 
+        private bool isTurnNotificationDialogEnabled;
+        public bool IsTurnNotificationDialogEnabled
+        {
+            get
+            {
+                return isTurnNotificationDialogEnabled;
+            }
+            set
+            {
+                isTurnNotificationDialogEnabled = value;
+                this.ClientSettings[ClientResourceList.SettingTurnNotificationDialogEnabledKey] = value;
+                this.ClientSettings.Save();
+
+                OnPropertyChanged("IsTurnNotificationDialogEnabled");
+            }
+        }
+
         #endregion Variables
 
         public GameWindow( string playerName, string ipAddress, int portNumber, Turn turn )
@@ -225,6 +242,7 @@ namespace GameClient
             // Load and apply client settings.
             this.ClientSettings = ClientUtilities.GetClientSettings(ClientResourceList.SettingsFilePath);
             this.AreSoundEffectsEnabled = this.ClientSettings.bValue(ClientResourceList.SettingSoundEffectsEnabledKey, Convert.ToBoolean(ClientResourceList.SettingSoundEffectsEnabledDefaultValue));
+            this.IsTurnNotificationDialogEnabled = this.ClientSettings.bValue(ClientResourceList.SettingTurnNotificationDialogEnabledKey, Convert.ToBoolean(ClientResourceList.SettingTurnNotificationDialogEnabledDefaultValue));
         }
 
         #region Client Communication Code
@@ -718,8 +736,11 @@ namespace GameClient
                 {
                     ClientUtilities.PlaySound(ClientResourceList.UriPathTurnDing);
 
-                    var turnNotificationDialog = new MessageDialog(this, string.Empty, "It's your turn!", MessageBoxButton.OK);
-                    turnNotificationDialog.ShowDialog();
+                    if ( this.isTurnNotificationDialogEnabled )
+                    {
+                        var turnNotificationDialog = new MessageDialog(this, string.Empty, "It's your turn!", MessageBoxButton.OK);
+                        turnNotificationDialog.ShowDialog();
+                    }
                 }
 
                 // Draw the cards for the current turn owner automatically.

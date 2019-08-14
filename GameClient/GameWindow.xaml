@@ -33,6 +33,9 @@
                 <MenuItem Header="Sound Effects" 
                           IsCheckable="True"
                           IsChecked="{Binding AreSoundEffectsEnabled}"/>
+                <MenuItem Header="Turn Notification Pop-Up" 
+                          IsCheckable="True"
+                          IsChecked="{Binding IsTurnNotificationDialogEnabled}"/>
             </MenuItem>
         </Menu>
         

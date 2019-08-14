@@ -162,4 +162,10 @@
   <data name="UriPathTurnDing" xml:space="preserve">
     <value>pack://application:,,,/GameObjects;component/Audio/TurnDing.wav</value>
   </data>
+  <data name="SettingTurnNotificationDialogEnabledDefaultValue" xml:space="preserve">
+    <value>true</value>
+  </data>
+  <data name="SettingTurnNotificationDialogEnabledKey" xml:space="preserve">
+    <value>-TurnNotificationDialogEnabled</value>
+  </data>
 </root>
