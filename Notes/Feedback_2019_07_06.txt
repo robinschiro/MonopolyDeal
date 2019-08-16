@@ -1,0 +1,26 @@
+Feedback
+
+- Arrow should change to pointer icon when hovering over button
+- MD68: Automatically show smallest value on top of money pile
+- MD69: Instead of popup, have a message with ding to inform about turn
+	- If keep popup, then don't draw until clicking ok.
+	- Currently popup is popping up on the EndTurn button, this is dangerous
+- MD70: Make it clear how the names correspond to the rows
+- MD71: Double click an item to add it to the give list
+- MD72: In real-time, show what people are giving to the renter as rent is paid
+	- This can be in the text log
+- MD73: Show card count for the player himself (for his own hand)
+	- Show name as well
+- MD74: Instead of having an InfoBox, show a larger version of the card under the mouse
+- MD75: Have a color mapping for players, paint border with that color
+- MD Milestone 4: Have a text log events in the bottom left
+	- Can 
+- In Rental Payment, color coat the rows based on color of card
+- MD76: In Rental Payment, have money and properties grouped in tree-view
+- Increase margin between player field and player hand
+- Show count of cards left in deck
+
+AUDIO
+- Normalize audio to -5.0 decibels
+
+BUGS
