@@ -61,6 +61,15 @@ namespace GameObjects.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 225.
+        /// </summary>
+        public static string TooltipMaxWidth {
+            get {
+                return ResourceManager.GetString("TooltipMaxWidth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/.
         /// </summary>
         public static string UriPathAudioFolder {

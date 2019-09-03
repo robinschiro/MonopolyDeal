@@ -66,6 +66,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EventLog.xaml.cs">
+      <DependentUpon>EventLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="IEventLog.cs" />
     <Compile Include="LaunchScreen.xaml.cs">
       <DependentUpon>LaunchScreen.xaml</DependentUpon>
     </Compile>
@@ -76,6 +80,10 @@
     <Compile Include="RoomWindow.xaml.cs">
       <DependentUpon>RoomWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="EventLog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Styles\PlayerHandCount.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

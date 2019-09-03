@@ -15,7 +15,7 @@ using System.ComponentModel;
 using System.Collections.ObjectModel;
 using GameObjects;
 using Utilities;
-
+using GameObjectsResourceList = GameObjects.Properties.Resources;
 
 namespace AdditionalWindows
 {
@@ -238,7 +238,7 @@ namespace AdditionalWindows
 
                         Image tooltip = new Image();
                         tooltip.Source = this.TryFindResource(property.CardImageUriPath) as DrawingImage;
-                        tooltip.MaxWidth = 200;
+                        tooltip.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
                         propertyItem.ToolTip = tooltip;
 
                         potentialMonopoly.Items.Add(propertyItem);                        

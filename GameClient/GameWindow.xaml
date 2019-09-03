@@ -93,6 +93,10 @@
                       Grid.Row="1"
                       Margin="10">
                 </Grid>
+
+				<local:EventLog x:Name="GameEventLog"
+                            Grid.Row="1"
+                            Margin="10, 10, 10, 10"/>
             </Grid>
         </Border>
 

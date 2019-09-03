@@ -804,13 +804,19 @@ namespace GameClient
         {
             Button cardButton = new Button();
 
-            cardButton.Content = new Image();
-            (cardButton.Content as Image).Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
-            
+            var cardContentImage = new Image();
+            cardContentImage.Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
+            cardButton.Content = cardContentImage;
+
+            var cardTooltipImage = new Image();
+            cardTooltipImage.Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
+            cardTooltipImage.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
+            cardButton.ToolTip = cardTooltipImage;
+
             cardButton.Tag = card;
             cardButton.Style = (Style)FindResource("NoChromeButton");
             cardButton.RenderTransform = new TransformGroup();
-            cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
+            cardButton.RenderTransformOrigin = new Point(0.5, 0.5);                        
 
             return cardButton;
         }
@@ -925,7 +931,10 @@ namespace GameClient
         {
             this.ActionCount.Content = "Actions Remaining: " + this.Turn.ActionsRemaining;
 
-            this.TurnIndicator.Content = this.PlayerList[this.Turn.CurrentTurnOwner].Name + "'s Turn";
+            string currentPlayerName = this.PlayerList[this.Turn.CurrentTurnOwner].Name;
+            this.TurnIndicator.Content = currentPlayerName + "'s Turn";
+
+            this.GameEventLog.PublishCustomEvent("It is " + currentPlayerName + "'s turn!");
         }
 
         // Resize UI elements so that they are propotional to the size of the window.
