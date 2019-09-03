@@ -165,7 +165,7 @@ namespace GameClient
             }
 
             // Update the turn display.
-            UpdateTurnDisplay(null);
+            UpdateTurnDisplay(isNewTurn: true);
 
             // Inform the next player in the list that he can connect.
             int pos = FindPlayerPositionInPlayerList(this.Player.Name);
@@ -377,7 +377,7 @@ namespace GameClient
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
                             // Update the turn indicator and action count.
-                            CreateNewThread(new Action<Object>(UpdateTurnDisplay));
+                            CreateNewThread(new Action<Object>(UpdateTurnDisplay), false);
 
                             break;
                         }
@@ -400,12 +400,8 @@ namespace GameClient
                         {
                             // Retrieve the request.
                             ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReceiveMessage(inc, messageType);
-
-                            // If this player is the renter who originally requested the rent, add the AssetsGiven to the player's AssetsReceived list.
-                            if ( response.RenterName == this.Player.Name )
-                            {
-                                CreateNewThread(new Action<Object>(ProcessReceivedRent), response);
-                            }
+                                                        
+                            CreateNewThread(new Action<Object>(ProcessReceivedRent), response);
 
                             break;
                         }
@@ -444,7 +440,7 @@ namespace GameClient
                             CreateNewThread(new Action<Object>(CheckIfCurrentTurnOwner), true);
 
                             // Update the turn display.
-                            CreateNewThread(new Action<Object>(UpdateTurnDisplay));
+                            CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
 
                             break;
                         }
@@ -927,14 +923,19 @@ namespace GameClient
             InfoBox.Children.Add(element);
         }
 
-        public void UpdateTurnDisplay( Object filler )
+        public void UpdateTurnDisplay( Object isNewTurn )
         {
+            bool shouldCreateEventLogEntry = (bool)isNewTurn;
+
             this.ActionCount.Content = "Actions Remaining: " + this.Turn.ActionsRemaining;
 
             string currentPlayerName = this.PlayerList[this.Turn.CurrentTurnOwner].Name;
             this.TurnIndicator.Content = currentPlayerName + "'s Turn";
 
-            this.GameEventLog.PublishCustomEvent("It is " + currentPlayerName + "'s turn!");
+            if (shouldCreateEventLogEntry)
+            {
+                this.GameEventLog.PublishCustomEvent("It is " + currentPlayerName + "'s turn!");
+            }
         }
 
         // Resize UI elements so that they are propotional to the size of the window.
@@ -1989,6 +1990,17 @@ namespace GameClient
         private void ProcessReceivedRent( Object response )
         {
             ActionData.RentResponse rentResponse = (ActionData.RentResponse)response;
+
+            this.GameEventLog.PublishPayRentEvent(
+                this.PlayerList.First(p => p.Name == rentResponse.RenterName),
+                this.PlayerList.First(p => p.Name == rentResponse.RenteeName),
+                rentResponse.AssetsGiven);
+
+            // If this player is the renter who originally requested the rent, add the AssetsGiven to the player's AssetsReceived list.
+            if (rentResponse.RenterName != this.Player.Name)
+            {
+                return;
+            }
 
             // Verify that there still exists renters who have not paid their rent.
             if ( this.NumberOfRentees > 0 )

@@ -20,8 +20,6 @@ namespace GameClient
     /// </summary>
     public partial class EventLog : UserControl, IEventLog
     {
-        private int eventNum = 0;
-
         public EventLog()
         {
             InitializeComponent();
@@ -34,7 +32,9 @@ namespace GameClient
 
         public void PublishPayRentEvent( Player renter, Player rentee, List<Card> assetsPaid )
         {
-            throw new NotImplementedException();
+            string eventLine = rentee.Name + " paid " + renter.Name + " the following assets: " + string.Join(", ", assetsPaid.Select(card => card.Name));
+
+            this.PublishCustomEvent(eventLine);
         }
 
         public void PublishSlyDealEvent( Player thief, Player victim, Card property )
@@ -59,10 +59,7 @@ namespace GameClient
 
         public void PublishCustomEvent( string eventLogline )
         {
-            for ( int i = 0; i < 10; i++ )
-            {
-                this.EventLogTextBlock.Text += "\r\n" + eventLogline + " " + this.eventNum++;
-            }
+            this.EventLogTextBlock.Text += "\r\n" + eventLogline + " ";
 
             this.EventLogScrollViewer.ScrollToBottom();
         }

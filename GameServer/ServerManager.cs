@@ -250,7 +250,7 @@ namespace GameServer
                                 case Datatype.GiveRent:
                                 {
                                     ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReadRentResponse(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.GiveRent, response, idOfClientToExclude: idOfSender);
+                                    ServerUtilities.SendMessage(Server, Datatype.GiveRent, response);
 
                                     break;
                                 }
