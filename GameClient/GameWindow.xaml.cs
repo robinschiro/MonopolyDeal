@@ -1393,7 +1393,7 @@ namespace GameClient
                         // Each player should only be to see the breakdown of his own money pile
                         if ( this.Player == player )
                         {
-                            cardButton.MouseEnter += new MouseEventHandler(cardButtonMoney_MouseEnter);
+                            cardButton.ToolTip = new MoneyListView(this.Player);
                         }
 
                         // Play money cards horizontally.
