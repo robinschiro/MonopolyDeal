@@ -306,10 +306,16 @@
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
-            
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="13*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
                 <Grid Name="PlayerOneField"
                       Background="LightCoral"
-                      Grid.Row="0">
+                      Grid.Row="0"
+                      Grid.Column="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -326,8 +332,24 @@
                     </Grid.ColumnDefinitions>
                 </Grid>
 
+                <Grid Name="PlayerOneHandCount"
+                      Grid.Column="1"
+                      Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="0"
+                           Source="{StaticResource ResourceKey=cardbackDrawingImage}"/>
+                    <Viewbox Grid.Row="1"
+                             HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerOneHand}"/>
+                    </Viewbox>
+                </Grid>
+
                 <Grid Name="PlayerOneHand"
-                      Grid.Row="1">
+                      Grid.Row="1"
+                      Grid.ColumnSpan="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>

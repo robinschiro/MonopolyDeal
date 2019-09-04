@@ -879,15 +879,11 @@ namespace GameClient
 
             foreach ( Player player in PlayerList )
             {
-                // Skip the player that represents this client.
-                if ( this.Player.Name != player.Name )
-                {
-                    // Update the display of the opponent's cards in play.
-                    DisplayCardsInPlay(player, PlayerFieldDictionary[player.Name]);
+                // Update the display of the opponent's cards in play.
+                DisplayCardsInPlay(player, PlayerFieldDictionary[player.Name]);
 
-                    // Update the field displaying the count of cards in the player's hand.
-                    PlayerHandDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
-                }
+                // Update the field displaying the count of cards in the player's hand.
+                PlayerHandDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
             }
         }
 
