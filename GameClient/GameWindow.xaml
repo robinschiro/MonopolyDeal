@@ -12,7 +12,7 @@
             <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
 
-        <local:MultiBoolConverter x:Key="multiBoolConverter" />        
+        <local:MultiBoolConverter x:Key="multiBoolConverter" />
     </Window.Resources>
 
     <Grid Name="WindowGrid"
@@ -38,50 +38,65 @@
                           IsChecked="{Binding IsTurnNotificationDialogEnabled}"/>
             </MenuItem>
         </Menu>
-        
-        <Grid Name="SideBar"
-              Grid.Column="0"
-              Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid Name="TopSideBar"
-                  Grid.Row="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="4*"/>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition Height="4*"/>
-                </Grid.RowDefinitions>
 
-                <Button Name="EndTurnButton"
-                        Content="End Turn"
-                        Focusable="False"
-                        Click="EndTurnButton_Click"
-                        IsEnabled="{Binding IsCurrentTurnOwner, UpdateSourceTrigger=PropertyChanged}"
-                        Grid.Row="0"/>
-                   
-                <Label Name="TurnIndicator"
-                       Background="White"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Center"
-                       Content="Your Turn"
-                       Grid.Row="1"/>
-                <Label Name="ActionCount"
-                       Background="White"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Center"
-                       Content="Actions Remaining: 3"
-                       Grid.Row="2"/>
-                <Grid Name="DiscardPileGrid"
-                      Grid.Row="3" />
+        <Border BorderBrush="Black" 
+                BorderThickness="2" 
+                Grid.Column="0" 
+                Grid.Row="1">            
+            <Grid Name="SideBar">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid Name="TopSideBar"
+                      Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition Height="4*"/>
+                    </Grid.RowDefinitions>
+
+                    <Viewbox Grid.Row="0"
+                             Margin="5, 5, 5, 5">
+                        <Button Name="EndTurnButton"
+                                Content="End Turn"
+                                Focusable="False"
+                                Click="EndTurnButton_Click"
+                                IsEnabled="{Binding IsCurrentTurnOwner, UpdateSourceTrigger=PropertyChanged}"/>
+                    </Viewbox>
+
+                    <Viewbox Grid.Row="1"
+                             HorizontalAlignment="Center"
+                             Margin="5, 5, 5, 5">
+                        <Label Name="TurnIndicator"
+                           Background="White"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Content="Your Turn"/>
+                    </Viewbox>
+
+                    <Viewbox Grid.Row="2"
+                             HorizontalAlignment="Center"
+                             Margin="5, 5, 5, 5">
+                        <Label Name="ActionCount"
+                           Background="White"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Content="Actions Remaining: 3"
+                           Grid.Row="2"/>
+                    </Viewbox>
+
+                    <Grid Name="DiscardPileGrid"
+                          Grid.Row="3"
+                          Margin="10, 10, 10, 10"/>
+                    </Grid>
+                <Grid Name="InfoBox"
+                      Grid.Row="1">
+                </Grid>
             </Grid>
-            <Grid Name="InfoBox"
-                  Grid.Row="1">
-            </Grid>
-        </Grid>
-        
+        </Border>
+
         <Grid Name="PlayingField"
               Grid.Column="1"
               Grid.Row="1">
