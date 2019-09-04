@@ -11,7 +11,6 @@
             <Setter Property="Background" Value="Black"/>
             <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
-
         <local:MultiBoolConverter x:Key="multiBoolConverter" />
     </Window.Resources>
 
@@ -23,9 +22,8 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="7*"/>
+            <ColumnDefinition Width="6*"/>
         </Grid.ColumnDefinitions>
-        <!--<Grid utilities:GridHelpers.RowCount="5" />-->
 
         <Menu Grid.Row="0"
               Grid.ColumnSpan="2">
@@ -112,260 +110,289 @@
                 <RowDefinition Height="12*"/>
             </Grid.RowDefinitions>
 
-            <Grid Name="GridFive"
-                  Grid.Row="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="9*"/>
+            </Grid.ColumnDefinitions>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="13*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
+            <Border Name="GridFiveBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    Grid.Row="0"
+                    Grid.Column="1">
+                <Grid Name="GridFive">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
 
-                <Grid Name="PlayerFiveField"
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Name="PlayerFiveField"
                       Grid.Row="0"
                       Grid.Column="0"
                       ClipToBounds="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
 
-                <Grid Name="PlayerFiveHand"
+                    <Grid Name="PlayerFiveHand"
                       Visibility="Hidden"
                       Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-                    <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}"
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}"
                            Grid.Row="0"/>
-                    <Viewbox Grid.Row="1"
+                        <Viewbox Grid.Row="1"
                              HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerFiveHand}"/>
-                    </Viewbox>
+                            <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerFiveHand}"/>
+                        </Viewbox>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Border>
 
-            <Grid Name="GridFour"
-                  Grid.Row="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
+            <Border Name="GridFourBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    BorderBrush="Black" 
+                    BorderThickness="1" 
+                    Grid.Row="2"
+                    Grid.Column="1">
+                <Grid Name="GridFour">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="13*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
 
-                <Grid Name="PlayerFourField"
+                    <Grid Name="PlayerFourField"
                       Grid.Row="0"
                       Grid.Column="0"
                       ClipToBounds="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
 
-                <Grid Name="PlayerFourHand"
+                    <Grid Name="PlayerFourHand"
                       Visibility="Hidden"
                       Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-                    <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}"
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}"
                            Grid.Row="0"/>
-                    <Viewbox Grid.Row="1"
+                        <Viewbox Grid.Row="1"
                              HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerFourHand}"/>
-                    </Viewbox>
+                            <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerFourHand}"/>
+                        </Viewbox>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Border>
 
-            <Grid Name="GridThree"
-                  Grid.Row="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
+            <Border Name="GridThreeBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    Grid.Row="4"
+                    Grid.Column="1">
+                <Grid Name="GridThree">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="13*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
 
-                <Grid Name="PlayerThreeField"
+                    <Grid Name="PlayerThreeField"
                       Grid.Row="0"
                       Grid.Column="0"
                       ClipToBounds="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
 
-                <Grid Name="PlayerThreeHand"
+                    <Grid Name="PlayerThreeHand"
                       Visibility="Hidden"
                       Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-                    <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}"
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}"
                            Grid.Row="0"/>
-                    <Viewbox Grid.Row="1"
+                        <Viewbox Grid.Row="1"
                              HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerThreeHand}"/>
-                    </Viewbox>
+                            <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerThreeHand}"/>
+                        </Viewbox>
+                    </Grid>
                 </Grid>
-            </Grid>
-            <Grid Name="GridTwo"
-                  Grid.Row="6">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
+            </Border>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="13*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
+            <Border Name="GridTwoBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    Grid.Row="6"
+                    Grid.Column="1">
+                <Grid Name="GridTwo">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
 
-                <Grid Name="PlayerTwoField"
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Name="PlayerTwoField"
                       Grid.Row="0"
                       Grid.Column="0"
                       ClipToBounds="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                </Grid>
-                
-                <Grid Name="PlayerTwoHand"
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+
+                    <Grid Name="PlayerTwoHand"
                       Visibility="Hidden"
                       Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-                    <Image Grid.Row="0"
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Image Grid.Row="0"
                            Source="{StaticResource ResourceKey=cardbackDrawingImage}"/>
-                    <Viewbox Grid.Row="1"
+                        <Viewbox Grid.Row="1"
                              HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerTwoHand}"/>
-                    </Viewbox>
-                </Grid>                
-            </Grid>
-            
-            <Grid Name="GridOne"
-                  AllowDrop="True"
-                  Grid.Row="8">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="13*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-
-                <Grid Name="PlayerOneField"
-                      Background="LightCoral"
-                      Grid.Row="0"
-                      Grid.Column="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerTwoHand}"/>
+                        </Viewbox>
+                    </Grid>
                 </Grid>
+            </Border>
 
-                <Grid Name="PlayerOneHandCount"
+            <Border Name="GridOneBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    Grid.Row="8"
+                    Grid.Column="1">
+                <Grid Name="GridOne"
+                  AllowDrop="True">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Name="PlayerOneField"
+                          Background="LightCoral"
+                          Grid.Row="0"
+                          Grid.Column="0"
+                          ClipToBounds="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+
+                    <Grid Name="PlayerOneHandCount"
                       Grid.Column="1"
                       Grid.Row="0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-                    <Image Grid.Row="0"
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Image Grid.Row="0"
                            Source="{StaticResource ResourceKey=cardbackDrawingImage}"/>
-                    <Viewbox Grid.Row="1"
+                        <Viewbox Grid.Row="1"
                              HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerOneHand}"/>
-                    </Viewbox>
-                </Grid>
+                            <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerOneHand}"/>
+                        </Viewbox>
+                    </Grid>
 
-                <Grid Name="PlayerOneHand"
+                    <Grid Name="PlayerOneHand"
                       Grid.Row="1"
                       Grid.ColumnSpan="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Border>
         </Grid>      
     </Grid>
 </Window>

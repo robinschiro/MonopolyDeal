@@ -77,6 +77,10 @@
     <Compile Include="RoomWindow.xaml.cs">
       <DependentUpon>RoomWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Styles\PlayerGridBorder.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Styles\PlayerFieldAndHand.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

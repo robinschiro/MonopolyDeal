@@ -191,29 +191,31 @@ namespace GameClient
             // Add player names to each playing field.
             for ( int i = 0; i < this.PlayerList.Count; i++ )
             {
-                if ( this.PlayerList[i].Name != this.PlayerName )
-                {
-                    TextBlock playerNameTextBlock = new TextBlock();
-                    playerNameTextBlock.Text = "Name: " + this.PlayerList[i].Name;
+                TextBlock playerNameTextBlock = new TextBlock();
+                playerNameTextBlock.Text = this.PlayerList[i].Name;
+                playerNameTextBlock.Margin = new Thickness(10);
 
-                    Viewbox playerNameViewbox = new Viewbox();
-                    playerNameViewbox.VerticalAlignment = System.Windows.VerticalAlignment.Center;
-                    playerNameViewbox.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-                    playerNameViewbox.Child = playerNameTextBlock;
+                Viewbox playerNameViewbox = new Viewbox();
+                playerNameViewbox.VerticalAlignment = VerticalAlignment.Center;
+                playerNameViewbox.HorizontalAlignment = HorizontalAlignment.Left;
+                playerNameViewbox.Child = playerNameTextBlock;
 
-                    // Create a separator to separate the playing fields.
-                    Separator fieldSeparator = new Separator();
-                    fieldSeparator.Style = (Style)FindResource("FieldSeparator");
+                Border playerNameBorder = new Border();
+                playerNameBorder.BorderBrush = Brushes.Black;
+                playerNameBorder.BorderThickness = new Thickness(1);
+                playerNameBorder.Child = playerNameViewbox;
 
-                    // Add the UI elements to the playing field.
-                    PlayingField.Children.Add(playerNameViewbox);
-                    PlayingField.Children.Add(fieldSeparator);
+                // Create a separator to separate the playing fields.
+                Separator fieldSeparator = new Separator();
+                fieldSeparator.Style = (Style)FindResource("FieldSeparator");
 
-                    // Set the row positions of the UI elements.
-                    int row = -2 * GetRelativePosition(this.PlayerName, PlayerList[i].Name) + 9;
-                    Grid.SetRow(playerNameViewbox, row);
-                    Grid.SetRow(fieldSeparator, row);
-                }
+                // Add the UI elements to the playing field.
+                PlayingField.Children.Add(playerNameBorder);
+
+                // Set the row positions of the UI elements.
+                int row = -2 * GetRelativePosition(this.PlayerName, PlayerList[i].Name) + 8;
+                Grid.SetRow(playerNameBorder, row);
+                Grid.SetColumn(playerNameBorder, 0);
             }
 
             // Display the cards in this player's hand.
@@ -961,13 +963,16 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerOneField);
                         PlayerHandDictionary.Add(player.Name, PlayerOneHand);
+                        PlayerOneHand.Visibility = Visibility.Visible;
+                        GridOneBorder.Visibility = Visibility.Visible;
                         break;
                     }
                     case 1:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerTwoField);
                         PlayerHandDictionary.Add(player.Name, PlayerTwoHand);
-                        PlayerTwoHand.Visibility = System.Windows.Visibility.Visible;
+                        PlayerTwoHand.Visibility = Visibility.Visible;
+                        GridTwoBorder.Visibility = Visibility.Visible;
                         break;
                     }
 
@@ -975,7 +980,8 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerThreeField);
                         PlayerHandDictionary.Add(player.Name, PlayerThreeHand);
-                        PlayerThreeHand.Visibility = System.Windows.Visibility.Visible;
+                        PlayerThreeHand.Visibility = Visibility.Visible;
+                        GridThreeBorder.Visibility = Visibility.Visible;
                         break;
                     }
 
@@ -983,7 +989,8 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFourField);
                         PlayerHandDictionary.Add(player.Name, PlayerFourHand);
-                        PlayerFourHand.Visibility = System.Windows.Visibility.Visible;
+                        PlayerFourHand.Visibility = Visibility.Visible;
+                        GridFourBorder.Visibility = Visibility.Visible;
                         break;
                     }
 
@@ -991,7 +998,8 @@ namespace GameClient
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFiveField);
                         PlayerHandDictionary.Add(player.Name, PlayerFiveHand);
-                        PlayerFiveHand.Visibility = System.Windows.Visibility.Visible;
+                        PlayerFiveHand.Visibility = Visibility.Visible;
+                        GridFiveBorder.Visibility = Visibility.Visible;
                         break;
                     }
                 }
