@@ -35,18 +35,8 @@
                             </Grid.ColumnDefinitions>
                         </Grid>
 
-                        <Grid Grid.Column="1">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="1*"/>
-                            </Grid.RowDefinitions>
-                            <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}" 
-                               Grid.Row="0"/>
-                            <Viewbox Grid.Row="1"
-                                 HorizontalAlignment="Center">
-                                <TextBlock />
-                            </Viewbox>
-                        </Grid>
+                        <ContentControl Grid.Column="1"                                    
+                                        Style="{StaticResource PlayerHandCountStyle}" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

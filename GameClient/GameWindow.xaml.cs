@@ -27,7 +27,7 @@ namespace GameClient
     /// <summary>
     /// Interaction logic for GameWindow.xaml
     /// </summary>
-    public partial class GameWindow : Window, IGameClient, INotifyPropertyChanged
+    public partial class GameWindow : Window, INotifyPropertyChanged
     {
 
         #region Variables
@@ -43,7 +43,7 @@ namespace GameClient
         private bool ReceivedDeck;
         private volatile NetClient Client;
         private Dictionary<String, Grid> PlayerFieldDictionary;
-        private Dictionary<String, Grid> PlayerHandDictionary;
+        private Dictionary<String, FrameworkElement> PlayerHandCountDictionary;
         private bool HavePlayersBeenAssigned;
         private Turn Turn;
         private List<Card> DiscardPile;
@@ -869,8 +869,8 @@ namespace GameClient
             }
         }
 
-        // Display the cards of the player's opponents.
-        public void DisplayOpponentCards( Object filler = null )
+        // Display cards of the player and the player's opponents.
+        public void DisplayAllCards( Object filler = null )
         {
             // If the other players have not been assigned to their respective areas of the client's window,
             // assign them now.
@@ -885,15 +885,8 @@ namespace GameClient
                 DisplayCardsInPlay(player, PlayerFieldDictionary[player.Name]);
 
                 // Update the field displaying the count of cards in the player's hand.
-                PlayerHandDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
+                PlayerHandCountDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
             }
-        }
-
-        // Display cards of the player and the player's opponents.
-        public void DisplayAllCards( Object filler = null )
-        {
-            DisplayOpponentCards();
-            DisplayCardsInPlay(this.Player, PlayerOneField);
         }
 
         // Update the card displayed in the InfoBox.
@@ -952,7 +945,7 @@ namespace GameClient
             HavePlayersBeenAssigned = true;
 
             PlayerFieldDictionary = new Dictionary<String, Grid>();
-            PlayerHandDictionary = new Dictionary<String, Grid>();
+            PlayerHandCountDictionary = new Dictionary<String, FrameworkElement>();
 
             foreach ( Player player in PlayerList )
             {
@@ -962,16 +955,14 @@ namespace GameClient
                     case 0:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerOneField);
-                        PlayerHandDictionary.Add(player.Name, PlayerOneHand);
-                        PlayerOneHand.Visibility = Visibility.Visible;
+                        PlayerHandCountDictionary.Add(player.Name, PlayerOneHandCount);
                         GridOneBorder.Visibility = Visibility.Visible;
                         break;
                     }
                     case 1:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerTwoField);
-                        PlayerHandDictionary.Add(player.Name, PlayerTwoHand);
-                        PlayerTwoHand.Visibility = Visibility.Visible;
+                        PlayerHandCountDictionary.Add(player.Name, PlayerTwoHandCount);
                         GridTwoBorder.Visibility = Visibility.Visible;
                         break;
                     }
@@ -979,8 +970,7 @@ namespace GameClient
                     case 2:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerThreeField);
-                        PlayerHandDictionary.Add(player.Name, PlayerThreeHand);
-                        PlayerThreeHand.Visibility = Visibility.Visible;
+                        PlayerHandCountDictionary.Add(player.Name, PlayerThreeHandCount);
                         GridThreeBorder.Visibility = Visibility.Visible;
                         break;
                     }
@@ -988,8 +978,7 @@ namespace GameClient
                     case 3:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFourField);
-                        PlayerHandDictionary.Add(player.Name, PlayerFourHand);
-                        PlayerFourHand.Visibility = Visibility.Visible;
+                        PlayerHandCountDictionary.Add(player.Name, PlayerFourHandCount);
                         GridFourBorder.Visibility = Visibility.Visible;
                         break;
                     }
@@ -997,8 +986,7 @@ namespace GameClient
                     case 4:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFiveField);
-                        PlayerHandDictionary.Add(player.Name, PlayerFiveHand);
-                        PlayerFiveHand.Visibility = Visibility.Visible;
+                        PlayerHandCountDictionary.Add(player.Name, PlayerFiveHandCount);
                         GridFiveBorder.Visibility = Visibility.Visible;
                         break;
                     }
