@@ -353,6 +353,7 @@ namespace GameClient
                             this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
                             // If the Player associated with this client does not exist yet, retrieve it from the list.
+                            // DO NOT REMOVE THIS CHECK UNTIL MD# 81 IS ADDRESSED, otherwise random bugs will appear.
                             if ( null == this.Player )
                             {
                                 this.Player = (Player)this.PlayerList.Find(player => player.Name == this.PlayerName);
@@ -879,13 +880,22 @@ namespace GameClient
                 AssignPlayersToGrids();
             }
 
-            foreach ( Player player in PlayerList )
+            // Update display for main player.
+            // Note: This logic needs to be duplicated for the main player because the Card objects in the 'Player' member
+            // are not necessarily the same objects as the ones in this.PlayerList. 
+            // This is a flaw that will need to be fixed in a later refactor.
+            // Addressed by MD# 81.
+            DisplayCardsInPlay(this.Player, this.PlayerFieldDictionary[this.PlayerName]);
+            this.PlayerHandCountDictionary[this.PlayerName].Tag = "x" + this.Player.CardsInHand.Count;
+
+            // Update display of opponents fields/hands.
+            foreach ( Player player in this.PlayerList.Where(p => p.Name != this.PlayerName) )
             {
                 // Update the display of the opponent's cards in play.
-                DisplayCardsInPlay(player, PlayerFieldDictionary[player.Name]);
+                DisplayCardsInPlay(player, this.PlayerFieldDictionary[player.Name]);
 
                 // Update the field displaying the count of cards in the player's hand.
-                PlayerHandCountDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
+                this.PlayerHandCountDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
             }
         }
 
@@ -1610,7 +1620,7 @@ namespace GameClient
             {
                 for ( int i = 0; i < cardList.Count; ++i )
                 {
-                    if ( cardList[i] == cardBeingMoved )
+                    if ( cardList[i].CardID == cardBeingMoved.CardID )
                     {
                         MoveItemInList<Card>(cardList, i, i + numberOfSpaces);
                         DisplayCardsInPlay(Player, PlayerOneField);

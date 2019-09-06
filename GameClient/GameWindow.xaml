@@ -43,8 +43,8 @@
                 Grid.Row="1">            
             <Grid Name="SideBar">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition />
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
                 <Grid Name="TopSideBar"
                       Grid.Row="0">
@@ -56,7 +56,7 @@
                     </Grid.RowDefinitions>
 
                     <Viewbox Grid.Row="0"
-                             Margin="5, 5, 5, 5">
+                             Margin="5">
                         <Button Name="EndTurnButton"
                                 Content="End Turn"
                                 Focusable="False"
@@ -66,7 +66,7 @@
 
                     <Viewbox Grid.Row="1"
                              HorizontalAlignment="Center"
-                             Margin="5, 5, 5, 5">
+                             Margin="5">
                         <Label Name="TurnIndicator"
                            Background="White"
                            VerticalAlignment="Center"
@@ -76,7 +76,7 @@
 
                     <Viewbox Grid.Row="2"
                              HorizontalAlignment="Center"
-                             Margin="5, 5, 5, 5">
+                             Margin="5">
                         <Label Name="ActionCount"
                            Background="White"
                            VerticalAlignment="Center"
@@ -87,10 +87,11 @@
 
                     <Grid Name="DiscardPileGrid"
                           Grid.Row="3"
-                          Margin="10, 10, 10, 10"/>
+                          Margin="10"/>
                     </Grid>
                 <Grid Name="InfoBox"
-                      Grid.Row="1">
+                      Grid.Row="1"
+                      Margin="10">
                 </Grid>
             </Grid>
         </Border>
