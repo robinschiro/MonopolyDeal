@@ -11,8 +11,7 @@
             <Setter Property="Background" Value="Black"/>
             <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
-
-        <local:MultiBoolConverter x:Key="multiBoolConverter" />        
+        <local:MultiBoolConverter x:Key="multiBoolConverter" />
     </Window.Resources>
 
     <Grid Name="WindowGrid"
@@ -23,9 +22,8 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="7*"/>
+            <ColumnDefinition Width="6*"/>
         </Grid.ColumnDefinitions>
-        <!--<Grid utilities:GridHelpers.RowCount="5" />-->
 
         <Menu Grid.Row="0"
               Grid.ColumnSpan="2">
@@ -38,50 +36,66 @@
                           IsChecked="{Binding IsTurnNotificationDialogEnabled}"/>
             </MenuItem>
         </Menu>
-        
-        <Grid Name="SideBar"
-              Grid.Column="0"
-              Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid Name="TopSideBar"
-                  Grid.Row="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="4*"/>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition Height="4*"/>
-                </Grid.RowDefinitions>
 
-                <Button Name="EndTurnButton"
-                        Content="End Turn"
-                        Focusable="False"
-                        Click="EndTurnButton_Click"
-                        IsEnabled="{Binding IsCurrentTurnOwner, UpdateSourceTrigger=PropertyChanged}"
-                        Grid.Row="0"/>
-                   
-                <Label Name="TurnIndicator"
-                       Background="White"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Center"
-                       Content="Your Turn"
-                       Grid.Row="1"/>
-                <Label Name="ActionCount"
-                       Background="White"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Center"
-                       Content="Actions Remaining: 3"
-                       Grid.Row="2"/>
-                <Grid Name="DiscardPileGrid"
-                      Grid.Row="3" />
+        <Border BorderBrush="Black" 
+                BorderThickness="2" 
+                Grid.Column="0" 
+                Grid.Row="1">            
+            <Grid Name="SideBar">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid Name="TopSideBar"
+                      Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition Height="4*"/>
+                    </Grid.RowDefinitions>
+
+                    <Viewbox Grid.Row="0"
+                             Margin="5">
+                        <Button Name="EndTurnButton"
+                                Content="End Turn"
+                                Focusable="False"
+                                Click="EndTurnButton_Click"
+                                IsEnabled="{Binding IsCurrentTurnOwner, UpdateSourceTrigger=PropertyChanged}"/>
+                    </Viewbox>
+
+                    <Viewbox Grid.Row="1"
+                             HorizontalAlignment="Center"
+                             Margin="5">
+                        <Label Name="TurnIndicator"
+                           Background="White"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Content="Your Turn"/>
+                    </Viewbox>
+
+                    <Viewbox Grid.Row="2"
+                             HorizontalAlignment="Center"
+                             Margin="5">
+                        <Label Name="ActionCount"
+                           Background="White"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Content="Actions Remaining: 3"
+                           Grid.Row="2"/>
+                    </Viewbox>
+
+                    <Grid Name="DiscardPileGrid"
+                          Grid.Row="3"
+                          Margin="10"/>
+                    </Grid>
+                <Grid Name="InfoBox"
+                      Grid.Row="1"
+                      Margin="10">
+                </Grid>
             </Grid>
-            <Grid Name="InfoBox"
-                  Grid.Row="1">
-            </Grid>
-        </Grid>
-        
+        </Border>
+
         <Grid Name="PlayingField"
               Grid.Column="1"
               Grid.Row="1">
@@ -97,238 +111,235 @@
                 <RowDefinition Height="12*"/>
             </Grid.RowDefinitions>
 
-            <Grid Name="GridFive"
-                  Grid.Row="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="9*"/>
+            </Grid.ColumnDefinitions>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="13*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
+            <Border Name="GridFiveBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    Grid.Row="0"
+                    Grid.Column="1">
+                <Grid Name="GridFive">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
 
-                <Grid Name="PlayerFiveField"
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Name="PlayerFiveField"
                       Grid.Row="0"
                       Grid.Column="0"
                       ClipToBounds="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
 
-                <Grid Name="PlayerFiveHand"
-                      Visibility="Hidden"
-                      Grid.Column="1">
+                    <ContentControl Name="PlayerFiveHandCount"
+                                    Grid.Column="1"                                    
+                                    Style="{StaticResource PlayerHandCountStyle}" />
+                </Grid>
+            </Border>
+
+            <Border Name="GridFourBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    BorderBrush="Black" 
+                    BorderThickness="1" 
+                    Grid.Row="2"
+                    Grid.Column="1">
+                <Grid Name="GridFour">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
                         <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
-                    <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}"
-                           Grid.Row="0"/>
-                    <Viewbox Grid.Row="1"
-                             HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerFiveHand}"/>
-                    </Viewbox>
-                </Grid>
-            </Grid>
 
-            <Grid Name="GridFour"
-                  Grid.Row="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="13*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-
-                <Grid Name="PlayerFourField"
+                    <Grid Name="PlayerFourField"
                       Grid.Row="0"
                       Grid.Column="0"
                       ClipToBounds="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
 
-                <Grid Name="PlayerFourHand"
-                      Visibility="Hidden"
-                      Grid.Column="1">
+                    <ContentControl Name="PlayerFourHandCount"
+                                    Grid.Column="1"                                    
+                                    Style="{StaticResource PlayerHandCountStyle}" />
+                </Grid>
+            </Border>
+
+            <Border Name="GridThreeBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    Grid.Row="4"
+                    Grid.Column="1">
+                <Grid Name="GridThree">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
                         <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
-                    <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}"
-                           Grid.Row="0"/>
-                    <Viewbox Grid.Row="1"
-                             HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerFourHand}"/>
-                    </Viewbox>
-                </Grid>
-            </Grid>
 
-            <Grid Name="GridThree"
-                  Grid.Row="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="13*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-
-                <Grid Name="PlayerThreeField"
+                    <Grid Name="PlayerThreeField"
                       Grid.Row="0"
                       Grid.Column="0"
                       ClipToBounds="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
 
-                <Grid Name="PlayerThreeHand"
-                      Visibility="Hidden"
-                      Grid.Column="1">
+                    <ContentControl Name="PlayerThreeHandCount"
+                                    Grid.Column="1"                                    
+                                    Style="{StaticResource PlayerHandCountStyle}" />
+                </Grid>
+            </Border>
+
+            <Border Name="GridTwoBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    Grid.Row="6"
+                    Grid.Column="1">
+                <Grid Name="GridTwo">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
                         <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
-                    <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}"
-                           Grid.Row="0"/>
-                    <Viewbox Grid.Row="1"
-                             HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerThreeHand}"/>
-                    </Viewbox>
-                </Grid>
-            </Grid>
-            <Grid Name="GridTwo"
-                  Grid.Row="6">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="13*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
 
-                <Grid Name="PlayerTwoField"
+                    <Grid Name="PlayerTwoField"
                       Grid.Row="0"
                       Grid.Column="0"
                       ClipToBounds="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+
+                    <ContentControl Name="PlayerTwoHandCount"
+                                    Grid.Column="1"                                    
+                                    Style="{StaticResource PlayerHandCountStyle}" />
                 </Grid>
-                
-                <Grid Name="PlayerTwoHand"
-                      Visibility="Hidden"
-                      Grid.Column="1">
+            </Border>
+
+            <Border Name="GridOneBorder"
+                    Style="{StaticResource PlayerGridBorderStyle}"
+                    Grid.Row="8"
+                    Grid.Column="1">
+                <Grid Name="GridOne"
+                      AllowDrop="True">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="1*"/>
                         <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
-                    <Image Grid.Row="0"
-                           Source="{StaticResource ResourceKey=cardbackDrawingImage}"/>
-                    <Viewbox Grid.Row="1"
-                             HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding Tag, Mode=OneWay, ElementName=PlayerTwoHand}"/>
-                    </Viewbox>
-                </Grid>                
-            </Grid>
-            
-            <Grid Name="GridOne"
-                  AllowDrop="True"
-                  Grid.Row="8">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
-            
-                <Grid Name="PlayerOneField"
-                      Background="LightCoral"
-                      Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                </Grid>
 
-                <Grid Name="PlayerOneHand"
-                      Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="13*"/>
+                        <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
+
+                    <Grid Name="PlayerOneField"
+                          Background="LightCoral"
+                          Grid.Row="0"
+                          Grid.Column="0"
+                          ClipToBounds="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+
+                    <ContentControl Name="PlayerOneHandCount"
+                                    Grid.Column="1"
+                                    Grid.Row="0"                                    
+                                    Style="{StaticResource PlayerHandCountStyle}" />
+
+                    <Grid Name="PlayerOneHand"
+                          Grid.Row="1"
+                          Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Border>
         </Grid>      
     </Grid>
 </Window>

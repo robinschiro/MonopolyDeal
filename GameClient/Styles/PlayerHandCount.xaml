@@ -1,0 +1,30 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:GameClient">
+
+    <Style x:Key="PlayerHandCountStyle" TargetType="{x:Type ContentControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ContentControl}">
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Image Source="{StaticResource ResourceKey=cardbackDrawingImage}" 
+                               Grid.Row="0"
+                               Margin="5"/>
+                        <Viewbox Grid.Row="1"
+                                 HorizontalAlignment="Center">
+                            <TextBlock Text="{TemplateBinding Tag}"/>
+                        </Viewbox>
+                    </Grid>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

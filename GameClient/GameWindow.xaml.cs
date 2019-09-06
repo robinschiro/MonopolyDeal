@@ -27,7 +27,7 @@ namespace GameClient
     /// <summary>
     /// Interaction logic for GameWindow.xaml
     /// </summary>
-    public partial class GameWindow : Window, IGameClient, INotifyPropertyChanged
+    public partial class GameWindow : Window, INotifyPropertyChanged
     {
 
         #region Variables
@@ -43,7 +43,7 @@ namespace GameClient
         private bool ReceivedDeck;
         private volatile NetClient Client;
         private Dictionary<String, Grid> PlayerFieldDictionary;
-        private Dictionary<String, Grid> PlayerHandDictionary;
+        private Dictionary<String, FrameworkElement> PlayerHandCountDictionary;
         private bool HavePlayersBeenAssigned;
         private Turn Turn;
         private List<Card> DiscardPile;
@@ -191,29 +191,31 @@ namespace GameClient
             // Add player names to each playing field.
             for ( int i = 0; i < this.PlayerList.Count; i++ )
             {
-                if ( this.PlayerList[i].Name != this.PlayerName )
-                {
-                    TextBlock playerNameTextBlock = new TextBlock();
-                    playerNameTextBlock.Text = "Name: " + this.PlayerList[i].Name;
+                TextBlock playerNameTextBlock = new TextBlock();
+                playerNameTextBlock.Text = this.PlayerList[i].Name;
+                playerNameTextBlock.Margin = new Thickness(10);
 
-                    Viewbox playerNameViewbox = new Viewbox();
-                    playerNameViewbox.VerticalAlignment = System.Windows.VerticalAlignment.Center;
-                    playerNameViewbox.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-                    playerNameViewbox.Child = playerNameTextBlock;
+                Viewbox playerNameViewbox = new Viewbox();
+                playerNameViewbox.VerticalAlignment = VerticalAlignment.Center;
+                playerNameViewbox.HorizontalAlignment = HorizontalAlignment.Left;
+                playerNameViewbox.Child = playerNameTextBlock;
 
-                    // Create a separator to separate the playing fields.
-                    Separator fieldSeparator = new Separator();
-                    fieldSeparator.Style = (Style)FindResource("FieldSeparator");
+                Border playerNameBorder = new Border();
+                playerNameBorder.BorderBrush = Brushes.Black;
+                playerNameBorder.BorderThickness = new Thickness(1);
+                playerNameBorder.Child = playerNameViewbox;
 
-                    // Add the UI elements to the playing field.
-                    PlayingField.Children.Add(playerNameViewbox);
-                    PlayingField.Children.Add(fieldSeparator);
+                // Create a separator to separate the playing fields.
+                Separator fieldSeparator = new Separator();
+                fieldSeparator.Style = (Style)FindResource("FieldSeparator");
 
-                    // Set the row positions of the UI elements.
-                    int row = -2 * GetRelativePosition(this.PlayerName, PlayerList[i].Name) + 9;
-                    Grid.SetRow(playerNameViewbox, row);
-                    Grid.SetRow(fieldSeparator, row);
-                }
+                // Add the UI elements to the playing field.
+                PlayingField.Children.Add(playerNameBorder);
+
+                // Set the row positions of the UI elements.
+                int row = -2 * GetRelativePosition(this.PlayerName, PlayerList[i].Name) + 8;
+                Grid.SetRow(playerNameBorder, row);
+                Grid.SetColumn(playerNameBorder, 0);
             }
 
             // Display the cards in this player's hand.
@@ -351,6 +353,7 @@ namespace GameClient
                             this.PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
 
                             // If the Player associated with this client does not exist yet, retrieve it from the list.
+                            // DO NOT REMOVE THIS CHECK UNTIL MD# 81 IS ADDRESSED, otherwise random bugs will appear.
                             if ( null == this.Player )
                             {
                                 this.Player = (Player)this.PlayerList.Find(player => player.Name == this.PlayerName);
@@ -867,8 +870,8 @@ namespace GameClient
             }
         }
 
-        // Display the cards of the player's opponents.
-        public void DisplayOpponentCards( Object filler = null )
+        // Display cards of the player and the player's opponents.
+        public void DisplayAllCards( Object filler = null )
         {
             // If the other players have not been assigned to their respective areas of the client's window,
             // assign them now.
@@ -877,25 +880,23 @@ namespace GameClient
                 AssignPlayersToGrids();
             }
 
-            foreach ( Player player in PlayerList )
+            // Update display for main player.
+            // Note: This logic needs to be duplicated for the main player because the Card objects in the 'Player' member
+            // are not necessarily the same objects as the ones in this.PlayerList. 
+            // This is a flaw that will need to be fixed in a later refactor.
+            // Addressed by MD# 81.
+            DisplayCardsInPlay(this.Player, this.PlayerFieldDictionary[this.PlayerName]);
+            this.PlayerHandCountDictionary[this.PlayerName].Tag = "x" + this.Player.CardsInHand.Count;
+
+            // Update display of opponents fields/hands.
+            foreach ( Player player in this.PlayerList.Where(p => p.Name != this.PlayerName) )
             {
-                // Skip the player that represents this client.
-                if ( this.Player.Name != player.Name )
-                {
-                    // Update the display of the opponent's cards in play.
-                    DisplayCardsInPlay(player, PlayerFieldDictionary[player.Name]);
+                // Update the display of the opponent's cards in play.
+                DisplayCardsInPlay(player, this.PlayerFieldDictionary[player.Name]);
 
-                    // Update the field displaying the count of cards in the player's hand.
-                    PlayerHandDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
-                }
+                // Update the field displaying the count of cards in the player's hand.
+                this.PlayerHandCountDictionary[player.Name].Tag = "x" + player.CardsInHand.Count;
             }
-        }
-
-        // Display cards of the player and the player's opponents.
-        public void DisplayAllCards( Object filler = null )
-        {
-            DisplayOpponentCards();
-            DisplayCardsInPlay(this.Player, PlayerOneField);
         }
 
         // Update the card displayed in the InfoBox.
@@ -954,7 +955,7 @@ namespace GameClient
             HavePlayersBeenAssigned = true;
 
             PlayerFieldDictionary = new Dictionary<String, Grid>();
-            PlayerHandDictionary = new Dictionary<String, Grid>();
+            PlayerHandCountDictionary = new Dictionary<String, FrameworkElement>();
 
             foreach ( Player player in PlayerList )
             {
@@ -964,38 +965,39 @@ namespace GameClient
                     case 0:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerOneField);
-                        PlayerHandDictionary.Add(player.Name, PlayerOneHand);
+                        PlayerHandCountDictionary.Add(player.Name, PlayerOneHandCount);
+                        GridOneBorder.Visibility = Visibility.Visible;
                         break;
                     }
                     case 1:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerTwoField);
-                        PlayerHandDictionary.Add(player.Name, PlayerTwoHand);
-                        PlayerTwoHand.Visibility = System.Windows.Visibility.Visible;
+                        PlayerHandCountDictionary.Add(player.Name, PlayerTwoHandCount);
+                        GridTwoBorder.Visibility = Visibility.Visible;
                         break;
                     }
 
                     case 2:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerThreeField);
-                        PlayerHandDictionary.Add(player.Name, PlayerThreeHand);
-                        PlayerThreeHand.Visibility = System.Windows.Visibility.Visible;
+                        PlayerHandCountDictionary.Add(player.Name, PlayerThreeHandCount);
+                        GridThreeBorder.Visibility = Visibility.Visible;
                         break;
                     }
 
                     case 3:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFourField);
-                        PlayerHandDictionary.Add(player.Name, PlayerFourHand);
-                        PlayerFourHand.Visibility = System.Windows.Visibility.Visible;
+                        PlayerHandCountDictionary.Add(player.Name, PlayerFourHandCount);
+                        GridFourBorder.Visibility = Visibility.Visible;
                         break;
                     }
 
                     case 4:
                     {
                         PlayerFieldDictionary.Add(player.Name, PlayerFiveField);
-                        PlayerHandDictionary.Add(player.Name, PlayerFiveHand);
-                        PlayerFiveHand.Visibility = System.Windows.Visibility.Visible;
+                        PlayerHandCountDictionary.Add(player.Name, PlayerFiveHandCount);
+                        GridFiveBorder.Visibility = Visibility.Visible;
                         break;
                     }
                 }
@@ -1618,7 +1620,7 @@ namespace GameClient
             {
                 for ( int i = 0; i < cardList.Count; ++i )
                 {
-                    if ( cardList[i] == cardBeingMoved )
+                    if ( cardList[i].CardID == cardBeingMoved.CardID )
                     {
                         MoveItemInList<Card>(cardList, i, i + numberOfSpaces);
                         DisplayCardsInPlay(Player, PlayerOneField);
