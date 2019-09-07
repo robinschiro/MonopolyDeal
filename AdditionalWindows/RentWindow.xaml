@@ -10,8 +10,11 @@
     
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
         
         <Grid.RowDefinitions>
@@ -25,61 +28,79 @@
                HorizontalAlignment="Center" 
                VerticalAlignment="Center"
                Name="AssetsLabel"
-               Grid.Column="0"
-               Grid.Row="0"/>
-
-        <Label Content="What to Give" 
-               HorizontalAlignment="Center" 
-               VerticalAlignment="Center"
-               Name="GiveLabel"
                Grid.Column="1"
                Grid.Row="0"/>
-
+        
         <ListView Name="AssetsListView"
                   ItemsSource="{Binding Assets, Mode=TwoWay}"
                   Style="{StaticResource CardListViewStyle}"
-                  Grid.Column="0"
-                  Grid.Row="1"
-                  MouseDoubleClick="AssetsListView_MouseDoubleClick"/>            
-
-        <ListView Name="PaymentListView"
-                  ItemsSource="{Binding Payment, Mode=TwoWay}"
-                  Style="{StaticResource CardListViewStyle}"
                   Grid.Column="1"
                   Grid.Row="1"
-                  MouseDoubleClick="PaymentListView_MouseDoubleClick"/>
+                  MouseDoubleClick="AssetsListView_MouseDoubleClick"/>
 
-        <Button Name="GiveButton" 
-                Content="Give Selected" 
-                Click="GiveButton_Click"
-                HorizontalAlignment="Center" 
-                VerticalAlignment="Center"
-                Grid.Column="0"
-                Grid.Row="2"/>
-
-        <Label Name="TotalLabel" 
-               Content="{Binding AmountGivenString}"
+        <Label Name="TotalLeftLabel"
+               Margin="5"
+               Content="{Binding AmountLeftString}"
                HorizontalAlignment="Left" 
                VerticalAlignment="Center"
                Grid.Column="1"
                Grid.Row="2"/>
 
-        <Button Name="RemoveButton" 
-                Content="Remove Selected"
-                Click="RemoveButton_Click"
+        <Button Name="GiveButton"
+                Margin="5"
+                Content="Give Selected" 
+                Click="GiveButton_Click"
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Center"
                 Grid.Column="1"
                 Grid.Row="2"/>
 
+        <Rectangle VerticalAlignment="Stretch" 
+                   Width="1" 
+                   Margin="2" 
+                   Stroke="Black"
+                   Grid.Column="2"
+                   Grid.RowSpan="3"/>
+
+        <Label Content="What to Give" 
+               HorizontalAlignment="Center" 
+               VerticalAlignment="Center"
+               Name="GiveLabel"
+               Grid.Column="3"
+               Grid.Row="0"/>
+
+        <ListView Name="PaymentListView"
+                  ItemsSource="{Binding Payment, Mode=TwoWay}"
+                  Style="{StaticResource CardListViewStyle}"
+                  Grid.Column="3"
+                  Grid.Row="1"
+                  MouseDoubleClick="PaymentListView_MouseDoubleClick"/>
+
+        <Label Name="TotalGivenLabel"
+               Margin="5"
+               Content="{Binding AmountGivenString}"
+               HorizontalAlignment="Left" 
+               VerticalAlignment="Center"
+               Grid.Column="3"
+               Grid.Row="2"/>
+
+        <Button Name="RemoveButton"
+                Margin="5"
+                Content="Remove Selected"
+                Click="RemoveButton_Click"
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Center"
+                Grid.Column="3"
+                Grid.Row="2"/>
+
         <Separator VerticalAlignment="Bottom"
-                   Grid.Column="0"
-                   Grid.ColumnSpan="2"
+                   Grid.ColumnSpan="5"
                    Grid.Row="2"/>
+        
         <Label Name="AmountOwedLabel"
                Content="Amount Owed (in millions): "
                VerticalAlignment="Center"
-               Grid.Column="0"
+               Grid.Column="1"
                Grid.Row="3"/>
 
         <Button Name="PayButton" 
@@ -88,7 +109,7 @@
                 Click="PayButton_Click"
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center"
-                Grid.Column="1"
+                Grid.Column="3"
                 Grid.Row="3"/>
     </Grid>
 </src:ModalWindow>

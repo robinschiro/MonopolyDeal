@@ -25,12 +25,24 @@ namespace AdditionalWindows
         {
             get
             {
+                amountLeft = Card.SumOfCardValues(AssetsListView.Items);
                 amountGiven = Card.SumOfCardValues(PaymentListView.Items);
 
                 // Update the Pay Rent button.
-                PayButton.IsEnabled = (amountGiven >= amountOwed) || ( 0 == AssetsListView.Items.OfType<Card>().Select(c => c.Value).Sum() );
+                PayButton.IsEnabled = (amountGiven >= amountOwed) || (0 == amountLeft);
 
                 return "Total Value: " + amountGiven;
+            }
+        }
+
+        private int amountLeft;
+        public string AmountLeftString
+        {
+            get
+            {
+                amountLeft = Card.SumOfCardValues(AssetsListView.Items);
+
+                return "Total Value: " + amountLeft;
             }
         }
 
@@ -128,8 +140,8 @@ namespace AdditionalWindows
             // Resize the ListViews' columns.
             AutoSizeColumns(listview1);
             AutoSizeColumns(listview2);
-
-            // Raise the property change for the amount given.
+                        
+            OnPropertyChanged("AmountLeftString");
             OnPropertyChanged("AmountGivenString");
         }
 
