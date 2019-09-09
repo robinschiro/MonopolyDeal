@@ -574,63 +574,72 @@ namespace GameClient
         // Allow cards to be drag and dropped from one place to another.
         void cardButton_Drop( object sender, DragEventArgs e )
         {
-            if ( this.IsCurrentTurnOwner )
+            if ( !this.IsCurrentTurnOwner )
             {
-                Button targetCardButton = sender as Button;
-                List<Card> targetCardList = FindListContainingCard(targetCardButton.Tag as Card);
-                PropertyType targetCardListColor = ClientUtilities.GetCardListColor(targetCardList);
+                return;
+            }
 
-                Button sourceCardButton = e.Data.GetData(typeof(Button)) as Button;
-                Card sourceCard = sourceCardButton.Tag as Card;
+            Button targetCardButton = sender as Button;
+            List<Card> targetCardList = FindListContainingCard(targetCardButton.Tag as Card);
+            PropertyType targetCardListColor = ClientUtilities.GetCardListColor(targetCardList);
 
-                // Do not allow a drag-drop operation to occur if the source and target are the same objects.
-                if ( sourceCardButton != targetCardButton )
+            Button sourceCardButton = e.Data.GetData(typeof(Button)) as Button;
+            Card sourceCard = sourceCardButton.Tag as Card;
+            List<Card> sourceCardList = FindListContainingCard(sourceCard);
+
+            // Do not allow a drag-drop operation to occur if the source and target lists are the same (fixes MD #83).
+            if ( sourceCardList == targetCardList )
+            {
+                return;
+            }
+
+            bool isMonopoly = ClientUtilities.IsCardListMonopoly(targetCardList);
+            bool performTransfer = false;
+
+            if ( !isMonopoly )
+            {
+                performTransfer = (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color ||
+                                    PropertyType.Wild == targetCardListColor || PropertyType.None == targetCardListColor);
+            }
+            else
+            {
+                switch ( sourceCard.Name )
                 {
-                    bool isMonopoly = ClientUtilities.IsCardListMonopoly(targetCardList);
-                    bool performTransfer = false;
-
-                    if ( !isMonopoly )
+                    case ("House"):
                     {
-                        performTransfer = (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color || 
-                                           PropertyType.Wild == targetCardListColor || PropertyType.None == targetCardListColor);
+                        performTransfer = !ClientUtilities.IsCardInCardList("House", targetCardList);
 
-                        //// Mark the event as handled.
-                        //e.Handled = true;
-                    }
-                    else
-                    {
-                        switch ( sourceCard.Name )
-                        {
-                            case ("House"):
-                            {
-                                performTransfer = !ClientUtilities.IsCardInCardList("House", targetCardList);
-
-                                break;
-                            }
-
-                            case ("Hotel"):
-                            {
-                                performTransfer = ClientUtilities.IsCardInCardList("House", targetCardList) && !ClientUtilities.IsCardInCardList("Hotel", targetCardList);
-
-                                break;
-                            }
-                        }
-
+                        break;
                     }
 
-                    if ( performTransfer )
+                    case ("Hotel"):
                     {
-                        RemoveCardFromCardsInPlay(sourceCard, this.Player);
-                        targetCardList.Add(sourceCard);
-                        DisplayCardsInPlay(this.Player, this.PlayerOneField);
-                    }
+                        performTransfer = ClientUtilities.IsCardInCardList("House", targetCardList) && !ClientUtilities.IsCardInCardList("Hotel", targetCardList);
 
-                    // Update the server's information regarding this player.
-                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+                        break;
+                    }
                 }
+
+            }
+
+            if ( performTransfer )
+            {
+                /** The following two operations were the cause of a MAJOR bug (MD #83).
+                  * When this bug was discoverd, it was possible for the target card list to be the same as the source card list.
+                  * When the source card is removed from the CardsInPlay, a new list is created (rather than the card being removed from the existing list).
+                  * Therefore, 'targetCardList' was no longer referring to list in this.Player.CardsInPlay.
+                  * This caused the source card to never be added to the Player's CardsInPlay, effectively removing it from the game. 
+                  * LESSON: Be careful when replacing objects instead of mutating them; if the caller is unaware of what is going on, bugs like this can occur. **/
+                RemoveCardFromCardsInPlay(sourceCard, this.Player);
+                targetCardList.Add(sourceCard);
+
+                DisplayCardsInPlay(this.Player, this.PlayerOneField);
+
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+                e.Handled = true;
             }
         }
-        
+
         // When the user drops a Property Wild Card on an empty space in their field, put the card in its own space.
         private void PlayerOneField_Drop( object sender, DragEventArgs e )
         {
