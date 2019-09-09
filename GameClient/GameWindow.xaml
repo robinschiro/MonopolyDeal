@@ -38,7 +38,7 @@
         </Menu>
 
         <Border BorderBrush="Black" 
-                BorderThickness="2" 
+                BorderThickness="0, 0, 1, 0" 
                 Grid.Column="0" 
                 Grid.Row="1">            
             <Grid Name="SideBar">
@@ -89,14 +89,20 @@
                           Grid.Row="3"
                           Margin="10"/>
                     </Grid>
+                
+                <Border BorderBrush="Black" 
+                        BorderThickness="0 1 0 0" 
+                        Grid.Row="1">
+                    <local:EventLog x:Name="GameEventLog"
+                            Grid.Row="1"
+                            Margin="10"/>
+                </Border>
+
                 <Grid Name="InfoBox"
                       Grid.Row="1"
                       Margin="10">
                 </Grid>
 
-				<local:EventLog x:Name="GameEventLog"
-                            Grid.Row="1"
-                            Margin="10, 10, 10, 10"/>
             </Grid>
         </Border>
 

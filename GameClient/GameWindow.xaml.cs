@@ -202,7 +202,7 @@ namespace GameClient
 
                 Border playerNameBorder = new Border();
                 playerNameBorder.BorderBrush = Brushes.Black;
-                playerNameBorder.BorderThickness = new Thickness(1);
+                playerNameBorder.BorderThickness = new Thickness(0, 1, 0, 1);
                 playerNameBorder.Child = playerNameViewbox;
 
                 // Create a separator to separate the playing fields.

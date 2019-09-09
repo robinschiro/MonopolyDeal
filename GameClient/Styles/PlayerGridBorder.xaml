@@ -4,7 +4,7 @@
     xmlns:local="clr-namespace:GameClient">
 
     <Style x:Key="PlayerGridBorderStyle" TargetType="{x:Type Border}">
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderThickness" Value="0, 1, 0, 1"/>
         <Setter Property="Visibility" Value="Hidden"/>
         <Setter Property="BorderBrush" Value="Black"/>
     </Style>

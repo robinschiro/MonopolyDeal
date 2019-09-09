@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -20,9 +21,13 @@ namespace GameClient
     /// </summary>
     public partial class EventLog : UserControl, IEventLog
     {
+        public ObservableCollection<string> EventList { get; set; }
+
         public EventLog()
         {
             InitializeComponent();
+            this.EventList = new ObservableCollection<string>();
+            this.DataContext = this;
         }
 
         public void PublishPlayCardEvent( Player player, Card card )
@@ -59,7 +64,8 @@ namespace GameClient
 
         public void PublishCustomEvent( string eventLogline )
         {
-            this.EventLogTextBlock.Text += "\r\n" + eventLogline + " ";
+            //this.EventLogTextBlock.Text += "\r\n" + eventLogline + " ";
+            this.EventList.Add(eventLogline);
 
             this.EventLogScrollViewer.ScrollToBottom();
         }
