@@ -1399,12 +1399,6 @@ namespace GameClient
 
                     case CardType.Money:
                     {
-                        // Each player should only be to see the breakdown of his own money pile
-                        if ( this.Player == player )
-                        {
-                            cardButton.ToolTip = new MoneyListView(this.Player);
-                        }
-
                         // Play money cards horizontally.
                         TransformCardButton(cardButton, 0, 0);
 
@@ -1418,6 +1412,18 @@ namespace GameClient
                             moneyCardGrid.Children.Insert(position, cardButton);
                         }
                         Grid.SetColumn(cardButton, 1);
+
+                        // Each player should only be to see the breakdown of his own money pile
+                        if ( this.Player == player )
+                        {
+                            cardButton.ToolTip = new MoneyListView(this.Player);
+                        }
+                        else
+                        {
+                            TextBlock moneyCount = new TextBlock();
+                            moneyCount.Text = $"x{moneyCardGrid.Children.Count}";
+                            cardButton.ToolTip = moneyCount;
+                        }
 
                         return;
                     }
