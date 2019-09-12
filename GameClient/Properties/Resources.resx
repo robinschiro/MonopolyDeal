@@ -168,4 +168,7 @@
   <data name="SettingTurnNotificationDialogEnabledKey" xml:space="preserve">
     <value>-TurnNotificationDialogEnabled</value>
   </data>
+  <data name="UriPathMoneyDing" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Audio/MoneyDing.wav</value>
+  </data>
 </root>

@@ -74,6 +74,11 @@ namespace GameServer
                 {
                     return ReadTurn(inc);
                 }
+
+                case Datatype.PlaySound:
+                {
+                    return ReadPlaySoundRequest(inc);
+                }
             }
 
             return null;
@@ -198,6 +203,11 @@ namespace GameServer
             return new ActionData.TheftResponse(thiefName, victimName, answer);
         }
 
+        public static string ReadPlaySoundRequest( NetIncomingMessage inc )
+        {
+            return inc.ReadString();
+        }
+
         public static void WriteCards( NetOutgoingMessage outmsg, List<Card> cardList )
         {
             if ( cardList != null )
@@ -294,8 +304,13 @@ namespace GameServer
             outmsg.Write(turn.ActionsRemaining);
         }
 
+        public static void WritePlaySoundRequest( NetOutgoingMessage outmsg, string uriPath )
+        {
+            outmsg.Write(uriPath);
+        }
+
         // Send an update to either a client or the server, depending on where this method is called.
-        public static void SendMessage( NetPeer netPeer, Datatype messageType, object updatedObject = null, long idOfClientToExclude = -1 )
+        public static void SendMessage( NetPeer netPeer, Datatype messageType, object messageData = null, long idOfClientToExclude = -1 )
         {
             NetOutgoingMessage outmsg;
 
@@ -312,64 +327,64 @@ namespace GameServer
             // Write the type of the message that is being sent.
             outmsg.Write((byte)messageType);
 
-            if ( updatedObject != null )
+            if ( messageData != null )
             {
                 switch ( messageType )
                 {
                     case Datatype.UpdateDeck:
                     {
-                        WriteCards(outmsg, (updatedObject as Deck).CardList);
+                        WriteCards(outmsg, (messageData as Deck).CardList);
 
                         break;
                     }
 
                     case Datatype.UpdateDiscardPile:
                     {
-                        WriteCards(outmsg, (updatedObject as List<Card>));
+                        WriteCards(outmsg, (messageData as List<Card>));
                         break;
                     }
 
                     case Datatype.UpdatePlayer:
                     {
-                        WritePlayer(outmsg, (updatedObject as Player));
+                        WritePlayer(outmsg, (messageData as Player));
 
                         break;
                     }
 
                     case Datatype.UpdatePlayerList:
                     {
-                        WritePlayerList(outmsg, (updatedObject as List<Player>));
+                        WritePlayerList(outmsg, (messageData as List<Player>));
                         break;
                     }
 
                     case Datatype.RequestRent:
                     {
-                        WriteRentRequest(outmsg, (updatedObject as ActionData.RentRequest));
+                        WriteRentRequest(outmsg, (messageData as ActionData.RentRequest));
                         break;
                     }
 
                     case Datatype.GiveRent:
                     {
-                        WriteRentResponse(outmsg, (updatedObject as ActionData.RentResponse));
+                        WriteRentResponse(outmsg, (messageData as ActionData.RentResponse));
                         break;
                     }
 
                     case Datatype.RequestTheft:
                     {
-                        WriteTheftRequest(outmsg, (updatedObject as ActionData.TheftRequest));
+                        WriteTheftRequest(outmsg, (messageData as ActionData.TheftRequest));
                         break;
                     }
 
                     case Datatype.ReplyToTheft:
                     {
-                        WriteTheftResponse(outmsg, (updatedObject as ActionData.TheftResponse));
+                        WriteTheftResponse(outmsg, (messageData as ActionData.TheftResponse));
                         break;
                     }
 
                     case Datatype.LaunchGame:
                     case Datatype.UpdateTurn:
                     {
-                        Turn currentTurn = (Turn)updatedObject;
+                        Turn currentTurn = (Turn)messageData;
 
                         WriteTurn(outmsg, currentTurn);
 
@@ -378,7 +393,7 @@ namespace GameServer
 
                     case Datatype.TimeToConnect:
                     {
-                        String playerToConnect = (String)updatedObject;
+                        String playerToConnect = (String)messageData;
                         outmsg.Write(playerToConnect);
 
                         break;
@@ -386,9 +401,16 @@ namespace GameServer
 
                     case Datatype.EndTurn:
                     {
-                        Turn currentTurn = (Turn)updatedObject;
+                        Turn currentTurn = (Turn)messageData;
 
                         WriteTurn(outmsg, currentTurn);
+
+                        break;
+                    }
+
+                    case Datatype.PlaySound:
+                    {
+                        WritePlaySoundRequest(outmsg, messageData as string);
 
                         break;
                     }
