@@ -491,6 +491,7 @@ namespace GameClient
                     // Send the update to all players.
                     ServerUtilities.SendMessage(this.Client, Datatype.UpdateTurn, this.Turn);
 
+                    // Removal of action cards is handled in HandleAction(), so only remove non-action cards here.
                     if ( cardBeingPlayed.Type != CardType.Action )
                     {
                         RemoveCardFromHand(cardBeingPlayed);
