@@ -83,6 +83,13 @@ namespace GameClient
             this.PublishCustomEvent(eventLine);
         }
 
+        public void PublishNewTurnEvent( Player player )
+        {
+            string eventLine = $"It is {player.Name}'s turn!";
+
+            this.PublishCustomEvent(eventLine);
+        }
+
         public void PublishPlayerWonEvent( Player winner )
         {
             throw new NotImplementedException();

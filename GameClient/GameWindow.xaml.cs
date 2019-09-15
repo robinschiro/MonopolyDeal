@@ -170,13 +170,17 @@ namespace GameClient
             }
 
             // Update the turn display.
-            UpdateTurnDisplay(isNewTurn: true);
+            UpdateTurnDisplay(isNewTurn: false);
 
             // Inform the next player in the list that he can connect.
             int pos = FindPlayerPositionInPlayerList(this.Player.Name);
             if ( pos < (this.PlayerList.Count - 1) )
             {
                 ServerUtilities.SendMessage(Client, Datatype.TimeToConnect, this.PlayerList[pos + 1].Name);
+            }
+            else
+            {
+                this.GameEventLog.PublishNewTurnEvent(this.PlayerList[this.Turn.CurrentTurnOwner]);
             }
 
             // Assign the hands and playing fields of opponents to appropriate areas of the client's screen.
@@ -974,7 +978,7 @@ namespace GameClient
 
             if ( shouldCreateEventLogEntry && currentPlayerName == this.PlayerName )
             {
-                this.GameEventLog.PublishCustomEvent("It is " + currentPlayerName + "'s turn!");
+                this.GameEventLog.PublishNewTurnEvent(this.PlayerList[this.Turn.CurrentTurnOwner]);
             }
         }
 
