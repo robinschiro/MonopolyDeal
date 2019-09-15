@@ -452,8 +452,7 @@ namespace GameClient
                         case Datatype.PlaySound:
                         {
                             string soundPath = (string)ServerUtilities.ReceiveMessage(inc, messageType);
-                            //CreateNewThread(new Action<object>(this.PlaySound), soundPath);
-                            this.PlaySound(soundPath);
+                            ClientUtilities.PlaySound(soundPath);
 
                             break;
                         }
@@ -2206,11 +2205,6 @@ namespace GameClient
             {
                 ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, card.CardSoundUriPath);
             }
-        }
-
-        private void PlaySound( object soundPath = null )
-        {
-            ClientUtilities.PlaySound(soundPath as string);
         }
 
         #endregion
