@@ -196,6 +196,15 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/MoneyDing.wav.
+        /// </summary>
+        public static string UriPathMoneyDing {
+            get {
+                return ResourceManager.GetString("UriPathMoneyDing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/Silence.wav.
         /// </summary>
         public static string UriPathSilence {
