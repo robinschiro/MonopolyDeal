@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
@@ -709,6 +710,16 @@ namespace GameClient
         {
             InfoBox.Children.Clear();
             InfoBox.Children.Add(new MoneyListView(this.Player));
+        }
+
+        private void GiveFeedbackButton_Click( object sender, RoutedEventArgs e )
+        {
+            Process.Start(ClientResourceList.GiveFeedbackUrl);
+        }
+
+        private void RulesButton_Click( object sender, RoutedEventArgs e )
+        {
+            Process.Start(ClientResourceList.RulesUrl);
         }
 
         #endregion
@@ -2387,8 +2398,9 @@ namespace GameClient
             }
 
             return playerName;
-        }        
+        }
 
         #endregion
+
     }
 }

@@ -97,11 +97,29 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to https://bit.ly/2lQWlcq.
+        /// </summary>
+        public static string GiveFeedbackUrl {
+            get {
+                return ResourceManager.GetString("GiveFeedbackUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please Wait....
         /// </summary>
         public static string PleaseWaitWindowTitle {
             get {
                 return ResourceManager.GetString("PleaseWaitWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to http://monopolydealrules.com/.
+        /// </summary>
+        public static string RulesUrl {
+            get {
+                return ResourceManager.GetString("RulesUrl", resourceCulture);
             }
         }
         

@@ -35,6 +35,12 @@
                           IsCheckable="True"
                           IsChecked="{Binding IsTurnNotificationDialogEnabled}"/>
             </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="Rules"
+                          Click="RulesButton_Click"/>
+                <MenuItem Header="Give Feedback"
+                          Click="GiveFeedbackButton_Click"/>
+            </MenuItem>
         </Menu>
 
         <Border BorderBrush="Black" 

@@ -171,4 +171,10 @@
   <data name="UriPathMoneyDing" xml:space="preserve">
     <value>pack://application:,,,/GameObjects;component/Audio/MoneyDing.wav</value>
   </data>
+  <data name="GiveFeedbackUrl" xml:space="preserve">
+    <value>https://bit.ly/2lQWlcq</value>
+  </data>
+  <data name="RulesUrl" xml:space="preserve">
+    <value>http://monopolydealrules.com/</value>
+  </data>
 </root>
