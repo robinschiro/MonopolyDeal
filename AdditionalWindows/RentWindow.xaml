@@ -19,89 +19,16 @@
         
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="4*"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="4*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
-        <Label Content="Assets" 
-               HorizontalAlignment="Center" 
-               VerticalAlignment="Center"
-               Name="AssetsLabel"
-               Grid.Column="1"
-               Grid.Row="0"/>
-        
-        <ListView Name="AssetsListView"
-                  ItemsSource="{Binding Assets, Mode=TwoWay}"
-                  Style="{StaticResource CardListViewStyle}"
-                  Grid.Column="1"
-                  Grid.Row="1"
-                  MouseDoubleClick="AssetsListView_MouseDoubleClick"/>
-
-        <Label Name="TotalLeftLabel"
-               Margin="5"
-               Content="{Binding AmountLeftString}"
-               HorizontalAlignment="Left" 
-               VerticalAlignment="Center"
-               Grid.Column="1"
-               Grid.Row="2"/>
-
-        <Button Name="GiveButton"
-                Margin="5"
-                Content="Give Selected" 
-                Click="GiveButton_Click"
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Center"
-                Grid.Column="1"
-                Grid.Row="2"/>
-
-        <Rectangle VerticalAlignment="Stretch" 
-                   Width="1" 
-                   Margin="2" 
-                   Stroke="Black"
-                   Grid.Column="2"
-                   Grid.RowSpan="3"/>
-
-        <Label Content="What to Give" 
-               HorizontalAlignment="Center" 
-               VerticalAlignment="Center"
-               Name="GiveLabel"
-               Grid.Column="3"
-               Grid.Row="0"/>
-
-        <ListView Name="PaymentListView"
-                  ItemsSource="{Binding Payment, Mode=TwoWay}"
-                  Style="{StaticResource CardListViewStyle}"
-                  Grid.Column="3"
-                  Grid.Row="1"
-                  MouseDoubleClick="PaymentListView_MouseDoubleClick"/>
-
-        <Label Name="TotalGivenLabel"
-               Margin="5"
-               Content="{Binding AmountGivenString}"
-               HorizontalAlignment="Left" 
-               VerticalAlignment="Center"
-               Grid.Column="3"
-               Grid.Row="2"/>
-
-        <Button Name="RemoveButton"
-                Margin="5"
-                Content="Remove Selected"
-                Click="RemoveButton_Click"
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Center"
-                Grid.Column="3"
-                Grid.Row="2"/>
-
-        <Separator VerticalAlignment="Bottom"
-                   Grid.ColumnSpan="5"
-                   Grid.Row="2"/>
-        
         <Label Name="AmountOwedLabel"
                Content="Amount Owed (in millions): "
                VerticalAlignment="Center"
                Grid.Column="1"
-               Grid.Row="3"/>
+               Grid.Row="0"/>
 
         <Button Name="PayButton" 
                 Content="Pay Rent" 
@@ -110,6 +37,82 @@
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center"
                 Grid.Column="3"
+                Grid.Row="0"/>
+
+        <Label Content="Assets" 
+               HorizontalAlignment="Center" 
+               VerticalAlignment="Center"
+               Name="AssetsLabel"
+               Grid.Column="1"
+               Grid.Row="1"/>
+        
+        <ListView Name="AssetsListView"
+                  ItemsSource="{Binding Assets, Mode=TwoWay}"
+                  Style="{StaticResource CardListViewStyle}"
+                  Grid.Column="1"
+                  Grid.Row="2"
+                  MouseDoubleClick="AssetsListView_MouseDoubleClick"/>
+
+        <Label Name="TotalLeftLabel"
+               Margin="5"
+               Content="{Binding AmountLeftString}"
+               HorizontalAlignment="Left" 
+               VerticalAlignment="Center"
+               Grid.Column="1"
+               Grid.Row="3"/>
+
+        <Button Name="GiveButton"
+                Margin="5"
+                Content="Give Selected" 
+                Click="GiveButton_Click"
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Center"
+                Grid.Column="1"
                 Grid.Row="3"/>
+
+        <Rectangle VerticalAlignment="Stretch" 
+                   Width="1" 
+                   Margin="2" 
+                   Stroke="Black"
+                   Grid.Column="2"
+                   Grid.Row="1"
+                   Grid.RowSpan="3"/>
+
+        <Label Content="What to Give" 
+               HorizontalAlignment="Center" 
+               VerticalAlignment="Center"
+               Name="GiveLabel"
+               Grid.Column="3"
+               Grid.Row="1"/>
+
+        <ListView Name="PaymentListView"
+                  ItemsSource="{Binding Payment, Mode=TwoWay}"
+                  Style="{StaticResource CardListViewStyle}"
+                  Grid.Column="3"
+                  Grid.Row="2"
+                  MouseDoubleClick="PaymentListView_MouseDoubleClick"/>
+
+        <Label Name="TotalGivenLabel"
+               Margin="5"
+               Content="{Binding AmountGivenString}"
+               HorizontalAlignment="Left" 
+               VerticalAlignment="Center"
+               Grid.Column="3"
+               Grid.Row="3"/>
+
+        <Button Name="RemoveButton"
+                Margin="5"
+                Content="Remove Selected"
+                Click="RemoveButton_Click"
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Center"
+                Grid.Column="3"
+                Grid.Row="3"/>
+
+        <Separator VerticalAlignment="Bottom"
+                   Grid.ColumnSpan="5"
+                   Grid.Row="0"/>
+        
+        
     </Grid>
 </src:ModalWindow>
