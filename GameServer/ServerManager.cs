@@ -293,7 +293,14 @@ namespace GameServer
                                 {
                                     ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
                                     break;
-                                }                                    
+                                }
+
+                                case Datatype.PlaySound:
+                                {
+                                    string soundPath = (string)ServerUtilities.ReceiveMessage(inc, messageType);
+                                    ServerUtilities.SendMessage(Server, Datatype.PlaySound, soundPath);
+                                    break;
+                                }
                             }
 
                             break;

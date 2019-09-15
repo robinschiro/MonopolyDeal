@@ -444,6 +444,14 @@ namespace GameClient
 
                             break;
                         }
+
+                        case Datatype.PlaySound:
+                        {
+                            string soundPath = (string)ServerUtilities.ReceiveMessage(inc, messageType);
+                            ClientUtilities.PlaySound(soundPath);
+
+                            break;
+                        }
                     }
                 }
             }
@@ -497,11 +505,16 @@ namespace GameClient
                         RemoveCardFromHand(cardBeingPlayed);
                     }
 
+                    if ( cardBeingPlayed.Type == CardType.Money )
+                    {
+                        ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, ClientResourceList.UriPathMoneyDing);
+                    }
+
                     // Update animation on end turn button.
                     if ( 0 == this.Turn.ActionsRemaining )
                     {
                         this.AnimateEndTurnButton();
-                    }
+                    }                    
                 }                
             }
         }
@@ -783,8 +796,6 @@ namespace GameClient
                 Card discardedCard = this.DiscardPile[this.DiscardPile.Count - 1];
                 Button cardButton = ConvertCardToButton(discardedCard);
                 DiscardPileGrid.Children.Add(cardButton);
-
-                this.PlaySoundForCard(discardedCard);
             }
         }
 
@@ -1761,6 +1772,7 @@ namespace GameClient
                     
                     this.LastTheftRequest = new ActionData.TheftRequest(this.Player.Name, propertyTheftWindow.Victim.Name, stealCard.ActionID, propertyTheftWindow.PropertyToGive, propertyTheftWindow.PropertiesToTake);
                     ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);
+                    this.SendPlaySoundRequestForCard(stealCard);
 
                     // Display a wait message until the victim has responded to the request.
                     WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for victim to respond...");
@@ -1911,6 +1923,7 @@ namespace GameClient
 
             this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled);
             ServerUtilities.SendMessage(Client, Datatype.RequestRent, this.LastRentRequest);
+            this.SendPlaySoundRequestForCard(rentCard);
 
             // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
             // ROBIN TODO: Show some sort of progress bar.
@@ -1928,6 +1941,7 @@ namespace GameClient
 
             // Update the server with the current version of this player.
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+            this.SendPlaySoundRequestForCard(justSayNoCard);
         }
 
         // Display the rent window.
@@ -2213,11 +2227,11 @@ namespace GameClient
 
         #region Sound
 
-        private void PlaySoundForCard( Card card )
+        private void SendPlaySoundRequestForCard( Card card )
         {
             if (card.CardSoundUriPath != GameObjectsResourceList.UriPathEmpty)
             {
-                ClientUtilities.PlaySound(card.CardSoundUriPath);
+                ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, card.CardSoundUriPath);
             }
         }
 
