@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using GameObjects;
 using Utilities;
@@ -58,7 +59,9 @@ namespace AdditionalWindows
             amountOwed = rentAmount * ((rentDoubled) ? (2) : (1));
 
             // Update the window to display the amount owed.
-            AmountOwedLabel.Content = AmountOwedLabel.Content.ToString() + rentAmount + ((rentDoubled) ? (" x 2") : (""));
+            TextBlock amountOwedTextblock = new TextBlock();
+            amountOwedTextblock.Inlines.Add(new Bold(new Run(AmountOwedLabel.Content.ToString() + rentAmount + ((rentDoubled) ? (" x 2") : ("")))));
+            AmountOwedLabel.Content = amountOwedTextblock;
 
             // Add all the rentee's cards in play to the Assets listview.
             foreach ( List<Card> cardList in rentee.CardsInPlay )

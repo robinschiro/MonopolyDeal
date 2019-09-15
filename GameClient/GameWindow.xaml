@@ -44,7 +44,7 @@
         </Menu>
 
         <Border BorderBrush="Black" 
-                BorderThickness="2" 
+                BorderThickness="0, 0, 1, 0" 
                 Grid.Column="0" 
                 Grid.Row="1">            
             <Grid Name="SideBar">
@@ -95,10 +95,18 @@
                           Grid.Row="3"
                           Margin="10"/>
                     </Grid>
+
+                <Border Name="GameEventLogBorder"
+                        BorderBrush="Black" 
+                        BorderThickness="0 1 0 0" 
+                        Grid.Row="1"/>
+
                 <Grid Name="InfoBox"
                       Grid.Row="1"
-                      Margin="10">
+                      Margin="10"
+                      Visibility="Hidden">                    
                 </Grid>
+
             </Grid>
         </Border>
 
@@ -164,8 +172,6 @@
 
             <Border Name="GridFourBorder"
                     Style="{StaticResource PlayerGridBorderStyle}"
-                    BorderBrush="Black" 
-                    BorderThickness="1" 
                     Grid.Row="2"
                     Grid.Column="1">
                 <Grid Name="GridFour">

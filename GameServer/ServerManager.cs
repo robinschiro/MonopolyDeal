@@ -250,7 +250,7 @@ namespace GameServer
                                 case Datatype.GiveRent:
                                 {
                                     ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReadRentResponse(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.GiveRent, response, idOfClientToExclude: idOfSender);
+                                    ServerUtilities.SendMessage(Server, Datatype.GiveRent, response);
 
                                     break;
                                 }
@@ -299,6 +299,13 @@ namespace GameServer
                                 {
                                     string soundPath = (string)ServerUtilities.ReceiveMessage(inc, messageType);
                                     ServerUtilities.SendMessage(Server, Datatype.PlaySound, soundPath);
+                                    break;
+                                }
+
+                                case Datatype.GameEvent:
+                                {
+                                    string serializedEvent = (string)ServerUtilities.ReceiveMessage(inc, messageType);
+                                    ServerUtilities.SendMessage(Server, Datatype.GameEvent, serializedEvent);
                                     break;
                                 }
                             }
