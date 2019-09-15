@@ -14,19 +14,23 @@
                        FontSize="18"/>-->
 
             <ItemsControl Name="EventsItemsControl"
-                          ItemsSource="{Binding EventList}">
-                <!--<ItemsControl.ItemTemplate>
+                          ItemsSource="{Binding EventList}"
+                          >
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VerticalAlignment="Bottom"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0,0,0,5">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="100" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Title}" />
-                            
-                        </Grid>
+
+                        <!-- TODO MD# 86: Improve look and feel of these items -->
+                        <TextBlock Text="{Binding Content}"
+                                    TextWrapping="Wrap"
+                                    FontSize="18"/>
+                        
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>-->
+                </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
     </Grid>

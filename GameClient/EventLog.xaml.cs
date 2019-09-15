@@ -21,12 +21,12 @@ namespace GameClient
     /// </summary>
     public partial class EventLog : UserControl, IEventLog
     {
-        public ObservableCollection<string> EventList { get; set; }
+        public ObservableCollection<EventLogItem> EventList { get; set; }
 
         public EventLog()
         {
             InitializeComponent();
-            this.EventList = new ObservableCollection<string>();
+            this.EventList = new ObservableCollection<EventLogItem>();
             this.DataContext = this;
         }
 
@@ -64,8 +64,7 @@ namespace GameClient
 
         public void PublishCustomEvent( string eventLogline )
         {
-            //this.EventLogTextBlock.Text += "\r\n" + eventLogline + " ";
-            this.EventList.Add(eventLogline);
+            this.EventList.Add(new EventLogItem { Content = eventLogline });
 
             this.EventLogScrollViewer.ScrollToBottom();
         }

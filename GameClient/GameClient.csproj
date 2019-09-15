@@ -45,7 +45,7 @@
            Only *.allowedextension files will be included, which doesn't exist in my case.
        -->
       .allowedextension
-    </AllowedReferenceRelatedFileExtensions> 
+    </AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Lidgren.Network, Version=2012.1.7.0, Culture=neutral, processorArchitecture=MSIL">
@@ -78,6 +78,7 @@
     <Compile Include="EventLog.xaml.cs">
       <DependentUpon>EventLog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EventLogItem.cs" />
     <Compile Include="IEventLog.cs" />
     <Compile Include="LaunchScreen.xaml.cs">
       <DependentUpon>LaunchScreen.xaml</DependentUpon>

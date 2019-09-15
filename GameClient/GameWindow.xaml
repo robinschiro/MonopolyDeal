@@ -100,7 +100,8 @@
 
                 <Grid Name="InfoBox"
                       Grid.Row="1"
-                      Margin="10">
+                      Margin="10"
+                      Visibility="Hidden">
                 </Grid>
 
             </Grid>
