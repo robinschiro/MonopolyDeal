@@ -21,6 +21,7 @@ namespace GameObjects
         GiveRent,
         RequestTheft,
         ReplyToTheft,
-        PlaySound
+        PlaySound,
+        GameEvent
     }
 }

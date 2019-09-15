@@ -301,6 +301,13 @@ namespace GameServer
                                     ServerUtilities.SendMessage(Server, Datatype.PlaySound, soundPath);
                                     break;
                                 }
+
+                                case Datatype.GameEvent:
+                                {
+                                    string serializedEvent = (string)ServerUtilities.ReceiveMessage(inc, messageType);
+                                    ServerUtilities.SendMessage(Server, Datatype.GameEvent, serializedEvent);
+                                    break;
+                                }
                             }
 
                             break;

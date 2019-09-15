@@ -9,6 +9,7 @@ namespace GameClient
     interface IEventLog
     {
         void PublishPlayCardEvent( Player player, Card card );
+        void PublishJustSayNoEvent( Player playerSayingNo );
         void PublishPayRentEvent( Player renter, Player rentee, List<Card> assetsPaid );
         void PublishSlyDealEvent( Player thief, Player victim, Card property );
         void PublishForcedDealEvent( Player thief, Player victim, Card thiefProperty, Card victimProperty );

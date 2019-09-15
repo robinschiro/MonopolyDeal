@@ -79,6 +79,11 @@ namespace GameServer
                 {
                     return ReadPlaySoundRequest(inc);
                 }
+
+                case Datatype.GameEvent:
+                {
+                    return ReadGameEvent(inc);
+                }
             }
 
             return null;
@@ -208,6 +213,11 @@ namespace GameServer
             return inc.ReadString();
         }
 
+        public static string ReadGameEvent( NetIncomingMessage inc )
+        {
+            return inc.ReadString();
+        }
+
         public static void WriteCards( NetOutgoingMessage outmsg, List<Card> cardList )
         {
             if ( cardList != null )
@@ -307,6 +317,11 @@ namespace GameServer
         public static void WritePlaySoundRequest( NetOutgoingMessage outmsg, string uriPath )
         {
             outmsg.Write(uriPath);
+        }
+
+        public static void WriteGameEvent( NetOutgoingMessage outmsg, string serializedEvent )
+        {
+            outmsg.Write(serializedEvent);
         }
 
         // Send an update to either a client or the server, depending on where this method is called.
@@ -411,6 +426,13 @@ namespace GameServer
                     case Datatype.PlaySound:
                     {
                         WritePlaySoundRequest(outmsg, messageData as string);
+
+                        break;
+                    }
+
+                    case Datatype.GameEvent:
+                    {
+                        WriteGameEvent(outmsg, messageData as string);
 
                         break;
                     }

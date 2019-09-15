@@ -48,6 +48,7 @@ namespace GameClient
         private Turn Turn;
         private List<Card> DiscardPile;
         private ColorAnimation EndTurnButtonAnimation;
+        private EventLog GameEventLog;
         private tvProfile ClientSettings;
 
         // Variables for managing the state of Action Cards.
@@ -132,6 +133,10 @@ namespace GameClient
 
             // Connect the client to the server.
             InitializeClient(ipAddress, portNumber);
+
+            // Initialize the event log with access to the network client object.
+            this.GameEventLog = new EventLog(this.Client);
+            this.GameEventLogBorder.Child = this.GameEventLog;
 
             // Do not continue until the client has successfully established communication with the server.
             WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting to establish communication with server...");
@@ -452,6 +457,14 @@ namespace GameClient
 
                             break;
                         }
+
+                        case Datatype.GameEvent:
+                        {
+                            string eventLogline = (string)ServerUtilities.ReceiveMessage(inc, messageType);
+                            CreateNewThread(new Action<Object>(UpdateEventLog), eventLogline);
+
+                            break;
+                        }
                     }
                 }
             }
@@ -503,6 +516,7 @@ namespace GameClient
                     if ( cardBeingPlayed.Type != CardType.Action )
                     {
                         RemoveCardFromHand(cardBeingPlayed);
+                        this.GameEventLog.PublishPlayCardEvent(this.Player, cardBeingPlayed);
                     }
 
                     if ( cardBeingPlayed.Type == CardType.Money )
@@ -782,6 +796,11 @@ namespace GameClient
             }
         }
 
+        public void UpdateEventLog( Object serializedEvent )
+        {
+            this.GameEventLog.DisplayEvent(serializedEvent as string);
+        }
+
         // Update the discard pile card so that it displays the last card in the discard pile.
         public void DisplayUpdatedDiscardPile( Object filler = null )
         {
@@ -953,7 +972,7 @@ namespace GameClient
             string currentPlayerName = this.PlayerList[this.Turn.CurrentTurnOwner].Name;
             this.TurnIndicator.Content = currentPlayerName + "'s Turn";
 
-            if (shouldCreateEventLogEntry)
+            if ( shouldCreateEventLogEntry && currentPlayerName == this.PlayerName )
             {
                 this.GameEventLog.PublishCustomEvent("It is " + currentPlayerName + "'s turn!");
             }
@@ -1693,6 +1712,7 @@ namespace GameClient
                     // "Pass Go" case.
                     DrawCards(2);
                     DiscardCard(actionCard);
+                    this.GameEventLog.PublishPlayCardEvent(this.Player, actionCard);
 
                     return true;
                 }
@@ -1773,10 +1793,30 @@ namespace GameClient
                     this.LastTheftRequest = new ActionData.TheftRequest(this.Player.Name, propertyTheftWindow.Victim.Name, stealCard.ActionID, propertyTheftWindow.PropertyToGive, propertyTheftWindow.PropertiesToTake);
                     ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);
                     this.SendPlaySoundRequestForCard(stealCard);
+                    switch ( theftType )
+                    {
+                        case TheftType.Dealbreaker:
+                        {
+                            this.GameEventLog.PublishDealbreakerEvent(this.Player, propertyTheftWindow.Victim, propertyTheftWindow.PropertiesToTake);
+                            break;
+                        }
+
+                        case TheftType.ForcedDeal:
+                        {
+                            this.GameEventLog.PublishForcedDealEvent(this.Player, propertyTheftWindow.Victim, propertyTheftWindow.PropertyToGive, propertyTheftWindow.PropertiesToTake.FirstOrDefault());
+                            break;
+                        }
+
+                        case TheftType.SlyDeal:
+                        {
+                            this.GameEventLog.PublishSlyDealEvent(this.Player, propertyTheftWindow.Victim, propertyTheftWindow.PropertiesToTake.FirstOrDefault());
+                            break;
+                        }
+                    }
 
                     // Display a wait message until the victim has responded to the request.
                     WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for victim to respond...");
-                    WaitMessage.ShowDialog();                    
+                    WaitMessage.ShowDialog();
                 }
                 else
                 {
@@ -1924,9 +1964,9 @@ namespace GameClient
             this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled);
             ServerUtilities.SendMessage(Client, Datatype.RequestRent, this.LastRentRequest);
             this.SendPlaySoundRequestForCard(rentCard);
+            this.GameEventLog.PublishPlayCardEvent(this.Player, rentCard);
 
             // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
-            // ROBIN TODO: Show some sort of progress bar.
             WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for rentees to pay rent...");
             WaitMessage.ShowDialog();
 
@@ -1942,6 +1982,7 @@ namespace GameClient
             // Update the server with the current version of this player.
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
             this.SendPlaySoundRequestForCard(justSayNoCard);
+            this.GameEventLog.PublishJustSayNoEvent(this.Player);
         }
 
         // Display the rent window.
@@ -2014,17 +2055,19 @@ namespace GameClient
             // Send the updated rentee to the server and a RentResponse to the renter.
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
             ServerUtilities.SendMessage(Client, Datatype.GiveRent, new ActionData.RentResponse(renterName, this.Player.Name, payment, acceptedDeal));
+            if (acceptedDeal)
+            { 
+                this.GameEventLog.PublishPayRentEvent(
+                    this.PlayerList.First(p => p.Name == renterName),
+                    this.PlayerList.First(p => p.Name == this.PlayerName),
+                    payment);
+            }
         }
 
         // Process a rent response for the renter.
         private void ProcessReceivedRent( Object response )
         {
             ActionData.RentResponse rentResponse = (ActionData.RentResponse)response;
-
-            this.GameEventLog.PublishPayRentEvent(
-                this.PlayerList.First(p => p.Name == rentResponse.RenterName),
-                this.PlayerList.First(p => p.Name == rentResponse.RenteeName),
-                rentResponse.AssetsGiven);
 
             // If this player is the renter who originally requested the rent, add the AssetsGiven to the player's AssetsReceived list.
             if (rentResponse.RenterName != this.Player.Name)
@@ -2092,9 +2135,6 @@ namespace GameClient
                     {
                         WaitMessage.CloseWindow = true;
                     }
-
-                    // Show message dialog with summary of assets received.
-                    MessageBox.Show("You received " + (string.IsNullOrWhiteSpace(assetsSummary.ToString()) ? "no assets." : "the following assets:\n" + assetsSummary.ToString()), "Assets Received");
                 }
             }
             else
