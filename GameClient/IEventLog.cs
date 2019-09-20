@@ -21,7 +21,5 @@ namespace GameClient
 
         void PublishNewTurnEvent( Player player ); 
         void PublishPlayerWonEvent( Player winner );
-
-        void PublishCustomEvent( string eventLogline );
     }
 }
