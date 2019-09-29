@@ -61,6 +61,15 @@ namespace GameObjects.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Profile.txt.
+        /// </summary>
+        public static string FilePathLocalServerSettings {
+            get {
+                return ResourceManager.GetString("FilePathLocalServerSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 225.
         /// </summary>
         public static string TooltipMaxWidth {
@@ -75,6 +84,15 @@ namespace GameObjects.Properties {
         public static string UriPathAudioFolder {
             get {
                 return ResourceManager.GetString("UriPathAudioFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Resources/Profile.txt.
+        /// </summary>
+        public static string UriPathEmbeddedServerSettings {
+            get {
+                return ResourceManager.GetString("UriPathEmbeddedServerSettings", resourceCulture);
             }
         }
         

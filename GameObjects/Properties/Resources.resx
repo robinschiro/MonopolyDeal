@@ -117,11 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="FilePathLocalServerSettings" xml:space="preserve">
+    <value>Profile.txt</value>
+  </data>
   <data name="TooltipMaxWidth" xml:space="preserve">
     <value>225</value>
   </data>
   <data name="UriPathAudioFolder" xml:space="preserve">
     <value>pack://application:,,,/GameObjects;component/Audio/</value>
+  </data>
+  <data name="UriPathEmbeddedServerSettings" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Resources/Profile.txt</value>
   </data>
   <data name="UriPathEmpty" xml:space="preserve">
     <value>None</value>

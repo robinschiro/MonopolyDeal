@@ -33,30 +33,41 @@ namespace GameClient
 
         private IDictionary<PropertyType, CardDisplayColors> propertyTypeToDisplayColors = new Dictionary<PropertyType, CardDisplayColors>()
         {
-            { PropertyType.Blue, new CardDisplayColors() { Foreground = Brushes.White, Background = Brushes.Blue } }
+            { PropertyType.Blue, new CardDisplayColors() { Foreground = Brushes.White, Background = Brushes.Blue } },
+            { PropertyType.Brown, new CardDisplayColors() { Foreground = Brushes.White, Background = Brushes.SaddleBrown } },
+            { PropertyType.Green, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.LimeGreen } },
+            { PropertyType.LightBlue, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.LightBlue } },
+            { PropertyType.None, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.White} },
+            { PropertyType.Orange, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.Orange } },
+            { PropertyType.Pink, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.Magenta} },
+            { PropertyType.Railroad, new CardDisplayColors() { Foreground = Brushes.White, Background = Brushes.Black } },
+            { PropertyType.Red, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.Red } },
+            { PropertyType.Utility, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.PaleGoldenrod} },
+            { PropertyType.Wild, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.White} },
+            { PropertyType.Yellow, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.Yellow} }
         };
 
         private NetClient netClient;
-        //private Deck deck = new Deck();
+        private List<Card> allCards;
 
         public ObservableCollection<EventLogItem> EventList { get; set; }
 
-        public EventLog()
+        public EventLog( List<Card> allCards )
         {
             InitializeComponent();
             this.DataContext = this;
             this.EventList = new ObservableCollection<EventLogItem>();
-            //this.deck = Card.ge
+            this.allCards = allCards;
         }
 
-        public EventLog(NetClient netClient) : this()
+        public EventLog(NetClient netClient, List<Card> allCards) : this(allCards)
         {
             this.netClient = netClient;
         }
 
         public void PublishPlayCardEvent( Player player, Card card )
         {
-            string eventLine = $"{player.Name} played {card.Name}";
+            string eventLine = $"{player.Name} played [{card.CardID}]";
 
             this.PublishEvent(eventLine);
         }
@@ -70,21 +81,21 @@ namespace GameClient
 
         public void PublishPayRentEvent( Player renter, Player rentee, List<Card> assetsPaid )
         {
-            string eventLine = $"{rentee.Name} paid {renter.Name } ${assetsPaid.Sum(card => card.Value)}M with the following assets: {string.Join(", ", assetsPaid.Select(card => card.Name))}";
+            string eventLine = $"{rentee.Name} paid {renter.Name } ${assetsPaid.Sum(card => card.Value)}M with the following assets: {string.Join(", ", assetsPaid.Select(card => $"[{card.CardID}]"))}";
 
             this.PublishEvent(eventLine);
         }
 
         public void PublishSlyDealEvent( Player thief, Player victim, Card property )
         {
-            string eventLine = $"{thief.Name} would like to steal {property.Name} from {victim.Name}";
+            string eventLine = $"{thief.Name} would like to steal [{property.CardID}] from {victim.Name}";
 
             this.PublishEvent(eventLine);
         }
 
         public void PublishForcedDealEvent( Player thief, Player victim, Card thiefProperty, Card victimProperty )
         {
-            string eventLine = $"{thief.Name} would like to trade {thiefProperty.Name} for {victimProperty.Name} from {victim.Name}";
+            string eventLine = $"{thief.Name} would like to trade [{thiefProperty.CardID}] for [{victimProperty.CardID}] from {victim.Name}";
 
             this.PublishEvent(eventLine);
         }
@@ -116,33 +127,71 @@ namespace GameClient
 
         private EventLogItem CreateEventLogItemFromSerializedEvent(string serializedEvent)
         {
-            return new EventLogItem();
-        }
-
-        public void DisplayEvent( string serializedEvent )
-        {
-            DrawingImage cardImageSource = this.TryFindResource("cardbackDrawingImage") as DrawingImage;
-            var testButton = new TextBlock()
-            {
-                Text = "(Card)",
-                Background = Brushes.Blue,
-                Foreground = Brushes.White,
-                ToolTip = new Image()
-                {
-                    Source = cardImageSource,
-                    MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth)
-                }
-            };
-
             var eventTextBlock = new TextBlock()
             {
                 TextWrapping = TextWrapping.Wrap,
                 FontSize = 18
             };
-            eventTextBlock.Inlines.Add(new Run(serializedEvent + " "));
-            eventTextBlock.Inlines.Add(testButton);
 
-            EventLogItem logItem = new EventLogItem() { Content = eventTextBlock };
+            StringBuilder currentPiece = new StringBuilder();
+            foreach ( char token in serializedEvent )
+            {
+                switch( token )
+                {
+                    case '[':
+                    {
+                        if ( currentPiece.Length > 0 )
+                        {
+                            eventTextBlock.Inlines.Add(new Run(currentPiece.ToString()));
+                            currentPiece.Clear();
+                        }
+                        break;
+                    }
+                    case ']':
+                    {
+                        int cardId = -1;
+                        if ( currentPiece.Length > 0 && int.TryParse(currentPiece.ToString(), out cardId))
+                        {
+                            Card card = this.allCards.Where(c => c.CardID == cardId).FirstOrDefault();
+                            DrawingImage cardImageSource = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
+                            var cardGraphic = new TextBlock()
+                            {
+                                TextWrapping = TextWrapping.Wrap,
+                                Background = this.propertyTypeToDisplayColors[card.Color].Background,
+                                Foreground = this.propertyTypeToDisplayColors[card.Color].Foreground,
+                                ToolTip = new Image()
+                                {
+                                    Source = cardImageSource,
+                                    MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth)
+                                }
+                            };
+                            cardGraphic.Inlines.Add(new Underline(new Bold(new Run(card.Name))));
+
+                            eventTextBlock.Inlines.Add(cardGraphic);
+                            currentPiece.Clear();
+                        }
+                        break;
+                    }
+                    default:
+                    {
+                        currentPiece.Append(token);
+                        break;
+                    }
+                }
+            }
+
+            if ( currentPiece.Length > 0 )
+            {
+                eventTextBlock.Inlines.Add(new Run(currentPiece.ToString()));
+            }
+
+
+            return new EventLogItem() { Content = eventTextBlock };
+        }
+
+        public void DisplayEvent( string serializedEvent )
+        {
+            EventLogItem logItem = this.CreateEventLogItemFromSerializedEvent(serializedEvent);
 
             this.EventList.Add(logItem);
             this.EventLogScrollViewer.ScrollToBottom();

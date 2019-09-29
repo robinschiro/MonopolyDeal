@@ -63,6 +63,10 @@
       <Project>{6199831C-E516-41B7-83BF-E82EEBCAA33C}</Project>
       <Name>GameClient</Name>
     </ProjectReference>
+    <ProjectReference Include="..\GameObjects\GameObjects.csproj">
+      <Project>{F91299E4-DDEF-4FE7-9ADF-0D731A7D99CB}</Project>
+      <Name>GameObjects</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

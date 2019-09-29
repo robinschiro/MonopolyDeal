@@ -135,10 +135,6 @@ namespace GameClient
             // Connect the client to the server.
             InitializeClient(ipAddress, portNumber);
 
-            // Initialize the event log with access to the network client object.
-            this.GameEventLog = new EventLog(this.Client);
-            this.GameEventLogBorder.Child = this.GameEventLog;
-
             // Do not continue until the client has successfully established communication with the server.
             WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting to establish communication with server...");
             if ( !this.BeginCommunication )
@@ -169,6 +165,18 @@ namespace GameClient
                 // Do not continue until the client receives the Player List from the server.
                 WaitMessage.ShowDialog();
             }
+
+            // Initialize the event log with access to the network client object.
+            List<Card> allCards = new List<Card>();
+            allCards.AddRange(this.Deck.CardList);
+            foreach (Player player in this.PlayerList)
+            {
+                allCards.AddRange(player.CardsInHand);
+            }
+
+            this.GameEventLog = new EventLog(this.Client, allCards);
+            this.GameEventLogBorder.Child = this.GameEventLog;
+
 
             // Update the turn display.
             UpdateTurnDisplay(isNewTurn: false);
