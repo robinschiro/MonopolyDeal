@@ -2015,8 +2015,15 @@ namespace GameClient
             {
                 acceptedDeal = true;
 
-                // Retrieve the list of cards that the rentee selected as payment.
-                payment = rentWindow.Payment.ToList<Card>();             
+                // Retrieve the list of cards that the rentee selected as payment. All enhancement cards should be converted to money.
+                payment = rentWindow.Payment.Select(card =>
+                {
+                    if (card.Type == CardType.Enhancement)
+                    {
+                        card.Type = CardType.Money;
+                    }
+                    return card;
+                }).ToList();
    
                 // Retrieve the player object representing the renter.
                 Player renter = this.PlayerList.Find(player => player.Name == rentRequest.RenterName);
