@@ -72,6 +72,13 @@ namespace GameClient
             this.PublishEvent(eventLine);
         }
 
+        public void PublishDiscardEvent( Player player, Card card )
+        {
+            string eventLine = $"{player.Name} discarded [{card.CardID}]";
+
+            this.PublishEvent(eventLine);
+        }
+
         public void PublishJustSayNoEvent( Player playerSayingNo )
         {
             string eventLine = $"{playerSayingNo.Name} rejected with a Just Say No!";

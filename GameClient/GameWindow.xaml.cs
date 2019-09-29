@@ -1314,6 +1314,7 @@ namespace GameClient
                     if ( MessageBoxResult.Yes == MessageBox.Show("Are you sure you want to discard this card?", "Discard Confirmation", MessageBoxButton.YesNo) )
                     {
                         DiscardCard(cardBeingAdded);
+                        this.GameEventLog.PublishDiscardEvent(this.Player, cardBeingAdded);
                     }
                 };
                 menu.Items.Add(discardMenuItem);
@@ -1975,19 +1976,18 @@ namespace GameClient
             // Discard the action card and send the message to the server.
             DiscardCard(rentCard);
 
-            if ( rentDoubled )
-            {
-                // Remove the card from the player's hand and add it to the discard pile.
-                DiscardCard(doubleRentCard);
-
-                // Update the number of actions.
-                this.Turn.ActionsRemaining--;
-            }
-
             this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled);
             ServerUtilities.SendMessage(Client, Datatype.RequestRent, this.LastRentRequest);
             this.SendPlaySoundRequestForCard(rentCard);
             this.GameEventLog.PublishPlayCardEvent(this.Player, rentCard);
+
+            if ( rentDoubled )
+            {
+                // Remove the card from the player's hand and add it to the discard pile.
+                DiscardCard(doubleRentCard);
+                this.GameEventLog.PublishPlayCardEvent(this.Player, doubleRentCard);
+                this.Turn.ActionsRemaining--;
+            }
 
             // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
             WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for rentees to pay rent...");
