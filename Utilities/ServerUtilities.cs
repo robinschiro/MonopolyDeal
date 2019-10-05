@@ -1,18 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Packaging;
 using System.Linq;
-using System.Text;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Windows;
+using System.Windows.Resources;
 using GameObjects;
 using Lidgren.Network;
+using tvToolbox;
+using GameObjectsResourceList = GameObjects.Properties.Resources;
 
 namespace GameServer
 {
     public class ServerUtilities
     {
         public const int PORT_NUMBER = 14242;
+
+        public static tvProfile GetEmbeddedServerSettings()
+        {
+            // Ensure that the pack scheme is known: http://stackoverflow.com/questions/6005398/uriformatexception-invalid-uri-invalid-port-specified
+            string ensurePackSchemeIsKnown = PackUriHelper.UriSchemePack;
+
+            StreamResourceInfo stream = Application.GetResourceStream(new Uri(GameObjectsResourceList.UriPathEmbeddedServerSettings, UriKind.Absolute));
+            StreamReader reader = new StreamReader(stream.Stream);
+            return new tvProfile(reader.ReadToEnd());
+        }
 
         // Receive an update from either a client or the server, depending on where this method is called.
         public static object ReceiveMessage( NetIncomingMessage inc, Datatype messageType )

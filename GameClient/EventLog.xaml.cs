@@ -16,6 +16,7 @@ using GameObjects;
 using GameServer;
 using Lidgren.Network;
 using Utilities;
+using GameObjectsResourceList = GameObjects.Properties.Resources;
 
 namespace GameClient
 {
@@ -24,55 +25,86 @@ namespace GameClient
     /// </summary>
     public partial class EventLog : UserControl, IEventLog
     {
-        public ObservableCollection<EventLogItem> EventList { get; set; }
-
-        private NetClient netClient;
-
-        public EventLog()
+        struct CardDisplayColors
         {
-            InitializeComponent();
-            this.EventList = new ObservableCollection<EventLogItem>();
-            this.DataContext = this;
+            public Brush Foreground { get; set; }
+            public Brush Background { get; set; }
         }
 
-        public EventLog(NetClient netClient) : this()
+        private IDictionary<PropertyType, CardDisplayColors> propertyTypeToDisplayColors = new Dictionary<PropertyType, CardDisplayColors>()
+        {
+            { PropertyType.Blue, new CardDisplayColors() { Foreground = Brushes.White, Background = Brushes.Blue } },
+            { PropertyType.Brown, new CardDisplayColors() { Foreground = Brushes.White, Background = Brushes.SaddleBrown } },
+            { PropertyType.Green, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.LimeGreen } },
+            { PropertyType.LightBlue, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.LightBlue } },
+            { PropertyType.None, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.White} },
+            { PropertyType.Orange, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.Orange } },
+            { PropertyType.Pink, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.Magenta} },
+            { PropertyType.Railroad, new CardDisplayColors() { Foreground = Brushes.White, Background = Brushes.Black } },
+            { PropertyType.Red, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.Red } },
+            { PropertyType.Utility, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.PaleGoldenrod} },
+            { PropertyType.Wild, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.White} },
+            { PropertyType.Yellow, new CardDisplayColors() { Foreground = Brushes.Black, Background = Brushes.Yellow} }
+        };
+
+        private NetClient netClient;
+        private List<Card> allCards;
+
+        public ObservableCollection<EventLogItem> EventList { get; set; }
+
+        public EventLog( List<Card> allCards )
+        {
+            InitializeComponent();
+            this.DataContext = this;
+            this.EventList = new ObservableCollection<EventLogItem>();
+            this.allCards = allCards;
+        }
+
+        public EventLog(NetClient netClient, List<Card> allCards) : this(allCards)
         {
             this.netClient = netClient;
         }
 
         public void PublishPlayCardEvent( Player player, Card card )
         {
-            string eventLine = $"{player.Name} played {card.Name}";
+            string eventLine = $"{player.Name} played [{card.CardID}]";
 
-            this.PublishCustomEvent(eventLine);
+            this.PublishEvent(eventLine);
+        }
+
+        public void PublishDiscardEvent( Player player, Card card )
+        {
+            string eventLine = $"{player.Name} discarded [{card.CardID}]";
+
+            this.PublishEvent(eventLine);
         }
 
         public void PublishJustSayNoEvent( Player playerSayingNo )
         {
             string eventLine = $"{playerSayingNo.Name} rejected with a Just Say No!";
 
-            this.PublishCustomEvent(eventLine);
+            this.PublishEvent(eventLine);
         }
 
         public void PublishPayRentEvent( Player renter, Player rentee, List<Card> assetsPaid )
         {
-            string eventLine = $"{rentee.Name} paid {renter.Name } ${assetsPaid.Sum(card => card.Value)}M with the following assets: {string.Join(", ", assetsPaid.Select(card => card.Name))}";
+            string eventLine = $"{rentee.Name} paid {renter.Name } ${assetsPaid.Sum(card => card.Value)}M with the following assets: {string.Join(", ", assetsPaid.Select(card => $"[{card.CardID}]"))}";
 
-            this.PublishCustomEvent(eventLine);
+            this.PublishEvent(eventLine);
         }
 
         public void PublishSlyDealEvent( Player thief, Player victim, Card property )
         {
-            string eventLine = $"{thief.Name} would like to steal {property.Name} from {victim.Name}";
+            string eventLine = $"{thief.Name} would like to steal [{property.CardID}] from {victim.Name}";
 
-            this.PublishCustomEvent(eventLine);
+            this.PublishEvent(eventLine);
         }
 
         public void PublishForcedDealEvent( Player thief, Player victim, Card thiefProperty, Card victimProperty )
         {
-            string eventLine = $"{thief.Name} would like to trade {thiefProperty.Name} for {victimProperty.Name} from {victim.Name}";
+            string eventLine = $"{thief.Name} would like to trade [{thiefProperty.CardID}] for [{victimProperty.CardID}] from {victim.Name}";
 
-            this.PublishCustomEvent(eventLine);
+            this.PublishEvent(eventLine);
         }
 
         public void PublishDealbreakerEvent( Player thief, Player victim, List<Card> monopoly )
@@ -80,14 +112,14 @@ namespace GameClient
             PropertyType monopolyColor = ClientUtilities.GetCardListColor(monopoly);
             string eventLine = $"{thief.Name} would like to steal the {monopolyColor.ToString()} monopoly from {victim.Name}";
 
-            this.PublishCustomEvent(eventLine);
+            this.PublishEvent(eventLine);
         }
 
         public void PublishNewTurnEvent( Player player )
         {
             string eventLine = $"It is {player.Name}'s turn!";
 
-            this.PublishCustomEvent(eventLine);
+            this.PublishEvent(eventLine);
         }
 
         public void PublishPlayerWonEvent( Player winner )
@@ -95,14 +127,80 @@ namespace GameClient
             throw new NotImplementedException();
         }
 
-        public void PublishCustomEvent( string eventLogline )
+        private void PublishEvent( string eventLogline )
         {
             ServerUtilities.SendMessage(this.netClient, Datatype.GameEvent, eventLogline);
         }
 
+        private EventLogItem CreateEventLogItemFromSerializedEvent(string serializedEvent)
+        {
+            var eventTextBlock = new TextBlock()
+            {
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 18
+            };
+
+            StringBuilder currentPiece = new StringBuilder();
+            foreach ( char token in serializedEvent )
+            {
+                switch( token )
+                {
+                    case '[':
+                    {
+                        if ( currentPiece.Length > 0 )
+                        {
+                            eventTextBlock.Inlines.Add(new Run(currentPiece.ToString()));
+                            currentPiece.Clear();
+                        }
+                        break;
+                    }
+                    case ']':
+                    {
+                        int cardId = -1;
+                        if ( currentPiece.Length > 0 && int.TryParse(currentPiece.ToString(), out cardId))
+                        {
+                            Card card = this.allCards.Where(c => c.CardID == cardId).FirstOrDefault();
+                            DrawingImage cardImageSource = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
+                            var cardGraphic = new TextBlock()
+                            {
+                                TextWrapping = TextWrapping.Wrap,
+                                Background = this.propertyTypeToDisplayColors[card.Color].Background,
+                                Foreground = this.propertyTypeToDisplayColors[card.Color].Foreground,
+                                ToolTip = new Image()
+                                {
+                                    Source = cardImageSource,
+                                    MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth)
+                                }
+                            };
+                            cardGraphic.Inlines.Add(new Underline(new Bold(new Run(card.Name))));
+
+                            eventTextBlock.Inlines.Add(cardGraphic);
+                            currentPiece.Clear();
+                        }
+                        break;
+                    }
+                    default:
+                    {
+                        currentPiece.Append(token);
+                        break;
+                    }
+                }
+            }
+
+            if ( currentPiece.Length > 0 )
+            {
+                eventTextBlock.Inlines.Add(new Run(currentPiece.ToString()));
+            }
+
+
+            return new EventLogItem() { Content = eventTextBlock };
+        }
+
         public void DisplayEvent( string serializedEvent )
         {
-            this.EventList.Add(new EventLogItem { Content = serializedEvent });
+            EventLogItem logItem = this.CreateEventLogItemFromSerializedEvent(serializedEvent);
+
+            this.EventList.Add(logItem);
             this.EventLogScrollViewer.ScrollToBottom();
         }
     }

@@ -135,10 +135,6 @@ namespace GameClient
             // Connect the client to the server.
             InitializeClient(ipAddress, portNumber);
 
-            // Initialize the event log with access to the network client object.
-            this.GameEventLog = new EventLog(this.Client);
-            this.GameEventLogBorder.Child = this.GameEventLog;
-
             // Do not continue until the client has successfully established communication with the server.
             WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting to establish communication with server...");
             if ( !this.BeginCommunication )
@@ -169,6 +165,18 @@ namespace GameClient
                 // Do not continue until the client receives the Player List from the server.
                 WaitMessage.ShowDialog();
             }
+
+            // Initialize the event log with access to the network client object.
+            List<Card> allCards = new List<Card>();
+            allCards.AddRange(this.Deck.CardList);
+            foreach (Player player in this.PlayerList)
+            {
+                allCards.AddRange(player.CardsInHand);
+            }
+
+            this.GameEventLog = new EventLog(this.Client, allCards);
+            this.GameEventLogBorder.Child = this.GameEventLog;
+
 
             // Update the turn display.
             UpdateTurnDisplay(isNewTurn: false);
@@ -1306,6 +1314,7 @@ namespace GameClient
                     if ( MessageBoxResult.Yes == MessageBox.Show("Are you sure you want to discard this card?", "Discard Confirmation", MessageBoxButton.YesNo) )
                     {
                         DiscardCard(cardBeingAdded);
+                        this.GameEventLog.PublishDiscardEvent(this.Player, cardBeingAdded);
                     }
                 };
                 menu.Items.Add(discardMenuItem);
@@ -1967,19 +1976,18 @@ namespace GameClient
             // Discard the action card and send the message to the server.
             DiscardCard(rentCard);
 
-            if ( rentDoubled )
-            {
-                // Remove the card from the player's hand and add it to the discard pile.
-                DiscardCard(doubleRentCard);
-
-                // Update the number of actions.
-                this.Turn.ActionsRemaining--;
-            }
-
             this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled);
             ServerUtilities.SendMessage(Client, Datatype.RequestRent, this.LastRentRequest);
             this.SendPlaySoundRequestForCard(rentCard);
             this.GameEventLog.PublishPlayCardEvent(this.Player, rentCard);
+
+            if ( rentDoubled )
+            {
+                // Remove the card from the player's hand and add it to the discard pile.
+                DiscardCard(doubleRentCard);
+                this.GameEventLog.PublishPlayCardEvent(this.Player, doubleRentCard);
+                this.Turn.ActionsRemaining--;
+            }
 
             // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
             WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for rentees to pay rent...");

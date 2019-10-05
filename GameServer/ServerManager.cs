@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using GameObjects;
 using tvToolbox;
 using Lidgren.Network;
-using Utilities;
 using System.IO;
-using System.Windows;
-using System.Windows.Resources;
-using System.IO.Packaging;
+using GameObjectsResourceList = GameObjects.Properties.Resources;
 
 // The server/client architecture of MonopolyDeal is built on the Lidgren Networking framework.
 // Lidgren Networking Resources:
@@ -38,25 +30,19 @@ namespace GameServer
         static List<Player> PlayerList;
         static Turn Turn;
         static List<Card> DiscardPile;
-        static String PATH_TO_PROFILE = "pack://application:,,,/GameObjects;component/Resources/Profile.txt";
 
         [STAThread]
         static void Main( string[] args )
         {
             // Attempt to load the game configuration from a config file.
-            if ( File.Exists("Profile.txt"))
+            if ( File.Exists(GameObjectsResourceList.FilePathLocalServerSettings))
             {
-                Profile = new tvProfile("Profile.txt", false);
+                Profile = new tvProfile(GameObjectsResourceList.FilePathLocalServerSettings, false);
             }
             // If it doesn't exist locally, use the embedded one.
             else
             {
-                // Ensure that the pack scheme is known: http://stackoverflow.com/questions/6005398/uriformatexception-invalid-uri-invalid-port-specified
-                string ensurePackSchemeIsKnown = PackUriHelper.UriSchemePack;
-
-                StreamResourceInfo stream = Application.GetResourceStream(new Uri(PATH_TO_PROFILE, UriKind.Absolute));
-                StreamReader reader = new StreamReader(stream.Stream);
-                Profile = new tvProfile(reader.ReadToEnd());
+                Profile = ServerUtilities.GetEmbeddedServerSettings();
             }
 
             // Create a new deck.

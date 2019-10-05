@@ -27,7 +27,6 @@ namespace Utilities
 
     public class ClientUtilities
     {
-
         #region Static Variables
 
         // For each type of property, store the number of cards of that property type that make up a complete monopoly

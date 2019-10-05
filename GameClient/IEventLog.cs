@@ -11,6 +11,7 @@ namespace GameClient
         #region Card Events
 
         void PublishPlayCardEvent( Player player, Card card );
+        void PublishDiscardEvent( Player player, Card card );
         void PublishJustSayNoEvent( Player playerSayingNo );
         void PublishPayRentEvent( Player renter, Player rentee, List<Card> assetsPaid );
         void PublishSlyDealEvent( Player thief, Player victim, Card property );
@@ -21,7 +22,5 @@ namespace GameClient
 
         void PublishNewTurnEvent( Player player ); 
         void PublishPlayerWonEvent( Player winner );
-
-        void PublishCustomEvent( string eventLogline );
     }
 }
