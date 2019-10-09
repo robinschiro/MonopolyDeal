@@ -2,7 +2,7 @@ set releaseGetter=GetLatestRelease
 set zipName=MonopolyDeal
 
 REM Compile AHK script the retrieves latest release from Github
-Ahk2Exe.exe /in %releaseGetter%.ahk
+Ahk2Exe.exe /in %releaseGetter%.ahk /out %releaseGetter%.exe
 
 REM Zip contents
 7z a -tzip %zipName%.zip ..\Release %releaseGetter%.exe UpdateTools

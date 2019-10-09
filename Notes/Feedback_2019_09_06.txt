@@ -1,7 +1,7 @@
 Make double-click configurable
 - Implement turn timer reminder
-- Improve Assets Received dialog
-    - Or get rid of it after event log
+- [DONE] Improve Assets Received dialog
+    - [DONE] Or get rid of it after event log 
 - Multi-monitor support; window moved to secondary monitor, but pop-up show up on primary
 - Somewhere on the Rental Payment, show the card name that was used in the rental window
 - Add server config for last n events in event log
@@ -10,15 +10,16 @@ Make double-click configurable
 - When you add something, have it be highlighted in the remove column
 
 - Make modality configurable
-- Perhaps remove vertical lines
+- [DONE] Perhaps remove vertical lines
 
-- Add new game button
+- MD93: Add new game button
 - Customizable background color
-- Ca-ching sound effect for money
-- Have count of money pile cards
-- Put amount owed on top and bolded
+- [DONE] Ca-ching sound effect for money
+- MD37: Have count of money pile cards
+    - [DONE] Implement half-ass solution that let's people hover over money stack to see card count
+- [DONE] Put amount owed on top and bolded
 - Rental Payment headers should sort when clicked
-- Make Just Say No dialog NOT have Yes/No options; should say other things (like Use/ Don't use)
+- MD94: Make Just Say No dialog NOT have Yes/No options; should say other things (like Use/ Don't use)
 
-- BUG: Drag and Drop, caused cards to disappear when dragged and dropped non-wild blue property on wild brown-blue property; cards disappeared
+- [DONE] MD83: BUG: Drag and Drop, caused cards to disappear when dragged and dropped non-wild blue property on wild brown-blue property; cards disappeared
     - Disable drag and drop as mitigation
