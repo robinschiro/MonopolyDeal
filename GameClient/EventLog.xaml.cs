@@ -137,7 +137,10 @@ namespace GameClient
             var eventTextBlock = new TextBlock()
             {
                 TextWrapping = TextWrapping.Wrap,
-                FontSize = 18
+                FontSize = 14,
+                FontFamily = new FontFamily("Courier New"),
+                Margin = new Thickness(0),
+                Padding = new Thickness(0)
             };
 
             StringBuilder currentPiece = new StringBuilder();
@@ -192,15 +195,24 @@ namespace GameClient
                 eventTextBlock.Inlines.Add(new Run(currentPiece.ToString()));
             }
 
+            // Prepend timestamp.
+            string timestamp = $"[{DateTime.Now.ToString("h:mm:ss tt")}] ";
+            eventTextBlock.Inlines.InsertBefore(eventTextBlock.Inlines.ElementAt(0), new Run(timestamp));
 
             return new EventLogItem() { Content = eventTextBlock };
         }
 
         public void DisplayEvent( string serializedEvent )
         {
-            EventLogItem logItem = this.CreateEventLogItemFromSerializedEvent(serializedEvent);
+            if (this.EventList.Count >= Convert.ToInt32(GameObjectsResourceList.EventLogItemLimit))
+            {
+                this.EventList.RemoveAt(0);
+            }
 
+            EventLogItem logItem = this.CreateEventLogItemFromSerializedEvent(serializedEvent);
             this.EventList.Add(logItem);
+
+
             this.EventLogScrollViewer.ScrollToBottom();
         }
     }

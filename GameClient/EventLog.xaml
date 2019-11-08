@@ -7,7 +7,7 @@
              d:DesignHeight="300" 
              d:DesignWidth="300"
              Margin="10">
-    <Grid>
+    <Grid Background="White">
         <ScrollViewer Name="EventLogScrollViewer"
                       VerticalScrollBarVisibility="Auto">
             <ItemsControl Name="EventsItemsControl"
@@ -19,7 +19,9 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Label Content="{Binding Content}"/>                        
+                        <Label Content="{Binding Content}"
+                               Margin="0"
+                               Padding="5, 2, 5, 2"/>                        
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
