@@ -177,4 +177,7 @@
   <data name="RulesUrl" xml:space="preserve">
     <value>http://monopolydealrules.com/</value>
   </data>
+  <data name="UriPathActionDing" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Audio/ActionDing.wav</value>
+  </data>
 </root>

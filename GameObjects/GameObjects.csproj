@@ -90,6 +90,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Audio\ActionDing.wav" />
     <Resource Include="Audio\TurnDing.wav" />
   </ItemGroup>
   <ItemGroup>

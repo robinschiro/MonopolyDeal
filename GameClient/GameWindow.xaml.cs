@@ -2015,7 +2015,8 @@ namespace GameClient
             String renterName = rentRequest.RenterName;
             List<Card> payment = new List<Card>();
             bool acceptedDeal = false;
-
+                        
+            ClientUtilities.PlaySound(ClientResourceList.UriPathActionDing);
             RentWindow rentWindow = new RentWindow(this.Player, renterName, rentRequest.RentAmount, rentRequest.IsDoubled);
 
             // Proceed only if the rentee accepted the deal.
@@ -2181,7 +2182,7 @@ namespace GameClient
             string message = theftRequest.ThiefName + " has played a " + ((TheftType)theftRequest.ActionID).ToString() + " against you.";
 
             // By default, use the name of the first property in the list.
-            string nameOfPropertyToTake = theftRequest.PropertiesToTake[0].Name;            
+            string nameOfPropertyToTake = theftRequest.PropertiesToTake[0].Name;
 
             switch ( (TheftType)theftRequest.ActionID )
             {
@@ -2209,6 +2210,7 @@ namespace GameClient
 
             // Display the message box to the victim.
             Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
+            ClientUtilities.PlaySound(ClientResourceList.UriPathActionDing);
             bool playerWantsToUseJustSayNo = ClientUtilities.AskPlayerAboutJustSayNo("Theft Request", message, playerHasJustSayNo: null != justSayNo);
 
             if ( playerWantsToUseJustSayNo )

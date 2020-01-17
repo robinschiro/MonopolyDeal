@@ -230,10 +230,10 @@ namespace Utilities
             MessageBoxResult result;
             if (playerHasJustSayNo)
             {
-                result = MessageBox.Show(baseMessage + "\n\nWould you like to use your \"Just Say No!\" card?", title, MessageBoxButton.YesNo);  
+                result = MessageBox.Show(baseMessage + "\n\nWould you like to use your \"Just Say No!\" card?", title, MessageBoxButton.OKCancel);  
                 if (MessageBoxResult.Yes == result)
                 {
-                    result = MessageBox.Show("Are you sure you want to use your \"Just Say No!\" card?", "Confirmation", MessageBoxButton.YesNo);
+                    result = MessageBox.Show("Are you sure you want to use your \"Just Say No!\" card?", "Confirmation", MessageBoxButton.OKCancel);
                 }
             }
             else
@@ -248,12 +248,21 @@ namespace Utilities
 
         #region Sound
 
-        public static void PlaySound( String uriPath )
+        public static void PlaySound( string uriPath )
         {
-            Stream resourceStream = Application.GetResourceStream(new Uri(uriPath)).Stream;
-            UtilitySoundPlayer.Stream = resourceStream;
+            try
+            {
+                var streamResourceInfo = Application.GetResourceStream(new Uri(uriPath));
+                Stream audioStream = streamResourceInfo.Stream;
 
-            UtilitySoundPlayer.Play();
+                UtilitySoundPlayer.Stream = audioStream;
+                UtilitySoundPlayer.Play();
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"Failed to find audio file for sound. Be sure to add the file to the 'GameObjects' project as a resource and rebuild the solution. " +
+                    $"Exception Details: {ex.Message}");
+            }
         }
 
         public static void SetClientVolume( int volume )
