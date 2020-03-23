@@ -228,20 +228,22 @@ namespace Utilities
         public static bool AskPlayerAboutJustSayNo(string title, string baseMessage, bool playerHasJustSayNo)
         {
             MessageBoxResult result;
+            bool useJustSayNo = false;
             if (playerHasJustSayNo)
             {
                 result = MessageBox.Show(baseMessage + "\n\nWould you like to use your \"Just Say No!\" card?", title, MessageBoxButton.OKCancel);  
-                if (MessageBoxResult.Yes == result)
+                if (MessageBoxResult.OK == result)
                 {
                     result = MessageBox.Show("Are you sure you want to use your \"Just Say No!\" card?", "Confirmation", MessageBoxButton.OKCancel);
+                    useJustSayNo = MessageBoxResult.OK == result;
                 }
             }
             else
             {
-                result = MessageBox.Show(baseMessage + "\n\nPress OK to continue.", title, MessageBoxButton.OK);
+                MessageBox.Show(baseMessage + "\n\nPress OK to continue.", title, MessageBoxButton.OK);
             }
 
-            return MessageBoxResult.Yes == result;
+            return useJustSayNo;
         }
 
         #endregion
