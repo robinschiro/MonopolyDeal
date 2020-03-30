@@ -61,6 +61,15 @@ namespace GameObjects.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 10.
+        /// </summary>
+        public static string EventLogItemLimit {
+            get {
+                return ResourceManager.GetString("EventLogItemLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Profile.txt.
         /// </summary>
         public static string FilePathLocalServerSettings {
