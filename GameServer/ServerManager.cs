@@ -170,6 +170,7 @@ namespace GameServer
                                     // If the Player is not on the list, add it.
                                     if ( !isPlayerInList )
                                     {
+                                        Console.WriteLine($"{updatedPlayer.Name} has joined the server!");
                                         PlayerList.Add(updatedPlayer);
                                     }
 

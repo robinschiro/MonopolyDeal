@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+  <Product Name='MonopolyDeal' Id='3FDA700E-B3C2-4089-8993-2A5B8A776EDE' UpgradeCode='2DE74FD6-1C2B-4DB8-B8B3-763EC8B0BC53' Language='1033' Version='2.4.2' Manufacturer='RobinSchiroSoftware'>
+
+    <Package Id='*' Keywords='Installer' Description="MonopolyDeal Installer"
+      Comments='MonopolyDeal is a registered trademark of Hasbro' Manufacturer='RobinSchiroSoftware'
+      InstallerVersion='100' Languages='1033' Compressed='yes' />
+
+    <Media Id='1' Cabinet='Monopolydeal.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
+    <Property Id='DiskPrompt' Value="MonopolyDeal Installation [1]" />
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder' Name='PFiles'>
+        <Directory Id='INSTALLDIR' Name='MonopolyDeal'>
+
+          <Component Id='GameClient' Guid='312358DB-66B6-48F3-997B-848A8EE97DCA'>
+            <File Id='MonopolyDealEXE' Name='MonopolyDeal.exe' DiskId='1' Source='..\Release\MonopolyDeal.exe' KeyPath='yes'>
+              <Shortcut Id="startmenMonopolyDeal" Directory="ProgramMenuDir" Name="MonopolyDeal" WorkingDirectory='INSTALLDIR' Icon="MonopolyDeal.exe" IconIndex="0" Advertise="yes" />
+              <Shortcut Id="desktopMonopolyDeal" Directory="DesktopFolder" Name="MonopolyDeal" WorkingDirectory='INSTALLDIR' Icon="MonopolyDeal.exe" IconIndex="0" Advertise="yes" />
+            </File>
+          </Component>
+          <Component Id='GameServer' Guid='0363484E-0B35-43E9-943C-AE842EB68321'>
+            <File Id='GameServerEXE' Name='GameServer.exe' DiskId='1' Source='..\Release\GameServer.exe' KeyPath='yes' />
+          </Component>
+            
+          <Component Id='AdditionalWindows' Guid='C69E1A50-2EE9-46AD-8481-629A5D828A54'>
+            <File Id='AdditionalWindowsDLL' Name='AdditionalWindows.dll' DiskId='1' Source='..\Release\AdditionalWindows.dll' KeyPath='yes' />
+          </Component>
+          <Component Id='GameObjects' Guid='7795383B-C9FB-4DB0-AEAA-6DD5A80156A4'>
+            <File Id='GameObjectsDLL' Name='GameObjects.dll' DiskId='1' Source='..\Release\GameObjects.dll' KeyPath='yes' />
+          </Component>
+          <Component Id='Utilities' Guid='2E74D8E2-C0DF-4C3D-B4A0-1D0161DB8A47'>
+            <File Id='UtilitiesDLL' Name='Utilities.dll' DiskId='1' Source='..\Release\..\Release\Utilities.dll' KeyPath='yes' />
+          </Component>
+          <Component Id='LidgrenNetwork' Guid='FEC82D39-B520-42C2-95F3-39B2F0AD7E77'>
+            <File Id='LidgrenNetworkDLL' Name='Lidgren.Network.dll' DiskId='1' Source='..\Release\Lidgren.Network.dll' KeyPath='yes' />
+          </Component>
+          <Component Id='SystemReactiveCore' Guid='A8705471-CF29-4D9D-B294-1862855A13F9'>
+            <File Id='SystemReactiveCoreDLL' Name='System.Reactive.Core.dll' DiskId='1' Source='..\Release\System.Reactive.Core.dll' KeyPath='yes' />
+          </Component>
+          <Component Id='SystemReactiveInterfaces' Guid='844186FB-AB91-4772-98E5-4E0EA0CCD2B4'>
+            <File Id='SystemReactiveInterfacesDLL' Name='System.Reactive.Interfaces.dll' DiskId='1' Source='..\Release\System.Reactive.Interfaces.dll' KeyPath='yes' />
+          </Component>
+          <Component Id='SystemReactiveLinq' Guid='4DED74CB-8AB3-4A29-BC6D-0B40278422B9'>
+            <File Id='SystemReactiveLinqDLL' Name='System.Reactive.Linq.dll' DiskId='1' Source='..\Release\System.Reactive.Linq.dll' KeyPath='yes' />
+          </Component>
+            
+          <!--<Component Id='' Guid=''>
+            <File Id='DLL' Name='AdditionalWindows.dll' DiskId='1' Source='..\Release\AdditionalWindows.dll' KeyPath='yes' />
+          </Component>-->
+
+        </Directory>
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="MonopolyDeal">
+          <Component Id="ProgramMenuDir" Guid="D89C9E01-3721-4DF8-B3D4-B1A621B200E2">
+            <RemoveFolder Id='ProgramMenuDir' On='uninstall' />
+            <RegistryValue Root='HKCU' Key='Software\RobinSchiroSoftware\MonopolyDeal' Type='string' Value='' KeyPath='yes' />
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+
+    <Feature Id='Complete' Level='1'>
+      <ComponentRef Id='GameClient' />
+      <ComponentRef Id='GameServer' />
+      <ComponentRef Id='AdditionalWindows' />
+      <ComponentRef Id='GameObjects' />
+      <ComponentRef Id='Utilities' />
+      <ComponentRef Id='LidgrenNetwork' />
+      <ComponentRef Id='SystemReactiveCore' />
+      <ComponentRef Id='SystemReactiveInterfaces' />
+      <ComponentRef Id='SystemReactiveLinq' />
+      <ComponentRef Id='ProgramMenuDir' />
+    </Feature>
+
+    <Icon Id="MonopolyDeal.exe" SourceFile="..\Release\MonopolyDeal.exe" />
+
+  </Product>
+</Wix>
