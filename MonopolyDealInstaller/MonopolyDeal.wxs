@@ -44,6 +44,9 @@
           <Component Id='SystemReactiveLinq' Guid='4DED74CB-8AB3-4A29-BC6D-0B40278422B9'>
             <File Id='SystemReactiveLinqDLL' Name='System.Reactive.Linq.dll' DiskId='1' Source='..\Release\System.Reactive.Linq.dll' KeyPath='yes' />
           </Component>
+          <Component Id='AutoUpdater' Guid='D355869F-E48F-4FB8-A8DE-6033DA0FD743'>
+            <File Id='AutoUpdaterDLL' Name='AutoUpdater.NET.dll' DiskId='1' Source='..\Release\AutoUpdater.NET.dll' KeyPath='yes' />
+          </Component>
             
           <!--<Component Id='' Guid=''>
             <File Id='DLL' Name='AdditionalWindows.dll' DiskId='1' Source='..\Release\AdditionalWindows.dll' KeyPath='yes' />
@@ -74,6 +77,7 @@
       <ComponentRef Id='SystemReactiveCore' />
       <ComponentRef Id='SystemReactiveInterfaces' />
       <ComponentRef Id='SystemReactiveLinq' />
+      <ComponentRef Id='AutoUpdater' />
       <ComponentRef Id='ProgramMenuDir' />
     </Feature>
 

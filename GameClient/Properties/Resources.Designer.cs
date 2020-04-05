@@ -70,6 +70,15 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to https://github.com/robinschiro/MonopolyDeal/releases/latest/download/AutoUpdaterManifest.xml.
+        /// </summary>
+        public static string AutoUpdaterManifestUrl {
+            get {
+                return ResourceManager.GetString("AutoUpdaterManifestUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 50.
         /// </summary>
         public static string DefaultVolume {

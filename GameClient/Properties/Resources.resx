@@ -180,4 +180,7 @@
   <data name="UriPathActionDing" xml:space="preserve">
     <value>pack://application:,,,/GameObjects;component/Audio/ActionDing.wav</value>
   </data>
+  <data name="AutoUpdaterManifestUrl" xml:space="preserve">
+    <value>https://github.com/robinschiro/MonopolyDeal/releases/latest/download/AutoUpdaterManifest.xml</value>
+  </data>
 </root>
