@@ -1,6 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
+<?define ProductVersion="!(bind.FileVersion.MonopolyDealEXE)"?>
+
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
-  <Product Name='MonopolyDeal' Id='3FDA700E-B3C2-4089-8993-2A5B8A776EDE' UpgradeCode='2DE74FD6-1C2B-4DB8-B8B3-763EC8B0BC53' Language='1033' Version='2.4.2' Manufacturer='RobinSchiroSoftware'>
+  <Product Name='MonopolyDeal' Id='*' UpgradeCode='2DE74FD6-1C2B-4DB8-B8B3-763EC8B0BC53' Language='1033' Version="$(var.ProductVersion)" Manufacturer='RobinSchiroSoftware'>
 
     <Package Id='*' Keywords='Installer' Description="MonopolyDeal Installer"
       Comments='MonopolyDeal is a registered trademark of Hasbro' Manufacturer='RobinSchiroSoftware'
@@ -8,6 +10,8 @@
 
     <Media Id='1' Cabinet='Monopolydeal.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
     <Property Id='DiskPrompt' Value="MonopolyDeal Installation [1]" />
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of MonopolyDeal is already installed." />
 
     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id='ProgramFilesFolder' Name='PFiles'>
@@ -82,6 +86,17 @@
     </Feature>
 
     <Icon Id="MonopolyDeal.exe" SourceFile="..\Release\MonopolyDeal.exe" />
+
+    <CustomAction Id="EXECUTE_AFTER_FINALIZE"
+              Execute="immediate"
+              Impersonate="no"
+              Return="asyncNoWait"
+              FileKey="MonopolyDealEXE"
+              ExeCommand="" />
+
+    <InstallExecuteSequence>
+      <Custom Action="EXECUTE_AFTER_FINALIZE" After="InstallFinalize">NOT Installed</Custom>
+    </InstallExecuteSequence>
 
   </Product>
 </Wix>
