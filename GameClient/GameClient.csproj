@@ -233,6 +233,6 @@
       $(PostBuildEventDependsOn);
       PostBuildMacros;
     </PostBuildEventDependsOn>
-    <PostBuildEvent>powershell -ExecutionPolicy Unrestricted -Command "..\Scripts\GenerateAutoUpdaterManifest.ps1 -VersionNumber @(VersionNumber)"</PostBuildEvent>
+    <PostBuildEvent>if $(ConfigurationName) == Release powershell -ExecutionPolicy Unrestricted -Command "..\Scripts\GenerateAutoUpdaterManifest.ps1 -VersionNumber @(VersionNumber)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
