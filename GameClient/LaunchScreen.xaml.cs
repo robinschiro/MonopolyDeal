@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.IO;
 using System.Net;
+using System.Windows.Input;
+
+using AutoUpdaterDotNET;
 using ResourceList = GameClient.Properties.Resources;
 using tvToolbox;
-using System.IO;
-using System.Windows.Input;
 using Utilities;
 
 namespace GameClient
@@ -34,6 +36,9 @@ namespace GameClient
             // Play the sound of silence to allow the game client to adjust the volume of the application.
             // Without this, the volume would not be able to be adjusted until after the first sound is played.
             ClientUtilities.PlaySound(ResourceList.UriPathSilence);
+
+            // Check for updates.
+            AutoUpdater.Start(ResourceList.AutoUpdaterManifestUrl);
         }
 
         private void LaunchLobby()
