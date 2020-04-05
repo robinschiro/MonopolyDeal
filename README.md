@@ -2,10 +2,12 @@
 Welcome to Monopoly Deal! This is a digital recreation of America's favorite version of America's most-hated board game.
 
 ## Downloading the game
-To download the latest release of the game, follow [this link](https://github.com/robinschiro/MonopolyDeal/releases/latest/download/MonopolyDeal.zip).
+To download the latest release of the game, follow [this link](https://github.com/robinschiro/MonopolyDeal/releases/latest/download/MonopolyDealInstaller.msi).
 
 ## Prerequisites
 You will need to be running Win7+ with the .NET Framework 4.0+ installed. You can install this version of the .NET Framework [here](https://www.microsoft.com/en-us/download/confirmation.aspx?id=17851).
+
+To build the installer, you will also need the WIX toolset installed. You can install it [here](https://wixtoolset.org/releases/).
 
 ## Running the game
 Once you have the game downloaded, you will see two executables. 
