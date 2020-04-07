@@ -175,6 +175,12 @@ namespace Utilities
             return false;
         }
 
+        // Determine if the given card can be added to the given list of cards.
+        public static bool CanCardBeAddedToList(Card card, List<Card> cardList)
+        {
+            return !IsCardListMonopoly(cardList) && ((card.Color == PropertyType.Wild) || (GetCardListColor(cardList) == card.Color));
+        }
+
         // Return a list of all the card groups in the player's CardsInPlay that are monopolies.
         public static List<List<Card>> FindMonopolies( Player player )
         {
