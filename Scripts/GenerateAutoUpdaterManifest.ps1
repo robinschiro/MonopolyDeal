@@ -9,6 +9,7 @@ Out-File -FilePath ..\Release\AutoUpdaterManifest.xml -InputObject @"
 <item>
     <version>$($versionNumber)</version>
     <url>https://github.com/robinschiro/MonopolyDeal/releases/latest/download/MonopolyDealInstaller.msi</url>
+    <changelog>https://github.com/robinschiro/MonopolyDeal/releases/latest</changelog>
     <mandatory>true</mandatory>
 </item>  
 "@
