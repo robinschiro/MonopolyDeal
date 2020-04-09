@@ -1,25 +1,25 @@
-Make double-click configurable
-- Implement turn timer reminder
+- MD109: Make double-click configurable
+- MD103: Implement turn timer reminder
 - [DONE] Improve Assets Received dialog
     - [DONE] Or get rid of it after event log 
-- Multi-monitor support; window moved to secondary monitor, but pop-up show up on primary
-- Somewhere on the Rental Payment, show the card name that was used in the rental window
-- Add server config for last n events in event log
-- Make all pop-ups modal (i.e. assets received dialog, maybe put a sound on assets received dialog)
-- Allow players to move entire stacks around
-- When you add something, have it be highlighted in the remove column
+- MD104: Multi-monitor support; window moved to secondary monitor, but pop-up show up on primary
+- [WON'T FIX] ]Somewhere on the Rental Payment, show the card name that was used in the rental window
+- MD105: Add server config for last n events in event log
+- [WON'T FIX] Make all pop-ups modal (i.e. assets received dialog, maybe put a sound on assets received dialog)
+- MD106: Allow players to move entire stacks around
+- MD107: When you add something, have it be highlighted in the remove column
 
-- Make modality configurable
+- [WON'T FIX] Make modality configurable
 - [DONE] Perhaps remove vertical lines
 
 - MD93: Add new game button
-- Customizable background color
+- [WON'T FIX] Customizable background color
 - [DONE] Ca-ching sound effect for money
 - MD37: Have count of money pile cards
     - [DONE] Implement half-ass solution that let's people hover over money stack to see card count
 - [DONE] Put amount owed on top and bolded
-- Rental Payment headers should sort when clicked
-- MD94: Make Just Say No dialog NOT have Yes/No options; should say other things (like Use/ Don't use)
+- MD108: Rental Payment headers should sort when clicked
+- [DONE} MD94: Make Just Say No dialog NOT have Yes/No options; should say other things (like Use/ Don't use)
 
 - [DONE] MD83: BUG: Drag and Drop, caused cards to disappear when dragged and dropped non-wild blue property on wild brown-blue property; cards disappeared
     - Disable drag and drop as mitigation

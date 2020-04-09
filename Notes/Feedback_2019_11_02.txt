@@ -1,0 +1,17 @@
+Feedback 11/2
+
+- Event log
+    - [DONE] Reduce line spacing
+    - [DONE] Have white background
+    - [DONE] Timestamps
+    - MD110: Make event log configurable (hide certain things)
+- [DONE] Ding for rental payment
+    - Soft ding
+- [DONE] Any action that involves any other player should have a sound
+- MD111: For single rents (e.g. debt collection, wild rent), show which player is being targeted
+- MD112: Replace JustSayNo dialog with a JustSayNo button on the rent dialogs
+- MD113: As people pay rent, show the incoming payments on the renters board rather than waiting until the end of the rent action (since JustSayNo dialog delay the end of the rent action)
+
+Edge Cases:
+Player with a monopoly plays a forced deal. He selects a card from his monopoly to use for the swap. The card he wants is a card of the same color as the monopoly (only makes sense if the card he is trying to get is a wild card)
+- Result: The received card is correctly placed in the thief's monopoly.
