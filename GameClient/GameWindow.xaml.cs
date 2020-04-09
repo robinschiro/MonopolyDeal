@@ -630,13 +630,10 @@ namespace GameClient
                 return;
             }
 
-            bool isMonopoly = ClientUtilities.IsCardListMonopoly(targetCardList);
             bool performTransfer = false;
-
-            if ( !isMonopoly )
+            if ( !ClientUtilities.IsCardListMonopoly(targetCardList) )
             {
-                performTransfer = (targetCardListColor == sourceCard.Color || PropertyType.Wild == sourceCard.Color ||
-                                    PropertyType.Wild == targetCardListColor || PropertyType.None == targetCardListColor);
+                performTransfer = ClientUtilities.CanCardBeAddedToList(sourceCard, targetCardList);
             }
             else
             {
@@ -1110,10 +1107,8 @@ namespace GameClient
                         {
                             List<Card> cardList = player.CardsInPlay[i];
 
-                            PropertyType cardListColor = ClientUtilities.GetCardListColor(cardList);
-
                             // If the cardlist is not a monopoly and is compatible with the card being added, add the card to the list.
-                            if ( !ClientUtilities.IsCardListMonopoly(cardList) && (cardListColor == cardBeingAdded.Color || PropertyType.Wild == cardListColor) )
+                            if ( ClientUtilities.CanCardBeAddedToList(cardBeingAdded, cardList) )
                             {
                                 cardList.Add(cardBeingAdded);
                                 AddCardToGrid(cardBeingAdded, PlayerFieldDictionary[player.Name], player, false, player.CardsInPlay.IndexOf(cardList));
@@ -1864,89 +1859,86 @@ namespace GameClient
             bool rentDoubled = false;
             Card doubleRentCard = null;
 
-            // Only one player is targeted for a "Debt Collector" or a Wild Rent.
-            bool targetOnePlayer = (9 == rentCard.ActionID || 10 == rentCard.ActionID);
-            
-            // The amount of money collected through these actions is not affected by properties or "Double the Rent".
-            if ( 8 == rentCard.ActionID || 9 == rentCard.ActionID )
+            ActionId rentCardType = (ActionId)rentCard.ActionID;
+            switch (rentCardType)
             {
-                switch ( rentCard.ActionID )
+                case ActionId.ItsMyBirthday:
                 {
-                    // If it is an "It's My Birthday", collect a certain amount.
-                    case 8:
-                    {
-                        amountToCollect = Card.BIRTHDAY_AMOUNT;
-                        break;
-                    }
-
-                    // If it is a "Debt Collector", collect a certain amount.
-                    case 9:
-                    {
-                        amountToCollect = Card.DEBT_AMOUNT;
-                        break;
-                    }
-                }
-            }
-            // The rent card must be a property rent card.
-            else
-            {
-                List<List<Card>> matchingPropertyGroups = new List<List<Card>>();
-
-                // First, determine which lists on the player's field correpond to the rent card.
-                // Skip the money list.
-                foreach ( List<Card> cardList in this.Player.CardsInPlay.Skip(1) )
-                {
-                    PropertyType cardListColor = ClientUtilities.GetCardListColor(cardList);
-                    if ( (PropertyType.Wild == rentCard.Color) || (cardListColor == rentCard.Color) || (cardListColor == rentCard.AltColor) )
-                    {
-                        matchingPropertyGroups.Add(cardList);
-                    }
+                    amountToCollect = Card.BIRTHDAY_AMOUNT;
+                    break;
                 }
 
-                // If the player will not get any money from playing the rent, prevent him/her from performing the action.
-                if ( 0 == matchingPropertyGroups.Count )
+                case ActionId.DebtCollector:
                 {
-                    MessageBoxResult result = MessageBox.Show("You do not have " + rentCard.Color.ToString() + " or " + rentCard.AltColor.ToString() + " properties. You cannot perform this action.",
-                                    "Invalid Action",
-                                    MessageBoxButton.OK);
-
-                    return false;
+                    amountToCollect = Card.DEBT_AMOUNT;
+                    break;
                 }
 
-                // Determine the maximum amount of money the player can make from the rent.
-                foreach ( List<Card> cardList in matchingPropertyGroups )
+                default:
                 {
-                    // Determine the number of properties in the set.
-                    Card house = cardList.FirstOrDefault(card => card.Name == "House");
-                    Card hotel = cardList.FirstOrDefault(card => card.Name == "Hotel");
-                    int numProperties = cardList.Count - ( (null != house) ? (1) : (0) ) - ( (null != hotel) ? (1) : (0) );
+                    List<List<Card>> matchingPropertyGroups = new List<List<Card>>();
 
-                    // Calculate the total value of the set.
-                    int totalValue = ClientUtilities.RentData[ClientUtilities.GetCardListColor(cardList)][numProperties] + ((null != house) ? (house.Value) : (0)) + ((null != hotel) ? (hotel.Value) : (0));
-
-                    if ( totalValue > amountToCollect )
+                    // First, determine which lists on the player's field correpond to the rent card.
+                    // Skip the money list.
+                    foreach ( List<Card> cardList in this.Player.CardsInPlay.Skip(1) )
                     {
-                        amountToCollect = totalValue;
+                        PropertyType cardListColor = ClientUtilities.GetCardListColor(cardList);
+                        if ( (PropertyType.Wild != cardListColor) && 
+                             (PropertyType.None != cardListColor) &&
+                             ((PropertyType.Wild == rentCard.Color) || (cardListColor == rentCard.Color) || (cardListColor == rentCard.AltColor)) )
+                        {
+                            matchingPropertyGroups.Add(cardList);
+                        }
                     }
-                }
 
-                // If the player has a "Double the Rent" card and at least two actions remaining, ask if he would like to use it.
-                doubleRentCard = FindActionCardInList(this.Player.CardsInHand, 1);
+                    // If the player will not get any money from playing the rent, prevent him/her from performing the action.
+                    if ( 0 == matchingPropertyGroups.Count )
+                    {
+                        MessageBoxResult result = MessageBox.Show("You do not have any matching sets for this rent. You cannot perform this action.",
+                                        "Invalid Action",
+                                        MessageBoxButton.OK);
 
-                if ( (null != doubleRentCard) && (this.Turn.ActionsRemaining >= 2) )
-                {
-                    MessageBoxResult result = MessageBox.Show("You have a " + doubleRentCard.Name + " card. Would you like to apply it to this rent?",
-                                    "Are you sure?",
-                                    MessageBoxButton.YesNo);
+                        return false;
+                    }
 
-                    rentDoubled = (MessageBoxResult.Yes == result);
+                    // Determine the maximum amount of money the player can make from the rent.
+                    foreach ( List<Card> cardList in matchingPropertyGroups )
+                    {
+                        // Determine the number of properties in the set.
+                        Card house = cardList.FirstOrDefault(card => ActionId.House == (ActionId)card.ActionID);
+                        Card hotel = cardList.FirstOrDefault(card => ActionId.Hotel == (ActionId)card.ActionID);
+                        int numProperties = cardList.Count - ((null != house) ? 1 : 0) - ((null != hotel) ? 1 : 0);
+
+                        // Calculate the total value of the set.
+                        int totalValue = ClientUtilities.RentData[ClientUtilities.GetCardListColor(cardList)][numProperties] + ((null != house) ? house.Value : 0) + ((null != hotel) ? hotel.Value : 0);
+
+                        if ( totalValue > amountToCollect )
+                        {
+                            amountToCollect = totalValue;
+                        }
+                    }
+
+                    // If the player has a "Double the Rent" card and at least two actions remaining, ask if he would like to use it.
+                    doubleRentCard = FindActionCardInList(this.Player.CardsInHand, 1);
+
+                    if ( (null != doubleRentCard) && (this.Turn.ActionsRemaining >= 2) )
+                    {
+                        MessageBoxResult result = MessageBox.Show("You have a " + doubleRentCard.Name + " card. Would you like to apply it to this rent?",
+                                        "Are you sure?",
+                                        MessageBoxButton.YesNo);
+
+                        rentDoubled = (MessageBoxResult.Yes == result);
+                    }
+
+                    break;
                 }
             }
 
             // Create the list of players receiving the rent request.
             List<Player> rentees = null;
 
-            if (targetOnePlayer)
+            bool targetOnePlayer = (ActionId.DebtCollector == rentCardType || ActionId.RentWild == rentCardType);
+            if ( targetOnePlayer)
             {
                 // Prevent the renter from performing any action until all rentees have paid their rent.
                 NumberOfRentees = 1;
