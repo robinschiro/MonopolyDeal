@@ -54,7 +54,6 @@ namespace GameClient
 
         // Variables for managing the state of Action Cards.
         private int NumberOfRentees = 0;
-        private List<Card> AssetsReceived = new List<Card>();
         private MessageDialog WaitMessage;
         private ActionData.RentRequest LastRentRequest;
         private ActionData.TheftRequest LastTheftRequest;
@@ -2103,7 +2102,12 @@ namespace GameClient
             {
                 if ( rentResponse.AcceptedDeal )
                 {
-                    this.AssetsReceived.AddRange(rentResponse.AssetsGiven);
+                    foreach ( Card card in rentResponse.AssetsGiven)
+                    {
+                        AddCardToCardsInPlay(card, this.Player);
+                    }
+
+                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
                 }
                 else
                 {
@@ -2137,27 +2141,10 @@ namespace GameClient
                 // Update the number of remaining rentees.
                 this.NumberOfRentees--;
 
-                // If all rentees have paid their rent, then add the cards from the AssetsReceived to the player's CardsInPlay.
-                if ( 0 == this.NumberOfRentees )
+                // If all rentees have paid their rent, then close the wait dialog.
+                if ( 0 == this.NumberOfRentees && null != WaitMessage )
                 {
-                    StringBuilder assetsSummary = new StringBuilder();
-                    foreach ( Card card in this.AssetsReceived )
-                    {
-                        AddCardToCardsInPlay(card, this.Player);
-                        assetsSummary.Append(card.Name + " (" + (CardType.Property == card.Type ? (card.Color + " ") : string.Empty) + card.Type + ")\n");
-                    }
-
-                    // Clear the list of AssetsReceived.
-                    AssetsReceived.Clear();
-
-                    // Send the updated player to the server.
-                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
-
-                    // Update the wait dialog.
-                    if ( null != WaitMessage )
-                    {
-                        WaitMessage.CloseWindow = true;
-                    }
+                    WaitMessage.CloseWindow = true;
                 }
             }
             else
