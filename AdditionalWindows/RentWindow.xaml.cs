@@ -78,33 +78,13 @@ namespace AdditionalWindows
             // Set the data context of the window.
             this.DataContext = this;
 
-            this.ContentRendered += ( sender, args ) => 
-            {
-                // If the user has a "Just Say No", give him the option to use it.
-                bool playerHasJustSayNo = rentee.CardsInHand.Any(card => 2 == card.ActionID);
-                if ( playerHasJustSayNo )
-                {
-                    string message = "You could use your \"Just Say No!\" card to reject " + renterName + "'s rent request.";
-                    bool playerWantsToUseJustSayNo = ClientUtilities.AskPlayerAboutJustSayNo("Rent Rejection", message, playerHasJustSayNo: true);
-
-                    if ( playerWantsToUseJustSayNo )
-                    {
-                        // Mark the result of the dialog as false and close it.
-                        this.dialogResult = false;
-                        this.CloseWindow = true;
-                    }
-                }        
-            };            
+            this.JustSayNoButton.IsEnabled = rentee.CardsInHand.Any(card => ActionId.JustSayNo == (ActionId)card.ActionID);          
         }
 
         // Create the OnPropertyChanged method to raise the event.
         protected void OnPropertyChanged( string name )
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if ( handler != null )
-            {
-                handler(this, new PropertyChangedEventArgs(name));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         private void GiveButton_Click( object sender, RoutedEventArgs e )
@@ -183,6 +163,17 @@ namespace AdditionalWindows
         private void PaymentListView_MouseDoubleClick( object sender, MouseButtonEventArgs e )
         {
             TransferSelectedItems(PaymentListView, AssetsListView);
+        }
+
+        private void JustSayNoButton_Click( object sender, RoutedEventArgs e )
+        {
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to use your \"Just Say No!\" card?", "Confirmation", MessageBoxButton.OKCancel);
+            if ( MessageBoxResult.OK == result )
+            {
+                // Mark the result of the dialog as false and close it.
+                this.dialogResult = false;
+                this.CloseWindow = true;
+            }
         }
     }
 }

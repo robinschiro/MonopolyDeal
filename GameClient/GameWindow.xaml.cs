@@ -54,7 +54,6 @@ namespace GameClient
 
         // Variables for managing the state of Action Cards.
         private int NumberOfRentees = 0;
-        private List<Card> AssetsReceived = new List<Card>();
         private MessageDialog WaitMessage;
         private ActionData.RentRequest LastRentRequest;
         private ActionData.TheftRequest LastTheftRequest;
@@ -498,51 +497,58 @@ namespace GameClient
 
         public void PlayCardEvent( object sender, MouseButtonEventArgs args )
         {
-            if ( isCurrentTurnOwner && this.Turn.ActionsRemaining > 0 )
+            try
             {
-                Button cardButton = sender as Button;
-
-                Card cardBeingPlayed = cardButton.Tag as Card;
-                bool cardWasPlayed = false;
-
-                // Add the card to the Player's playing field (if it is not an action card).
-                if ( cardBeingPlayed.Type != CardType.Action )
+                if ( isCurrentTurnOwner && this.Turn.ActionsRemaining > 0 )
                 {
-                    // Add the card to the Player's CardsInPlay list.
-                    cardWasPlayed = AddCardToCardsInPlay(cardBeingPlayed, this.Player);
-                }
-                else
-                {
-                    // Handle the action.
-                    cardWasPlayed = HandleAction(cardBeingPlayed);
-                }
+                    Button cardButton = sender as Button;
 
-                if ( cardWasPlayed )
-                {
-                    // Update the player's number of actions.
-                    this.Turn.ActionsRemaining--;
+                    Card cardBeingPlayed = cardButton.Tag as Card;
+                    bool cardWasPlayed = false;
 
-                    // Send the update to all players.
-                    ServerUtilities.SendMessage(this.Client, Datatype.UpdateTurn, this.Turn);
-
-                    // Removal of action cards is handled in HandleAction(), so only remove non-action cards here.
+                    // Add the card to the Player's playing field (if it is not an action card).
                     if ( cardBeingPlayed.Type != CardType.Action )
                     {
-                        RemoveCardFromHand(cardBeingPlayed);
-                        this.GameEventLog.PublishPlayCardEvent(this.Player, cardBeingPlayed);
+                        // Add the card to the Player's CardsInPlay list.
+                        cardWasPlayed = AddCardToCardsInPlay(cardBeingPlayed, this.Player);
+                    }
+                    else
+                    {
+                        // Handle the action.
+                        cardWasPlayed = HandleAction(cardBeingPlayed);
                     }
 
-                    if ( cardBeingPlayed.Type == CardType.Money )
+                    if ( cardWasPlayed )
                     {
-                        ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, ClientResourceList.UriPathMoneyDing);
-                    }
+                        // Update the player's number of actions.
+                        this.Turn.ActionsRemaining--;
 
-                    // Update animation on end turn button.
-                    if ( 0 == this.Turn.ActionsRemaining )
-                    {
-                        this.AnimateEndTurnButton();
-                    }                    
-                }                
+                        // Send the update to all players.
+                        ServerUtilities.SendMessage(this.Client, Datatype.UpdateTurn, this.Turn);
+
+                        // Removal of action cards is handled in HandleAction(), so only remove non-action cards here.
+                        if ( cardBeingPlayed.Type != CardType.Action )
+                        {
+                            RemoveCardFromHand(cardBeingPlayed);
+                            this.GameEventLog.PublishPlayCardEvent(this.Player, cardBeingPlayed);
+                        }
+
+                        if ( cardBeingPlayed.Type == CardType.Money )
+                        {
+                            ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, ClientResourceList.UriPathMoneyDing);
+                        }
+
+                        // Update animation on end turn button.
+                        if ( 0 == this.Turn.ActionsRemaining )
+                        {
+                            this.AnimateEndTurnButton();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error has occurred. Exception: {ex.ToString()} ", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2103,7 +2109,12 @@ namespace GameClient
             {
                 if ( rentResponse.AcceptedDeal )
                 {
-                    this.AssetsReceived.AddRange(rentResponse.AssetsGiven);
+                    foreach ( Card card in rentResponse.AssetsGiven)
+                    {
+                        AddCardToCardsInPlay(card, this.Player);
+                    }
+
+                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
                 }
                 else
                 {
@@ -2137,27 +2148,10 @@ namespace GameClient
                 // Update the number of remaining rentees.
                 this.NumberOfRentees--;
 
-                // If all rentees have paid their rent, then add the cards from the AssetsReceived to the player's CardsInPlay.
-                if ( 0 == this.NumberOfRentees )
+                // If all rentees have paid their rent, then close the wait dialog.
+                if ( 0 == this.NumberOfRentees && null != WaitMessage )
                 {
-                    StringBuilder assetsSummary = new StringBuilder();
-                    foreach ( Card card in this.AssetsReceived )
-                    {
-                        AddCardToCardsInPlay(card, this.Player);
-                        assetsSummary.Append(card.Name + " (" + (CardType.Property == card.Type ? (card.Color + " ") : string.Empty) + card.Type + ")\n");
-                    }
-
-                    // Clear the list of AssetsReceived.
-                    AssetsReceived.Clear();
-
-                    // Send the updated player to the server.
-                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
-
-                    // Update the wait dialog.
-                    if ( null != WaitMessage )
-                    {
-                        WaitMessage.CloseWindow = true;
-                    }
+                    WaitMessage.CloseWindow = true;
                 }
             }
             else
