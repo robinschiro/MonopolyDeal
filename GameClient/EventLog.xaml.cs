@@ -72,6 +72,13 @@ namespace GameClient
             this.PublishEvent(eventLine);
         }
 
+        public void PublishPlayTargetedCardEvent( Player player, Player target, Card card )
+        {
+            string eventLine = $"{player.Name} played [{card.CardID}] against {target.Name}";
+
+            this.PublishEvent(eventLine);
+        }
+
         public void PublishDiscardEvent( Player player, Card card )
         {
             string eventLine = $"{player.Name} discarded [{card.CardID}]";

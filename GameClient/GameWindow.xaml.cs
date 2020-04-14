@@ -1955,6 +1955,7 @@ namespace GameClient
                 {
                     // Send the rent request to the selected player.
                     rentees = new List<Player>() { dialog.SelectedPlayer };
+                    this.GameEventLog.PublishPlayTargetedCardEvent(this.Player, dialog.SelectedPlayer, rentCard);
                 }
                 else
                 {
@@ -1969,6 +1970,8 @@ namespace GameClient
 
                 // Send a rent request to all players except for the renter.
                 rentees = new List<Player>(this.PlayerList.Where(player => player.Name != this.Player.Name));
+
+                this.GameEventLog.PublishPlayCardEvent(this.Player, rentCard);
             }
 
             // Discard the action card and send the message to the server.
@@ -1977,7 +1980,6 @@ namespace GameClient
             this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled);
             ServerUtilities.SendMessage(Client, Datatype.RequestRent, this.LastRentRequest);
             this.SendPlaySoundRequestForCard(rentCard);
-            this.GameEventLog.PublishPlayCardEvent(this.Player, rentCard);
 
             if ( rentDoubled )
             {
