@@ -582,10 +582,10 @@ namespace GameClient
             if (ClientUtilities.DetermineIfPlayerHasWon(this.Player))
             {
                 this.EndTurnButton.IsEnabled = false;
-
                 this.GameEventLog.PublishPlayerWonEvent(this.Player);
-                MessageBox.Show("You won!", "Congratulations!", MessageBoxButton.OK, MessageBoxImage.None);
+                ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, ClientResourceList.UriPathWinningMusic);
 
+                MessageBox.Show("You won!", "Congratulations!", MessageBoxButton.OK, MessageBoxImage.None);
                 return;
             }
 

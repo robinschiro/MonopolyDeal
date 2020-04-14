@@ -257,5 +257,14 @@ namespace GameClient.Properties {
                 return ResourceManager.GetString("UriPathTurnDing", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/WinningMusic.wav.
+        /// </summary>
+        public static string UriPathWinningMusic {
+            get {
+                return ResourceManager.GetString("UriPathWinningMusic", resourceCulture);
+            }
+        }
     }
 }
