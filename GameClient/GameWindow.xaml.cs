@@ -578,6 +578,17 @@ namespace GameClient
         // End the player's turn.
         private void EndTurnButton_Click( object sender, RoutedEventArgs e )
         {
+            // Check if player has won. If so, show message box and disable End Turn button.
+            if (ClientUtilities.DetermineIfPlayerHasWon(this.Player))
+            {
+                this.EndTurnButton.IsEnabled = false;
+
+                this.GameEventLog.PublishPlayerWonEvent(this.Player);
+                MessageBox.Show("You won!", "Congratulations!", MessageBoxButton.OK, MessageBoxImage.None);
+
+                return;
+            }
+
             // Do not let player end turn if have more than 7 cards in hand.
             if ( this.Player.CardsInHand.Count > 7 )
             {

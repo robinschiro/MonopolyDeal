@@ -131,7 +131,9 @@ namespace GameClient
 
         public void PublishPlayerWonEvent( Player winner )
         {
-            throw new NotImplementedException();
+            string eventLine = $"{winner.Name} has won the game!";
+
+            this.PublishEvent(eventLine);
         }
 
         private void PublishEvent( string eventLogline )

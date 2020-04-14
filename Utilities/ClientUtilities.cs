@@ -109,6 +109,8 @@ namespace Utilities
                                     }},
         };
 
+        private static int NumberMonopoliesRequiredToWin = 3;
+
         private static SoundPlayer UtilitySoundPlayer = new SoundPlayer();
 
         #endregion
@@ -287,6 +289,12 @@ namespace Utilities
         {
             string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), settingsPath);
             return new tvProfile(settingsFilePath, tvProfileFileCreateActions.NoPromptCreateFile, abUseXmlFiles: true);
+        }
+
+        public static bool DetermineIfPlayerHasWon( Player player )
+        {
+            int numberOfMonopolies = player.CardsInPlay.Count(cardList => IsCardListMonopoly(cardList));
+            return numberOfMonopolies >= NumberMonopoliesRequiredToWin;
         }
 
         #endregion
