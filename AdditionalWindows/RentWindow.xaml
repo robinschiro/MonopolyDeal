@@ -30,14 +30,28 @@
                Grid.Column="1"
                Grid.Row="0"/>
 
-        <Button Name="PayButton" 
+        <Grid Grid.Column="3"
+              Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Name="PayButton" 
                 Content="Pay Rent" 
                 IsEnabled="False"
                 Click="PayButton_Click"
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center"
-                Grid.Column="3"
-                Grid.Row="0"/>
+                Grid.Column="0"/>
+
+            <Button Name="JustSayNoButton" 
+                Content="Use 'Just Say No!'" 
+                IsEnabled="False"
+                Click="JustSayNoButton_Click"
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center"
+                Grid.Column="1"/>
+        </Grid>        
 
         <Label Content="Assets" 
                HorizontalAlignment="Center" 
