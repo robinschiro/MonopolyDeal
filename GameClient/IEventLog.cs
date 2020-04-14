@@ -11,6 +11,7 @@ namespace GameClient
         #region Card Events
 
         void PublishPlayCardEvent( Player player, Card card );
+        void PublishPlayTargetedCardEvent( Player player, Player target, Card card );
         void PublishDiscardEvent( Player player, Card card );
         void PublishJustSayNoEvent( Player playerSayingNo );
         void PublishPayRentEvent( Player renter, Player rentee, List<Card> assetsPaid );

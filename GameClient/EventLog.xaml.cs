@@ -72,6 +72,13 @@ namespace GameClient
             this.PublishEvent(eventLine);
         }
 
+        public void PublishPlayTargetedCardEvent( Player player, Player target, Card card )
+        {
+            string eventLine = $"{player.Name} played [{card.CardID}] against {target.Name}";
+
+            this.PublishEvent(eventLine);
+        }
+
         public void PublishDiscardEvent( Player player, Card card )
         {
             string eventLine = $"{player.Name} discarded [{card.CardID}]";
@@ -124,7 +131,9 @@ namespace GameClient
 
         public void PublishPlayerWonEvent( Player winner )
         {
-            throw new NotImplementedException();
+            string eventLine = $"{winner.Name} has won the game!";
+
+            this.PublishEvent(eventLine);
         }
 
         private void PublishEvent( string eventLogline )

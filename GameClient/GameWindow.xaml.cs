@@ -578,6 +578,17 @@ namespace GameClient
         // End the player's turn.
         private void EndTurnButton_Click( object sender, RoutedEventArgs e )
         {
+            // Check if player has won. If so, show message box and disable End Turn button.
+            if (ClientUtilities.DetermineIfPlayerHasWon(this.Player))
+            {
+                this.EndTurnButton.IsEnabled = false;
+                this.GameEventLog.PublishPlayerWonEvent(this.Player);
+                ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, ClientResourceList.UriPathWinningMusic);
+
+                MessageBox.Show("You won!", "Congratulations!", MessageBoxButton.OK, MessageBoxImage.None);
+                return;
+            }
+
             // Do not let player end turn if have more than 7 cards in hand.
             if ( this.Player.CardsInHand.Count > 7 )
             {
@@ -1955,6 +1966,7 @@ namespace GameClient
                 {
                     // Send the rent request to the selected player.
                     rentees = new List<Player>() { dialog.SelectedPlayer };
+                    this.GameEventLog.PublishPlayTargetedCardEvent(this.Player, dialog.SelectedPlayer, rentCard);
                 }
                 else
                 {
@@ -1969,6 +1981,8 @@ namespace GameClient
 
                 // Send a rent request to all players except for the renter.
                 rentees = new List<Player>(this.PlayerList.Where(player => player.Name != this.Player.Name));
+
+                this.GameEventLog.PublishPlayCardEvent(this.Player, rentCard);
             }
 
             // Discard the action card and send the message to the server.
@@ -1977,7 +1991,6 @@ namespace GameClient
             this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled);
             ServerUtilities.SendMessage(Client, Datatype.RequestRent, this.LastRentRequest);
             this.SendPlaySoundRequestForCard(rentCard);
-            this.GameEventLog.PublishPlayCardEvent(this.Player, rentCard);
 
             if ( rentDoubled )
             {
