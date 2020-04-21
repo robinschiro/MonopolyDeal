@@ -30,6 +30,8 @@ namespace GameServer
         static List<Player> PlayerList;
         static Turn Turn;
         static List<Card> DiscardPile;
+        static bool HasGameBeenLaunched = false;
+        static int NumberOfPlayersConnectedAfterLaunch = 0;
 
         [STAThread]
         static void Main( string[] args )
@@ -110,11 +112,20 @@ namespace GameServer
                             {
                                 Console.WriteLine("Incoming LOGIN");
 
-                                // Approve clients connection ( Its sort of agreenment. "You can be my client and i will host you" )
-                                inc.SenderConnection.Approve();
-
-                                // Debug
-                                Console.WriteLine("Approved new connection.");
+                                if ( !HasGameBeenLaunched || NumberOfPlayersConnectedAfterLaunch < PlayerList.Count )
+                                {
+                                    if (HasGameBeenLaunched)
+                                    {
+                                        NumberOfPlayersConnectedAfterLaunch++;
+                                    }
+                                    inc.SenderConnection.Approve();
+                                    Console.WriteLine("Approved new connection.");
+                                }
+                                else
+                                {
+                                    inc.SenderConnection.Deny();
+                                    Console.WriteLine("Rejected new connection. Game has already started and all players have connected.");
+                                }
                             }
 
                             break;
@@ -201,6 +212,8 @@ namespace GameServer
                                 // Set up the players for the game. This case should be hit only when a client launches the game.
                                 case Datatype.LaunchGame:
                                 {
+                                    HasGameBeenLaunched = true;
+
                                     // Deal the initial hands to the players.
                                     for ( int i = 0; i < PlayerList.Count; ++i )
                                     {
