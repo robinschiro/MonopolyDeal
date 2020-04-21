@@ -88,31 +88,34 @@ namespace GameClient
                 WaitMessage.ShowDialog();  
             }
 
-            // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
-            WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for player list...", isModal: false);
-
-            // Receive a list of the players already on the server.
-            ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
-
-            // Do not continue until the client receives the Player List from the server.
-            WaitMessage.ShowDialog();
-
-            // If the PlayerList is still null, the player must have closed the window manually.
-            if ( null == this.PlayerList )
+            if (this.BeginCommunication)
             {
-                this.ShowWindow = false;
-            }
-            else
-            {
-                // Verify that the value of 'playerName' does not exist in the list of Player names.
-                // If it does, modify the name so that it no longer matches one on the list.
-                this.PlayerName = VerifyPlayerName(this.PlayerName);
+                // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
+                WaitMessage = new MessageDialog(this, ResourceList.PleaseWaitWindowTitle, "Waiting for player list...", isModal: false);
 
-                // Instantiate the player.
-                this.Player = new Player(this.PlayerName);
+                // Receive a list of the players already on the server.
+                ServerUtilities.SendMessage(Client, Datatype.RequestPlayerList);
 
-                // Send the player's information to the server.
-                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                // Do not continue until the client receives the Player List from the server.
+                WaitMessage.ShowDialog();
+
+                // If the PlayerList is still null, the player must have closed the window manually.
+                if (null == this.PlayerList)
+                {
+                    this.ShowWindow = false;
+                }
+                else
+                {
+                    // Verify that the value of 'playerName' does not exist in the list of Player names.
+                    // If it does, modify the name so that it no longer matches one on the list.
+                    this.PlayerName = VerifyPlayerName(this.PlayerName);
+
+                    // Instantiate the player.
+                    this.Player = new Player(this.PlayerName);
+
+                    // Send the player's information to the server.
+                    ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+                }
             }
         }
 
@@ -162,13 +165,18 @@ namespace GameClient
                     {
                         if ( inc.MessageType == NetIncomingMessageType.StatusChanged )
                         {
-                            this.BeginCommunication = true;
-                            UpdateReceived = true;
+                            this.BeginCommunication = NetConnectionStatus.Disconnected != inc.SenderConnection.Status;
+                            this.UpdateReceived = true;
 
                             // Close the wait message if it is open.
                             if ( null != WaitMessage && !WaitMessage.CloseWindow )
                             {
                                 CreateNewThread(new Action<Object>(( sender ) => { WaitMessage.CloseWindow = true; }));
+                            }
+
+                            if (!this.BeginCommunication)
+                            {
+                                CreateNewThread(new Action<object>(sender => this.CloseLobby()));
                             }
                         }
 
@@ -253,6 +261,13 @@ namespace GameClient
 
             GameWindow gameWindow = new GameWindow(this.Player.Name, this.ServerIP, this.PortNumber, this.Turn);
             gameWindow.Show();
+            this.DialogResult = true;
+            this.Close();
+        }
+
+        private void CloseLobby()
+        {
+            MessageBox.Show("You cannot join this game because it has already started.", "Cannot Join Game", MessageBoxButton.OK, MessageBoxImage.Error);
             this.Close();
         }
 

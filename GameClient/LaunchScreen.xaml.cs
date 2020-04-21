@@ -55,9 +55,11 @@ namespace GameClient
             RoomWindow roomWindow = new RoomWindow(IPAddressTextBox.Text, portNumber, PlayerNameTextBox.Text);
             if ( roomWindow.ShowWindow )
             {
-                roomWindow.Show();
+                if (true == roomWindow.ShowDialog())
+                {
+                    this.Close();
+                }
             }
-            this.Close();
         }
 
         #region Events
