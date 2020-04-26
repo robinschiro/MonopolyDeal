@@ -15,7 +15,7 @@ namespace GameClient.Tests
         [TestMethod]
         public void DisplayEvent_AnyString_AddsToEventLogList()
         {
-            EventLog eventLog = new EventLog(new List<Card>());
+            EventLog eventLog = new EventLog(new Dictionary<int, Card>());
 
             eventLog.DisplayEvent(string.Empty);
             EventLogItem result = eventLog.EventList.FirstOrDefault();
@@ -26,11 +26,11 @@ namespace GameClient.Tests
         [TestMethod]        
         public void DisplayEvent_GivenStringWithMixOfTagsAndNonTags_CreatesValidEventLogItem()
         {
-            EventLog eventLog = new EventLog(new List<Card>()
+            EventLog eventLog = new EventLog(new Dictionary<int, Card>()
             {
-                new Card() { CardID = 1, Name = "TestCard1" },
-                new Card() { CardID = 23, Name = "TestCard23" },
-                new Card() { CardID = 0, Name = "TestCard0" }
+                {1, new Card() { Name = "TestCard1" } },
+                {23, new Card() { Name = "TestCard23" } },
+                {0, new Card() { Name = "TestCard0" } }
             });
 
             string serializedEvent = "Player A traded [1] for property [23] from Player B, and [0] too!";
@@ -53,11 +53,11 @@ namespace GameClient.Tests
         [TestMethod]
         public void DisplayEvent_GivenStringWithOnlyTags_CreatesValidEventLogItem()
         {
-            EventLog eventLog = new EventLog(new List<Card>()
+            EventLog eventLog = new EventLog(new Dictionary<int, Card>()
             {
-                new Card() { CardID = 1, Name = "TestCard1" },
-                new Card() { CardID = 23, Name = "TestCard23" },
-                new Card() { CardID = 0, Name = "TestCard0" }
+                {1, new Card() { Name = "TestCard1" } },
+                {23, new Card() { Name = "TestCard23" } },
+                {0, new Card() { Name = "TestCard0" } }
             });
 
             string serializedEvent = "[1][23][0]";
@@ -76,7 +76,7 @@ namespace GameClient.Tests
         [TestMethod]
         public void DisplayEvent_GivenStringWithNoTags_CreatesValidEventLogItem()
         {
-            EventLog eventLog = new EventLog(new List<Card>());
+            EventLog eventLog = new EventLog(new Dictionary<int, Card>());
 
             string serializedEvent = "Event with no tags";
 

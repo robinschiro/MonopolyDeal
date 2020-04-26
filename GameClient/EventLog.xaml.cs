@@ -48,11 +48,11 @@ namespace GameClient
         };
 
         private NetClient netClient;
-        private List<Card> allCards;
+        private Dictionary<int, Card> allCards;
 
         public ObservableCollection<EventLogItem> EventList { get; set; }
 
-        public EventLog( List<Card> allCards )
+        public EventLog(Dictionary<int, Card> allCards )
         {
             InitializeComponent();
             this.DataContext = this;
@@ -60,7 +60,7 @@ namespace GameClient
             this.allCards = allCards;
         }
 
-        public EventLog(NetClient netClient, List<Card> allCards) : this(allCards)
+        public EventLog(NetClient netClient, Dictionary<int, Card> allCards) : this(allCards)
         {
             this.netClient = netClient;
         }
@@ -168,10 +168,12 @@ namespace GameClient
                     }
                     case ']':
                     {
-                        int cardId = -1;
-                        if ( currentPiece.Length > 0 && int.TryParse(currentPiece.ToString(), out cardId))
+                        int cardId;
+                        if ( currentPiece.Length > 0 && 
+                             int.TryParse(currentPiece.ToString(), out cardId) && 
+                             this.allCards.ContainsKey(cardId))
                         {
-                            Card card = this.allCards.Where(c => c.CardID == cardId).FirstOrDefault();
+                            Card card = this.allCards[cardId];
                             DrawingImage cardImageSource = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
                             var cardGraphic = new TextBlock()
                             {
