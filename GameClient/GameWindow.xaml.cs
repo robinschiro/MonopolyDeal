@@ -236,7 +236,7 @@ namespace GameClient
             }
 
             // Because this call automatically draws cards for the player, it must occur after the player's cardsInHand have been placed on the grid.
-            CheckIfCurrentTurnOwner(shouldNotifyUserObject: false);
+            CheckAndDrawIfCurrentTurnOwner(shouldNotifyUserObject: false);
 
             // Enable Reactive Extensions (taken from http://goo.gl/0Jr5WU) in order to perform Size_Changed responses at the end of a chain of resizing events
             // (instead performing a Size_Changed response for every resize event). This is used to improve efficiency.
@@ -446,11 +446,11 @@ namespace GameClient
                         {
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            // Check to see if the player is the current turn owner. 
-                            CreateNewThread(new Action<Object>(CheckIfCurrentTurnOwner), true);
+                                // Update the turn display.
+                                CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
 
-                            // Update the turn display.
-                            CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
+                                // Check to see if the player is the current turn owner. 
+                                CreateNewThread(new Action<Object>(CheckAndDrawIfCurrentTurnOwner), true);
 
                             break;
                         }
@@ -790,7 +790,7 @@ namespace GameClient
         }
 
         // Update the value of the IsCurrentTurnOwner boolean.
-        public void CheckIfCurrentTurnOwner( Object shouldNotifyUserObject )
+        public void CheckAndDrawIfCurrentTurnOwner( Object shouldNotifyUserObject )
         {
             bool shouldNotifyUser = (bool) shouldNotifyUserObject; 
             if ( this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name) )
@@ -1672,6 +1672,7 @@ namespace GameClient
                     {
                         if ( this.DiscardPile.Count != 0 )
                         {
+                            this.GameEventLog.PublishDeckEmptyEvent(discardPileReshuffled: true);
                             this.Deck = Deck.CreateDeckFromDiscardPile(this.DiscardPile, this.AllCardsDictionary);
                             this.DiscardPile = new List<Card>();
 
@@ -1679,7 +1680,7 @@ namespace GameClient
                         }
                         else
                         {
-                            // ROBIN TODO: Should send a Game Over message to players because there are no cards to draw.
+                            this.GameEventLog.PublishDeckEmptyEvent(discardPileReshuffled: false);
                             return;
                         }
                     }
@@ -1736,12 +1737,11 @@ namespace GameClient
         {
             if ( CardType.Action == actionCard.Type )
             {
-                if ( 0 == actionCard.ActionID )
+                if ( ActionId.PassGo == (ActionId)actionCard.ActionID )
                 {
-                    // "Pass Go" case.
+                    this.GameEventLog.PublishPlayCardEvent(this.Player, actionCard);
                     DrawCards(2);
                     DiscardCard(actionCard);
-                    this.GameEventLog.PublishPlayCardEvent(this.Player, actionCard);
 
                     return true;
                 }

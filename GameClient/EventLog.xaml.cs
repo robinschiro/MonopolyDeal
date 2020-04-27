@@ -136,6 +136,15 @@ namespace GameClient
             this.PublishEvent(eventLine);
         }
 
+        public void PublishDeckEmptyEvent(bool discardPileReshuffled)
+        {
+            string eventLine = "The deck has run out of cards! " + (discardPileReshuffled 
+                ? "All cards in the discard pile will be shuffled and used as the deck." 
+                : "No cards will be reshuffled because the discard pile is empty.");
+
+            this.PublishEvent(eventLine);
+        }
+
         private void PublishEvent( string eventLogline )
         {
             ServerUtilities.SendMessage(this.netClient, Datatype.GameEvent, eventLogline);
