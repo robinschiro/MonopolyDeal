@@ -48,11 +48,11 @@ namespace GameClient
         };
 
         private NetClient netClient;
-        private List<Card> allCards;
+        private Dictionary<int, Card> allCards;
 
         public ObservableCollection<EventLogItem> EventList { get; set; }
 
-        public EventLog( List<Card> allCards )
+        public EventLog(Dictionary<int, Card> allCards )
         {
             InitializeComponent();
             this.DataContext = this;
@@ -60,7 +60,7 @@ namespace GameClient
             this.allCards = allCards;
         }
 
-        public EventLog(NetClient netClient, List<Card> allCards) : this(allCards)
+        public EventLog(NetClient netClient, Dictionary<int, Card> allCards) : this(allCards)
         {
             this.netClient = netClient;
         }
@@ -136,6 +136,15 @@ namespace GameClient
             this.PublishEvent(eventLine);
         }
 
+        public void PublishDeckEmptyEvent(bool discardPileReshuffled)
+        {
+            string eventLine = "The deck has run out of cards! " + (discardPileReshuffled 
+                ? "All cards in the discard pile will be shuffled and used as the deck." 
+                : "No cards will be reshuffled because the discard pile is empty.");
+
+            this.PublishEvent(eventLine);
+        }
+
         private void PublishEvent( string eventLogline )
         {
             ServerUtilities.SendMessage(this.netClient, Datatype.GameEvent, eventLogline);
@@ -168,10 +177,12 @@ namespace GameClient
                     }
                     case ']':
                     {
-                        int cardId = -1;
-                        if ( currentPiece.Length > 0 && int.TryParse(currentPiece.ToString(), out cardId))
+                        int cardId;
+                        if ( currentPiece.Length > 0 && 
+                             int.TryParse(currentPiece.ToString(), out cardId) && 
+                             this.allCards.ContainsKey(cardId))
                         {
-                            Card card = this.allCards.Where(c => c.CardID == cardId).FirstOrDefault();
+                            Card card = this.allCards[cardId];
                             DrawingImage cardImageSource = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
                             var cardGraphic = new TextBlock()
                             {
@@ -204,9 +215,11 @@ namespace GameClient
                 eventTextBlock.Inlines.Add(new Run(currentPiece.ToString()));
             }
 
-            // Prepend timestamp.
-            string timestamp = $"[{DateTime.Now.ToString("h:mm:ss tt")}] ";
-            eventTextBlock.Inlines.InsertBefore(eventTextBlock.Inlines.ElementAt(0), new Run(timestamp));
+            if (eventTextBlock.Inlines.Count > 0)
+            {
+                string timestamp = $"[{DateTime.Now:h:mm:ss tt}] ";
+                eventTextBlock.Inlines.InsertBefore(eventTextBlock.Inlines.ElementAt(0), new Run(timestamp));
+            }
 
             return new EventLogItem() { Content = eventTextBlock };
         }

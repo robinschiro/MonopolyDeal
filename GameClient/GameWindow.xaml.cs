@@ -47,6 +47,7 @@ namespace GameClient
         private Dictionary<String, FrameworkElement> PlayerHandCountDictionary;
         private bool HavePlayersBeenAssigned;
         private Turn Turn;
+        private readonly Dictionary<int, Card> AllCardsDictionary;
         private List<Card> DiscardPile;
         private ColorAnimation EndTurnButtonAnimation;
         private EventLog GameEventLog;
@@ -154,26 +155,19 @@ namespace GameClient
             }
 
             // Request the deck and wait for it before continuing.
-            {
-                // Create a Wait dialog to stop the creation of the room window until the player list is retrieved from the server.
-                WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for deck...");
-
-                // Receive a list of the players already on the server.
-                ServerUtilities.SendMessage(Client, Datatype.RequestDeck);
-
-                // Do not continue until the client receives the Player List from the server.
-                WaitMessage.ShowDialog();
-            }
+            ServerUtilities.SendMessage(Client, Datatype.RequestDeck);
+            WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for deck...");
+            WaitMessage.ShowDialog();
 
             // Initialize the event log with access to the network client object.
-            List<Card> allCards = new List<Card>();
-            allCards.AddRange(this.Deck.CardList);
+            List<Card> allCardsList = new List<Card>(this.Deck.CardList);
             foreach (Player player in this.PlayerList)
             {
-                allCards.AddRange(player.CardsInHand);
+                allCardsList.AddRange(player.CardsInHand);
             }
+            this.AllCardsDictionary = allCardsList.ToDictionary(card => card.CardID);
 
-            this.GameEventLog = new EventLog(this.Client, allCards);
+            this.GameEventLog = new EventLog(this.Client, this.AllCardsDictionary);
             this.GameEventLogBorder.Child = this.GameEventLog;
 
 
@@ -242,7 +236,7 @@ namespace GameClient
             }
 
             // Because this call automatically draws cards for the player, it must occur after the player's cardsInHand have been placed on the grid.
-            CheckIfCurrentTurnOwner(shouldNotifyUserObject: false);
+            CheckAndDrawIfCurrentTurnOwner(shouldNotifyUserObject: false);
 
             // Enable Reactive Extensions (taken from http://goo.gl/0Jr5WU) in order to perform Size_Changed responses at the end of a chain of resizing events
             // (instead performing a Size_Changed response for every resize event). This is used to improve efficiency.
@@ -296,8 +290,7 @@ namespace GameClient
             Client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage));
         }
 
-        // Update the client's window based on messages received from the server. This method is called as soon as the client
-        // receives a message.
+        // Update the client's window based on messages received from the server. This method is called as soon as the client receives a message.
         public void GotMessage( object peer )
         {
             NetIncomingMessage inc;
@@ -346,7 +339,7 @@ namespace GameClient
                         {
                             this.Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            // Close the wait message if it is open and we have not received the player list yet.
+                            // Close the wait message if it is open and we have not received the deck yet.
                             if ( !this.ReceivedDeck && null != this.WaitMessage && !this.WaitMessage.CloseWindow )
                             {
                                 this.ReceivedDeck = true;
@@ -453,11 +446,11 @@ namespace GameClient
                         {
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            // Check to see if the player is the current turn owner. 
-                            CreateNewThread(new Action<Object>(CheckIfCurrentTurnOwner), true);
+                                // Update the turn display.
+                                CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
 
-                            // Update the turn display.
-                            CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
+                                // Check to see if the player is the current turn owner. 
+                                CreateNewThread(new Action<Object>(CheckAndDrawIfCurrentTurnOwner), true);
 
                             break;
                         }
@@ -797,7 +790,7 @@ namespace GameClient
         }
 
         // Update the value of the IsCurrentTurnOwner boolean.
-        public void CheckIfCurrentTurnOwner( Object shouldNotifyUserObject )
+        public void CheckAndDrawIfCurrentTurnOwner( Object shouldNotifyUserObject )
         {
             bool shouldNotifyUser = (bool) shouldNotifyUserObject; 
             if ( this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name) )
@@ -1679,14 +1672,15 @@ namespace GameClient
                     {
                         if ( this.DiscardPile.Count != 0 )
                         {
-                            this.Deck = new Deck(DiscardPile, true);
+                            this.GameEventLog.PublishDeckEmptyEvent(discardPileReshuffled: true);
+                            this.Deck = Deck.CreateDeckFromDiscardPile(this.DiscardPile, this.AllCardsDictionary);
                             this.DiscardPile = new List<Card>();
 
                             ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, this.DiscardPile);
                         }
                         else
                         {
-                            // ROBIN TODO: Should send a Game Over message to players because there are no cards to draw.
+                            this.GameEventLog.PublishDeckEmptyEvent(discardPileReshuffled: false);
                             return;
                         }
                     }
@@ -1743,12 +1737,11 @@ namespace GameClient
         {
             if ( CardType.Action == actionCard.Type )
             {
-                if ( 0 == actionCard.ActionID )
+                if ( ActionId.PassGo == (ActionId)actionCard.ActionID )
                 {
-                    // "Pass Go" case.
+                    this.GameEventLog.PublishPlayCardEvent(this.Player, actionCard);
                     DrawCards(2);
                     DiscardCard(actionCard);
-                    this.GameEventLog.PublishPlayCardEvent(this.Player, actionCard);
 
                     return true;
                 }
