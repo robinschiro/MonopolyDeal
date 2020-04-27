@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using GameClient;
 using GameObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -40,14 +38,14 @@ namespace GameClient.Tests
 
             InlineCollection inlines = (result.Content as TextBlock).Inlines;
 
-            Assert.AreEqual(7, inlines.Count);
-            Assert.IsTrue(inlines.ElementAt(0).GetType() == typeof(Run));
-            Assert.IsTrue(inlines.ElementAt(1).GetType() == typeof(InlineUIContainer));
-            Assert.IsTrue(inlines.ElementAt(2).GetType() == typeof(Run));
-            Assert.IsTrue(inlines.ElementAt(3).GetType() == typeof(InlineUIContainer));
-            Assert.IsTrue(inlines.ElementAt(4).GetType() == typeof(Run));
-            Assert.IsTrue(inlines.ElementAt(5).GetType() == typeof(InlineUIContainer));
-            Assert.IsTrue(inlines.ElementAt(6).GetType() == typeof(Run));
+            Assert.IsTrue(inlines.Count >= 7);
+            Assert.IsTrue(inlines.ElementAt(1).GetType() == typeof(Run));
+            Assert.IsTrue(inlines.ElementAt(2).GetType() == typeof(InlineUIContainer));
+            Assert.IsTrue(inlines.ElementAt(3).GetType() == typeof(Run));
+            Assert.IsTrue(inlines.ElementAt(4).GetType() == typeof(InlineUIContainer));
+            Assert.IsTrue(inlines.ElementAt(5).GetType() == typeof(Run));
+            Assert.IsTrue(inlines.ElementAt(6).GetType() == typeof(InlineUIContainer));
+            Assert.IsTrue(inlines.ElementAt(7).GetType() == typeof(Run));
         }
 
         [TestMethod]
@@ -67,10 +65,10 @@ namespace GameClient.Tests
 
             InlineCollection inlines = (result.Content as TextBlock).Inlines;
 
-            Assert.AreEqual(3, inlines.Count);
-            Assert.IsTrue(inlines.ElementAt(0).GetType() == typeof(InlineUIContainer));
+            Assert.IsTrue(inlines.Count >= 3);
             Assert.IsTrue(inlines.ElementAt(1).GetType() == typeof(InlineUIContainer));
             Assert.IsTrue(inlines.ElementAt(2).GetType() == typeof(InlineUIContainer));
+            Assert.IsTrue(inlines.ElementAt(3).GetType() == typeof(InlineUIContainer));
         }
 
         [TestMethod]
@@ -85,7 +83,23 @@ namespace GameClient.Tests
 
             InlineCollection inlines = (result.Content as TextBlock).Inlines;
 
-            Assert.AreEqual(1, inlines.Count);
+            Assert.IsTrue(inlines.Count >= 1);
+            Assert.IsTrue(inlines.ElementAt(1).GetType() == typeof(Run));
+        }
+
+        [TestMethod]
+        public void DisplayEvent_GivenAnyNonEmptyString_PrependsTimeStamp()
+        {
+            EventLog eventLog = new EventLog(new List<Card>());
+
+            string serializedEvent = "Any event";
+
+            eventLog.DisplayEvent(serializedEvent);
+            EventLogItem result = eventLog.EventList.FirstOrDefault();
+
+            InlineCollection inlines = (result.Content as TextBlock).Inlines;
+
+            Assert.IsTrue(inlines.Count >= 2);
             Assert.IsTrue(inlines.ElementAt(0).GetType() == typeof(Run));
         }
     }

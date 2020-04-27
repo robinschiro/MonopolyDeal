@@ -206,9 +206,11 @@ namespace GameClient
                 eventTextBlock.Inlines.Add(new Run(currentPiece.ToString()));
             }
 
-            // Prepend timestamp.
-            string timestamp = $"[{DateTime.Now.ToString("h:mm:ss tt")}] ";
-            eventTextBlock.Inlines.InsertBefore(eventTextBlock.Inlines.ElementAt(0), new Run(timestamp));
+            if (eventTextBlock.Inlines.Count > 0)
+            {
+                string timestamp = $"[{DateTime.Now:h:mm:ss tt}] ";
+                eventTextBlock.Inlines.InsertBefore(eventTextBlock.Inlines.ElementAt(0), new Run(timestamp));
+            }
 
             return new EventLogItem() { Content = eventTextBlock };
         }
