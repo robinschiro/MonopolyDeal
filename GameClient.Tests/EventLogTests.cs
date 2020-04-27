@@ -90,7 +90,7 @@ namespace GameClient.Tests
         [TestMethod]
         public void DisplayEvent_GivenAnyNonEmptyString_PrependsTimeStamp()
         {
-            EventLog eventLog = new EventLog(new List<Card>());
+            EventLog eventLog = new EventLog(new Dictionary<int, Card>());
 
             string serializedEvent = "Any event";
 
