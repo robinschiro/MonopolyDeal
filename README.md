@@ -1,6 +1,8 @@
 # MonopolyDeal
 Welcome to Monopoly Deal! This is a digital recreation of America's favorite version of America's most-hated board game.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/0a26o51ugctxmfex/branch/master?svg=true)](https://ci.appveyor.com/project/robinschiro/monopolydeal/branch/master)
+
 ## Prerequisites
 You will need to be running Windows 7+ with the .NET Framework 4.0+ installed. You can install this version of the .NET Framework [here](https://www.microsoft.com/en-us/download/confirmation.aspx?id=17851).
 
