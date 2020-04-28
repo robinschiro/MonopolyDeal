@@ -14,7 +14,7 @@ To install the latest release of Monopoly Deal, follow [this link](https://githu
 Once you have installed the game, you should see a shortcut called 'MonopolyDeal' on your desktop. Open it to start to playing! It will allow you to join a server you created or a friend's server.
 
 ### Running the server
-If you would like to host your own game server, you can do so by running the 'GameServer.exe' file that is located in the MonopolyDeal installation folder. This executable will create a server on your machine that will allow you and your friends to play together. You will need to set up port forwarding to local port 14242 to allow connections to your server.
+If you would like to host your own game server, you can do so by running the 'GameServer.exe' file that is located in the MonopolyDeal installation folder. This executable will create a server on your machine that will allow you and your friends to play together. You will need to set up port forwarding to whichever port you choose (port 14242 is suggested by default) to allow connections to your server.
 
 ## Building the code
 To build the installer, you will need the WIX toolset. You can install it [here](https://wixtoolset.org/releases/).
