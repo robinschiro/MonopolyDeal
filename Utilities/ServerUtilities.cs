@@ -23,7 +23,10 @@ namespace GameServer
 
             StreamResourceInfo stream = Application.GetResourceStream(new Uri(GameObjectsResourceList.UriPathEmbeddedServerSettings, UriKind.Absolute));
             StreamReader reader = new StreamReader(stream.Stream);
-            return new tvProfile(reader.ReadToEnd());
+            string streamContents = reader.ReadToEnd();
+            Console.WriteLine($"Contents of embedded Deck profile file: {streamContents}");
+
+            return new tvProfile(streamContents);
         }
 
         // Receive an update from either a client or the server, depending on where this method is called.

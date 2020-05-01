@@ -48,6 +48,7 @@ namespace GameObjects
 
             if (null == profile)
             {
+                Console.WriteLine("Deck profile file is null");
                 return cardList;
             }
 
@@ -93,6 +94,8 @@ namespace GameObjects
             }
 
             Shuffle(cardList);
+
+            Console.WriteLine($"Number of cards parsed: {cardList.Count}");
 
             return cardList;
         }

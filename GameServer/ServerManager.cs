@@ -39,11 +39,13 @@ namespace GameServer
             // Attempt to load the game configuration from a config file.
             if ( File.Exists(GameObjectsResourceList.FilePathLocalServerSettings))
             {
+                Console.WriteLine("Deck Profile file exists, reading from local file");
                 Profile = new tvProfile(GameObjectsResourceList.FilePathLocalServerSettings, false);
             }
             // If it doesn't exist locally, use the embedded one.
             else
             {
+                Console.WriteLine("Deck Profile file does not exist, reading from embedded file");
                 Profile = ServerUtilities.GetEmbeddedServerSettings();
             }
 
@@ -98,258 +100,266 @@ namespace GameServer
             // Or maybe it could be while(new messages)
             while ( true )
             {
-                // Server.ReadMessage() Returns new messages, that have not yet been read.
-                // If "inc" is null -> ReadMessage returned null -> Its null, so dont do this :)
-                if ( (inc = Server.ReadMessage()) != null )
+                try
                 {
-                    // Theres few different types of messages. To simplify this process, i left only 2 of em here
-                    switch ( inc.MessageType )
+                    // Server.ReadMessage() Returns new messages, that have not yet been read.
+                    // If "inc" is null -> ReadMessage returned null -> Its null, so dont do this :)
+                    if ((inc = Server.ReadMessage()) != null)
                     {
-                        // If incoming message is Request for connection approval
-                        // This is the very first packet/message that is sent from client
-                        // Here you can do new player initialisation stuff
-                        case NetIncomingMessageType.ConnectionApproval:
+                        // Theres few different types of messages. To simplify this process, i left only 2 of em here
+                        switch (inc.MessageType)
                         {
-                            // Read the first byte of the packet
-                            // ( Enums can be casted to bytes, so it be used to make bytes human readable )
-                            if ( inc.ReadByte() == (byte)PacketTypes.LOGIN )
-                            {
-                                Console.WriteLine("Incoming LOGIN");
-
-                                if ( !HasGameBeenLaunched || NumberOfPlayersConnectedAfterLaunch < PlayerList.Count )
+                            // If incoming message is Request for connection approval
+                            // This is the very first packet/message that is sent from client
+                            // Here you can do new player initialisation stuff
+                            case NetIncomingMessageType.ConnectionApproval:
                                 {
-                                    if (HasGameBeenLaunched)
+                                    // Read the first byte of the packet
+                                    // ( Enums can be casted to bytes, so it be used to make bytes human readable )
+                                    if (inc.ReadByte() == (byte)PacketTypes.LOGIN)
                                     {
-                                        NumberOfPlayersConnectedAfterLaunch++;
-                                    }
-                                    inc.SenderConnection.Approve();
-                                    Console.WriteLine("Approved new connection.");
-                                }
-                                else
-                                {
-                                    inc.SenderConnection.Deny();
-                                    Console.WriteLine("Rejected new connection. Game has already started and all players have connected.");
-                                }
-                            }
+                                        Console.WriteLine("Incoming LOGIN");
 
-                            break;
-                        }
-                        // All messages manually sent from clients are considered "Data" messages.
-                        // ( Approval is an automated process )
-                        case NetIncomingMessageType.Data:
-                        {
-                            Datatype messageType = (Datatype)inc.ReadByte();
-                            
-                            // Exclude the sender from the fanout.
-                            long idOfSender = inc.SenderConnection.RemoteUniqueIdentifier;                            
-
-                            switch ( messageType )
-                            {
-                                // Receive an updated Deck from a client.
-                                case Datatype.UpdateDeck:
-                                {
-                                    Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
-                                    ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
-
-                                    break;
-                                }
-
-                                // Receive an updated DiscardPile from a client.
-                                case Datatype.UpdateDiscardPile:
-                                {
-                                    DiscardPile = (List<Card>)ServerUtilities.ReceiveMessage(inc, messageType);
-                                    ServerUtilities.SendMessage(Server, Datatype.UpdateDiscardPile, DiscardPile);
-
-                                    break;
-                                }
-
-                                // Add or modify a player in the PlayerList.
-                                case Datatype.UpdatePlayer:
-                                {
-                                    Player updatedPlayer = (Player)ServerUtilities.ReceiveMessage(inc, messageType);
-                                    bool isPlayerInList = false;
-
-                                    // If the updated Player is already in the server's list, update that's Player's properties.
-                                    // Note: This search only works if players have unique names.
-                                    foreach ( Player player in PlayerList )
-                                    {
-                                        if ( updatedPlayer.Name == player.Name )
+                                        if (!HasGameBeenLaunched || NumberOfPlayersConnectedAfterLaunch < PlayerList.Count)
                                         {
-                                            player.CardsInHand = updatedPlayer.CardsInHand;
-                                            player.CardsInPlay = updatedPlayer.CardsInPlay;
-                                            isPlayerInList = true;
-                                            break;
+                                            if (HasGameBeenLaunched)
+                                            {
+                                                NumberOfPlayersConnectedAfterLaunch++;
+                                            }
+                                            inc.SenderConnection.Approve();
+                                            Console.WriteLine("Approved new connection.");
+                                        }
+                                        else
+                                        {
+                                            inc.SenderConnection.Deny();
+                                            Console.WriteLine("Rejected new connection. Game has already started and all players have connected.");
                                         }
                                     }
 
-                                    // If the Player is not on the list, add it.
-                                    if ( !isPlayerInList )
+                                    break;
+                                }
+                            // All messages manually sent from clients are considered "Data" messages.
+                            // ( Approval is an automated process )
+                            case NetIncomingMessageType.Data:
+                                {
+                                    Datatype messageType = (Datatype)inc.ReadByte();
+
+                                    // Exclude the sender from the fanout.
+                                    long idOfSender = inc.SenderConnection.RemoteUniqueIdentifier;
+
+                                    switch (messageType)
                                     {
-                                        Console.WriteLine($"{updatedPlayer.Name} has joined the server!");
-                                        PlayerList.Add(updatedPlayer);
+                                        // Receive an updated Deck from a client.
+                                        case Datatype.UpdateDeck:
+                                            {
+                                                Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
+                                                ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
+
+                                                break;
+                                            }
+
+                                        // Receive an updated DiscardPile from a client.
+                                        case Datatype.UpdateDiscardPile:
+                                            {
+                                                DiscardPile = (List<Card>)ServerUtilities.ReceiveMessage(inc, messageType);
+                                                ServerUtilities.SendMessage(Server, Datatype.UpdateDiscardPile, DiscardPile);
+
+                                                break;
+                                            }
+
+                                        // Add or modify a player in the PlayerList.
+                                        case Datatype.UpdatePlayer:
+                                            {
+                                                Player updatedPlayer = (Player)ServerUtilities.ReceiveMessage(inc, messageType);
+                                                bool isPlayerInList = false;
+
+                                                // If the updated Player is already in the server's list, update that's Player's properties.
+                                                // Note: This search only works if players have unique names.
+                                                foreach (Player player in PlayerList)
+                                                {
+                                                    if (updatedPlayer.Name == player.Name)
+                                                    {
+                                                        player.CardsInHand = updatedPlayer.CardsInHand;
+                                                        player.CardsInPlay = updatedPlayer.CardsInPlay;
+                                                        isPlayerInList = true;
+                                                        break;
+                                                    }
+                                                }
+
+                                                // If the Player is not on the list, add it.
+                                                if (!isPlayerInList)
+                                                {
+                                                    Console.WriteLine($"{updatedPlayer.Name} has joined the server!");
+                                                    PlayerList.Add(updatedPlayer);
+                                                }
+
+                                                // Send the updated PlayerList to all clients.                                    
+                                                ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
+
+                                                break;
+                                            }
+
+                                        // Update the server's Player List and send it to the clients.
+                                        case Datatype.UpdatePlayerList:
+                                            {
+                                                PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
+                                                ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
+
+                                                break;
+                                            }
+
+                                        // Send the updated turn to all players.
+                                        case Datatype.UpdateTurn:
+                                            {
+                                                Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
+                                                ServerUtilities.SendMessage(Server, Datatype.UpdateTurn, Turn);
+
+                                                break;
+                                            }
+
+                                        // Set up the players for the game. This case should be hit only when a client launches the game.
+                                        case Datatype.LaunchGame:
+                                            {
+                                                HasGameBeenLaunched = true;
+
+                                                // Deal the initial hands to the players.
+                                                for (int i = 0; i < PlayerList.Count; ++i)
+                                                {
+                                                    PlayerList[i] = new Player(Deck, PlayerList[i].Name);
+                                                }
+
+                                                // Generate the Turn object to keep track of the current turn.
+                                                Turn = new Turn(PlayerList.Count);
+
+                                                // Tell all clients to launch the game and send them the Turn object.
+                                                ServerUtilities.SendMessage(Server, Datatype.LaunchGame, Turn);
+
+                                                break;
+                                            }
+
+                                        case Datatype.TimeToConnect:
+                                            {
+                                                string playerToConnect = (String)ServerUtilities.ReceiveMessage(inc, messageType);
+
+                                                // Broadcast a message that tells a specific client to launch the game.
+                                                ServerUtilities.SendMessage(Server, Datatype.TimeToConnect, playerToConnect);
+
+                                                break;
+                                            }
+
+                                        case Datatype.RequestRent:
+                                            {
+                                                ActionData.RentRequest request = (ActionData.RentRequest)ServerUtilities.ReadRentRequest(inc);
+                                                ServerUtilities.SendMessage(Server, Datatype.RequestRent, request, idOfClientToExclude: idOfSender);
+
+                                                break;
+                                            }
+
+                                        case Datatype.GiveRent:
+                                            {
+                                                ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReadRentResponse(inc);
+                                                ServerUtilities.SendMessage(Server, Datatype.GiveRent, response);
+
+                                                break;
+                                            }
+
+                                        case Datatype.RequestTheft:
+                                            {
+                                                ActionData.TheftRequest request = (ActionData.TheftRequest)ServerUtilities.ReadTheftRequest(inc);
+                                                ServerUtilities.SendMessage(Server, Datatype.RequestTheft, request, idOfClientToExclude: idOfSender);
+
+                                                break;
+                                            }
+
+                                        case Datatype.ReplyToTheft:
+                                            {
+                                                ActionData.TheftResponse response = (ActionData.TheftResponse)ServerUtilities.ReadTheftResponse(inc);
+                                                ServerUtilities.SendMessage(Server, Datatype.ReplyToTheft, response, idOfClientToExclude: idOfSender);
+
+                                                break;
+                                            }
+
+                                        case Datatype.EndTurn:
+                                            {
+                                                Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.EndTurn);
+
+                                                // Send the updated Turn object to the clients.
+                                                ServerUtilities.SendMessage(Server, Datatype.EndTurn, Turn);
+
+                                                break;
+                                            }
+
+                                        // Send the server's Deck to all clients.
+                                        case Datatype.RequestDeck:
+                                            {
+                                                ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
+                                                break;
+                                            }
+
+                                        // Send the server's PlayerList to all clients.
+                                        case Datatype.RequestPlayerList:
+                                            {
+                                                ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
+                                                break;
+                                            }
+
+                                        case Datatype.PlaySound:
+                                            {
+                                                string soundPath = (string)ServerUtilities.ReceiveMessage(inc, messageType);
+                                                ServerUtilities.SendMessage(Server, Datatype.PlaySound, soundPath);
+                                                break;
+                                            }
+
+                                        case Datatype.GameEvent:
+                                            {
+                                                string serializedEvent = (string)ServerUtilities.ReceiveMessage(inc, messageType);
+                                                ServerUtilities.SendMessage(Server, Datatype.GameEvent, serializedEvent);
+                                                break;
+                                            }
                                     }
 
-                                    // Send the updated PlayerList to all clients.                                    
-                                    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
-                                    
                                     break;
                                 }
-
-                                // Update the server's Player List and send it to the clients.
-                                case Datatype.UpdatePlayerList:
+                            case NetIncomingMessageType.StatusChanged:
                                 {
-                                    PlayerList = (List<Player>)ServerUtilities.ReceiveMessage(inc, messageType);
-                                    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
+                                    // In case status changed
+                                    // It can be one of these
+                                    // NetConnectionStatus.Connected;
+                                    // NetConnectionStatus.Connecting;
+                                    // NetConnectionStatus.Disconnected;
+                                    // NetConnectionStatus.Disconnecting;
+                                    // NetConnectionStatus.None;
 
-                                    break;
-                                }
-
-                                // Send the updated turn to all players.
-                                case Datatype.UpdateTurn:
-                                {
-                                    Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
-                                    ServerUtilities.SendMessage(Server, Datatype.UpdateTurn, Turn);
-
-                                    break;
-                                }
-
-                                // Set up the players for the game. This case should be hit only when a client launches the game.
-                                case Datatype.LaunchGame:
-                                {
-                                    HasGameBeenLaunched = true;
-
-                                    // Deal the initial hands to the players.
-                                    for ( int i = 0; i < PlayerList.Count; ++i )
+                                    // NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with disconnect()
+                                    Console.WriteLine(inc.SenderConnection.ToString() + " status changed. " + (NetConnectionStatus)inc.SenderConnection.Status);
+                                    if (inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting)
                                     {
-                                        PlayerList[i] = new Player(Deck, PlayerList[i].Name);
+                                        Console.WriteLine("Client was disconnected.");
                                     }
-
-                                    // Generate the Turn object to keep track of the current turn.
-                                    Turn = new Turn(PlayerList.Count);
-
-                                    // Tell all clients to launch the game and send them the Turn object.
-                                    ServerUtilities.SendMessage(Server, Datatype.LaunchGame, Turn);                                   
-
                                     break;
                                 }
-
-                                case Datatype.TimeToConnect:
+                            default:
                                 {
-                                    string playerToConnect = (String)ServerUtilities.ReceiveMessage(inc, messageType);
-
-                                    // Broadcast a message that tells a specific client to launch the game.
-                                    ServerUtilities.SendMessage(Server, Datatype.TimeToConnect, playerToConnect);                                   
-
+                                    Console.WriteLine("Message of type: " + inc.MessageType + " received");
                                     break;
                                 }
-
-                                case Datatype.RequestRent:
-                                {
-                                    ActionData.RentRequest request = (ActionData.RentRequest)ServerUtilities.ReadRentRequest(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.RequestRent, request, idOfClientToExclude: idOfSender);
-
-                                    break;
-                                }
-
-                                case Datatype.GiveRent:
-                                {
-                                    ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReadRentResponse(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.GiveRent, response);
-
-                                    break;
-                                }
-
-                                case Datatype.RequestTheft:
-                                {
-                                    ActionData.TheftRequest request = (ActionData.TheftRequest)ServerUtilities.ReadTheftRequest(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.RequestTheft, request, idOfClientToExclude: idOfSender);
-
-                                    break;
-                                }
-                                                                
-                                case Datatype.ReplyToTheft:
-                                {
-                                    ActionData.TheftResponse response = (ActionData.TheftResponse)ServerUtilities.ReadTheftResponse(inc);
-                                    ServerUtilities.SendMessage(Server, Datatype.ReplyToTheft, response, idOfClientToExclude: idOfSender);
-
-                                    break;
-                                }
-
-                                case Datatype.EndTurn:
-                                {
-                                    Turn = (Turn)ServerUtilities.ReceiveMessage(inc, Datatype.EndTurn);
-
-                                    // Send the updated Turn object to the clients.
-                                    ServerUtilities.SendMessage(Server, Datatype.EndTurn, Turn);
-
-                                    break;
-                                }
-
-                                // Send the server's Deck to all clients.
-                                case Datatype.RequestDeck:
-                                {
-                                    ServerUtilities.SendMessage(Server, Datatype.UpdateDeck, Deck);
-                                    break;
-                                }
-
-                                // Send the server's PlayerList to all clients.
-                                case Datatype.RequestPlayerList:
-                                {
-                                    ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
-                                    break;
-                                }
-
-                                case Datatype.PlaySound:
-                                {
-                                    string soundPath = (string)ServerUtilities.ReceiveMessage(inc, messageType);
-                                    ServerUtilities.SendMessage(Server, Datatype.PlaySound, soundPath);
-                                    break;
-                                }
-
-                                case Datatype.GameEvent:
-                                {
-                                    string serializedEvent = (string)ServerUtilities.ReceiveMessage(inc, messageType);
-                                    ServerUtilities.SendMessage(Server, Datatype.GameEvent, serializedEvent);
-                                    break;
-                                }
-                            }
-
-                            break;
                         }
-                        case NetIncomingMessageType.StatusChanged:
-                        {
-                            // In case status changed
-                            // It can be one of these
-                            // NetConnectionStatus.Connected;
-                            // NetConnectionStatus.Connecting;
-                            // NetConnectionStatus.Disconnected;
-                            // NetConnectionStatus.Disconnecting;
-                            // NetConnectionStatus.None;
+                    } // If New messages
 
-                            // NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with disconnect()
-                            Console.WriteLine(inc.SenderConnection.ToString() + " status changed. " + (NetConnectionStatus)inc.SenderConnection.Status);
-                            if ( inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting )
-                            {                                
-                                Console.WriteLine("Client was disconnected.");
-                            }
-                            break;
-                        }
-                        default:
-                        {
-                            Console.WriteLine("Message of type: " + inc.MessageType + " received");
-                            break;
-                        }
+                    // if 30ms has passed
+                    if ((time + timetopass) < DateTime.Now)
+                    {
+                        time = DateTime.Now;
                     }
-                } // If New messages
 
-                // if 30ms has passed
-                if ( (time + timetopass) < DateTime.Now )
-                {
-                    time = DateTime.Now;
+                    // While loops run as fast as your computer lets. While(true) can lock your computer up. Even 1ms sleep, lets other programs have piece of your CPU time
+                    System.Threading.Thread.Sleep(100);
                 }
-
-                // While loops run as fast as your computer lets. While(true) can lock your computer up. Even 1ms sleep, lets other programs have piece of your CPU time
-                System.Threading.Thread.Sleep(100);
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Console.ReadLine();
+                }
             }
         }
     }
