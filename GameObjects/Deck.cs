@@ -65,11 +65,14 @@ namespace GameObjects
             
             // Each card must have a unique ID.
             int cardID = 0;
-            
+
+            Console.WriteLine($"Profile when initializing deck: {profile}");
+
             foreach (DictionaryEntry keyVal in profile)
             {
-                string resourceName = keyVal.Key as string;
+                string resourceName = keyVal.Key as string;                
                 tvProfile cardProfile = profile.oProfile(resourceName);
+                Console.WriteLine($"Card profile: {cardProfile}");
 
                 for (int a = 0; a < cardProfile.iValue("-Count", 0); ++a)
                 {
