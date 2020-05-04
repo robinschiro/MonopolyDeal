@@ -36,6 +36,9 @@ namespace GameServer
         [STAThread]
         static void Main( string[] args )
         {
+            Console.WriteLine("Press any key to continue");
+            Console.ReadLine();
+
             // Attempt to load the game configuration from a config file.
             if ( File.Exists(GameObjectsResourceList.FilePathLocalServerSettings))
             {
