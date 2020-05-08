@@ -75,6 +75,7 @@ namespace GameClient
             }
         }
 
+        #region Client Config
         private bool areSoundEffectsEnabled;
         public bool AreSoundEffectsEnabled
         {
@@ -110,6 +111,25 @@ namespace GameClient
                 OnPropertyChanged("IsTurnNotificationDialogEnabled");
             }
         }
+
+        private bool endTurnAfterSpendingAllActionsEnabled;
+        public bool EndTurnAfterSpendingAllActionsEnabled
+        {
+            get
+            {
+                return endTurnAfterSpendingAllActionsEnabled;
+            }
+            set
+            {
+                endTurnAfterSpendingAllActionsEnabled = value;
+                this.ClientSettings[ClientResourceList.EndTurnAfterSpendingAllActionsEnabledKey] = value;
+                this.ClientSettings.Save();
+
+                OnPropertyChanged("EndTurnAfterSpendingAllActionsEnabled");
+            }
+        }
+
+        #endregion
 
         #endregion Variables
 
@@ -256,6 +276,7 @@ namespace GameClient
             this.ClientSettings = ClientUtilities.GetClientSettings(ClientResourceList.SettingsFilePath);
             this.AreSoundEffectsEnabled = this.ClientSettings.bValue(ClientResourceList.SettingSoundEffectsEnabledKey, Convert.ToBoolean(ClientResourceList.SettingSoundEffectsEnabledDefaultValue));
             this.IsTurnNotificationDialogEnabled = this.ClientSettings.bValue(ClientResourceList.SettingTurnNotificationDialogEnabledKey, Convert.ToBoolean(ClientResourceList.SettingTurnNotificationDialogEnabledDefaultValue));
+            this.EndTurnAfterSpendingAllActionsEnabled = this.ClientSettings.bValue(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledKey, Convert.ToBoolean(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledDefaultValue));
         }
 
         #region Client Communication Code
@@ -534,7 +555,14 @@ namespace GameClient
                         // Update animation on end turn button.
                         if ( 0 == this.Turn.ActionsRemaining )
                         {
-                            this.AnimateEndTurnButton();
+                            if (this.endTurnAfterSpendingAllActionsEnabled)
+                            {
+                                this.EndTurnButton_Click(this.EndTurnButton, new RoutedEventArgs());
+                            }
+                            else
+                            {
+                                this.AnimateEndTurnButton();
+                            }
                         }
                     }
                 }

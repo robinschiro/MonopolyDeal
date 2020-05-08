@@ -19,7 +19,7 @@ namespace GameClient.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -93,6 +93,24 @@ namespace GameClient.Properties {
         public static string DiscardMenuItemHeader {
             get {
                 return ResourceManager.GetString("DiscardMenuItemHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to false.
+        /// </summary>
+        public static string EndTurnAfterSpendingAllActionsEnabledDefaultValue {
+            get {
+                return ResourceManager.GetString("EndTurnAfterSpendingAllActionsEnabledDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -EndTurnAfterSpendingAllActionsEnabled.
+        /// </summary>
+        public static string EndTurnAfterSpendingAllActionsEnabledKey {
+            get {
+                return ResourceManager.GetString("EndTurnAfterSpendingAllActionsEnabledKey", resourceCulture);
             }
         }
         

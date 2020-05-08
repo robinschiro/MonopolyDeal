@@ -186,4 +186,10 @@
   <data name="UriPathWinningMusic" xml:space="preserve">
     <value>pack://application:,,,/GameObjects;component/Audio/WinningMusic.wav</value>
   </data>
+  <data name="EndTurnAfterSpendingAllActionsEnabledDefaultValue" xml:space="preserve">
+    <value>false</value>
+  </data>
+  <data name="EndTurnAfterSpendingAllActionsEnabledKey" xml:space="preserve">
+    <value>-EndTurnAfterSpendingAllActionsEnabled</value>
+  </data>
 </root>
