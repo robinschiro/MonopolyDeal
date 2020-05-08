@@ -97,6 +97,24 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to true.
+        /// </summary>
+        public static string DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue {
+            get {
+                return ResourceManager.GetString("DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -DoubleClickToPlayCardAsOriginalTypeEnabled.
+        /// </summary>
+        public static string DoubleClickToPlayCardAsOriginalTypeEnabledKey {
+            get {
+                return ResourceManager.GetString("DoubleClickToPlayCardAsOriginalTypeEnabledKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to false.
         /// </summary>
         public static string EndTurnAfterSpendingAllActionsEnabledDefaultValue {
@@ -129,6 +147,15 @@ namespace GameClient.Properties {
         public static string GiveFeedbackUrl {
             get {
                 return ResourceManager.GetString("GiveFeedbackUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Play as Money.
+        /// </summary>
+        public static string PlayAsMoneyMenuItemHeader {
+            get {
+                return ResourceManager.GetString("PlayAsMoneyMenuItemHeader", resourceCulture);
             }
         }
         

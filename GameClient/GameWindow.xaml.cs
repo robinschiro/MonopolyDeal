@@ -129,6 +129,23 @@ namespace GameClient
             }
         }
 
+        private bool doubleClickToPlayCardAsOriginalTypeEnabled;
+        public bool DoubleClickToPlayCardAsOriginalTypeEnabled
+        {
+            get
+            {
+                return doubleClickToPlayCardAsOriginalTypeEnabled;
+            }
+            set
+            {
+                doubleClickToPlayCardAsOriginalTypeEnabled = value;
+                this.ClientSettings[ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledKey] = value;
+                this.ClientSettings.Save();
+
+                OnPropertyChanged("DoubleClickToPlayCardAsOriginalTypeEnabled");
+            }
+        }
+
         #endregion
 
         #endregion Variables
@@ -277,6 +294,7 @@ namespace GameClient
             this.AreSoundEffectsEnabled = this.ClientSettings.bValue(ClientResourceList.SettingSoundEffectsEnabledKey, Convert.ToBoolean(ClientResourceList.SettingSoundEffectsEnabledDefaultValue));
             this.IsTurnNotificationDialogEnabled = this.ClientSettings.bValue(ClientResourceList.SettingTurnNotificationDialogEnabledKey, Convert.ToBoolean(ClientResourceList.SettingTurnNotificationDialogEnabledDefaultValue));
             this.EndTurnAfterSpendingAllActionsEnabled = this.ClientSettings.bValue(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledKey, Convert.ToBoolean(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledDefaultValue));
+            this.DoubleClickToPlayCardAsOriginalTypeEnabled = this.ClientSettings.bValue(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledKey, Convert.ToBoolean(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue));
         }
 
         #region Client Communication Code
@@ -1265,7 +1283,7 @@ namespace GameClient
                 };
 
                 // If a card is not an action card, there is only one way it can be played.
-                if ( CardType.Property == cardBeingAdded.Type || CardType.Money == cardBeingAdded.Type )
+                if ( CardType.Property == cardBeingAdded.Type )
                 {
                     MenuItem playMenuItem = new MenuItem();
                     playMenuItem.Header = "Play";
@@ -1283,41 +1301,43 @@ namespace GameClient
                         {
                             // Flip the card, swapping its primary and alternative colors.
                             FlipCard(cardBeingAdded);
-
                             TransformCardButton(cardButton, 0, 0);
-
                             DisplayCardInInfobox(cardBeingAdded);
                         };
                         menu.Items.Add(flipMenuItem);
                     }
                 }
-                // Houses and hotels have unique menu options. Players can add these to existing monopolies or use them as money.
-                else if ( CardType.Enhancement == cardBeingAdded.Type )
+                else
                 {
-                    MenuItem playAsActionMenuItem = new MenuItem();
-                    playAsActionMenuItem.Header = ClientResourceList.AddEnhancementMenuItemHeader;
-                    playAsActionMenuItem.Click += (sender, args) =>
-                    {
-                        PlayCardEvent(cardButton, null);
-                    };
                     MenuItem playAsMoneyMenuItem = new MenuItem();
-                    playAsMoneyMenuItem.Header = "Play as Money";
-                    playAsMoneyMenuItem.Click += (sender, args) =>
+                    playAsMoneyMenuItem.Header = ClientResourceList.PlayAsMoneyMenuItemHeader;
+                    playAsMoneyMenuItem.Click += (sender2, args2) =>
                     {
                         cardBeingAdded.Type = CardType.Money;
-                        PlayCardEvent(cardButton, null);
+                        this.PlayCardEvent(cardButton, null);
                     };
-
-                    menu.Items.Add(playAsActionMenuItem);
                     menu.Items.Add(playAsMoneyMenuItem);
                 }
+
+                // Houses and hotels have unique menu options. Players can add these to existing monopolies or use them as money.
+                if ( CardType.Enhancement == cardBeingAdded.Type )
+                {
+                    MenuItem addEnhancementMenuItem = new MenuItem();
+                    addEnhancementMenuItem.Header = ClientResourceList.AddEnhancementMenuItemHeader;
+                    addEnhancementMenuItem.Click += (sender, args) =>
+                    {
+                        PlayCardEvent(cardButton, null);
+                    };  
+                    menu.Items.Add(addEnhancementMenuItem);
+                }
+                
                 // These apply to all other action cards. Players can play these cards as actions or money.
-                else
+                if ( CardType.Action == cardBeingAdded.Type )
                 {
                     // If the action card is not a "Double the Rent" or "Just Say No", add this option.
                     // (Double the Rent cards are played only with Rent cards, and Just Say No cards
                     // are only used in response to actions).
-                    if ( (2 != cardBeingAdded.ActionID) && (1 != cardBeingAdded.ActionID) )
+                    if ( (ActionId.JustSayNo != (ActionId)cardBeingAdded.ActionID) && (ActionId.DoubleTheRent != (ActionId)cardBeingAdded.ActionID) )
                     {
                         MenuItem playAsActionMenuItem = new MenuItem();
                         playAsActionMenuItem.Header = "Play as Action";
@@ -1327,19 +1347,18 @@ namespace GameClient
                         };
                         menu.Items.Add(playAsActionMenuItem);
                     }
-
-                    MenuItem playAsMoneyMenuItem = new MenuItem();
-                    playAsMoneyMenuItem.Header = "Play as Money";
-                    playAsMoneyMenuItem.Click += ( sender2, args2 ) =>
-                    {
-                        cardBeingAdded.Type = CardType.Money;
-                        PlayCardEvent(cardButton, null);
-                    };
-
-                    menu.Items.Add(playAsMoneyMenuItem);
                 }
 
-                // To all cards (regardless of type), add the ability to discard the card.
+                // To all cards (regardless of type), add the abilitoes to discard the card and play with double click.
+                cardButton.MouseDoubleClick += (sender, args) =>
+                {
+                    if (this.doubleClickToPlayCardAsOriginalTypeEnabled)
+                    {
+                        this.PlayCardEvent(cardButton, null);
+                    }
+                };
+
+
                 MenuItem discardMenuItem = new MenuItem();
                 discardMenuItem.Header = ClientResourceList.DiscardMenuItemHeader;
                 discardMenuItem.Click += ( sender, args ) =>
@@ -1765,7 +1784,7 @@ namespace GameClient
         {
             if ( CardType.Action == actionCard.Type )
             {
-                if ( ActionId.PassGo == (ActionId)actionCard.ActionID )
+                if (ActionId.PassGo == (ActionId)actionCard.ActionID)
                 {
                     this.GameEventLog.PublishPlayCardEvent(this.Player, actionCard);
                     DrawCards(2);
@@ -1773,10 +1792,14 @@ namespace GameClient
 
                     return true;
                 }
-                else if ( 5 <= actionCard.ActionID && 7 >= actionCard.ActionID )
+                else if (5 <= actionCard.ActionID && 7 >= actionCard.ActionID)
                 {
                     // Steal property
                     return StealProperty(actionCard);
+                }
+                else if ((ActionId.JustSayNo == (ActionId)actionCard.ActionID) || (ActionId.DoubleTheRent == (ActionId)actionCard.ActionID))
+                {
+                    return false;
                 }
                 else
                 {

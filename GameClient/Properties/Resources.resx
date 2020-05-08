@@ -186,10 +186,19 @@
   <data name="UriPathWinningMusic" xml:space="preserve">
     <value>pack://application:,,,/GameObjects;component/Audio/WinningMusic.wav</value>
   </data>
+  <data name="DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue" xml:space="preserve">
+    <value>true</value>
+  </data>
+  <data name="DoubleClickToPlayCardAsOriginalTypeEnabledKey" xml:space="preserve">
+    <value>-DoubleClickToPlayCardAsOriginalTypeEnabled</value>
+  </data>
   <data name="EndTurnAfterSpendingAllActionsEnabledDefaultValue" xml:space="preserve">
     <value>false</value>
   </data>
   <data name="EndTurnAfterSpendingAllActionsEnabledKey" xml:space="preserve">
     <value>-EndTurnAfterSpendingAllActionsEnabled</value>
+  </data>
+  <data name="PlayAsMoneyMenuItemHeader" xml:space="preserve">
+    <value>Play as Money</value>
   </data>
 </root>
