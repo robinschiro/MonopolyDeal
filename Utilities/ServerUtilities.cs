@@ -182,9 +182,8 @@ namespace GameServer
             string renterName = inc.ReadString();
             List<Player> rentees = ReadPlayerList(inc);
             int rentAmount = Convert.ToInt32(inc.ReadString());
-            bool isDoubled = inc.ReadBoolean();
 
-            return new ActionData.RentRequest(renterName, rentees, rentAmount, isDoubled);
+            return new ActionData.RentRequest(renterName, rentees, rentAmount);
         }
 
         // Parse the information from the rent response.
@@ -260,7 +259,6 @@ namespace GameServer
             outmsg.Write(request.RenterName);
             WritePlayerList(outmsg, request.Rentees);
             outmsg.Write(request.RentAmount.ToString());
-            outmsg.Write(request.IsDoubled);
         }
 
         // Write a rent response. 

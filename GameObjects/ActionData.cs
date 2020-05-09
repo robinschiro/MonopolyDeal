@@ -14,14 +14,12 @@ namespace GameObjects
             public string RenterName;
             public List<Player> Rentees;
             public int RentAmount;
-            public bool IsDoubled;
 
-            public RentRequest( string renterName, List<Player> rentees, int rentAmount, bool isDoubled )
+            public RentRequest( string renterName, List<Player> rentees, int rentAmount)
             {
                 this.RenterName = renterName;
                 this.Rentees = rentees;
                 this.RentAmount = rentAmount;
-                this.IsDoubled = isDoubled;
             }
         }
 

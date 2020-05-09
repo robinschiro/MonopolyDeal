@@ -49,18 +49,16 @@ namespace AdditionalWindows
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public RentWindow( Player rentee, string renterName, int rentAmount, bool rentDoubled )
+        public RentWindow( Player rentee, string renterName, int rentAmount )
         {
             Payment = new ObservableCollection<Card>();
             Assets = new ObservableCollection<Card>();
 
             InitializeComponent();
 
-            amountOwed = rentAmount * ((rentDoubled) ? (2) : (1));
-
             // Update the window to display the amount owed.
             TextBlock amountOwedTextblock = new TextBlock();
-            amountOwedTextblock.Inlines.Add(new Bold(new Run(AmountOwedLabel.Content.ToString() + rentAmount + ((rentDoubled) ? (" x 2") : ("")))));
+            amountOwedTextblock.Inlines.Add(new Bold(new Run(AmountOwedLabel.Content.ToString() + rentAmount)));
             AmountOwedLabel.Content = amountOwedTextblock;
 
             // Add all the rentee's cards in play to the Assets listview.
