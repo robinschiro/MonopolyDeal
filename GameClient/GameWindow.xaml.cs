@@ -927,6 +927,8 @@ namespace GameClient
             var cardTooltipImage = new Image();
             cardTooltipImage.Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
             cardTooltipImage.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
+            cardTooltipImage.RenderTransform = new TransformGroup();
+            cardTooltipImage.RenderTransformOrigin = new Point(0.5, 0.5);
             cardButton.ToolTip = cardTooltipImage;
 
             cardButton.Tag = card;
@@ -1606,7 +1608,8 @@ namespace GameClient
                 case CardType.Enhancement:
                 case CardType.Property:
                 {
-                    TransformGroup transformGroup = (cardButton.RenderTransform as TransformGroup);
+                    TransformGroup cardButtonTransformGroup = (cardButton.RenderTransform as TransformGroup);
+                    TransformGroup cardTooltipTransformGroup = (cardButton.ToolTip as Image).RenderTransform as TransformGroup;
 
                     // Flip or unflip a two-color property.
                     if ( HasAltColor(cardButton.Tag as Card) )
@@ -1614,26 +1617,23 @@ namespace GameClient
                         RotateTransform horizontalTransform = new RotateTransform();
 
                         // First remove any rotate transform that may have been applied.
-                        RemoveTransformTypeFromGroup(horizontalTransform.GetType(), transformGroup);
+                        RemoveTransformTypeFromGroup(horizontalTransform.GetType(), cardButtonTransformGroup);
+                        RemoveTransformTypeFromGroup(horizontalTransform.GetType(), cardTooltipTransformGroup);
 
                         // Flip properties that are supposed to be flipped.
                         if ( card.IsFlipped )
                         {
                             horizontalTransform.Angle = 180;
-                            //cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
-                            transformGroup.Children.Add(horizontalTransform);
-                            //transformGroup.Children.Add(horizontalTransform);
+                            cardButtonTransformGroup.Children.Add(horizontalTransform);
+                            cardTooltipTransformGroup.Children.Add(horizontalTransform);
                         }
                     }
 
                     // Lay properties of compatible colors on top of each other (offset vertically). Before doing this, remove the existed translate transform.
                     TranslateTransform translateTransform = new TranslateTransform();
-                    RemoveTransformTypeFromGroup(translateTransform.GetType(), transformGroup);
+                    RemoveTransformTypeFromGroup(translateTransform.GetType(), cardButtonTransformGroup);
                     translateTransform.Y = (numberOfMatchingCards * .10) * gridHeight;
-                    transformGroup.Children.Add(translateTransform);
-                    //transformGroup.Children.Add(myTranslateTransform);
-
-                    //cardButton.RenderTransform = transformGroup;
+                    cardButtonTransformGroup.Children.Add(translateTransform);
 
                     break;
                 }
@@ -1912,8 +1912,7 @@ namespace GameClient
         private bool CollectRent( Card rentCard )
         {
             int amountToCollect = 0;
-            bool rentDoubled = false;
-            Card doubleRentCard = null;
+            var doubleTheRentCardsUsed = new List<Card>();
 
             ActionId rentCardType = (ActionId)rentCard.ActionID;
             switch (rentCardType)
@@ -1932,7 +1931,7 @@ namespace GameClient
 
                 default:
                 {
-                    List<List<Card>> matchingPropertyGroups = new List<List<Card>>();
+                    var matchingPropertyGroups = new List<List<Card>>();
 
                     // First, determine which lists on the player's field correpond to the rent card.
                     // Skip the money list.
@@ -1974,16 +1973,26 @@ namespace GameClient
                         }
                     }
 
-                    // If the player has a "Double the Rent" card and at least two actions remaining, ask if he would like to use it.
-                    doubleRentCard = FindActionCardInList(this.Player.CardsInHand, (int)ActionId.DoubleTheRent);
-
-                    if ( (null != doubleRentCard) && (this.Turn.ActionsRemaining >= 2) )
+                    var doubleTheRentCardsFound = this.Player.CardsInHand.Where(card => card.ActionID == (int)ActionId.DoubleTheRent).ToList();
+                    foreach (Card doubleTheRentCard in doubleTheRentCardsFound)
                     {
-                        MessageBoxResult result = MessageBox.Show("You have a " + doubleRentCard.Name + " card. Would you like to apply it to this rent? This will cost you an action.",
-                                        "Are you sure?",
-                                        MessageBoxButton.YesNo);
+                        if ( this.Turn.ActionsRemaining > 1 )
+                        {
+                            MessageBoxResult result = MessageBox.Show(
+                                $"You have a Double the Rent card. Would you like to apply it to this rent? This will cost you an action. If this is your second one, this will quadruple your rent.",
+                                "Are you sure?",
+                                MessageBoxButton.YesNo);
 
-                        rentDoubled = (MessageBoxResult.Yes == result);
+                            if ( MessageBoxResult.Yes == result )
+                            {
+                                doubleTheRentCardsUsed.Add(doubleTheRentCard);
+                                this.Turn.ActionsRemaining--;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
                     }
 
                     break;
@@ -2027,13 +2036,11 @@ namespace GameClient
             // Discard the action card and send the message to the server.
             DiscardCard(rentCard);
 
-            if ( rentDoubled )
+            foreach (Card doubleTheRentCard in doubleTheRentCardsUsed)
             {
-                // Remove the card from the player's hand and add it to the discard pile.
                 amountToCollect *= 2;
-                DiscardCard(doubleRentCard);
-                this.GameEventLog.PublishPlayCardEvent(this.Player, doubleRentCard);
-                this.Turn.ActionsRemaining--;
+                DiscardCard(doubleTheRentCard);
+                this.GameEventLog.PublishPlayCardEvent(this.Player, doubleTheRentCard);
             }
 
             this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect);
