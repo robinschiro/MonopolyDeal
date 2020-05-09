@@ -75,6 +75,7 @@ namespace GameClient
             }
         }
 
+        #region Client Config
         private bool areSoundEffectsEnabled;
         public bool AreSoundEffectsEnabled
         {
@@ -110,6 +111,42 @@ namespace GameClient
                 OnPropertyChanged("IsTurnNotificationDialogEnabled");
             }
         }
+
+        private bool endTurnAfterSpendingAllActionsEnabled;
+        public bool EndTurnAfterSpendingAllActionsEnabled
+        {
+            get
+            {
+                return endTurnAfterSpendingAllActionsEnabled;
+            }
+            set
+            {
+                endTurnAfterSpendingAllActionsEnabled = value;
+                this.ClientSettings[ClientResourceList.EndTurnAfterSpendingAllActionsEnabledKey] = value;
+                this.ClientSettings.Save();
+
+                OnPropertyChanged("EndTurnAfterSpendingAllActionsEnabled");
+            }
+        }
+
+        private bool doubleClickToPlayCardAsOriginalTypeEnabled;
+        public bool DoubleClickToPlayCardAsOriginalTypeEnabled
+        {
+            get
+            {
+                return doubleClickToPlayCardAsOriginalTypeEnabled;
+            }
+            set
+            {
+                doubleClickToPlayCardAsOriginalTypeEnabled = value;
+                this.ClientSettings[ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledKey] = value;
+                this.ClientSettings.Save();
+
+                OnPropertyChanged("DoubleClickToPlayCardAsOriginalTypeEnabled");
+            }
+        }
+
+        #endregion
 
         #endregion Variables
 
@@ -256,6 +293,8 @@ namespace GameClient
             this.ClientSettings = ClientUtilities.GetClientSettings(ClientResourceList.SettingsFilePath);
             this.AreSoundEffectsEnabled = this.ClientSettings.bValue(ClientResourceList.SettingSoundEffectsEnabledKey, Convert.ToBoolean(ClientResourceList.SettingSoundEffectsEnabledDefaultValue));
             this.IsTurnNotificationDialogEnabled = this.ClientSettings.bValue(ClientResourceList.SettingTurnNotificationDialogEnabledKey, Convert.ToBoolean(ClientResourceList.SettingTurnNotificationDialogEnabledDefaultValue));
+            this.EndTurnAfterSpendingAllActionsEnabled = this.ClientSettings.bValue(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledKey, Convert.ToBoolean(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledDefaultValue));
+            this.DoubleClickToPlayCardAsOriginalTypeEnabled = this.ClientSettings.bValue(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledKey, Convert.ToBoolean(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue));
         }
 
         #region Client Communication Code
@@ -513,12 +552,6 @@ namespace GameClient
 
                     if ( cardWasPlayed )
                     {
-                        // Update the player's number of actions.
-                        this.Turn.ActionsRemaining--;
-
-                        // Send the update to all players.
-                        ServerUtilities.SendMessage(this.Client, Datatype.UpdateTurn, this.Turn);
-
                         // Removal of action cards is handled in HandleAction(), so only remove non-action cards here.
                         if ( cardBeingPlayed.Type != CardType.Action )
                         {
@@ -531,11 +564,28 @@ namespace GameClient
                             ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, ClientResourceList.UriPathMoneyDing);
                         }
 
+                        // Update the player's number of actions.
+                        this.Turn.ActionsRemaining--;
+
+                        // Send the update to all players.
+                        ServerUtilities.SendMessage(this.Client, Datatype.UpdateTurn, this.Turn);
+
                         // Update animation on end turn button.
                         if ( 0 == this.Turn.ActionsRemaining )
                         {
-                            this.AnimateEndTurnButton();
+                            if (this.endTurnAfterSpendingAllActionsEnabled)
+                            {
+                                this.EndTurnButton_Click(this.EndTurnButton, new RoutedEventArgs());
+                            }
+                            else
+                            {
+                                this.AnimateEndTurnButton();
+                            }
                         }
+                    }
+                    else
+                    {
+                        MessageBox.Show("You cannot play this card right now!", "Invalid action");
                     }
                 }
             }
@@ -877,6 +927,8 @@ namespace GameClient
             var cardTooltipImage = new Image();
             cardTooltipImage.Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
             cardTooltipImage.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
+            cardTooltipImage.RenderTransform = new TransformGroup();
+            cardTooltipImage.RenderTransformOrigin = new Point(0.5, 0.5);
             cardButton.ToolTip = cardTooltipImage;
 
             cardButton.Tag = card;
@@ -1236,8 +1288,38 @@ namespace GameClient
                     }
                 };
 
+                // These apply to all other action cards. Players can play these cards as actions or money.
+                if ( CardType.Action == cardBeingAdded.Type )
+                {
+                    // If the action card is not a "Double the Rent" or "Just Say No", add this option.
+                    // (Double the Rent cards are played only with Rent cards, and Just Say No cards
+                    // are only used in response to actions).
+                    if ( (ActionId.JustSayNo != (ActionId)cardBeingAdded.ActionID) && (ActionId.DoubleTheRent != (ActionId)cardBeingAdded.ActionID) )
+                    {
+                        MenuItem playAsActionMenuItem = new MenuItem();
+                        playAsActionMenuItem.Header = "Play as Action";
+                        playAsActionMenuItem.Click += ( sender, args ) =>
+                        {
+                            PlayCardEvent(cardButton, null);
+                        };
+                        menu.Items.Add(playAsActionMenuItem);
+                    }
+                }
+
+                // Houses and hotels have unique menu options. Players can add these to existing monopolies or use them as money.
+                if ( CardType.Enhancement == cardBeingAdded.Type )
+                {
+                    MenuItem addEnhancementMenuItem = new MenuItem();
+                    addEnhancementMenuItem.Header = ClientResourceList.AddEnhancementMenuItemHeader;
+                    addEnhancementMenuItem.Click += ( sender, args ) =>
+                    {
+                        PlayCardEvent(cardButton, null);
+                    };
+                    menu.Items.Add(addEnhancementMenuItem);
+                }
+
                 // If a card is not an action card, there is only one way it can be played.
-                if ( CardType.Property == cardBeingAdded.Type || CardType.Money == cardBeingAdded.Type )
+                if ( CardType.Property == cardBeingAdded.Type )
                 {
                     MenuItem playMenuItem = new MenuItem();
                     playMenuItem.Header = "Play";
@@ -1255,63 +1337,24 @@ namespace GameClient
                         {
                             // Flip the card, swapping its primary and alternative colors.
                             FlipCard(cardBeingAdded);
-
                             TransformCardButton(cardButton, 0, 0);
-
                             DisplayCardInInfobox(cardBeingAdded);
                         };
                         menu.Items.Add(flipMenuItem);
                     }
                 }
-                // Houses and hotels have unique menu options. Players can add these to existing monopolies or use them as money.
-                else if ( CardType.Enhancement == cardBeingAdded.Type )
-                {
-                    MenuItem playAsActionMenuItem = new MenuItem();
-                    playAsActionMenuItem.Header = ClientResourceList.AddEnhancementMenuItemHeader;
-                    playAsActionMenuItem.Click += (sender, args) =>
-                    {
-                        PlayCardEvent(cardButton, null);
-                    };
-                    MenuItem playAsMoneyMenuItem = new MenuItem();
-                    playAsMoneyMenuItem.Header = "Play as Money";
-                    playAsMoneyMenuItem.Click += (sender, args) =>
-                    {
-                        cardBeingAdded.Type = CardType.Money;
-                        PlayCardEvent(cardButton, null);
-                    };
-
-                    menu.Items.Add(playAsActionMenuItem);
-                    menu.Items.Add(playAsMoneyMenuItem);
-                }
-                // These apply to all other action cards. Players can play these cards as actions or money.
                 else
                 {
-                    // If the action card is not a "Double the Rent" or "Just Say No", add this option.
-                    // (Double the Rent cards are played only with Rent cards, and Just Say No cards
-                    // are only used in response to actions).
-                    if ( (2 != cardBeingAdded.ActionID) && (1 != cardBeingAdded.ActionID) )
-                    {
-                        MenuItem playAsActionMenuItem = new MenuItem();
-                        playAsActionMenuItem.Header = "Play as Action";
-                        playAsActionMenuItem.Click += ( sender, args ) =>
-                        {
-                            PlayCardEvent(cardButton, null);
-                        };
-                        menu.Items.Add(playAsActionMenuItem);
-                    }
-
                     MenuItem playAsMoneyMenuItem = new MenuItem();
-                    playAsMoneyMenuItem.Header = "Play as Money";
-                    playAsMoneyMenuItem.Click += ( sender2, args2 ) =>
+                    playAsMoneyMenuItem.Header = ClientResourceList.PlayAsMoneyMenuItemHeader;
+                    playAsMoneyMenuItem.Click += (sender2, args2) =>
                     {
                         cardBeingAdded.Type = CardType.Money;
-                        PlayCardEvent(cardButton, null);
+                        this.PlayCardEvent(cardButton, null);
                     };
-
                     menu.Items.Add(playAsMoneyMenuItem);
                 }
 
-                // To all cards (regardless of type), add the ability to discard the card.
                 MenuItem discardMenuItem = new MenuItem();
                 discardMenuItem.Header = ClientResourceList.DiscardMenuItemHeader;
                 discardMenuItem.Click += ( sender, args ) =>
@@ -1323,6 +1366,14 @@ namespace GameClient
                     }
                 };
                 menu.Items.Add(discardMenuItem);
+
+                cardButton.MouseDoubleClick += ( sender, args ) =>
+                {
+                    if ( this.doubleClickToPlayCardAsOriginalTypeEnabled )
+                    {
+                        this.PlayCardEvent(cardButton, null);
+                    }
+                };
             }
             // The card is being added to a player's playing field.
             else
@@ -1557,7 +1608,8 @@ namespace GameClient
                 case CardType.Enhancement:
                 case CardType.Property:
                 {
-                    TransformGroup transformGroup = (cardButton.RenderTransform as TransformGroup);
+                    TransformGroup cardButtonTransformGroup = (cardButton.RenderTransform as TransformGroup);
+                    TransformGroup cardTooltipTransformGroup = (cardButton.ToolTip as Image).RenderTransform as TransformGroup;
 
                     // Flip or unflip a two-color property.
                     if ( HasAltColor(cardButton.Tag as Card) )
@@ -1565,26 +1617,23 @@ namespace GameClient
                         RotateTransform horizontalTransform = new RotateTransform();
 
                         // First remove any rotate transform that may have been applied.
-                        RemoveTransformTypeFromGroup(horizontalTransform.GetType(), transformGroup);
+                        RemoveTransformTypeFromGroup(horizontalTransform.GetType(), cardButtonTransformGroup);
+                        RemoveTransformTypeFromGroup(horizontalTransform.GetType(), cardTooltipTransformGroup);
 
                         // Flip properties that are supposed to be flipped.
                         if ( card.IsFlipped )
                         {
                             horizontalTransform.Angle = 180;
-                            //cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
-                            transformGroup.Children.Add(horizontalTransform);
-                            //transformGroup.Children.Add(horizontalTransform);
+                            cardButtonTransformGroup.Children.Add(horizontalTransform);
+                            cardTooltipTransformGroup.Children.Add(horizontalTransform);
                         }
                     }
 
                     // Lay properties of compatible colors on top of each other (offset vertically). Before doing this, remove the existed translate transform.
                     TranslateTransform translateTransform = new TranslateTransform();
-                    RemoveTransformTypeFromGroup(translateTransform.GetType(), transformGroup);
+                    RemoveTransformTypeFromGroup(translateTransform.GetType(), cardButtonTransformGroup);
                     translateTransform.Y = (numberOfMatchingCards * .10) * gridHeight;
-                    transformGroup.Children.Add(translateTransform);
-                    //transformGroup.Children.Add(myTranslateTransform);
-
-                    //cardButton.RenderTransform = transformGroup;
+                    cardButtonTransformGroup.Children.Add(translateTransform);
 
                     break;
                 }
@@ -1735,29 +1784,26 @@ namespace GameClient
         // Perform a specific action related to the given action card.
         private bool HandleAction( Card actionCard )
         {
-            if ( CardType.Action == actionCard.Type )
+            if (ActionId.PassGo == (ActionId)actionCard.ActionID)
             {
-                if ( ActionId.PassGo == (ActionId)actionCard.ActionID )
-                {
-                    this.GameEventLog.PublishPlayCardEvent(this.Player, actionCard);
-                    DrawCards(2);
-                    DiscardCard(actionCard);
+                this.GameEventLog.PublishPlayCardEvent(this.Player, actionCard);
+                DrawCards(2);
+                DiscardCard(actionCard);
 
-                    return true;
-                }
-                else if ( 5 <= actionCard.ActionID && 7 >= actionCard.ActionID )
-                {
-                    // Steal property
-                    return StealProperty(actionCard);
-                }
-                else
-                {
-                    // The card must be a rent card.
-                    return CollectRent(actionCard);
-                }
+                return true;
+            }
+            else if (5 <= actionCard.ActionID && 7 >= actionCard.ActionID)
+            {
+                // Steal property
+                return StealProperty(actionCard);
+            }
+            else if ((ActionId.JustSayNo == (ActionId)actionCard.ActionID) || (ActionId.DoubleTheRent == (ActionId)actionCard.ActionID))
+            {
+                return false;
             }
 
-            return false;
+            // The card must be a rent card.
+            return CollectRent(actionCard);            
         }
 
         // Steal a property or set of properties from a player.
@@ -1866,8 +1912,7 @@ namespace GameClient
         private bool CollectRent( Card rentCard )
         {
             int amountToCollect = 0;
-            bool rentDoubled = false;
-            Card doubleRentCard = null;
+            var doubleTheRentCardsUsed = new List<Card>();
 
             ActionId rentCardType = (ActionId)rentCard.ActionID;
             switch (rentCardType)
@@ -1886,7 +1931,7 @@ namespace GameClient
 
                 default:
                 {
-                    List<List<Card>> matchingPropertyGroups = new List<List<Card>>();
+                    var matchingPropertyGroups = new List<List<Card>>();
 
                     // First, determine which lists on the player's field correpond to the rent card.
                     // Skip the money list.
@@ -1928,16 +1973,26 @@ namespace GameClient
                         }
                     }
 
-                    // If the player has a "Double the Rent" card and at least two actions remaining, ask if he would like to use it.
-                    doubleRentCard = FindActionCardInList(this.Player.CardsInHand, 1);
-
-                    if ( (null != doubleRentCard) && (this.Turn.ActionsRemaining >= 2) )
+                    var doubleTheRentCardsFound = this.Player.CardsInHand.Where(card => card.ActionID == (int)ActionId.DoubleTheRent).ToList();
+                    foreach (Card doubleTheRentCard in doubleTheRentCardsFound)
                     {
-                        MessageBoxResult result = MessageBox.Show("You have a " + doubleRentCard.Name + " card. Would you like to apply it to this rent?",
-                                        "Are you sure?",
-                                        MessageBoxButton.YesNo);
+                        if ( this.Turn.ActionsRemaining > 1 )
+                        {
+                            MessageBoxResult result = MessageBox.Show(
+                                $"You have a Double the Rent card. Would you like to apply it to this rent? This will cost you an action. If this is your second one, this will quadruple your rent.",
+                                "Are you sure?",
+                                MessageBoxButton.YesNo);
 
-                        rentDoubled = (MessageBoxResult.Yes == result);
+                            if ( MessageBoxResult.Yes == result )
+                            {
+                                doubleTheRentCardsUsed.Add(doubleTheRentCard);
+                                this.Turn.ActionsRemaining--;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
                     }
 
                     break;
@@ -1981,17 +2036,16 @@ namespace GameClient
             // Discard the action card and send the message to the server.
             DiscardCard(rentCard);
 
-            this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect, rentDoubled);
+            foreach (Card doubleTheRentCard in doubleTheRentCardsUsed)
+            {
+                amountToCollect *= 2;
+                DiscardCard(doubleTheRentCard);
+                this.GameEventLog.PublishPlayCardEvent(this.Player, doubleTheRentCard);
+            }
+
+            this.LastRentRequest = new ActionData.RentRequest(this.Player.Name, rentees, amountToCollect);
             ServerUtilities.SendMessage(Client, Datatype.RequestRent, this.LastRentRequest);
             this.SendPlaySoundRequestForCard(rentCard);
-
-            if ( rentDoubled )
-            {
-                // Remove the card from the player's hand and add it to the discard pile.
-                DiscardCard(doubleRentCard);
-                this.GameEventLog.PublishPlayCardEvent(this.Player, doubleRentCard);
-                this.Turn.ActionsRemaining--;
-            }
 
             // Display a messagebox informing the renter that he cannot do anything until all rentees have paid their rent.
             WaitMessage = new MessageDialog(this, ClientResourceList.PleaseWaitWindowTitle, "Waiting for rentees to pay rent...");
@@ -2021,7 +2075,7 @@ namespace GameClient
             bool acceptedDeal = false;
                         
             ClientUtilities.PlaySound(ClientResourceList.UriPathActionDing);
-            RentWindow rentWindow = new RentWindow(this.Player, renterName, rentRequest.RentAmount, rentRequest.IsDoubled);
+            RentWindow rentWindow = new RentWindow(this.Player, renterName, rentRequest.RentAmount);
 
             // Proceed only if the rentee accepted the deal.
             if ( true == rentWindow.ShowDialog() )

@@ -19,7 +19,7 @@ namespace GameClient.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -97,6 +97,42 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to true.
+        /// </summary>
+        public static string DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue {
+            get {
+                return ResourceManager.GetString("DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -DoubleClickToPlayCardAsOriginalTypeEnabled.
+        /// </summary>
+        public static string DoubleClickToPlayCardAsOriginalTypeEnabledKey {
+            get {
+                return ResourceManager.GetString("DoubleClickToPlayCardAsOriginalTypeEnabledKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to false.
+        /// </summary>
+        public static string EndTurnAfterSpendingAllActionsEnabledDefaultValue {
+            get {
+                return ResourceManager.GetString("EndTurnAfterSpendingAllActionsEnabledDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -EndTurnAfterSpendingAllActionsEnabled.
+        /// </summary>
+        public static string EndTurnAfterSpendingAllActionsEnabledKey {
+            get {
+                return ResourceManager.GetString("EndTurnAfterSpendingAllActionsEnabledKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Flip Card.
         /// </summary>
         public static string FlipCardMenuItemHeader {
@@ -111,6 +147,15 @@ namespace GameClient.Properties {
         public static string GiveFeedbackUrl {
             get {
                 return ResourceManager.GetString("GiveFeedbackUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Play as Money.
+        /// </summary>
+        public static string PlayAsMoneyMenuItemHeader {
+            get {
+                return ResourceManager.GetString("PlayAsMoneyMenuItemHeader", resourceCulture);
             }
         }
         

@@ -28,12 +28,18 @@
         <Menu Grid.Row="0"
               Grid.ColumnSpan="2">
             <MenuItem Header="Options">
-                <MenuItem Header="Sound Effects" 
+                <MenuItem Header="Play sound effects" 
                           IsCheckable="True"
                           IsChecked="{Binding AreSoundEffectsEnabled}"/>
-                <MenuItem Header="Turn Notification Pop-Up" 
+                <MenuItem Header="Show turn notification pop-up" 
                           IsCheckable="True"
                           IsChecked="{Binding IsTurnNotificationDialogEnabled}"/>
+                <MenuItem Header="End turn automatically after spending all actions" 
+                          IsCheckable="True"
+                          IsChecked="{Binding EndTurnAfterSpendingAllActionsEnabled}"/>
+                <MenuItem Header="Double click to play card as its original type" 
+                          IsCheckable="True"
+                          IsChecked="{Binding DoubleClickToPlayCardAsOriginalTypeEnabled}"/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Rules"
