@@ -58,7 +58,8 @@ namespace AdditionalWindows
 
             // Update the window to display the amount owed.
             TextBlock amountOwedTextblock = new TextBlock();
-            amountOwedTextblock.Inlines.Add(new Bold(new Run(AmountOwedLabel.Content.ToString() + rentAmount)));
+            this.amountOwed = rentAmount;
+            amountOwedTextblock.Inlines.Add(new Bold(new Run(AmountOwedLabel.Content.ToString() + this.amountOwed)));
             AmountOwedLabel.Content = amountOwedTextblock;
 
             // Add all the rentee's cards in play to the Assets listview.
