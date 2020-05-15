@@ -594,7 +594,7 @@ namespace GameClient
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An error has occurred. Exception: {ex.ToString()} ", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"An error has occurred. Exception: {ex} ", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -2462,80 +2462,6 @@ namespace GameClient
         public bool HasAltColor( Card card )
         {
             return (card.AltColor != PropertyType.None);
-        }
-
-        // This returns the number of a type of card (i.e. money, action, or property) found within
-        // a provided list of card lists.
-        private int CountOfCardTypeInList( CardType cardType, List<List<Card>> cardGroupList )
-        {
-            int count = 0;
-
-            foreach ( List<Card> cardGroup in cardGroupList )
-            {
-                foreach ( Card card in cardGroup )
-                {
-                    if ( card.Type == cardType )
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-        }
-
-        // Determine the number of a certain card type (i.e. money, action, or property) in a given grid.
-        private int CountOfCardTypeInGrid( CardType cardType, Grid grid )
-        {
-            int count = 0;
-
-            foreach ( FrameworkElement element in grid.Children )
-            {
-                Grid cardGrid = element as Grid;
-
-                foreach ( FrameworkElement innerElement in cardGrid.Children )
-                {
-                    Button existingCardButton = (Button)innerElement;
-                    Card cardInGrid = existingCardButton.Tag as Card;
-
-                    if ( cardInGrid.Type == cardType )
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-        }
-
-        // Verify that the given player name does not match the name of player than has already joined the lobby. If it does, rename the player.
-        private string VerifyPlayerName( string playerName )
-        {
-            bool hasBeenModified = false;
-            int a = 2;
-            List<string> playerNames = new List<string>();
-
-            // Generate the the list of player names.
-            foreach ( Player player in PlayerList )
-            {
-                playerNames.Add(player.Name);
-            }
-
-            while ( playerNames.Contains(playerName) )
-            {
-                if ( !hasBeenModified )
-                {
-                    playerName += a;
-                    hasBeenModified = true;
-                }
-                else
-                {
-                    ++a;
-                    playerName = playerName.Substring(0, playerName.Length - 1) + a;
-                }
-            }
-
-            return playerName;
         }
 
         #endregion
