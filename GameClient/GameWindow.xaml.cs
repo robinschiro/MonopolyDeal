@@ -578,7 +578,13 @@ namespace GameClient
                         {
                             if (this.endTurnAfterSpendingAllActionsEnabled)
                             {
-                                this.EndTurnButton_Click(this.EndTurnButton, new RoutedEventArgs());
+                                // Only auto-end turn if there are no wild properties.
+                                if (!this.Player.CardsInPlay.Skip(1).Any(cardList => cardList.Any(card => 
+                                        (PropertyType.None != card.AltColor) ||
+                                        (PropertyType.Wild == card.Color))))
+                                {
+                                    this.EndTurnButton_Click(this.EndTurnButton, new RoutedEventArgs());
+                                }
                             }
                             else
                             {
