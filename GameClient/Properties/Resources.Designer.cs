@@ -79,15 +79,6 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 50.
-        /// </summary>
-        public static string DefaultVolume {
-            get {
-                return ResourceManager.GetString("DefaultVolume", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Discard.
         /// </summary>
         public static string DiscardMenuItemHeader {
@@ -264,6 +255,24 @@ namespace GameClient.Properties {
         public static string SettingTurnNotificationDialogEnabledKey {
             get {
                 return ResourceManager.GetString("SettingTurnNotificationDialogEnabledKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 50.
+        /// </summary>
+        public static string SettingVolumeDefaultValue {
+            get {
+                return ResourceManager.GetString("SettingVolumeDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -Volume.
+        /// </summary>
+        public static string SettingVolumeKey {
+            get {
+                return ResourceManager.GetString("SettingVolumeKey", resourceCulture);
             }
         }
         
