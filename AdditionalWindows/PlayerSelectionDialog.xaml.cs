@@ -12,12 +12,12 @@ namespace AdditionalWindows
     /// <summary>
     /// Interaction logic for PlayerSelectionDialog.xaml
     /// </summary>
-    public partial class PlayerSelectionDialog : Window
+    public partial class PlayerSelectionDialog : ModalWindow
     {
         public Player SelectedPlayer;
         public bool enoughPlayers = true;
 
-        public PlayerSelectionDialog( string selector, List<Player> playerList )
+        public PlayerSelectionDialog( Window owner, string selector, List<Player> playerList ) : base(owner, isModal: false)
         {
             InitializeComponent();
 

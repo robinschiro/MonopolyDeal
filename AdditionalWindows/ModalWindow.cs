@@ -33,14 +33,14 @@ namespace AdditionalWindows
             }
         }
 
-        public ModalWindow()
+        public ModalWindow( Window owner, bool isModal = true)
         {
-            this.isModal = true;
-        }
-
-        public ModalWindow( bool isModal )
-        {
+            if (owner.IsVisible)
+            {
+                this.Owner = owner;
+            }
             this.isModal = isModal;
+            this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         }
 
         // Only allow the this window to be closed when closeWindow has been enabled.

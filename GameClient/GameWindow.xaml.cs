@@ -4,11 +4,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -288,6 +286,11 @@ namespace GameClient
                 {
                     Size_Changed(x);
                 });
+
+            // Set tooltips to stay open forever.
+            ToolTipService.InitialShowDelayProperty.OverrideMetadata(typeof(DependencyObject), new FrameworkPropertyMetadata(0));
+            ToolTipService.BetweenShowDelayProperty.OverrideMetadata(typeof(DependencyObject), new FrameworkPropertyMetadata(0));
+            ToolTipService.ShowDurationProperty.OverrideMetadata(typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
 
             // Load and apply client settings.
             this.ClientSettings = ClientUtilities.GetClientSettings(ClientResourceList.SettingsFilePath);
@@ -573,8 +576,12 @@ namespace GameClient
                         // Update animation on end turn button.
                         if ( 0 == this.Turn.ActionsRemaining )
                         {
-                            if (this.endTurnAfterSpendingAllActionsEnabled)
-                            {
+                            // Only auto-end turn if there are no wild properties.
+                            if ( this.endTurnAfterSpendingAllActionsEnabled &&
+                                !this.Player.CardsInPlay.Skip(1).Any(cardList => cardList.Any(card =>
+                                        (PropertyType.None != card.AltColor) ||
+                                        (PropertyType.Wild == card.Color))) )
+                            {                                
                                 this.EndTurnButton_Click(this.EndTurnButton, new RoutedEventArgs());
                             }
                             else
@@ -583,15 +590,11 @@ namespace GameClient
                             }
                         }
                     }
-                    else
-                    {
-                        MessageBox.Show("You cannot play this card right now!", "Invalid action");
-                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An error has occurred. Exception: {ex.ToString()} ", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"An error has occurred. Exception: {ex} ", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1192,9 +1195,15 @@ namespace GameClient
                 // unless it is placed in a monopoly.
                 case CardType.Enhancement:
                 {
-                    List<Card> monopoly = (4 == cardBeingAdded.ActionID ) ? ClientUtilities.FindMonopolyWithoutHouse(player) : ClientUtilities.FindMonopolyWithoutHotel(player);
-                    if ( null != monopoly && 
-                        MessageBoxResult.Yes == MessageBox.Show("Adding a " + cardBeingAdded.Name + " to your monopoly will prevent you from being able to separate any " + 
+                    List<Card> monopoly = ( ActionId.House == (ActionId)cardBeingAdded.ActionID ) ? ClientUtilities.FindMonopolyWithoutHouse(player) : ClientUtilities.FindMonopolyWithoutHotel(player);
+
+                    if (null == monopoly)
+                    {
+                        MessageBox.Show($"You cannot play a {cardBeingAdded.Name} right now! You do not have any monopolies that can accept it.", "Invalid action");
+                        return false;
+                    }
+
+                    if ( MessageBoxResult.Yes == MessageBox.Show("Adding a " + cardBeingAdded.Name + " to your monopoly will prevent you from being able to separate any " + 
                                                                 "property wild cards from the set unless you have another monopoly that you can move the " + cardBeingAdded.Name + " to. \n\n" +
                                                                 "Are you sure you want to do this?", 
                                                                 "Are you sure you want to play your " + cardBeingAdded.Name + "?", MessageBoxButton.YesNo) )
@@ -1204,7 +1213,7 @@ namespace GameClient
 
                         return true;
                     }
-                    
+
                     return false;
                 }
                 case CardType.Money:
@@ -1799,6 +1808,7 @@ namespace GameClient
             }
             else if ((ActionId.JustSayNo == (ActionId)actionCard.ActionID) || (ActionId.DoubleTheRent == (ActionId)actionCard.ActionID))
             {
+                MessageBox.Show($"You cannot play a {actionCard.Name} right now!", "Invalid action");
                 return false;
             }
 
@@ -1810,7 +1820,7 @@ namespace GameClient
         private bool StealProperty( Card stealCard )
         {
             // Display the list of players.
-            PlayerSelectionDialog dialog = new PlayerSelectionDialog(this.Player.Name, PlayerList);
+            PlayerSelectionDialog dialog = new PlayerSelectionDialog(this, this.Player.Name, PlayerList);
             if ( dialog.enoughPlayers && true == dialog.ShowDialog() )
             {
                 TheftType theftType = (TheftType)(stealCard.ActionID);
@@ -1857,7 +1867,7 @@ namespace GameClient
                 }
 
                 // Display the property theft window.
-                PropertyTheftWindow propertyTheftWindow = new PropertyTheftWindow(dialog.SelectedPlayer, this.Player, stealCard.ActionID);
+                PropertyTheftWindow propertyTheftWindow = new PropertyTheftWindow(this, dialog.SelectedPlayer, this.Player, stealCard.ActionID);
                 bool isDealBreaker = (TheftType.Dealbreaker == theftType);
 
                 if ( true == propertyTheftWindow.ShowDialog() )
@@ -2009,7 +2019,7 @@ namespace GameClient
                 NumberOfRentees = 1;
 
                 // Display the list of players.
-                PlayerSelectionDialog dialog = new PlayerSelectionDialog(this.Player.Name, PlayerList);
+                PlayerSelectionDialog dialog = new PlayerSelectionDialog(this, this.Player.Name, PlayerList);
                 if ( dialog.enoughPlayers && true == dialog.ShowDialog() )
                 {
                     // Send the rent request to the selected player.
@@ -2075,7 +2085,7 @@ namespace GameClient
             bool acceptedDeal = false;
                         
             ClientUtilities.PlaySound(ClientResourceList.UriPathActionDing);
-            RentWindow rentWindow = new RentWindow(this.Player, renterName, rentRequest.RentAmount);
+            RentWindow rentWindow = new RentWindow(this, this.Player, renterName, rentRequest.RentAmount);
 
             // Proceed only if the rentee accepted the deal.
             if ( true == rentWindow.ShowDialog() )
@@ -2183,7 +2193,7 @@ namespace GameClient
                     Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
                     // If the renter has his own Just Say No, ask the renter if he wants to use it.
                     // If yes, send the rent request again.
-                    bool playerWantsToUseJustSayNo = ClientUtilities.AskPlayerAboutJustSayNo("Rest Request Rejected", message, playerHasJustSayNo: null != justSayNo);
+                    bool playerWantsToUseJustSayNo = this.AskPlayerAboutJustSayNo("Rest Request Rejected", message, playerHasJustSayNo: null != justSayNo);
                     if ( playerWantsToUseJustSayNo )
                     {
                         // By the time the renter presses "Yes", he may have already used all of his Just Say No cards. Verify that he still have one before moving on.
@@ -2257,7 +2267,7 @@ namespace GameClient
             // Display the message box to the victim.
             Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
             ClientUtilities.PlaySound(ClientResourceList.UriPathActionDing);
-            bool playerWantsToUseJustSayNo = ClientUtilities.AskPlayerAboutJustSayNo("Theft Request", message, playerHasJustSayNo: null != justSayNo);
+            bool playerWantsToUseJustSayNo = this.AskPlayerAboutJustSayNo("Theft Request", message, playerHasJustSayNo: null != justSayNo);
 
             if ( playerWantsToUseJustSayNo )
             {
@@ -2325,7 +2335,7 @@ namespace GameClient
 
                 // If the thief chooses to play a Just Say No, send the theft request again.
                 Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
-                bool playerWantsToUseJustSayNo = ClientUtilities.AskPlayerAboutJustSayNo("Deal Rejected", message, playerHasJustSayNo: null != justSayNo);
+                bool playerWantsToUseJustSayNo = this.AskPlayerAboutJustSayNo("Deal Rejected", message, playerHasJustSayNo: null != justSayNo);
                 if ( playerWantsToUseJustSayNo )
                 {
                     PlayJustSayNo(justSayNo);
@@ -2372,6 +2382,35 @@ namespace GameClient
         {
             this.EndTurnButton.Background = new SolidColorBrush(Colors.Gray);
             this.EndTurnButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, this.EndTurnButtonAnimation);
+        }
+
+        #endregion
+
+
+        #region Just Say No Handling
+
+        private bool AskPlayerAboutJustSayNo(string title, string baseMessage, bool playerHasJustSayNo )
+        {
+            MessageDialog messageDialog;     
+            bool useJustSayNo = false;
+            if ( playerHasJustSayNo )
+            {
+                messageDialog = new MessageDialog(this, title, baseMessage + "\n\nWould you like to use your \"Just Say No!\" card?", MessageBoxButton.OKCancel);
+                messageDialog.ShowDialog();
+                if ( MessageBoxResult.OK == messageDialog.Result )
+                {
+                    messageDialog = new MessageDialog(this, "Confirmation", "Are you sure you want to use your \"Just Say No!\" card?", MessageBoxButton.OKCancel);
+                    messageDialog.ShowDialog();
+                    useJustSayNo = MessageBoxResult.OK == messageDialog.Result;
+                }
+            }
+            else
+            {
+                messageDialog = new MessageDialog(this, title, baseMessage + "\n\nPress OK to continue.", MessageBoxButton.OK);
+                messageDialog.ShowDialog();
+            }
+
+            return useJustSayNo;
         }
 
         #endregion
@@ -2459,80 +2498,6 @@ namespace GameClient
         public bool HasAltColor( Card card )
         {
             return (card.AltColor != PropertyType.None);
-        }
-
-        // This returns the number of a type of card (i.e. money, action, or property) found within
-        // a provided list of card lists.
-        private int CountOfCardTypeInList( CardType cardType, List<List<Card>> cardGroupList )
-        {
-            int count = 0;
-
-            foreach ( List<Card> cardGroup in cardGroupList )
-            {
-                foreach ( Card card in cardGroup )
-                {
-                    if ( card.Type == cardType )
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-        }
-
-        // Determine the number of a certain card type (i.e. money, action, or property) in a given grid.
-        private int CountOfCardTypeInGrid( CardType cardType, Grid grid )
-        {
-            int count = 0;
-
-            foreach ( FrameworkElement element in grid.Children )
-            {
-                Grid cardGrid = element as Grid;
-
-                foreach ( FrameworkElement innerElement in cardGrid.Children )
-                {
-                    Button existingCardButton = (Button)innerElement;
-                    Card cardInGrid = existingCardButton.Tag as Card;
-
-                    if ( cardInGrid.Type == cardType )
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-        }
-
-        // Verify that the given player name does not match the name of player than has already joined the lobby. If it does, rename the player.
-        private string VerifyPlayerName( string playerName )
-        {
-            bool hasBeenModified = false;
-            int a = 2;
-            List<string> playerNames = new List<string>();
-
-            // Generate the the list of player names.
-            foreach ( Player player in PlayerList )
-            {
-                playerNames.Add(player.Name);
-            }
-
-            while ( playerNames.Contains(playerName) )
-            {
-                if ( !hasBeenModified )
-                {
-                    playerName += a;
-                    hasBeenModified = true;
-                }
-                else
-                {
-                    ++a;
-                    playerName = playerName.Substring(0, playerName.Length - 1) + a;
-                }
-            }
-
-            return playerName;
         }
 
         #endregion
