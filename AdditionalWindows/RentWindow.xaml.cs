@@ -49,7 +49,7 @@ namespace AdditionalWindows
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public RentWindow( Player rentee, string renterName, int rentAmount )
+        public RentWindow( Window owner, Player rentee, string renterName, int rentAmount ) : base(owner)
         {
             Payment = new ObservableCollection<Card>();
             Assets = new ObservableCollection<Card>();
@@ -166,10 +166,10 @@ namespace AdditionalWindows
 
         private void JustSayNoButton_Click( object sender, RoutedEventArgs e )
         {
-            MessageBoxResult result = MessageBox.Show("Are you sure you want to use your \"Just Say No!\" card?", "Confirmation", MessageBoxButton.OKCancel);
-            if ( MessageBoxResult.OK == result )
+            var messageDialog = new MessageDialog(this, "Confirmation", "Are you sure you want to use your \"Just Say No!\" card?", MessageBoxButton.OKCancel);
+            messageDialog.ShowDialog();            
+            if ( MessageBoxResult.OK == messageDialog.Result )
             {
-                // Mark the result of the dialog as false and close it.
                 this.dialogResult = false;
                 this.CloseWindow = true;
             }

@@ -1,21 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Threading;
-using System.ComponentModel;
 
 namespace AdditionalWindows
-{    
+{
     // <summary>
     /// Interaction logic for MessageDialog.xaml
     /// </summary>
@@ -23,27 +10,36 @@ namespace AdditionalWindows
     {
         public MessageBoxResult Result { get; set; }
 
-        public MessageDialog( Window owner, string title, string message, MessageBoxButton option = (MessageBoxButton)(-1), bool isModal = true ) : base( isModal )
+        public MessageDialog( Window owner, string title, string message, MessageBoxButton option = (MessageBoxButton)(-1), bool isModal = true ) : base(owner, isModal)
         {
             InitializeComponent();
             this.Title = title;
-            this.MessageLabel.Content = message;
+            this.MessageLabel.Text = message;
 
             if ( owner.IsVisible )
             {
                 this.Owner = owner;
-            }
+            }    
 
-            // Set the window's width to be large enough to contain the message.
-            this.Loaded += new RoutedEventHandler(( sender, args ) => { this.Width = this.MessageLabel.ActualWidth + 100; });            
+            switch (option)
+            {
+                case MessageBoxButton.YesNo:
+                {
+                    this.YesNoGrid.Visibility = Visibility.Visible;
+                    break;
+                }
 
-            if ( MessageBoxButton.YesNo == option )
-            {
-                this.YesNoGrid.Visibility = Visibility.Visible;
-            }
-            else if ( MessageBoxButton.OK == option )
-            {
-                this.OkButton.Visibility = Visibility.Visible;
+                case MessageBoxButton.OKCancel:
+                {
+                    this.OkCancelGrid.Visibility = Visibility.Visible;
+                    break;
+                }
+
+                case MessageBoxButton.OK:
+                {
+                    this.OkButton.Visibility = Visibility.Visible;
+                    break;
+                }
             }
         }
 
@@ -62,6 +58,12 @@ namespace AdditionalWindows
         private void OkButton_Click( object sender, RoutedEventArgs e )
         {
             this.Result = MessageBoxResult.OK;
+            CloseWindow = true;
+        }
+
+        private void CancelButton_Click( object sender, RoutedEventArgs e )
+        {
+            this.Result = MessageBoxResult.Cancel;
             CloseWindow = true;
         }
 

@@ -5,20 +5,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:src="clr-namespace:AdditionalWindows" 
              mc:Ignorable="d"               
-             Title="Message" 
-             Width="250" 
-             Height="200"
+             Title="Message"
              KeyDown="ModalWindow_KeyDown"
-             WindowStartupLocation="CenterOwner">
-    <Grid>
+             SizeToContent="WidthAndHeight"
+             >
+    <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Label Name="MessageLabel"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Grid.Row="0"/>
+        <TextBox    Name="MessageLabel"
+                    IsReadOnly="True"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    TextWrapping="Wrap"
+                    BorderThickness="0"
+                    MaxWidth="300"
+                    Margin="10"
+                    Text ="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras varius, lacus quis rutrum pretium, nunc justo hendrerit augue, id tristique erat sem eget diam. Donec elit libero, aliquam eget nisi convallis, pellentesque gravida velit."
+                    Grid.Row="0"/>
         
         <Grid Name="YesNoGrid"
               Visibility="Hidden"
@@ -31,18 +36,40 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             
-            <Button Name="YesButton"
-                    Content="Yes"
+            <Button Content="Yes"
                     Margin="0,0,5,0"
                     Width="50"
                     Click="YesButton_Click"
                     Grid.Column="0" />
 
-            <Button Name="NoButton"
-                    Content="No"
+            <Button Content="No"
                     Margin="5,0,0,0"
                     Width="50"
                     Click="NoButton_Click"
+                    Grid.Column="1" />
+        </Grid>
+
+        <Grid Name="OkCancelGrid"
+              Visibility="Hidden"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Grid.Row="1">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Button Content="OK"
+                    Margin="0,0,5,0"
+                    Width="50"
+                    Click="OkButton_Click"
+                    Grid.Column="0" />
+
+            <Button Content="Cancel"
+                    Margin="5,0,0,0"
+                    Width="50"
+                    Click="CancelButton_Click"
                     Grid.Column="1" />
         </Grid>
 

@@ -1,6 +1,7 @@
-﻿<Window x:Class="AdditionalWindows.PlayerSelectionDialog"
+﻿<src:ModalWindow x:Class="AdditionalWindows.PlayerSelectionDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:src="clr-namespace:AdditionalWindows"
         Title="Select Player" 
         Height="300" 
         Width="300">
@@ -18,4 +19,4 @@
                     Click="SelectPlayer_Click"
                     Grid.Row="1"/>
     </Grid>
-</Window>
+</src:ModalWindow>

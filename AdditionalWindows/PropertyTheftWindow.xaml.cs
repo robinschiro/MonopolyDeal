@@ -69,9 +69,8 @@ namespace AdditionalWindows
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public PropertyTheftWindow( Player victim, Player thief, int actionId )
+        public PropertyTheftWindow( Window owner, Player victim, Player thief, int actionId ) : base(owner, isModal: false)
         {
-            base.isModal = false;
             AssetsOfVictim = new ObservableCollection<Card>();
             this.victim = victim;
             this.thief = thief;
