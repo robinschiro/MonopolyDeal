@@ -28,9 +28,6 @@
         <Menu Grid.Row="0"
               Grid.ColumnSpan="2">
             <MenuItem Header="Options">
-                <MenuItem Header="Play sound effects" 
-                          IsCheckable="True"
-                          IsChecked="{Binding AreSoundEffectsEnabled}"/>
                 <MenuItem Header="Show turn notification pop-up" 
                           IsCheckable="True"
                           IsChecked="{Binding IsTurnNotificationDialogEnabled}"/>
@@ -46,6 +43,23 @@
                           Click="RulesButton_Click"/>
                 <MenuItem Header="Give Feedback"
                           Click="GiveFeedbackButton_Click"/>
+            </MenuItem>
+            <MenuItem Header="Volume"
+                      IsCheckable="False">
+                <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal">
+                    <Slider Value="{Binding Volume}"
+                            Maximum="100"
+                            Width="100" 
+                            TickFrequency="1"
+                            IsSnapToTickEnabled="True"
+                            Margin="5"/>
+                    <TextBox Text="{Binding Volume}"
+                             TextAlignment="Right" 
+                             Width="30"
+                             Margin="5"/>
+                </StackPanel>
             </MenuItem>
         </Menu>
 

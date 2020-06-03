@@ -120,9 +120,6 @@
   <data name="AddEnhancementMenuItemHeader" xml:space="preserve">
     <value>Add to Monopoly</value>
   </data>
-  <data name="DefaultVolume" xml:space="preserve">
-    <value>50</value>
-  </data>
   <data name="DiscardMenuItemHeader" xml:space="preserve">
     <value>Discard</value>
   </data>
@@ -200,5 +197,11 @@
   </data>
   <data name="PlayAsMoneyMenuItemHeader" xml:space="preserve">
     <value>Play as Money</value>
+  </data>
+  <data name="SettingVolumeDefaultValue" xml:space="preserve">
+    <value>50</value>
+  </data>
+  <data name="SettingVolumeKey" xml:space="preserve">
+    <value>-Volume</value>
   </data>
 </root>

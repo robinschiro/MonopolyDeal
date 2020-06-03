@@ -74,24 +74,6 @@ namespace GameClient
         }
 
         #region Client Config
-        private bool areSoundEffectsEnabled;
-        public bool AreSoundEffectsEnabled
-        {
-            get
-            {
-                return areSoundEffectsEnabled;
-            }
-            set
-            {
-                areSoundEffectsEnabled = value;
-
-                ClientUtilities.SetClientVolume(value ? Convert.ToInt32(ClientResourceList.DefaultVolume) : 0);
-                this.ClientSettings[ClientResourceList.SettingSoundEffectsEnabledKey] = value;
-                this.ClientSettings.Save();
-
-                OnPropertyChanged("AreSoundEffectsEnabled");
-            }
-        }
 
         private bool isTurnNotificationDialogEnabled;
         public bool IsTurnNotificationDialogEnabled
@@ -141,6 +123,24 @@ namespace GameClient
                 this.ClientSettings.Save();
 
                 OnPropertyChanged("DoubleClickToPlayCardAsOriginalTypeEnabled");
+            }
+        }
+
+        private int volume;
+        public int Volume
+        {
+            get
+            {
+                return volume;
+            }
+            set
+            {
+                volume = value;
+                ClientUtilities.SetClientVolume(value);
+                this.ClientSettings[ClientResourceList.SettingVolumeKey] = value;
+                this.ClientSettings.Save();
+
+                OnPropertyChanged("Volume");
             }
         }
 
@@ -295,10 +295,10 @@ namespace GameClient
 
             // Load and apply client settings.
             this.ClientSettings = ClientUtilities.GetClientSettings(ClientResourceList.SettingsFilePath);
-            this.AreSoundEffectsEnabled = this.ClientSettings.bValue(ClientResourceList.SettingSoundEffectsEnabledKey, Convert.ToBoolean(ClientResourceList.SettingSoundEffectsEnabledDefaultValue));
             this.IsTurnNotificationDialogEnabled = this.ClientSettings.bValue(ClientResourceList.SettingTurnNotificationDialogEnabledKey, Convert.ToBoolean(ClientResourceList.SettingTurnNotificationDialogEnabledDefaultValue));
             this.EndTurnAfterSpendingAllActionsEnabled = this.ClientSettings.bValue(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledKey, Convert.ToBoolean(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledDefaultValue));
             this.DoubleClickToPlayCardAsOriginalTypeEnabled = this.ClientSettings.bValue(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledKey, Convert.ToBoolean(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue));
+            this.Volume = this.ClientSettings.iValue(ClientResourceList.SettingVolumeKey, Convert.ToInt32(ClientResourceList.SettingVolumeDefaultValue));
         }
 
         #region Client Communication Code
