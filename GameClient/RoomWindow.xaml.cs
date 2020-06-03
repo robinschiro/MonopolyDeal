@@ -267,7 +267,7 @@ namespace GameClient
 
         private void CloseLobby()
         {
-            MessageBox.Show("You cannot join this game because it has already started.", "Cannot Join Game", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("You cannot join this game because the server is not running or the game has already started.", "Cannot Join Game", MessageBoxButton.OK, MessageBoxImage.Error);
             this.Close();
         }
 
