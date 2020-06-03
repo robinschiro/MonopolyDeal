@@ -13,6 +13,7 @@
         
         <ListBox    Name="PlayerListBox"
                     DisplayMemberPath="Name"
+                    MouseDoubleClick="SelectPlayer_Click"
                     Grid.Row="0"/>        
         <Button     Name="SelectPlayerButton"
                     Content="Select Player"
