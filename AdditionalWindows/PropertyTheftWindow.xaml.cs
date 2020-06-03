@@ -198,15 +198,8 @@ namespace AdditionalWindows
         // A Treeview class used to display the properties of a player.
         private class PropertyHierarchyView : TreeView
         {
-            private Player player;
-            private bool showMonopoliesOnly;
-
             public PropertyHierarchyView( Player player, bool onlyMonopoliesSelectable, bool isThiefAssets = false )
             {
-                // Instantiate member variables.
-                this.player = player;
-                this.showMonopoliesOnly = onlyMonopoliesSelectable;
-
                 List<List<Card>> cardGroups;
 
                 if ( isThiefAssets )
@@ -215,7 +208,7 @@ namespace AdditionalWindows
                 }
                 else
                 {
-                    cardGroups = onlyMonopoliesSelectable ? (ClientUtilities.FindMonopolies(player)) : new List<List<Card>>(player.CardsInPlay.Skip(1).Where(cardList => !ClientUtilities.IsCardListMonopoly(cardList)));
+                    cardGroups = onlyMonopoliesSelectable ? ClientUtilities.FindMonopolies(player) : player.CardsInPlay.Skip(1).ToList();
                 }
 
                 // Populate the tree with cards from the player's cards in play.
@@ -227,18 +220,31 @@ namespace AdditionalWindows
                     potentialMonopoly.Header = ClientUtilities.GetCardListColor(cardList).ToString() + " Group";
                     this.Items.Add(potentialMonopoly);
 
+                    bool isMonopoly = ClientUtilities.IsCardListMonopoly(cardList);
+
                     // Display the properties from the group under the group label.
                     foreach ( Card property in cardList )
                     {
                         TreeViewItem propertyItem = new TreeViewItem();
                         propertyItem.Header = property.Name;
                         propertyItem.Tag = property;
-                        propertyItem.IsEnabled = !onlyMonopoliesSelectable;
+                        propertyItem.IsEnabled = !onlyMonopoliesSelectable && !isMonopoly;
 
-                        Image tooltip = new Image();
-                        tooltip.Source = this.TryFindResource(property.CardImageUriPath) as DrawingImage;
-                        tooltip.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
-                        propertyItem.ToolTip = tooltip;
+                        if ( onlyMonopoliesSelectable )
+                        {
+                            propertyItem.ToolTip = "You must select a monopoly, not an individual property";
+                        }
+                        else if (isMonopoly)
+                        {
+                            propertyItem.ToolTip = "You cannot select this property because it is part of a monopoly";
+                        }
+                        else
+                        {
+                            Image tooltip = new Image();
+                            tooltip.Source = this.TryFindResource(property.CardImageUriPath) as DrawingImage;
+                            tooltip.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
+                            propertyItem.ToolTip = tooltip;
+                        }
 
                         potentialMonopoly.Items.Add(propertyItem);                        
                     }
