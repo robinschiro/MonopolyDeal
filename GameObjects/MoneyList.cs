@@ -9,7 +9,7 @@ namespace GameObjects
 {
     public class MoneyList : ObservableCollection<int>, INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        protected override event PropertyChangedEventHandler PropertyChanged;
 
         private Dictionary<int, int> ValueToIndexMap = new Dictionary<int, int>();
         private int total;
