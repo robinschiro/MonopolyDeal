@@ -62,8 +62,6 @@
     <Compile Include="Deck.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources\tvToolbox\tvExtensions.cs" />
-    <Compile Include="Resources\tvToolbox\tvFetchResource.cs" />
     <Compile Include="Resources\tvToolbox\tvProfile.cs" />
   </ItemGroup>
   <ItemGroup>
