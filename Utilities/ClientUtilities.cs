@@ -260,10 +260,14 @@ namespace Utilities
 
         #region Client Settings
 
-        public static tvProfile GetClientSettings(string settingsPath)
+        public static tvProfile GetClientSettings( string settingsPath )
         {
             string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), settingsPath);
-            return new tvProfile(settingsFilePath, tvProfileFileCreateActions.NoPromptCreateFile, abUseXmlFiles: true);
+            tvProfile profile = new tvProfile();
+            profile.bEnableFileLock = false;
+            profile.Load(settingsFilePath, tvProfileLoadActions.Overwrite);
+
+            return profile;
         }
 
         public static bool DetermineIfPlayerHasWon( Player player )
