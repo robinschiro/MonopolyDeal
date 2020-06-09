@@ -9,6 +9,7 @@ using AutoUpdaterDotNET;
 using ResourceList = GameClient.Properties.Resources;
 using tvToolbox;
 using Utilities;
+using System.Reflection;
 
 namespace GameClient
 {
@@ -23,7 +24,7 @@ namespace GameClient
         {
             InitializeComponent();
 
-            this.Title = "Monopoly Deal Setup";
+            this.Title = $"Monopoly Deal v{Assembly.GetEntryAssembly().GetName().Version}";
 
             // Load cached settings from Profile.
             settings = ClientUtilities.GetClientSettings(ResourceList.SettingsFilePath);
