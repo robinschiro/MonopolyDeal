@@ -11,7 +11,7 @@
     <Media Id='1' Cabinet='Monopolydeal.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
     <Property Id='DiskPrompt' Value="MonopolyDeal Installation [1]" />
 
-    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of MonopolyDeal is already installed." />
+    <MajorUpgrade AllowDowngrades="yes" />
 
     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id='ProgramFilesFolder' Name='PFiles'>
@@ -51,6 +51,9 @@
           <Component Id='AutoUpdater' Guid='D355869F-E48F-4FB8-A8DE-6033DA0FD743'>
             <File Id='AutoUpdaterDLL' Name='AutoUpdater.NET.dll' DiskId='1' Source='..\Release\AutoUpdater.NET.dll' KeyPath='yes' />
           </Component>
+          <Component Id='tvToolbox' Guid='94B7A5D4-C33C-4CA4-A457-1615CB4E2BF4'>
+            <File Id='tvToolboxDLL' Name='tvToolbox.Net.dll' DiskId='1' Source='..\Release\tvToolbox.Net.dll' KeyPath='yes' />
+          </Component>
             
           <!--<Component Id='' Guid=''>
             <File Id='DLL' Name='AdditionalWindows.dll' DiskId='1' Source='..\Release\AdditionalWindows.dll' KeyPath='yes' />
@@ -82,6 +85,7 @@
       <ComponentRef Id='SystemReactiveInterfaces' />
       <ComponentRef Id='SystemReactiveLinq' />
       <ComponentRef Id='AutoUpdater' />
+      <ComponentRef Id='tvToolbox' />
       <ComponentRef Id='ProgramMenuDir' />
     </Feature>
 
