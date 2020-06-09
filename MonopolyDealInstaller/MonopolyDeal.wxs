@@ -11,7 +11,7 @@
     <Media Id='1' Cabinet='Monopolydeal.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
     <Property Id='DiskPrompt' Value="MonopolyDeal Installation [1]" />
 
-    <MajorUpgrade AllowDowngrades="yes" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of MonopolyDeal is already installed." />
 
     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id='ProgramFilesFolder' Name='PFiles'>

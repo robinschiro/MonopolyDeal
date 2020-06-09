@@ -7,3 +7,4 @@ bin
 Release
 ProfileDev.txt
 .vs
+*.user
