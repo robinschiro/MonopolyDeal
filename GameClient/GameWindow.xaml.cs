@@ -381,6 +381,7 @@ namespace GameClient
                         case Datatype.UpdateDeck:
                         {
                             this.Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
+                            CreateNewThread(new Action<Object>(( sender ) => { this.DeckDisplay.CardCount = this.Deck.CardList.Count; }));                            
 
                             // Close the wait message if it is open and we have not received the deck yet.
                             if ( !this.ReceivedDeck && null != this.WaitMessage && !this.WaitMessage.CloseWindow )
@@ -888,17 +889,18 @@ namespace GameClient
         // Update the discard pile card so that it displays the last card in the discard pile.
         public void DisplayUpdatedDiscardPile( Object filler = null )
         {
-            // If the discard pile is empty, display nothing in its associated grid.
+            // If the discard pile is empty, display nothing.
             if ( 0 == this.DiscardPile.Count )
             {
-                DiscardPileGrid.Children.Clear();
+                this.DiscardPileDisplay.DisplayImage = null;
+                this.DiscardPileDisplay.CardCount = 0;
             }
             // Otherwise, display only the last card in the discard pile.
             else
             {
                 Card discardedCard = this.DiscardPile[this.DiscardPile.Count - 1];
-                Button cardButton = ConvertCardToButton(discardedCard);
-                DiscardPileGrid.Children.Add(cardButton);
+                this.DiscardPileDisplay.DisplayImage = this.TryFindResource(discardedCard.CardImageUriPath) as DrawingImage;
+                this.DiscardPileDisplay.CardCount = this.DiscardPile.Count;
             }
         }
 
@@ -2223,6 +2225,7 @@ namespace GameClient
                 if ( 0 == this.NumberOfRentees && null != WaitMessage )
                 {
                     WaitMessage.CloseWindow = true;
+                    ClientUtilities.PlaySound(ClientResourceList.UriPathTurnDing);
                 }
             }
             else
