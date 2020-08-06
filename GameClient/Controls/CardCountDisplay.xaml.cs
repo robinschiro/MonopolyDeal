@@ -13,7 +13,14 @@ namespace GameClient.Controls
         {
             set
             {
-                this.DisplayText = "x" + value;
+                if ( 0 == value )
+                {
+                    this.DisplayText = string.Empty;
+                }
+                else
+                {
+                    this.DisplayText = $"x{value}";
+                }
                 OnPropertyChanged("DisplayText");
             }
         }
