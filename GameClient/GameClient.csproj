@@ -87,6 +87,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\CardCountDisplay.xaml.cs">
+      <DependentUpon>CardCountDisplay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EventLog.xaml.cs">
       <DependentUpon>EventLog.xaml</DependentUpon>
     </Compile>
@@ -102,6 +105,10 @@
     <Compile Include="RoomWindow.xaml.cs">
       <DependentUpon>RoomWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\CardCountDisplay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="EventLog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
