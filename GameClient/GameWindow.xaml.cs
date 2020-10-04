@@ -1871,7 +1871,6 @@ namespace GameClient
 
                 // Display the property theft window.
                 PropertyTheftWindow propertyTheftWindow = new PropertyTheftWindow(this, dialog.SelectedPlayer, this.Player, stealCard.ActionID);
-                bool isDealBreaker = (TheftType.Dealbreaker == theftType);
 
                 if ( true == propertyTheftWindow.ShowDialog() )
                 {
@@ -2083,74 +2082,77 @@ namespace GameClient
         private void DisplayRentWindow( Object request )
         {
             ActionData.RentRequest rentRequest = (ActionData.RentRequest)request;
-            String renterName = rentRequest.RenterName;
+            string renterName = rentRequest.RenterName;
             List<Card> payment = new List<Card>();
-            bool acceptedDeal = false;
-                        
-            ClientUtilities.PlaySound(ClientResourceList.UriPathActionDing);
-            RentWindow rentWindow = new RentWindow(this, this.Player, renterName, rentRequest.RentAmount);
+            bool acceptedDeal = true;
 
-            // Proceed only if the rentee accepted the deal.
-            if ( true == rentWindow.ShowDialog() )
+
+            if ( Card.SumOfCardValues(this.Player.CardsInPlay.SelectMany(c => c).ToList()) > 0 )
             {
-                acceptedDeal = true;
+                ClientUtilities.PlaySound(ClientResourceList.UriPathActionDing);
+                RentWindow rentWindow = new RentWindow(this, this.Player, renterName, rentRequest.RentAmount);
 
-                // Retrieve the list of cards that the rentee selected as payment. All enhancement cards should be converted to money.
-                payment = rentWindow.Payment.Select(card =>
+                // Proceed only if the rentee accepted the deal.
+                if ( true == rentWindow.ShowDialog() )
                 {
-                    if (card.Type == CardType.Enhancement)
+                    // Retrieve the list of cards that the rentee selected as payment. All enhancement cards should be converted to money.
+                    payment = rentWindow.Payment.Select(card =>
                     {
-                        card.Type = CardType.Money;
+                        if ( card.Type == CardType.Enhancement )
+                        {
+                            card.Type = CardType.Money;
+                        }
+                        return card;
+                    }).ToList();
+
+                    // Retrieve the player object representing the renter.
+                    Player renter = this.PlayerList.Find(player => player.Name == rentRequest.RenterName);
+
+                    // Remove the cards of the payment from the rentee.
+                    foreach ( Card card in payment )
+                    {
+                        RemoveCardFromCardsInPlay(card, this.Player);
+
+                        // If a money card is used as payment, remove it from the MoneyList.
+                        if ( CardType.Money == card.Type )
+                        {
+                            this.Player.MoneyList.Remove(card);
+                        }
                     }
-                    return card;
-                }).ToList();
-   
-                // Retrieve the player object representing the renter.
-                Player renter = this.PlayerList.Find(player => player.Name == rentRequest.RenterName);
 
-                // Remove the cards of the payment from the rentee.
-                foreach ( Card card in payment )
-                {
-                    RemoveCardFromCardsInPlay(card, this.Player);
-
-                    // If a money card is used as payment, remove it from the MoneyList.
-                    if ( CardType.Money == card.Type )
+                    // If there are any card lists that contain an enhancement card but are not monopolies, then place the enhancement card(s) in the player's bank.
+                    bool enhancementsWereConverted = false;
+                    List<List<Card>> nonMonopolies = this.Player.CardsInPlay.Where(cardList => !ClientUtilities.IsCardListMonopoly(cardList)).ToList<List<Card>>();
+                    foreach ( List<Card> cardList in nonMonopolies )
                     {
-                        this.Player.MoneyList.Remove(card);
+                        List<Card> enhancements = cardList.Where(card => card.Type == CardType.Enhancement).ToList<Card>();
+                        foreach ( Card enhancement in enhancements )
+                        {
+                            RemoveCardFromCardsInPlay(enhancement, this.Player);
+                            enhancement.Type = CardType.Money;
+                            AddCardToCardsInPlay(enhancement, this.Player);
+
+                            enhancementsWereConverted = true;
+                        }
+                    }
+
+                    // Display this player's updated CardsInPlay.
+                    DisplayCardsInPlay(this.Player, PlayerOneField);
+
+                    if ( enhancementsWereConverted )
+                    {
+                        MessageBox.Show("The Houses/Hotels on any full sets that you needed to break up were converted to money and placed in your bank.");
                     }
                 }
-
-                // If there are any card lists that contain an enhancement card but are not monopolies, then place the enhancement card(s) in the player's bank.
-                bool enhancementsWereConverted = false;
-                List<List<Card>> nonMonopolies = this.Player.CardsInPlay.Where(cardList => !ClientUtilities.IsCardListMonopoly(cardList)).ToList<List<Card>>();
-                foreach ( List<Card> cardList in nonMonopolies )
+                else
                 {
-                    List<Card> enhancements = cardList.Where(card => card.Type == CardType.Enhancement).ToList<Card>();
-                    foreach (Card enhancement in enhancements)
+                    // Remove the Just Say No from the victim's hand and add it to the discard pile.
+                    Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
+                    if ( null != justSayNo )
                     {
-                        RemoveCardFromCardsInPlay(enhancement, this.Player);
-                        enhancement.Type = CardType.Money;
-                        AddCardToCardsInPlay(enhancement, this.Player);
-
-                        enhancementsWereConverted = true;
-                    }                 
-                }
-                
-                // Display this player's updated CardsInPlay.
-                DisplayCardsInPlay(this.Player, PlayerOneField);
-
-                if ( enhancementsWereConverted )
-                {
-                    MessageBox.Show("The Houses/Hotels on any full sets that you needed to break up were converted to money and placed in your bank.");
-                }
-            }
-            else
-            {
-                // Remove the Just Say No from the victim's hand and add it to the discard pile.
-                Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
-                if ( null != justSayNo )
-                {
-                    PlayJustSayNo(justSayNo);
+                        acceptedDeal = false;
+                        PlayJustSayNo(justSayNo);
+                    }
                 }
             }
 
@@ -2389,7 +2391,6 @@ namespace GameClient
         }
 
         #endregion
-
 
         #region Just Say No Handling
 

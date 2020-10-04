@@ -95,7 +95,16 @@ namespace GameClient
 
         public void PublishPayRentEvent( Player renter, Player rentee, List<Card> assetsPaid )
         {
-            string eventLine = $"{rentee.Name} paid {renter.Name } ${assetsPaid.Sum(card => card.Value)}M with the following assets: {string.Join(", ", assetsPaid.Select(card => $"[{card.CardID}]"))}";
+            int totalRent = assetsPaid.Sum(card => card.Value);
+            string eventLine = string.Empty;
+            if ( totalRent > 0 )
+            {
+                eventLine = $"{rentee.Name} paid {renter.Name } ${totalRent}M with the following assets: {string.Join(", ", assetsPaid.Select(card => $"[{card.CardID}]"))}";
+            }
+            else
+            {
+                eventLine = $"{rentee.Name} does not have any assets to pay {renter.Name} with";
+            }
 
             this.PublishEvent(eventLine);
         }
