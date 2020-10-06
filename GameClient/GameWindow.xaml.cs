@@ -546,6 +546,12 @@ namespace GameClient
                     // Add the card to the Player's playing field (if it is not an action card).
                     if ( cardBeingPlayed.Type != CardType.Action )
                     {
+                        if ( PropertyType.Wild == cardBeingPlayed.Color &&
+                            this.Player.CardsInPlay.Count > 1 )
+                        {
+                            MessageBox.Show("Be sure to add this property to a set before renting.", cardBeingPlayed.Name);
+                        }
+
                         // Add the card to the Player's CardsInPlay list.
                         cardWasPlayed = AddCardToCardsInPlay(cardBeingPlayed, this.Player);
                     }
@@ -1336,7 +1342,7 @@ namespace GameClient
                     MenuItem playMenuItem = new MenuItem();
                     playMenuItem.Header = "Play";
                     playMenuItem.Click += ( sender, args ) =>
-                    {
+                    {                        
                         PlayCardEvent(cardButton, null);
                     };
                     menu.Items.Add(playMenuItem);
