@@ -60,13 +60,22 @@ namespace GameServer
             Config = new NetPeerConfiguration("game");
 
             // Set server port
-            Console.WriteLine($"Please enter the port you would like to use for the server. Press enter to use {ServerUtilities.PORT_NUMBER} as the default.");
+            Config.Port = ServerUtilities.PORT_NUMBER;
             int portNumber;
-            if (!int.TryParse(Console.ReadLine(), out portNumber))
+            if ( args.Length > 1 &&
+                "-Port".Equals(args[0], StringComparison.OrdinalIgnoreCase) &&
+                int.TryParse(args[1], out portNumber))
             {
-                portNumber = ServerUtilities.PORT_NUMBER;
+                Config.Port = portNumber;
             }
-            Config.Port = portNumber;
+            else
+            {
+                Console.WriteLine($"Please enter the port you would like to use for the server. Press enter to use {ServerUtilities.PORT_NUMBER} as the default.");
+                if (int.TryParse(Console.ReadLine(), out portNumber))
+                {
+                    Config.Port = portNumber;
+                }
+            }
 
             // Max client amount
             Config.MaximumConnections = 200;

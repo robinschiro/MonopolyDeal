@@ -7,7 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using GameObjects;
-using Utilities;
 
 namespace AdditionalWindows
 {
@@ -17,6 +16,7 @@ namespace AdditionalWindows
     public partial class RentWindow : ModalWindow, INotifyPropertyChanged
     {
         private int amountOwed;
+        private const string AssetValueLabelPrefix = "Total: ";
 
         public ObservableCollection<Card> Payment { get; set; }
         public ObservableCollection<Card> Assets { get; set; }
@@ -32,7 +32,7 @@ namespace AdditionalWindows
                 // Update the Pay Rent button.
                 PayButton.IsEnabled = (amountGiven >= amountOwed) || (0 == amountLeft);
 
-                return "Total Value: " + amountGiven;
+                return AssetValueLabelPrefix + amountGiven;
             }
         }
 
@@ -43,7 +43,7 @@ namespace AdditionalWindows
             {
                 amountLeft = Card.SumOfCardValues(AssetsListView.Items);
 
-                return "Total Value: " + amountLeft;
+                return AssetValueLabelPrefix + amountLeft;
             }
         }
 
@@ -86,13 +86,25 @@ namespace AdditionalWindows
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private void GiveButton_Click( object sender, RoutedEventArgs e )
+        private void GiveSelectedButton_Click( object sender, RoutedEventArgs e )
         {
             TransferSelectedItems(AssetsListView, PaymentListView);
         }
 
-        private void RemoveButton_Click( object sender, RoutedEventArgs e )
+        private void RemoveSelectedButton_Click( object sender, RoutedEventArgs e )
         {
+            TransferSelectedItems(PaymentListView, AssetsListView);
+        }
+
+        private void GiveAllButton_Click( object sender, RoutedEventArgs e )
+        {
+            AssetsListView.SelectAll();
+            TransferSelectedItems(AssetsListView, PaymentListView);
+        }
+
+        private void RemoveAllButton_Click( object sender, RoutedEventArgs e )
+        {
+            PaymentListView.SelectAll();
             TransferSelectedItems(PaymentListView, AssetsListView);
         }
 
