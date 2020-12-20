@@ -55,6 +55,7 @@
     <Compile Include="Cards\Card.cs" />
     <Compile Include="MoneyList.cs" />
     <Compile Include="ActionData.cs" />
+    <Compile Include="PlaySoundRequest.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
