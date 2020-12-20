@@ -133,7 +133,7 @@ namespace GameClient
 
         public void PublishNewTurnEvent( Player player )
         {
-            string eventLine = $"It is {player.Name}'s turn!";
+            string eventLine = $"It's {player.Name}'s turn!";
 
             this.PublishEvent(eventLine);
         }
