@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -235,10 +236,10 @@ namespace GameClient
             }
 
             // Add player names to each playing field.
-            for ( int i = 0; i < this.PlayerList.Count; i++ )
+            foreach ( string otherPlayerName in this.PlayerList.Select(player => player.Name) )
             {
                 TextBlock playerNameTextBlock = new TextBlock();
-                playerNameTextBlock.Text = this.PlayerList[i].Name;
+                playerNameTextBlock.Text = otherPlayerName;
                 playerNameTextBlock.Margin = new Thickness(10);
 
                 Viewbox playerNameViewbox = new Viewbox();
@@ -253,23 +254,9 @@ namespace GameClient
                 Grid.SetRow(playerNameViewbox, 0);
                 playerNameAndBell.Children.Add(playerNameViewbox);
 
-                if ( playerName != this.PlayerList[i].Name )
+                if ( playerName != otherPlayerName )
                 {
-                    Button bellButton = new Button();
-                    bellButton.Content = "Bell";
-                    bellButton.Click += ( object sender, RoutedEventArgs e ) =>
-                    {
-                        List<string> namesOfPlayersToExclude = this.PlayerList.Select(player => player.Name)
-                            .Where(name => name != playerName)
-                            .ToList();
-                        ServerUtilities.SendMessage(
-                            this.Client,
-                            Datatype.PlaySound,
-                            new PlaySoundRequest(ClientResourceList.UriPathMoneyDing, namesOfPlayersToExclude));
-                    };
-                    bellButton.Width = 30;
-                    bellButton.Height = 30;
-                    Grid.SetRow(bellButton, 1);
+                    Button bellButton = CreateBellButtonForPlayer(otherPlayerName);
                     playerNameAndBell.Children.Add(bellButton);
                 }
 
@@ -286,7 +273,7 @@ namespace GameClient
                 PlayingField.Children.Add(playerNameBorder);
 
                 // Set the row positions of the UI elements.
-                int row = -2 * GetRelativePosition(this.PlayerName, PlayerList[i].Name) + 8;
+                int row = -2 * GetRelativePosition(this.PlayerName, otherPlayerName) + 8;
                 Grid.SetRow(playerNameBorder, row);
                 Grid.SetColumn(playerNameBorder, 0);
             }
@@ -2541,6 +2528,37 @@ namespace GameClient
             return (card.AltColor != PropertyType.None);
         }
 
+        public Button CreateBellButtonForPlayer(string playerName)
+        {
+            var bellButton = new Button();
+            bellButton.Content = "Bell";
+            bellButton.Click += async ( object sender, RoutedEventArgs e ) =>
+            {
+                List<string> namesOfPlayersToExclude = this.PlayerList.Select(player => player.Name)
+                    .Where(name => name != playerName)
+                    .ToList();
+                ServerUtilities.SendMessage(
+                    this.Client,
+                    Datatype.PlaySound,
+                    new PlaySoundRequest(ClientResourceList.UriPathBell, namesOfPlayersToExclude));
+
+                // Disable the button temporarily to prevent spamming
+                bellButton.IsEnabled = false;
+                bellButton.ToolTip = "Bell temporarily disabled";
+                Func<Task> enableAfterTimeTask = async () =>
+                {
+                    await Task.Delay(1000 * Convert.ToInt32(ClientResourceList.BellButtonDisabledTimeInSeconds));
+                    bellButton.IsEnabled = true;
+                    bellButton.ToolTip = null;
+                };
+                await enableAfterTimeTask();
+            };
+            bellButton.Width = 30;
+            bellButton.Height = 30;
+            Grid.SetRow(bellButton, 1);
+
+            return bellButton;
+        }
         #endregion
 
     }

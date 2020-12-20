@@ -204,4 +204,10 @@
   <data name="SettingVolumeKey" xml:space="preserve">
     <value>-Volume</value>
   </data>
+  <data name="UriPathBell" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Audio/TurnDing.wav</value>
+  </data>
+  <data name="BellButtonDisabledTimeInSeconds" xml:space="preserve">
+    <value>20</value>
+  </data>
 </root>

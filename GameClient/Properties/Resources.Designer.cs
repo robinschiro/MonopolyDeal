@@ -79,6 +79,15 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 20.
+        /// </summary>
+        public static string BellButtonDisabledTimeInSeconds {
+            get {
+                return ResourceManager.GetString("BellButtonDisabledTimeInSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Discard.
         /// </summary>
         public static string DiscardMenuItemHeader {
@@ -282,6 +291,15 @@ namespace GameClient.Properties {
         public static string UriPathActionDing {
             get {
                 return ResourceManager.GetString("UriPathActionDing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/TurnDing.wav.
+        /// </summary>
+        public static string UriPathBell {
+            get {
+                return ResourceManager.GetString("UriPathBell", resourceCulture);
             }
         }
         
