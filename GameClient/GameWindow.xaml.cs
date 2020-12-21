@@ -44,6 +44,7 @@ namespace GameClient
         private volatile NetClient Client;
         private Dictionary<String, Grid> PlayerFieldDictionary;
         private Dictionary<String, FrameworkElement> PlayerHandCountDictionary;
+        private Dictionary<string, Button> PlayerBellButtonDictionary = new Dictionary<string, Button>();
         private bool HavePlayersBeenAssigned;
         private Turn Turn;
         private readonly Dictionary<int, Card> AllCardsDictionary;
@@ -208,7 +209,7 @@ namespace GameClient
 
 
             // Update the turn display.
-            UpdateTurnDisplay(isNewTurn: false);
+            UpdateTurnDisplay(isNewTurnObject: false);
 
             // Inform the next player in the list that he can connect.
             int pos = FindPlayerPositionInPlayerList(this.Player.Name);
@@ -244,7 +245,7 @@ namespace GameClient
 
                 Viewbox playerNameViewbox = new Viewbox();
                 playerNameViewbox.VerticalAlignment = VerticalAlignment.Center;
-                playerNameViewbox.HorizontalAlignment = HorizontalAlignment.Left;
+                playerNameViewbox.HorizontalAlignment = HorizontalAlignment.Center;
                 playerNameViewbox.Child = playerNameTextBlock;
 
                 Grid playerNameAndBell = new Grid();
@@ -257,6 +258,7 @@ namespace GameClient
                 if ( playerName != otherPlayerName )
                 {
                     Button bellButton = CreateBellButtonForPlayer(otherPlayerName);
+                    this.PlayerBellButtonDictionary.Add(otherPlayerName, bellButton);
                     playerNameAndBell.Children.Add(bellButton);
                 }
 
@@ -286,6 +288,7 @@ namespace GameClient
 
             // Because this call automatically draws cards for the player, it must occur after the player's cardsInHand have been placed on the grid.
             CheckAndDrawIfCurrentTurnOwner(shouldNotifyUserObject: false);
+            DisplayBellForCurrentPlayer();
 
             // Enable Reactive Extensions (taken from http://goo.gl/0Jr5WU) in order to perform Size_Changed responses at the end of a chain of resizing events
             // (instead performing a Size_Changed response for every resize event). This is used to improve efficiency.
@@ -509,6 +512,9 @@ namespace GameClient
 
                             // Check to see if the player is the current turn owner. 
                             CreateNewThread(new Action<Object>(CheckAndDrawIfCurrentTurnOwner), true);
+
+                            // Display bell button for current player
+                            CreateNewThread(new Action<object>(DisplayBellForCurrentPlayer), true);
 
                             break;
                         }
@@ -1068,22 +1074,30 @@ namespace GameClient
             InfoBox.Children.Add(cardButton);
         }
 
-        // Display a framework element inside the Infobox.
-        public void DisplayElementInInfobox( FrameworkElement element )
+        public void DisplayBellForCurrentPlayer( Object filler = null )
         {
-            InfoBox.Children.Add(element);
+            foreach ( string playerName in this.PlayerBellButtonDictionary.Keys )
+            {
+                this.PlayerBellButtonDictionary[playerName].Visibility = Visibility.Hidden;
+            }
+            
+            string currentPlayerName = this.PlayerList[this.Turn.CurrentTurnOwner].Name;
+            if (this.PlayerBellButtonDictionary.ContainsKey(currentPlayerName))
+            {
+                this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
+            }
         }
 
-        public void UpdateTurnDisplay( Object isNewTurn )
+        public void UpdateTurnDisplay( Object isNewTurnObject )
         {
-            bool shouldCreateEventLogEntry = (bool)isNewTurn;
+            bool isNewTurn = (bool)isNewTurnObject;
 
             this.ActionCount.Content = "Actions Remaining: " + this.Turn.ActionsRemaining;
 
             string currentPlayerName = this.PlayerList[this.Turn.CurrentTurnOwner].Name;
             this.TurnIndicator.Content = currentPlayerName + "'s Turn";
 
-            if ( shouldCreateEventLogEntry && currentPlayerName == this.PlayerName )
+            if ( isNewTurn && currentPlayerName == this.PlayerName )
             {
                 this.GameEventLog.PublishNewTurnEvent(this.PlayerList[this.Turn.CurrentTurnOwner]);
             }
@@ -2528,7 +2542,8 @@ namespace GameClient
             return (card.AltColor != PropertyType.None);
         }
 
-        public Button CreateBellButtonForPlayer(string playerName)
+        // Create a button used for players to tell the current player to hurry up.
+        private Button CreateBellButtonForPlayer(string playerName)
         {
             var bellButton = new Button();
             bellButton.Content = "Bell";
@@ -2556,6 +2571,7 @@ namespace GameClient
             bellButton.Width = 30;
             bellButton.Height = 30;
             Grid.SetRow(bellButton, 1);
+            bellButton.Visibility = Visibility.Hidden;
 
             return bellButton;
         }
