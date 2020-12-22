@@ -88,6 +88,15 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to BellDrawingImage.
+        /// </summary>
+        public static string BellImagePath {
+            get {
+                return ResourceManager.GetString("BellImagePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Discard.
         /// </summary>
         public static string DiscardMenuItemHeader {

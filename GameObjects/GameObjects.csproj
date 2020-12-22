@@ -72,6 +72,10 @@
     <Resource Include="Audio\TurnDing.wav" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Images\Bell.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Images\MonopolyDealCardImages.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

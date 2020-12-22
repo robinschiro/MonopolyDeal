@@ -8,6 +8,7 @@
                 <ResourceDictionary Source="Styles\WatermarkTextBox.xaml" />
                 <ResourceDictionary Source="Styles\NoChromeButton.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/GameObjects;component/Images/MonopolyDealCardImages.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/GameObjects;component/Images/Bell.xaml" />
                 <ResourceDictionary Source="Styles\PlayerGridBorder.xaml"/>
                 <ResourceDictionary Source="Styles\PlayerHandCount.xaml"/>
             </ResourceDictionary.MergedDictionaries>

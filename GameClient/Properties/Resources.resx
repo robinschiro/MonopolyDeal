@@ -210,4 +210,7 @@
   <data name="BellButtonDisabledTimeInSeconds" xml:space="preserve">
     <value>20</value>
   </data>
+  <data name="BellImagePath" xml:space="preserve">
+    <value>BellDrawingImage</value>
+  </data>
 </root>

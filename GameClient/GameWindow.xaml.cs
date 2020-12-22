@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -249,8 +250,10 @@ namespace GameClient
                 playerNameViewbox.Child = playerNameTextBlock;
 
                 Grid playerNameAndBell = new Grid();
-                playerNameAndBell.RowDefinitions.Add(new RowDefinition());
-                playerNameAndBell.RowDefinitions.Add(new RowDefinition());
+                playerNameAndBell.Margin = new Thickness(10);
+                var gridLengthConverter = new GridLengthConverter();
+                playerNameAndBell.RowDefinitions.Add(new RowDefinition() {  Height = (GridLength)gridLengthConverter.ConvertFrom("2*") });
+                playerNameAndBell.RowDefinitions.Add(new RowDefinition() { Height = (GridLength)gridLengthConverter.ConvertFrom("1*") });
 
                 Grid.SetRow(playerNameViewbox, 0);
                 playerNameAndBell.Children.Add(playerNameViewbox);
@@ -2546,7 +2549,8 @@ namespace GameClient
         private Button CreateBellButtonForPlayer(string playerName)
         {
             var bellButton = new Button();
-            bellButton.Content = "Bell";
+            bellButton.Content = new Image() { Source = this.TryFindResource(ClientResourceList.BellImagePath) as DrawingImage };
+            bellButton.Style = (Style)FindResource("NoChromeButton");
             bellButton.Click += async ( object sender, RoutedEventArgs e ) =>
             {
                 List<string> namesOfPlayersToExclude = this.PlayerList.Select(player => player.Name)
@@ -2557,19 +2561,20 @@ namespace GameClient
                     Datatype.PlaySound,
                     new PlaySoundRequest(ClientResourceList.UriPathBell, namesOfPlayersToExclude));
 
-                // Disable the button temporarily to prevent spamming
-                bellButton.IsEnabled = false;
-                bellButton.ToolTip = "Bell temporarily disabled";
+                // Hide the button temporarily to prevent spamming
+                bellButton.Visibility = Visibility.Hidden;
                 Func<Task> enableAfterTimeTask = async () =>
                 {
                     await Task.Delay(1000 * Convert.ToInt32(ClientResourceList.BellButtonDisabledTimeInSeconds));
-                    bellButton.IsEnabled = true;
-                    bellButton.ToolTip = null;
+                    
+                    if ( playerName == this.PlayerList[this.Turn.CurrentTurnOwner].Name )
+                    {
+                        bellButton.Visibility = Visibility.Visible;
+                    }
                 };
                 await enableAfterTimeTask();
             };
-            bellButton.Width = 30;
-            bellButton.Height = 30;
+            bellButton.SetBinding(Button.WidthProperty, new Binding("ActualHeight") { Source = bellButton, Mode = BindingMode.OneWay });
             Grid.SetRow(bellButton, 1);
             bellButton.Visibility = Visibility.Hidden;
 
