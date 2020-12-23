@@ -38,6 +38,9 @@
                 <MenuItem Header="Double click to play card as its original type" 
                           IsCheckable="True"
                           IsChecked="{Binding DoubleClickToPlayCardAsOriginalTypeEnabled}"/>
+                <MenuItem Header="Display a bell to tell Geo to hurry up on his turn" 
+                          IsCheckable="True"
+                          IsChecked="{Binding BellOnlyForPlayersNamedGeoEnabled}"/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Rules"

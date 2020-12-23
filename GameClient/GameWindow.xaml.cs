@@ -129,6 +129,23 @@ namespace GameClient
             }
         }
 
+        private bool bellOnlyForPlayersNamedGeoEnabled;
+        public bool BellOnlyForPlayersNamedGeoEnabled
+        {
+            get
+            {
+                return bellOnlyForPlayersNamedGeoEnabled;
+            }
+            set
+            {
+                bellOnlyForPlayersNamedGeoEnabled = value;
+                this.ClientSettings[ClientResourceList.BellOnlyForPlayersNamedGeoEnabledKey] = value;
+                this.ClientSettings.Save();
+
+                OnPropertyChanged("BellOnlyForPlayersNamedGeoEnabled");
+            }
+        }
+
         private int volume;
         public int Volume
         {
@@ -291,7 +308,6 @@ namespace GameClient
 
             // Because this call automatically draws cards for the player, it must occur after the player's cardsInHand have been placed on the grid.
             CheckAndDrawIfCurrentTurnOwner(shouldNotifyUserObject: false);
-            DisplayBellForCurrentPlayer();
 
             // Enable Reactive Extensions (taken from http://goo.gl/0Jr5WU) in order to perform Size_Changed responses at the end of a chain of resizing events
             // (instead performing a Size_Changed response for every resize event). This is used to improve efficiency.
@@ -318,7 +334,10 @@ namespace GameClient
             this.IsTurnNotificationDialogEnabled = this.ClientSettings.bValue(ClientResourceList.SettingTurnNotificationDialogEnabledKey, Convert.ToBoolean(ClientResourceList.SettingTurnNotificationDialogEnabledDefaultValue));
             this.EndTurnAfterSpendingAllActionsEnabled = this.ClientSettings.bValue(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledKey, Convert.ToBoolean(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledDefaultValue));
             this.DoubleClickToPlayCardAsOriginalTypeEnabled = this.ClientSettings.bValue(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledKey, Convert.ToBoolean(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue));
+            this.BellOnlyForPlayersNamedGeoEnabled = this.ClientSettings.bValue(ClientResourceList.BellOnlyForPlayersNamedGeoEnabledKey, Convert.ToBoolean(ClientResourceList.BellOnlyForPlayersNamedGeoEnabledDefaultValue));
             this.Volume = this.ClientSettings.iValue(ClientResourceList.SettingVolumeKey, Convert.ToInt32(ClientResourceList.SettingVolumeDefaultValue));
+
+            DisplayBellForCurrentPlayer();
         }
 
         #region Client Communication Code
@@ -1087,7 +1106,17 @@ namespace GameClient
             string currentPlayerName = this.PlayerList[this.Turn.CurrentTurnOwner].Name;
             if (this.PlayerBellButtonDictionary.ContainsKey(currentPlayerName))
             {
-                this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
+                if ( this.bellOnlyForPlayersNamedGeoEnabled )
+                {
+                    if ( currentPlayerName == "Geo" )
+                    {
+                        this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
+                    }
+                }
+                else
+                {
+                    this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
+                }
             }
         }
 

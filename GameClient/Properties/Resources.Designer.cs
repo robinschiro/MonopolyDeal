@@ -97,6 +97,24 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to true.
+        /// </summary>
+        public static string BellOnlyForPlayersNamedGeoEnabledDefaultValue {
+            get {
+                return ResourceManager.GetString("BellOnlyForPlayersNamedGeoEnabledDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -BellOnlyForPlayersNamedGeoEnabled.
+        /// </summary>
+        public static string BellOnlyForPlayersNamedGeoEnabledKey {
+            get {
+                return ResourceManager.GetString("BellOnlyForPlayersNamedGeoEnabledKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Discard.
         /// </summary>
         public static string DiscardMenuItemHeader {
