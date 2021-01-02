@@ -549,6 +549,9 @@ namespace GameClient
                                 ClientUtilities.PlaySound(playSoundRequest.UriPath);
                             }
 
+                            // if is play bell request
+                            // DisableBellTemporarilyForAllPlayers()
+
                             break;
                         }
 
@@ -1117,6 +1120,28 @@ namespace GameClient
                 {
                     this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
                 }
+            }
+        }
+
+        // Hide the button temporarily to prevent spamming
+        public async void DisableBellTemporarilyForAllPlayers( Object playerNameObject )
+        {
+            string playerName = (string)playerNameObject;
+
+            if (this.PlayerBellButtonDictionary.ContainsKey(playerName))
+            {
+                Button bellButton = this.PlayerBellButtonDictionary[playerName];
+                bellButton.Visibility = Visibility.Hidden;
+                Func<Task> enableAfterTimeTask = async () =>
+                {
+                    await Task.Delay(1000 * Convert.ToInt32(ClientResourceList.BellButtonDisabledTimeInSeconds));
+
+                    if (playerName == this.PlayerList[this.Turn.CurrentTurnOwner].Name)
+                    {
+                        bellButton.Visibility = Visibility.Visible;
+                    }
+                };
+                await enableAfterTimeTask();
             }
         }
 
@@ -2580,7 +2605,7 @@ namespace GameClient
             var bellButton = new Button();
             bellButton.Content = new Image() { Source = this.TryFindResource(ClientResourceList.BellImagePath) as DrawingImage };
             bellButton.Style = (Style)FindResource("NoChromeButton");
-            bellButton.Click += async ( object sender, RoutedEventArgs e ) =>
+            bellButton.Click += ( object sender, RoutedEventArgs e ) =>
             {
                 List<string> namesOfPlayersToExclude = this.PlayerList.Select(player => player.Name)
                     .Where(name => name != playerName)
@@ -2589,19 +2614,6 @@ namespace GameClient
                     this.Client,
                     Datatype.PlaySound,
                     new PlaySoundRequest(ClientResourceList.UriPathBell, namesOfPlayersToExclude));
-
-                // Hide the button temporarily to prevent spamming
-                bellButton.Visibility = Visibility.Hidden;
-                Func<Task> enableAfterTimeTask = async () =>
-                {
-                    await Task.Delay(1000 * Convert.ToInt32(ClientResourceList.BellButtonDisabledTimeInSeconds));
-                    
-                    if ( playerName == this.PlayerList[this.Turn.CurrentTurnOwner].Name )
-                    {
-                        bellButton.Visibility = Visibility.Visible;
-                    }
-                };
-                await enableAfterTimeTask();
             };
             bellButton.SetBinding(Button.WidthProperty, new Binding("ActualHeight") { Source = bellButton, Mode = BindingMode.OneWay });
             Grid.SetRow(bellButton, 1);
