@@ -154,6 +154,12 @@ namespace GameClient
             this.PublishEvent(eventLine);
         }
 
+        public void PublishBellRungEvent(Player ringee)
+        {
+            string eventLine = $"A player wants {ringee.Name} to hurry up!";
+            this.PublishEvent(eventLine);
+        }
+
         private void PublishEvent( string eventLogline )
         {
             ServerUtilities.SendMessage(this.netClient, Datatype.GameEvent, eventLogline);

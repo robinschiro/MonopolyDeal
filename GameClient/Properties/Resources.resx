@@ -208,7 +208,7 @@
     <value>pack://application:,,,/GameObjects;component/Audio/TurnDing.wav</value>
   </data>
   <data name="BellButtonDisabledTimeInSeconds" xml:space="preserve">
-    <value>20</value>
+    <value>30</value>
   </data>
   <data name="BellImagePath" xml:space="preserve">
     <value>BellDrawingImage</value>

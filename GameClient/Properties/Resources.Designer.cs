@@ -79,7 +79,7 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 20.
+        ///   Looks up a localized string similar to 30.
         /// </summary>
         public static string BellButtonDisabledTimeInSeconds {
             get {

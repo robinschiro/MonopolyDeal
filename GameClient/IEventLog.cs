@@ -33,5 +33,7 @@ namespace GameClient
         void PublishPlayerWonEvent( Player winner );
 
         void PublishDeckEmptyEvent(bool discardPileReshuffled);
+
+        void PublishBellRungEvent( Player ringee );
     }
 }

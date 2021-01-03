@@ -255,10 +255,10 @@ namespace GameClient
             }
 
             // Add player names to each playing field.
-            foreach ( string otherPlayerName in this.PlayerList.Select(player => player.Name) )
+            foreach ( Player otherPlayer in this.PlayerList )
             {
                 TextBlock playerNameTextBlock = new TextBlock();
-                playerNameTextBlock.Text = otherPlayerName;
+                playerNameTextBlock.Text = otherPlayer.Name;
                 playerNameTextBlock.Margin = new Thickness(10);
 
                 Viewbox playerNameViewbox = new Viewbox();
@@ -275,10 +275,10 @@ namespace GameClient
                 Grid.SetRow(playerNameViewbox, 0);
                 playerNameAndBell.Children.Add(playerNameViewbox);
 
-                if ( playerName != otherPlayerName )
+                if ( playerName != otherPlayer.Name )
                 {
-                    Button bellButton = CreateBellButtonForPlayer(otherPlayerName);
-                    this.PlayerBellButtonDictionary.Add(otherPlayerName, bellButton);
+                    Button bellButton = CreateBellButtonForPlayer(otherPlayer);
+                    this.PlayerBellButtonDictionary.Add(otherPlayer.Name, bellButton);
                     playerNameAndBell.Children.Add(bellButton);
                 }
 
@@ -295,7 +295,7 @@ namespace GameClient
                 PlayingField.Children.Add(playerNameBorder);
 
                 // Set the row positions of the UI elements.
-                int row = -2 * GetRelativePosition(this.PlayerName, otherPlayerName) + 8;
+                int row = -2 * GetRelativePosition(this.PlayerName, otherPlayer.Name) + 8;
                 Grid.SetRow(playerNameBorder, row);
                 Grid.SetColumn(playerNameBorder, 0);
             }
@@ -2575,7 +2575,7 @@ namespace GameClient
         }
 
         // Create a button used for players to tell the current player to hurry up.
-        private Button CreateBellButtonForPlayer(string playerName)
+        private Button CreateBellButtonForPlayer(Player playerForBell)
         {
             var bellButton = new Button();
             bellButton.Content = new Image() { Source = this.TryFindResource(ClientResourceList.BellImagePath) as DrawingImage };
@@ -2583,12 +2583,13 @@ namespace GameClient
             bellButton.Click += async ( object sender, RoutedEventArgs e ) =>
             {
                 List<string> namesOfPlayersToExclude = this.PlayerList.Select(player => player.Name)
-                    .Where(name => name != playerName)
+                    .Where(name => name != playerForBell.Name)
                     .ToList();
                 ServerUtilities.SendMessage(
                     this.Client,
                     Datatype.PlaySound,
                     new PlaySoundRequest(ClientResourceList.UriPathBell, namesOfPlayersToExclude));
+                this.GameEventLog.PublishBellRungEvent(playerForBell);
 
                 // Hide the button temporarily to prevent spamming
                 bellButton.Visibility = Visibility.Hidden;
@@ -2596,7 +2597,7 @@ namespace GameClient
                 {
                     await Task.Delay(1000 * Convert.ToInt32(ClientResourceList.BellButtonDisabledTimeInSeconds));
                     
-                    if ( playerName == this.PlayerList[this.Turn.CurrentTurnOwner].Name )
+                    if ( playerForBell.Name == this.PlayerList[this.Turn.CurrentTurnOwner].Name )
                     {
                         bellButton.Visibility = Visibility.Visible;
                     }
