@@ -79,6 +79,42 @@ namespace GameClient.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 30.
+        /// </summary>
+        public static string BellButtonDisabledTimeInSeconds {
+            get {
+                return ResourceManager.GetString("BellButtonDisabledTimeInSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BellDrawingImage.
+        /// </summary>
+        public static string BellImagePath {
+            get {
+                return ResourceManager.GetString("BellImagePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to true.
+        /// </summary>
+        public static string BellOnlyForPlayersNamedGeoEnabledDefaultValue {
+            get {
+                return ResourceManager.GetString("BellOnlyForPlayersNamedGeoEnabledDefaultValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -BellOnlyForPlayersNamedGeoEnabled.
+        /// </summary>
+        public static string BellOnlyForPlayersNamedGeoEnabledKey {
+            get {
+                return ResourceManager.GetString("BellOnlyForPlayersNamedGeoEnabledKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Discard.
         /// </summary>
         public static string DiscardMenuItemHeader {
@@ -282,6 +318,15 @@ namespace GameClient.Properties {
         public static string UriPathActionDing {
             get {
                 return ResourceManager.GetString("UriPathActionDing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pack://application:,,,/GameObjects;component/Audio/TurnDing.wav.
+        /// </summary>
+        public static string UriPathBell {
+            get {
+                return ResourceManager.GetString("UriPathBell", resourceCulture);
             }
         }
         

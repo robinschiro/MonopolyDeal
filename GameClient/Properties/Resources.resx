@@ -204,4 +204,19 @@
   <data name="SettingVolumeKey" xml:space="preserve">
     <value>-Volume</value>
   </data>
+  <data name="UriPathBell" xml:space="preserve">
+    <value>pack://application:,,,/GameObjects;component/Audio/TurnDing.wav</value>
+  </data>
+  <data name="BellButtonDisabledTimeInSeconds" xml:space="preserve">
+    <value>30</value>
+  </data>
+  <data name="BellImagePath" xml:space="preserve">
+    <value>BellDrawingImage</value>
+  </data>
+  <data name="BellOnlyForPlayersNamedGeoEnabledDefaultValue" xml:space="preserve">
+    <value>true</value>
+  </data>
+  <data name="BellOnlyForPlayersNamedGeoEnabledKey" xml:space="preserve">
+    <value>-BellOnlyForPlayersNamedGeoEnabled</value>
+  </data>
 </root>

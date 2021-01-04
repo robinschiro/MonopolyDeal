@@ -219,9 +219,20 @@ namespace GameServer
             return new ActionData.TheftResponse(thiefName, victimName, answer);
         }
 
-        public static string ReadPlaySoundRequest( NetIncomingMessage inc )
+        public static PlaySoundRequest ReadPlaySoundRequest( NetIncomingMessage inc )
         {
-            return inc.ReadString();
+            string uriPath = inc.ReadString();
+            int countOfExcludedPlayers = inc.ReadInt32();
+            var namesOfExcludedPlayers = new List<string>();
+            if (countOfExcludedPlayers > 0)
+            {
+                for (int i = 0; i < countOfExcludedPlayers; i++ )
+                {
+                    namesOfExcludedPlayers.Add(inc.ReadString());
+                }
+            }
+
+            return new PlaySoundRequest(uriPath, namesOfExcludedPlayers);
         }
 
         public static string ReadGameEvent( NetIncomingMessage inc )
@@ -324,9 +335,18 @@ namespace GameServer
             outmsg.Write(turn.ActionsRemaining);
         }
 
-        public static void WritePlaySoundRequest( NetOutgoingMessage outmsg, string uriPath )
+        public static void WritePlaySoundRequest( NetOutgoingMessage outmsg, PlaySoundRequest request )
         {
-            outmsg.Write(uriPath);
+            outmsg.Write(request.UriPath);
+            var excludedPlayerCount = request.NamesOfPlayersToExclude?.Count ?? 0;
+            outmsg.Write(excludedPlayerCount);
+            if ( excludedPlayerCount > 0 )
+            {
+                for ( int i = 0; i < excludedPlayerCount; i++ )
+                {
+                    outmsg.Write(request.NamesOfPlayersToExclude[i]);
+                }
+            }
         }
 
         public static void WriteGameEvent( NetOutgoingMessage outmsg, string serializedEvent )
@@ -435,7 +455,7 @@ namespace GameServer
 
                     case Datatype.PlaySound:
                     {
-                        WritePlaySoundRequest(outmsg, messageData as string);
+                        WritePlaySoundRequest(outmsg, messageData as PlaySoundRequest);
 
                         break;
                     }

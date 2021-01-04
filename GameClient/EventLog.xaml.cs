@@ -133,7 +133,7 @@ namespace GameClient
 
         public void PublishNewTurnEvent( Player player )
         {
-            string eventLine = $"It is {player.Name}'s turn!";
+            string eventLine = $"It's {player.Name}'s turn!";
 
             this.PublishEvent(eventLine);
         }
@@ -151,6 +151,12 @@ namespace GameClient
                 ? "All cards in the discard pile will be shuffled and used as the deck." 
                 : "No cards will be reshuffled because the discard pile is empty.");
 
+            this.PublishEvent(eventLine);
+        }
+
+        public void PublishBellRungEvent(Player ringee)
+        {
+            string eventLine = $"A player wants {ringee.Name} to hurry up!";
             this.PublishEvent(eventLine);
         }
 

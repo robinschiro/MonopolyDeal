@@ -310,8 +310,8 @@ namespace GameServer
 
                                 case Datatype.PlaySound:
                                 {
-                                    string soundPath = (string)ServerUtilities.ReceiveMessage(inc, messageType);
-                                    ServerUtilities.SendMessage(Server, Datatype.PlaySound, soundPath);
+                                    var soundRequest = (PlaySoundRequest)ServerUtilities.ReceiveMessage(inc, messageType);
+                                    ServerUtilities.SendMessage(Server, Datatype.PlaySound, soundRequest);
                                     break;
                                 }
 

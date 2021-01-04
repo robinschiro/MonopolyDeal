@@ -55,6 +55,7 @@
     <Compile Include="Cards\Card.cs" />
     <Compile Include="MoneyList.cs" />
     <Compile Include="ActionData.cs" />
+    <Compile Include="PlaySoundRequest.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -71,6 +72,10 @@
     <Resource Include="Audio\TurnDing.wav" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Images\Bell.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Images\MonopolyDealCardImages.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

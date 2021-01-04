@@ -5,8 +5,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -43,6 +45,7 @@ namespace GameClient
         private volatile NetClient Client;
         private Dictionary<String, Grid> PlayerFieldDictionary;
         private Dictionary<String, FrameworkElement> PlayerHandCountDictionary;
+        private Dictionary<string, Button> PlayerBellButtonDictionary = new Dictionary<string, Button>();
         private bool HavePlayersBeenAssigned;
         private Turn Turn;
         private readonly Dictionary<int, Card> AllCardsDictionary;
@@ -126,6 +129,23 @@ namespace GameClient
             }
         }
 
+        private bool bellOnlyForPlayersNamedGeoEnabled;
+        public bool BellOnlyForPlayersNamedGeoEnabled
+        {
+            get
+            {
+                return bellOnlyForPlayersNamedGeoEnabled;
+            }
+            set
+            {
+                bellOnlyForPlayersNamedGeoEnabled = value;
+                this.ClientSettings[ClientResourceList.BellOnlyForPlayersNamedGeoEnabledKey] = value;
+                this.ClientSettings.Save();
+
+                OnPropertyChanged("BellOnlyForPlayersNamedGeoEnabled");
+            }
+        }
+
         private int volume;
         public int Volume
         {
@@ -196,7 +216,7 @@ namespace GameClient
 
             // Initialize the event log with access to the network client object.
             List<Card> allCardsList = new List<Card>(this.Deck.CardList);
-            foreach (Player player in this.PlayerList)
+            foreach ( Player player in this.PlayerList )
             {
                 allCardsList.AddRange(player.CardsInHand);
             }
@@ -207,7 +227,7 @@ namespace GameClient
 
 
             // Update the turn display.
-            UpdateTurnDisplay(isNewTurn: false);
+            UpdateTurnDisplay(isNewTurnObject: false);
 
             // Inform the next player in the list that he can connect.
             int pos = FindPlayerPositionInPlayerList(this.Player.Name);
@@ -227,29 +247,45 @@ namespace GameClient
 
             // Re-title the window.
             this.Title = playerName + "'s Window";
-            
+
             // Add an empty grid as the first element of every field. This grid is used to display each player's money pile.
             foreach ( Grid field in PlayerFieldDictionary.Values )
             {
                 field.Children.Add(CreateCardGrid());
             }
-            
+
             // Add player names to each playing field.
-            for ( int i = 0; i < this.PlayerList.Count; i++ )
+            foreach ( Player otherPlayer in this.PlayerList )
             {
                 TextBlock playerNameTextBlock = new TextBlock();
-                playerNameTextBlock.Text = this.PlayerList[i].Name;
+                playerNameTextBlock.Text = otherPlayer.Name;
                 playerNameTextBlock.Margin = new Thickness(10);
 
                 Viewbox playerNameViewbox = new Viewbox();
                 playerNameViewbox.VerticalAlignment = VerticalAlignment.Center;
-                playerNameViewbox.HorizontalAlignment = HorizontalAlignment.Left;
+                playerNameViewbox.HorizontalAlignment = HorizontalAlignment.Center;
                 playerNameViewbox.Child = playerNameTextBlock;
+
+                Grid playerNameAndBell = new Grid();
+                playerNameAndBell.Margin = new Thickness(10);
+                var gridLengthConverter = new GridLengthConverter();
+                playerNameAndBell.RowDefinitions.Add(new RowDefinition() {  Height = (GridLength)gridLengthConverter.ConvertFrom("2*") });
+                playerNameAndBell.RowDefinitions.Add(new RowDefinition() { Height = (GridLength)gridLengthConverter.ConvertFrom("1*") });
+
+                Grid.SetRow(playerNameViewbox, 0);
+                playerNameAndBell.Children.Add(playerNameViewbox);
+
+                if ( playerName != otherPlayer.Name )
+                {
+                    Button bellButton = CreateBellButtonForPlayer(otherPlayer);
+                    this.PlayerBellButtonDictionary.Add(otherPlayer.Name, bellButton);
+                    playerNameAndBell.Children.Add(bellButton);
+                }
 
                 Border playerNameBorder = new Border();
                 playerNameBorder.BorderBrush = Brushes.Black;
                 playerNameBorder.BorderThickness = new Thickness(0, 1, 0, 1);
-                playerNameBorder.Child = playerNameViewbox;
+                playerNameBorder.Child = playerNameAndBell;
 
                 // Create a separator to separate the playing fields.
                 Separator fieldSeparator = new Separator();
@@ -259,7 +295,7 @@ namespace GameClient
                 PlayingField.Children.Add(playerNameBorder);
 
                 // Set the row positions of the UI elements.
-                int row = -2 * GetRelativePosition(this.PlayerName, PlayerList[i].Name) + 8;
+                int row = -2 * GetRelativePosition(this.PlayerName, otherPlayer.Name) + 8;
                 Grid.SetRow(playerNameBorder, row);
                 Grid.SetColumn(playerNameBorder, 0);
             }
@@ -298,7 +334,10 @@ namespace GameClient
             this.IsTurnNotificationDialogEnabled = this.ClientSettings.bValue(ClientResourceList.SettingTurnNotificationDialogEnabledKey, Convert.ToBoolean(ClientResourceList.SettingTurnNotificationDialogEnabledDefaultValue));
             this.EndTurnAfterSpendingAllActionsEnabled = this.ClientSettings.bValue(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledKey, Convert.ToBoolean(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledDefaultValue));
             this.DoubleClickToPlayCardAsOriginalTypeEnabled = this.ClientSettings.bValue(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledKey, Convert.ToBoolean(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue));
+            this.BellOnlyForPlayersNamedGeoEnabled = this.ClientSettings.bValue(ClientResourceList.BellOnlyForPlayersNamedGeoEnabledKey, Convert.ToBoolean(ClientResourceList.BellOnlyForPlayersNamedGeoEnabledDefaultValue));
             this.Volume = this.ClientSettings.iValue(ClientResourceList.SettingVolumeKey, Convert.ToInt32(ClientResourceList.SettingVolumeDefaultValue));
+
+            DisplayBellForCurrentPlayer();
         }
 
         #region Client Communication Code
@@ -372,7 +411,7 @@ namespace GameClient
             {
                 inc = (peer as NetPeer).ReadMessage();
 
-                if ( null != inc &&  inc.MessageType == NetIncomingMessageType.Data )
+                if ( null != inc && inc.MessageType == NetIncomingMessageType.Data )
                 {
                     Datatype messageType = (Datatype)inc.ReadByte();
 
@@ -381,7 +420,7 @@ namespace GameClient
                         case Datatype.UpdateDeck:
                         {
                             this.Deck = (Deck)ServerUtilities.ReceiveMessage(inc, messageType);
-                            CreateNewThread(new Action<Object>(( sender ) => { this.DeckDisplay.CardCount = this.Deck.CardList.Count; }));                            
+                            CreateNewThread(new Action<Object>(( sender ) => { this.DeckDisplay.CardCount = this.Deck.CardList.Count; }));
 
                             // Close the wait message if it is open and we have not received the deck yet.
                             if ( !this.ReceivedDeck && null != this.WaitMessage && !this.WaitMessage.CloseWindow )
@@ -454,7 +493,7 @@ namespace GameClient
                         {
                             // Retrieve the request.
                             ActionData.RentResponse response = (ActionData.RentResponse)ServerUtilities.ReceiveMessage(inc, messageType);
-                                                        
+
                             CreateNewThread(new Action<Object>(ProcessReceivedRent), response);
 
                             break;
@@ -490,19 +529,25 @@ namespace GameClient
                         {
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                                // Update the turn display.
-                                CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
+                            // Update the turn display.
+                            CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
 
-                                // Check to see if the player is the current turn owner. 
-                                CreateNewThread(new Action<Object>(CheckAndDrawIfCurrentTurnOwner), true);
+                            // Check to see if the player is the current turn owner. 
+                            CreateNewThread(new Action<Object>(CheckAndDrawIfCurrentTurnOwner), true);
+
+                            // Display bell button for current player
+                            CreateNewThread(new Action<object>(DisplayBellForCurrentPlayer), true);
 
                             break;
                         }
 
                         case Datatype.PlaySound:
                         {
-                            string soundPath = (string)ServerUtilities.ReceiveMessage(inc, messageType);
-                            ClientUtilities.PlaySound(soundPath);
+                            var playSoundRequest = (PlaySoundRequest)ServerUtilities.ReceiveMessage(inc, messageType);
+                            if ( !playSoundRequest.NamesOfPlayersToExclude.Contains(this.PlayerName) )
+                            {
+                                ClientUtilities.PlaySound(playSoundRequest.UriPath);
+                            }
 
                             break;
                         }
@@ -572,7 +617,7 @@ namespace GameClient
 
                         if ( cardBeingPlayed.Type == CardType.Money )
                         {
-                            ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, ClientResourceList.UriPathMoneyDing);
+                            ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, new PlaySoundRequest(ClientResourceList.UriPathMoneyDing));
                         }
 
                         // Update the player's number of actions.
@@ -589,7 +634,7 @@ namespace GameClient
                                 !this.Player.CardsInPlay.Skip(1).Any(cardList => cardList.Any(card =>
                                         (PropertyType.None != card.AltColor) ||
                                         (PropertyType.Wild == card.Color))) )
-                            {                                
+                            {
                                 this.EndTurnButton_Click(this.EndTurnButton, new RoutedEventArgs());
                             }
                             else
@@ -600,7 +645,7 @@ namespace GameClient
                     }
                 }
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 MessageBox.Show($"An error has occurred. Exception: {ex} ", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -633,11 +678,11 @@ namespace GameClient
         private void EndTurnButton_Click( object sender, RoutedEventArgs e )
         {
             // Check if player has won. If so, show message box and disable End Turn button.
-            if (ClientUtilities.DetermineIfPlayerHasWon(this.Player))
+            if ( ClientUtilities.DetermineIfPlayerHasWon(this.Player) )
             {
                 this.EndTurnButton.IsEnabled = false;
                 this.GameEventLog.PublishPlayerWonEvent(this.Player);
-                ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, ClientResourceList.UriPathWinningMusic);
+                ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, new PlaySoundRequest(ClientResourceList.UriPathWinningMusic));
 
                 MessageBox.Show("You won!", "Congratulations!", MessageBoxButton.OK, MessageBoxImage.None);
                 return;
@@ -792,7 +837,7 @@ namespace GameClient
         void cardButton_MouseEnter( object sender, MouseEventArgs e )
         {
             Button cardButton = sender as Button;
-            
+
             DisplayCardInInfobox(cardButton.Tag as Card);
         }
 
@@ -841,7 +886,7 @@ namespace GameClient
             int orderedPosition;
             for ( orderedPosition = 0; orderedPosition < playerMoneyPile.Count; orderedPosition++ )
             {
-                if (moneyCard.Value > playerMoneyPile[orderedPosition].Value)
+                if ( moneyCard.Value > playerMoneyPile[orderedPosition].Value )
                 {
                     break;
                 }
@@ -853,7 +898,7 @@ namespace GameClient
         // Update the value of the IsCurrentTurnOwner boolean.
         public void CheckAndDrawIfCurrentTurnOwner( Object shouldNotifyUserObject )
         {
-            bool shouldNotifyUser = (bool) shouldNotifyUserObject; 
+            bool shouldNotifyUser = (bool)shouldNotifyUserObject;
             if ( this.Turn.CurrentTurnOwner == FindPlayerPositionInPlayerList(this.Player.Name) )
             {
                 IsCurrentTurnOwner = true;
@@ -946,7 +991,7 @@ namespace GameClient
             cardButton.Tag = card;
             cardButton.Style = (Style)FindResource("NoChromeButton");
             cardButton.RenderTransform = new TransformGroup();
-            cardButton.RenderTransformOrigin = new Point(0.5, 0.5);                        
+            cardButton.RenderTransformOrigin = new Point(0.5, 0.5);
 
             return cardButton;
         }
@@ -1051,22 +1096,40 @@ namespace GameClient
             InfoBox.Children.Add(cardButton);
         }
 
-        // Display a framework element inside the Infobox.
-        public void DisplayElementInInfobox( FrameworkElement element )
+        public void DisplayBellForCurrentPlayer( Object filler = null )
         {
-            InfoBox.Children.Add(element);
+            foreach ( string playerName in this.PlayerBellButtonDictionary.Keys )
+            {
+                this.PlayerBellButtonDictionary[playerName].Visibility = Visibility.Hidden;
+            }
+            
+            string currentPlayerName = this.PlayerList[this.Turn.CurrentTurnOwner].Name;
+            if (this.PlayerBellButtonDictionary.ContainsKey(currentPlayerName))
+            {
+                if ( this.bellOnlyForPlayersNamedGeoEnabled )
+                {
+                    if ( currentPlayerName == "Geo" )
+                    {
+                        this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
+                    }
+                }
+                else
+                {
+                    this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
+                }
+            }
         }
 
-        public void UpdateTurnDisplay( Object isNewTurn )
+        public void UpdateTurnDisplay( Object isNewTurnObject )
         {
-            bool shouldCreateEventLogEntry = (bool)isNewTurn;
+            bool isNewTurn = (bool)isNewTurnObject;
 
             this.ActionCount.Content = "Actions Remaining: " + this.Turn.ActionsRemaining;
 
             string currentPlayerName = this.PlayerList[this.Turn.CurrentTurnOwner].Name;
             this.TurnIndicator.Content = currentPlayerName + "'s Turn";
 
-            if ( shouldCreateEventLogEntry && currentPlayerName == this.PlayerName )
+            if ( isNewTurn && currentPlayerName == this.PlayerName )
             {
                 this.GameEventLog.PublishNewTurnEvent(this.PlayerList[this.Turn.CurrentTurnOwner]);
             }
@@ -1161,7 +1224,7 @@ namespace GameClient
         {
             // Check if any cards currently in play match the color of the card being played (if the card is a property).
             // If it does, lay the card being played over the matching cards.
-            switch (cardBeingAdded.Type)
+            switch ( cardBeingAdded.Type )
             {
                 case CardType.Property:
                 {
@@ -1204,17 +1267,17 @@ namespace GameClient
                 // unless it is placed in a monopoly.
                 case CardType.Enhancement:
                 {
-                    List<Card> monopoly = ( ActionId.House == (ActionId)cardBeingAdded.ActionID ) ? ClientUtilities.FindMonopolyWithoutHouse(player) : ClientUtilities.FindMonopolyWithoutHotel(player);
+                    List<Card> monopoly = (ActionId.House == (ActionId)cardBeingAdded.ActionID) ? ClientUtilities.FindMonopolyWithoutHouse(player) : ClientUtilities.FindMonopolyWithoutHotel(player);
 
-                    if (null == monopoly)
+                    if ( null == monopoly )
                     {
                         MessageBox.Show($"You cannot play a {cardBeingAdded.Name} right now! You do not have any monopolies that can accept it.", "Invalid action");
                         return false;
                     }
 
-                    if ( MessageBoxResult.Yes == MessageBox.Show("Adding a " + cardBeingAdded.Name + " to your monopoly will prevent you from being able to separate any " + 
+                    if ( MessageBoxResult.Yes == MessageBox.Show("Adding a " + cardBeingAdded.Name + " to your monopoly will prevent you from being able to separate any " +
                                                                 "property wild cards from the set unless you have another monopoly that you can move the " + cardBeingAdded.Name + " to. \n\n" +
-                                                                "Are you sure you want to do this?", 
+                                                                "Are you sure you want to do this?",
                                                                 "Are you sure you want to play your " + cardBeingAdded.Name + "?", MessageBoxButton.YesNo) )
                     {
                         monopoly.Add(cardBeingAdded);
@@ -1281,14 +1344,14 @@ namespace GameClient
                 // All menu options are disabled if it is not the player's turn.
                 menu.Opened += ( sender, args ) =>
                 {
-                    foreach (MenuItem item in menu.Items )
+                    foreach ( MenuItem item in menu.Items )
                     {
                         string header = (string)item.Header;
                         item.IsEnabled = isCurrentTurnOwner;
                         if ( ClientResourceList.AddEnhancementMenuItemHeader == header )
                         {
-                            item.IsEnabled &= (4 == cardBeingAdded.ActionID) ? 
-                                              (null != ClientUtilities.FindMonopolyWithoutHouse(player)) : 
+                            item.IsEnabled &= (4 == cardBeingAdded.ActionID) ?
+                                              (null != ClientUtilities.FindMonopolyWithoutHouse(player)) :
                                               (null != ClientUtilities.FindMonopolyWithoutHotel(player));
                         }
                         else if ( ClientResourceList.DiscardMenuItemHeader == header )
@@ -1342,11 +1405,11 @@ namespace GameClient
                     MenuItem playMenuItem = new MenuItem();
                     playMenuItem.Header = "Play";
                     playMenuItem.Click += ( sender, args ) =>
-                    {                        
+                    {
                         PlayCardEvent(cardButton, null);
                     };
                     menu.Items.Add(playMenuItem);
-                    
+
                     if ( HasAltColor(cardBeingAdded) )
                     {
                         MenuItem flipMenuItem = new MenuItem();
@@ -1365,7 +1428,7 @@ namespace GameClient
                 {
                     MenuItem playAsMoneyMenuItem = new MenuItem();
                     playAsMoneyMenuItem.Header = ClientResourceList.PlayAsMoneyMenuItemHeader;
-                    playAsMoneyMenuItem.Click += (sender2, args2) =>
+                    playAsMoneyMenuItem.Click += ( sender2, args2 ) =>
                     {
                         cardBeingAdded.Type = CardType.Money;
                         this.PlayCardEvent(cardButton, null);
@@ -1688,7 +1751,7 @@ namespace GameClient
             // Update the server's information regarding this player.
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
         }
-        
+
         // Remove a card (given its Button wrapper) from the player's hand.
         public void RemoveCardButtonFromHand( Button cardButton )
         {
@@ -1710,7 +1773,7 @@ namespace GameClient
         {
             foreach ( Transform transform in transformGroup.Children )
             {
-                if (transform.GetType() == transformType )
+                if ( transform.GetType() == transformType )
                 {
                     return transformGroup.Children.Remove(transform);
                 }
@@ -1802,7 +1865,7 @@ namespace GameClient
         // Perform a specific action related to the given action card.
         private bool HandleAction( Card actionCard )
         {
-            if (ActionId.PassGo == (ActionId)actionCard.ActionID)
+            if ( ActionId.PassGo == (ActionId)actionCard.ActionID )
             {
                 this.GameEventLog.PublishPlayCardEvent(this.Player, actionCard);
                 DrawCards(2);
@@ -1810,19 +1873,19 @@ namespace GameClient
 
                 return true;
             }
-            else if (5 <= actionCard.ActionID && 7 >= actionCard.ActionID)
+            else if ( 5 <= actionCard.ActionID && 7 >= actionCard.ActionID )
             {
                 // Steal property
                 return StealProperty(actionCard);
             }
-            else if ((ActionId.JustSayNo == (ActionId)actionCard.ActionID) || (ActionId.DoubleTheRent == (ActionId)actionCard.ActionID))
+            else if ( (ActionId.JustSayNo == (ActionId)actionCard.ActionID) || (ActionId.DoubleTheRent == (ActionId)actionCard.ActionID) )
             {
                 MessageBox.Show($"You cannot play a {actionCard.Name} right now!", "Invalid action");
                 return false;
             }
 
             // The card must be a rent card.
-            return CollectRent(actionCard);            
+            return CollectRent(actionCard);
         }
 
         // Steal a property or set of properties from a player.
@@ -1872,7 +1935,7 @@ namespace GameClient
                         }
 
                         break;
-                    }                    
+                    }
                 }
 
                 // Display the property theft window.
@@ -1882,7 +1945,7 @@ namespace GameClient
                 {
                     // Discard the action card and send the Theft Request to the victim. The victim has a chance to say "No" if he has a "Just Say No" card.
                     DiscardCard(stealCard);
-                    
+
                     this.LastTheftRequest = new ActionData.TheftRequest(this.Player.Name, propertyTheftWindow.Victim.Name, stealCard.ActionID, propertyTheftWindow.PropertyToGive, propertyTheftWindow.PropertiesToTake);
                     ServerUtilities.SendMessage(Client, Datatype.RequestTheft, this.LastTheftRequest);
                     this.SendPlaySoundRequestForCard(stealCard);
@@ -1920,7 +1983,7 @@ namespace GameClient
             else
             {
                 // If a player was not selected, cancel the action.
-                return false;                
+                return false;
             }
 
             return true;
@@ -1933,7 +1996,7 @@ namespace GameClient
             var doubleTheRentCardsUsed = new List<Card>();
 
             ActionId rentCardType = (ActionId)rentCard.ActionID;
-            switch (rentCardType)
+            switch ( rentCardType )
             {
                 case ActionId.ItsMyBirthday:
                 {
@@ -1956,7 +2019,7 @@ namespace GameClient
                     foreach ( List<Card> cardList in this.Player.CardsInPlay.Skip(1) )
                     {
                         PropertyType cardListColor = ClientUtilities.GetCardListColor(cardList);
-                        if ( (PropertyType.Wild != cardListColor) && 
+                        if ( (PropertyType.Wild != cardListColor) &&
                              (PropertyType.None != cardListColor) &&
                              ((PropertyType.Wild == rentCard.Color) || (cardListColor == rentCard.Color) || (cardListColor == rentCard.AltColor)) )
                         {
@@ -1992,7 +2055,7 @@ namespace GameClient
                     }
 
                     var doubleTheRentCardsFound = this.Player.CardsInHand.Where(card => card.ActionID == (int)ActionId.DoubleTheRent).ToList();
-                    foreach (Card doubleTheRentCard in doubleTheRentCardsFound)
+                    foreach ( Card doubleTheRentCard in doubleTheRentCardsFound )
                     {
                         if ( this.Turn.ActionsRemaining > 1 )
                         {
@@ -2021,7 +2084,7 @@ namespace GameClient
             List<Player> rentees = null;
 
             bool targetOnePlayer = (ActionId.DebtCollector == rentCardType || ActionId.RentWild == rentCardType);
-            if ( targetOnePlayer)
+            if ( targetOnePlayer )
             {
                 // Prevent the renter from performing any action until all rentees have paid their rent.
                 NumberOfRentees = 1;
@@ -2054,7 +2117,7 @@ namespace GameClient
             // Discard the action card and send the message to the server.
             DiscardCard(rentCard);
 
-            foreach (Card doubleTheRentCard in doubleTheRentCardsUsed)
+            foreach ( Card doubleTheRentCard in doubleTheRentCardsUsed )
             {
                 amountToCollect *= 2;
                 DiscardCard(doubleTheRentCard);
@@ -2165,8 +2228,8 @@ namespace GameClient
             // Send the updated rentee to the server and a RentResponse to the renter.
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
             ServerUtilities.SendMessage(Client, Datatype.GiveRent, new ActionData.RentResponse(renterName, this.Player.Name, payment, acceptedDeal));
-            if (acceptedDeal)
-            { 
+            if ( acceptedDeal )
+            {
                 this.GameEventLog.PublishPayRentEvent(
                     this.PlayerList.First(p => p.Name == renterName),
                     this.PlayerList.First(p => p.Name == this.PlayerName),
@@ -2180,7 +2243,7 @@ namespace GameClient
             ActionData.RentResponse rentResponse = (ActionData.RentResponse)response;
 
             // If this player is the renter who originally requested the rent, add the AssetsGiven to the player's AssetsReceived list.
-            if (rentResponse.RenterName != this.Player.Name)
+            if ( rentResponse.RenterName != this.Player.Name )
             {
                 return;
             }
@@ -2190,7 +2253,7 @@ namespace GameClient
             {
                 if ( rentResponse.AcceptedDeal )
                 {
-                    foreach ( Card card in rentResponse.AssetsGiven)
+                    foreach ( Card card in rentResponse.AssetsGiven )
                     {
                         AddCardToCardsInPlay(card, this.Player);
                     }
@@ -2240,7 +2303,7 @@ namespace GameClient
             {
                 throw new Exception("Rent Responses out of sync");
             }
-            
+
         }
 
         private void ProcessTheftRequest( Object request )
@@ -2284,7 +2347,7 @@ namespace GameClient
             if ( playerWantsToUseJustSayNo )
             {
                 // Remove the Just Say No from the victim's hand.
-                PlayJustSayNo(justSayNo);               
+                PlayJustSayNo(justSayNo);
             }
             else
             {
@@ -2369,9 +2432,9 @@ namespace GameClient
 
         private void SendPlaySoundRequestForCard( Card card )
         {
-            if (card.CardSoundUriPath != GameObjectsResourceList.UriPathEmpty)
+            if ( card.CardSoundUriPath != GameObjectsResourceList.UriPathEmpty )
             {
-                ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, card.CardSoundUriPath);
+                ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, new PlaySoundRequest(card.CardSoundUriPath));
             }
         }
 
@@ -2400,9 +2463,9 @@ namespace GameClient
 
         #region Just Say No Handling
 
-        private bool AskPlayerAboutJustSayNo(string title, string baseMessage, bool playerHasJustSayNo )
+        private bool AskPlayerAboutJustSayNo( string title, string baseMessage, bool playerHasJustSayNo )
         {
-            MessageDialog messageDialog;     
+            MessageDialog messageDialog;
             bool useJustSayNo = false;
             if ( playerHasJustSayNo )
             {
@@ -2431,7 +2494,7 @@ namespace GameClient
         // Create a new thread to run a function that cannot be run on the same thread invoking CreateNewThread().
         public Thread CreateNewThread( Action<Object> action, object data = null, string name = "" )
         {
-            ThreadStart start = delegate() { Dispatcher.Invoke(DispatcherPriority.Normal, action, data); };
+            ThreadStart start = delegate () { Dispatcher.Invoke(DispatcherPriority.Normal, action, data); };
             Thread newThread = new Thread(start);
 
             if ( !String.IsNullOrEmpty(name) )
@@ -2511,6 +2574,42 @@ namespace GameClient
             return (card.AltColor != PropertyType.None);
         }
 
+        // Create a button used for players to tell the current player to hurry up.
+        private Button CreateBellButtonForPlayer(Player playerForBell)
+        {
+            var bellButton = new Button();
+            bellButton.Content = new Image() { Source = this.TryFindResource(ClientResourceList.BellImagePath) as DrawingImage };
+            bellButton.Style = (Style)FindResource("NoChromeButton");
+            bellButton.Click += async ( object sender, RoutedEventArgs e ) =>
+            {
+                List<string> namesOfPlayersToExclude = this.PlayerList.Select(player => player.Name)
+                    .Where(name => name != playerForBell.Name)
+                    .ToList();
+                ServerUtilities.SendMessage(
+                    this.Client,
+                    Datatype.PlaySound,
+                    new PlaySoundRequest(ClientResourceList.UriPathBell, namesOfPlayersToExclude));
+                this.GameEventLog.PublishBellRungEvent(playerForBell);
+
+                // Hide the button temporarily to prevent spamming
+                bellButton.Visibility = Visibility.Hidden;
+                Func<Task> enableAfterTimeTask = async () =>
+                {
+                    await Task.Delay(1000 * Convert.ToInt32(ClientResourceList.BellButtonDisabledTimeInSeconds));
+                    
+                    if ( playerForBell.Name == this.PlayerList[this.Turn.CurrentTurnOwner].Name )
+                    {
+                        bellButton.Visibility = Visibility.Visible;
+                    }
+                };
+                await enableAfterTimeTask();
+            };
+            bellButton.SetBinding(Button.WidthProperty, new Binding("ActualHeight") { Source = bellButton, Mode = BindingMode.OneWay });
+            Grid.SetRow(bellButton, 1);
+            bellButton.Visibility = Visibility.Hidden;
+
+            return bellButton;
+        }
         #endregion
 
     }
