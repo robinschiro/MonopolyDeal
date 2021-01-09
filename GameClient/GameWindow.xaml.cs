@@ -129,23 +129,6 @@ namespace GameClient
             }
         }
 
-        private bool bellOnlyForPlayersNamedGeoEnabled;
-        public bool BellOnlyForPlayersNamedGeoEnabled
-        {
-            get
-            {
-                return bellOnlyForPlayersNamedGeoEnabled;
-            }
-            set
-            {
-                bellOnlyForPlayersNamedGeoEnabled = value;
-                this.ClientSettings[ClientResourceList.BellOnlyForPlayersNamedGeoEnabledKey] = value;
-                this.ClientSettings.Save();
-
-                OnPropertyChanged("BellOnlyForPlayersNamedGeoEnabled");
-            }
-        }
-
         private int volume;
         public int Volume
         {
@@ -334,7 +317,6 @@ namespace GameClient
             this.IsTurnNotificationDialogEnabled = this.ClientSettings.bValue(ClientResourceList.SettingTurnNotificationDialogEnabledKey, Convert.ToBoolean(ClientResourceList.SettingTurnNotificationDialogEnabledDefaultValue));
             this.EndTurnAfterSpendingAllActionsEnabled = this.ClientSettings.bValue(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledKey, Convert.ToBoolean(ClientResourceList.EndTurnAfterSpendingAllActionsEnabledDefaultValue));
             this.DoubleClickToPlayCardAsOriginalTypeEnabled = this.ClientSettings.bValue(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledKey, Convert.ToBoolean(ClientResourceList.DoubleClickToPlayCardAsOriginalTypeEnabledDefaultValue));
-            this.BellOnlyForPlayersNamedGeoEnabled = this.ClientSettings.bValue(ClientResourceList.BellOnlyForPlayersNamedGeoEnabledKey, Convert.ToBoolean(ClientResourceList.BellOnlyForPlayersNamedGeoEnabledDefaultValue));
             this.Volume = this.ClientSettings.iValue(ClientResourceList.SettingVolumeKey, Convert.ToInt32(ClientResourceList.SettingVolumeDefaultValue));
 
             DisplayBellForCurrentPlayer();
@@ -1106,17 +1088,7 @@ namespace GameClient
             string currentPlayerName = this.PlayerList[this.Turn.CurrentTurnOwner].Name;
             if (this.PlayerBellButtonDictionary.ContainsKey(currentPlayerName))
             {
-                if ( this.bellOnlyForPlayersNamedGeoEnabled )
-                {
-                    if ( currentPlayerName == "Geo" )
-                    {
-                        this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
-                    }
-                }
-                else
-                {
-                    this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
-                }
+                this.PlayerBellButtonDictionary[currentPlayerName].Visibility = Visibility.Visible;
             }
         }
 
