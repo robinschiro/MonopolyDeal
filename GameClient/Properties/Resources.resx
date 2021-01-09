@@ -213,10 +213,4 @@
   <data name="BellImagePath" xml:space="preserve">
     <value>BellDrawingImage</value>
   </data>
-  <data name="BellOnlyForPlayersNamedGeoEnabledDefaultValue" xml:space="preserve">
-    <value>true</value>
-  </data>
-  <data name="BellOnlyForPlayersNamedGeoEnabledKey" xml:space="preserve">
-    <value>-BellOnlyForPlayersNamedGeoEnabled</value>
-  </data>
 </root>
