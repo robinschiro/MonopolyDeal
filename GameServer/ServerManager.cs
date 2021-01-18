@@ -21,6 +21,7 @@ namespace GameServer
     {
         // Server object
         static NetServer Server;
+
         // Configuration object
         static NetPeerConfiguration Config;
         static tvProfile Profile;
@@ -32,6 +33,24 @@ namespace GameServer
         static List<Card> DiscardPile;
         static bool HasGameBeenLaunched = false;
         static int NumberOfPlayersConnectedAfterLaunch = 0;
+
+        static void PrintAndLog(string message)
+        {
+            try
+            {
+                using ( StreamWriter serverLogFile = new StreamWriter(GameObjectsResourceList.FilePathServerLog, true) )
+                {
+                    string logLine = $"{DateTime.Now}: {message}";
+                    serverLogFile.WriteLine(logLine);
+                    Console.WriteLine(logLine);
+                }
+
+            }
+            catch ( Exception )
+            {
+                Console.WriteLine("Failed to write to server log file.");
+            }
+        }
 
         [STAThread]
         static void Main( string[] args )
@@ -88,7 +107,7 @@ namespace GameServer
 
             // Start it
             Server.Start();
-            Console.WriteLine($"Server started on port {Config.Port}");
+            PrintAndLog($"Server started on port {Config.Port}");
 
             // Object that can be used to store and read messages
             NetIncomingMessage inc;
@@ -100,7 +119,7 @@ namespace GameServer
             TimeSpan timetopass = new TimeSpan(0, 0, 0, 0, 30);
 
             // Write to con..
-            Console.WriteLine("Waiting for new connections");
+            PrintAndLog("Waiting for new connections");
 
             // Main loop
             // This kind of loop can't be made in XNA. In there, its basically same, but without while
@@ -123,7 +142,7 @@ namespace GameServer
                             // ( Enums can be casted to bytes, so it be used to make bytes human readable )
                             if ( inc.ReadByte() == (byte)PacketTypes.LOGIN )
                             {
-                                Console.WriteLine("Incoming LOGIN");
+                                PrintAndLog("Incoming LOGIN");
 
                                 if ( !HasGameBeenLaunched || NumberOfPlayersConnectedAfterLaunch < PlayerList.Count )
                                 {
@@ -132,12 +151,12 @@ namespace GameServer
                                         NumberOfPlayersConnectedAfterLaunch++;
                                     }
                                     inc.SenderConnection.Approve();
-                                    Console.WriteLine("Approved new connection.");
+                                    PrintAndLog("Approved new connection.");
                                 }
                                 else
                                 {
                                     inc.SenderConnection.Deny();
-                                    Console.WriteLine("Rejected new connection. Game has already started and all players have connected.");
+                                    PrintAndLog("Rejected new connection. Game has already started and all players have connected.");
                                 }
                             }
 
@@ -194,7 +213,7 @@ namespace GameServer
                                     // If the Player is not on the list, add it.
                                     if ( !isPlayerInList )
                                     {
-                                        Console.WriteLine($"{updatedPlayer.Name} has joined the server!");
+                                        PrintAndLog($"{updatedPlayer.Name} has joined the server!");
                                         PlayerList.Add(updatedPlayer);
                                     }
 
@@ -336,16 +355,16 @@ namespace GameServer
                             // NetConnectionStatus.None;
 
                             // NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with disconnect()
-                            Console.WriteLine(inc.SenderConnection.ToString() + " status changed. " + (NetConnectionStatus)inc.SenderConnection.Status);
+                            PrintAndLog(inc.SenderConnection.ToString() + " status changed. " + (NetConnectionStatus)inc.SenderConnection.Status);
                             if ( inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting )
                             {                                
-                                Console.WriteLine("Client was disconnected.");
+                                PrintAndLog("Client was disconnected.");
                             }
                             break;
                         }
                         default:
                         {
-                            Console.WriteLine("Message of type: " + inc.MessageType + " received");
+                            PrintAndLog("Message of type: " + inc.MessageType + " received");
                             break;
                         }
                     }

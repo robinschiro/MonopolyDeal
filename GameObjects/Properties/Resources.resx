@@ -123,6 +123,9 @@
   <data name="FilePathLocalServerSettings" xml:space="preserve">
     <value>Profile.txt</value>
   </data>
+  <data name="FilePathServerLog" xml:space="preserve">
+    <value>ServerLog.txt</value>
+  </data>
   <data name="TooltipMaxWidth" xml:space="preserve">
     <value>225</value>
   </data>
