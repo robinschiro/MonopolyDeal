@@ -46,7 +46,6 @@ namespace GameServer
                     serverLogFile.WriteLine(logLine);
                     Console.WriteLine(logLine);
                 }
-
             }
             catch ( Exception )
             {
@@ -74,7 +73,7 @@ namespace GameServer
             // Create a new list of players.
             PlayerList = new List<Player>();
 
-            // Create a new Dicard Pile.
+            // Create a new Discard Pile.
             DiscardPile = new List<Card>();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
@@ -114,18 +113,9 @@ namespace GameServer
             // Object that can be used to store and read messages
             NetIncomingMessage inc;
 
-            // Check time
-            DateTime time = DateTime.Now;
-
-            // Create timespan of 30ms
-            TimeSpan timetopass = new TimeSpan(0, 0, 0, 0, 30);
-
-            // Write to con..
             PrintAndLog("Waiting for new connections");
 
             // Main loop
-            // This kind of loop can't be made in XNA. In there, its basically same, but without while
-            // Or maybe it could be while(new messages)
             while ( true )
             {
                 // Server.ReadMessage() Returns new messages, that have not yet been read.
@@ -373,7 +363,7 @@ namespace GameServer
                             PrintAndLog($"The status for player {playerName} has changed: {inc.SenderConnection.Status}. Connection Details: {inc.SenderConnection}");
                             if ( inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting )
                             {                                
-                                PrintAndLog("Client was disconnected.");
+                                PrintAndLog($"Client for player {playerName} was disconnected.");
                             }
                             break;
                         }
@@ -383,13 +373,7 @@ namespace GameServer
                             break;
                         }
                     }
-                } // If New messages
-
-                // if 30ms has passed
-                if ( (time + timetopass) < DateTime.Now )
-                {
-                    time = DateTime.Now;
-                }
+                } 
 
                 // While loops run as fast as your computer lets. While(true) can lock your computer up. Even 1ms sleep, lets other programs have piece of your CPU time
                 System.Threading.Thread.Sleep(100);
