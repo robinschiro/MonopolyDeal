@@ -124,7 +124,7 @@
     <value>Profile.txt</value>
   </data>
   <data name="FilePathServerLog" xml:space="preserve">
-    <value>ServerLog.txt</value>
+    <value>MonopolyDealServerLog.txt</value>
   </data>
   <data name="TooltipMaxWidth" xml:space="preserve">
     <value>225</value>

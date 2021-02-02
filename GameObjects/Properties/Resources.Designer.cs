@@ -79,7 +79,7 @@ namespace GameObjects.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ServerLog.txt.
+        ///   Looks up a localized string similar to MonopolyDealServerLog.txt.
         /// </summary>
         public static string FilePathServerLog {
             get {
