@@ -79,6 +79,15 @@ namespace GameObjects.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MonopolyDealServerLog.txt.
+        /// </summary>
+        public static string FilePathServerLog {
+            get {
+                return ResourceManager.GetString("FilePathServerLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 225.
         /// </summary>
         public static string TooltipMaxWidth {

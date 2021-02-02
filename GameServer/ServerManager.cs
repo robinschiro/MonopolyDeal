@@ -5,6 +5,7 @@ using tvToolbox;
 using Lidgren.Network;
 using System.IO;
 using GameObjectsResourceList = GameObjects.Properties.Resources;
+using System.Linq;
 
 // The server/client architecture of MonopolyDeal is built on the Lidgren Networking framework.
 // Lidgren Networking Resources:
@@ -21,6 +22,7 @@ namespace GameServer
     {
         // Server object
         static NetServer Server;
+
         // Configuration object
         static NetPeerConfiguration Config;
         static tvProfile Profile;
@@ -28,10 +30,28 @@ namespace GameServer
         // Game objects.
         static Deck Deck;
         static List<Player> PlayerList;
+        static Dictionary<long, string> ClientIdToPlayerName = new Dictionary<long, string>();
         static Turn Turn;
         static List<Card> DiscardPile;
         static bool HasGameBeenLaunched = false;
         static int NumberOfPlayersConnectedAfterLaunch = 0;
+
+        static void PrintAndLog(string message)
+        {
+            try
+            {
+                using ( StreamWriter serverLogFile = new StreamWriter(GameObjectsResourceList.FilePathServerLog, true) )
+                {
+                    string logLine = $"{DateTime.Now}: {message}";
+                    serverLogFile.WriteLine(logLine);
+                    Console.WriteLine(logLine);
+                }
+            }
+            catch ( Exception )
+            {
+                Console.WriteLine("Failed to write to server log file.");
+            }
+        }
 
         [STAThread]
         static void Main( string[] args )
@@ -53,7 +73,7 @@ namespace GameServer
             // Create a new list of players.
             PlayerList = new List<Player>();
 
-            // Create a new Dicard Pile.
+            // Create a new Discard Pile.
             DiscardPile = new List<Card>();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
@@ -88,23 +108,14 @@ namespace GameServer
 
             // Start it
             Server.Start();
-            Console.WriteLine($"Server started on port {Config.Port}");
+            PrintAndLog($"Server started on port {Config.Port}");
 
             // Object that can be used to store and read messages
             NetIncomingMessage inc;
 
-            // Check time
-            DateTime time = DateTime.Now;
-
-            // Create timespan of 30ms
-            TimeSpan timetopass = new TimeSpan(0, 0, 0, 0, 30);
-
-            // Write to con..
-            Console.WriteLine("Waiting for new connections");
+            PrintAndLog("Waiting for new connections");
 
             // Main loop
-            // This kind of loop can't be made in XNA. In there, its basically same, but without while
-            // Or maybe it could be while(new messages)
             while ( true )
             {
                 // Server.ReadMessage() Returns new messages, that have not yet been read.
@@ -123,7 +134,7 @@ namespace GameServer
                             // ( Enums can be casted to bytes, so it be used to make bytes human readable )
                             if ( inc.ReadByte() == (byte)PacketTypes.LOGIN )
                             {
-                                Console.WriteLine("Incoming LOGIN");
+                                PrintAndLog("Incoming LOGIN");
 
                                 if ( !HasGameBeenLaunched || NumberOfPlayersConnectedAfterLaunch < PlayerList.Count )
                                 {
@@ -132,12 +143,12 @@ namespace GameServer
                                         NumberOfPlayersConnectedAfterLaunch++;
                                     }
                                     inc.SenderConnection.Approve();
-                                    Console.WriteLine("Approved new connection.");
+                                    PrintAndLog("Approved new connection.");
                                 }
                                 else
                                 {
                                     inc.SenderConnection.Deny();
-                                    Console.WriteLine("Rejected new connection. Game has already started and all players have connected.");
+                                    PrintAndLog("Rejected new connection. Game has already started and all players have connected.");
                                 }
                             }
 
@@ -194,9 +205,15 @@ namespace GameServer
                                     // If the Player is not on the list, add it.
                                     if ( !isPlayerInList )
                                     {
-                                        Console.WriteLine($"{updatedPlayer.Name} has joined the server!");
+                                        PrintAndLog($"{updatedPlayer.Name} has joined the server!");
                                         PlayerList.Add(updatedPlayer);
+
+                                        PrintAndLog($"List of players currently in lobby: {string.Join(", ", PlayerList.Select(player => player.Name).ToArray())}");
                                     }
+                                    else if ( !ClientIdToPlayerName.ContainsKey(idOfSender) )
+                                    {
+                                        ClientIdToPlayerName.Add(idOfSender, updatedPlayer.Name);
+                                    }                                    
 
                                     // Send the updated PlayerList to all clients.                                    
                                     ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
@@ -336,26 +353,27 @@ namespace GameServer
                             // NetConnectionStatus.None;
 
                             // NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with disconnect()
-                            Console.WriteLine(inc.SenderConnection.ToString() + " status changed. " + (NetConnectionStatus)inc.SenderConnection.Status);
+                            string playerName;
+                            ClientIdToPlayerName.TryGetValue(inc.SenderConnection.RemoteUniqueIdentifier, out playerName);
+                            if (string.IsNullOrWhiteSpace(playerName))
+                            {
+                                playerName = "Unknown";
+                            }
+
+                            PrintAndLog($"The status for player {playerName} has changed: {inc.SenderConnection.Status}. Connection Details: {inc.SenderConnection}");
                             if ( inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting )
                             {                                
-                                Console.WriteLine("Client was disconnected.");
+                                PrintAndLog($"Client for player {playerName} was disconnected.");
                             }
                             break;
                         }
                         default:
                         {
-                            Console.WriteLine("Message of type: " + inc.MessageType + " received");
+                            PrintAndLog("Message of type: " + inc.MessageType + " received");
                             break;
                         }
                     }
-                } // If New messages
-
-                // if 30ms has passed
-                if ( (time + timetopass) < DateTime.Now )
-                {
-                    time = DateTime.Now;
-                }
+                } 
 
                 // While loops run as fast as your computer lets. While(true) can lock your computer up. Even 1ms sleep, lets other programs have piece of your CPU time
                 System.Threading.Thread.Sleep(100);
