@@ -5,6 +5,7 @@ using tvToolbox;
 using Lidgren.Network;
 using System.IO;
 using GameObjectsResourceList = GameObjects.Properties.Resources;
+using System.Linq;
 
 // The server/client architecture of MonopolyDeal is built on the Lidgren Networking framework.
 // Lidgren Networking Resources:
@@ -29,6 +30,7 @@ namespace GameServer
         // Game objects.
         static Deck Deck;
         static List<Player> PlayerList;
+        static Dictionary<long, string> ClientIdToPlayerName = new Dictionary<long, string>();
         static Turn Turn;
         static List<Card> DiscardPile;
         static bool HasGameBeenLaunched = false;
@@ -215,7 +217,13 @@ namespace GameServer
                                     {
                                         PrintAndLog($"{updatedPlayer.Name} has joined the server!");
                                         PlayerList.Add(updatedPlayer);
+
+                                        PrintAndLog($"List of players currently in lobby: {string.Join(", ", PlayerList.Select(player => player.Name).ToArray())}");
                                     }
+                                    else if ( !ClientIdToPlayerName.ContainsKey(idOfSender) )
+                                    {
+                                        ClientIdToPlayerName.Add(idOfSender, updatedPlayer.Name);
+                                    }                                    
 
                                     // Send the updated PlayerList to all clients.                                    
                                     ServerUtilities.SendMessage(Server, Datatype.UpdatePlayerList, PlayerList);
@@ -355,7 +363,14 @@ namespace GameServer
                             // NetConnectionStatus.None;
 
                             // NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with disconnect()
-                            PrintAndLog(inc.SenderConnection.ToString() + " status changed. " + (NetConnectionStatus)inc.SenderConnection.Status);
+                            string playerName;
+                            ClientIdToPlayerName.TryGetValue(inc.SenderConnection.RemoteUniqueIdentifier, out playerName);
+                            if (string.IsNullOrWhiteSpace(playerName))
+                            {
+                                playerName = "Unknown";
+                            }
+
+                            PrintAndLog($"The status for player {playerName} has changed: {inc.SenderConnection.Status}. Connection Details: {inc.SenderConnection}");
                             if ( inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting )
                             {                                
                                 PrintAndLog("Client was disconnected.");
