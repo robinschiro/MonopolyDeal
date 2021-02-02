@@ -49,6 +49,8 @@ namespace GameClient
 
         private NetClient netClient;
         private Dictionary<int, Card> allCards;
+        private readonly double ChanceToDisplayBellRingerName = Convert.ToInt32(GameObjectsResourceList.PercentChanceToDisplayBellRingerName) / 100.0;
+        private readonly Random ChanceGenerator = new Random();
 
         public ObservableCollection<EventLogItem> EventList { get; set; }
 
@@ -154,9 +156,10 @@ namespace GameClient
             this.PublishEvent(eventLine);
         }
 
-        public void PublishBellRungEvent(Player ringee)
+        public void PublishBellRungEvent(Player ringer, Player ringee)
         {
-            string eventLine = $"A player wants {ringee.Name} to hurry up!";
+            bool shouldShowRingerName = this.ChanceGenerator.NextDouble() < this.ChanceToDisplayBellRingerName;
+            string eventLine = $"{(shouldShowRingerName ? (ringer.Name) : ("A player"))} wants {ringee.Name} to hurry up!";
             this.PublishEvent(eventLine);
         }
 

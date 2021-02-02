@@ -88,6 +88,15 @@ namespace GameObjects.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 20.
+        /// </summary>
+        public static string PercentChanceToDisplayBellRingerName {
+            get {
+                return ResourceManager.GetString("PercentChanceToDisplayBellRingerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 225.
         /// </summary>
         public static string TooltipMaxWidth {

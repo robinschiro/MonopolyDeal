@@ -2561,7 +2561,7 @@ namespace GameClient
                     this.Client,
                     Datatype.PlaySound,
                     new PlaySoundRequest(ClientResourceList.UriPathBell, namesOfPlayersToExclude));
-                this.GameEventLog.PublishBellRungEvent(playerForBell);
+                this.GameEventLog.PublishBellRungEvent(this.Player, playerForBell);
 
                 // Hide the button temporarily to prevent spamming
                 bellButton.Visibility = Visibility.Hidden;

@@ -34,6 +34,6 @@ namespace GameClient
 
         void PublishDeckEmptyEvent(bool discardPileReshuffled);
 
-        void PublishBellRungEvent( Player ringee );
+        void PublishBellRungEvent( Player ringer, Player ringee );
     }
 }
