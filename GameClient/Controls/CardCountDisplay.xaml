@@ -13,7 +13,12 @@
         <Image Name="CardCountImage" 
                Source="{Binding DisplayImage}" 
                Grid.Row="0"
-               Margin="5"/>
+               Margin="5">
+            <Image.ToolTip>
+                <Image Name="CardCountImageTooltip" 
+                       Source="{Binding DisplayImage}"/>
+            </Image.ToolTip>
+        </Image>
         <Viewbox Grid.Row="1"
                 HorizontalAlignment="Center">
             <TextBlock Name="CardCountText" Text="{Binding DisplayText}"/>
