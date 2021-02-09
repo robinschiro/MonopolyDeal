@@ -126,6 +126,9 @@
   <data name="FilePathServerLog" xml:space="preserve">
     <value>MonopolyDealServerLog.txt</value>
   </data>
+  <data name="PercentChanceToDisplayBellRingerName" xml:space="preserve">
+    <value>20</value>
+  </data>
   <data name="TooltipMaxWidth" xml:space="preserve">
     <value>225</value>
   </data>

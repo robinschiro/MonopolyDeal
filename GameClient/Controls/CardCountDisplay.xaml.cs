@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Media;
+using GameObjectsResourceList = GameObjects.Properties.Resources;
 
 namespace GameClient.Controls
 {
@@ -40,6 +42,7 @@ namespace GameClient.Controls
         {
             InitializeComponent();
             this.CardCountGrid.DataContext = this;
+            this.CardCountImageTooltip.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
         }
 
         private void OnPropertyChanged( string info )
