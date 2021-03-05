@@ -61,6 +61,14 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ServerInterfaces\INetServer.cs" />
+    <Compile Include="ServerInterfaces\INetClient.cs" />
+    <Compile Include="ServerInterfaces\INetConnection.cs" />
+    <Compile Include="ServerInterfaces\INetIncomingMessage.cs" />
+    <Compile Include="ServerInterfaces\INetOutgoingMessage.cs" />
+    <Compile Include="ServerInterfaces\INetPeer.cs" />
+    <Compile Include="ServerInterfaces\INetPeerConfiguration.cs" />
+    <Compile Include="ServerInterfaces\NetIncomingMessageType.cs" />
     <Compile Include="Turn.cs" />
     <Compile Include="Datatype.cs" />
     <Compile Include="Deck.cs" />
