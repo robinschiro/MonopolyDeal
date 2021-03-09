@@ -49,9 +49,9 @@ namespace GameServer
                     serverLogFile.WriteLine(logLine);
                 }
             }
-            catch ( Exception )
+            catch ( Exception ex )
             {
-                Console.WriteLine("Failed to write to server log file.");
+                Console.WriteLine($"Failed to write to server log file. Exception: {ex}");
             }
         }
 
