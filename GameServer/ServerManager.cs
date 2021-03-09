@@ -38,13 +38,15 @@ namespace GameServer
 
         static void PrintAndLog(string message)
         {
+            string logLine = $"{DateTime.Now}: {message}";
+            Console.WriteLine(logLine);
+
             try
             {
-                using ( StreamWriter serverLogFile = new StreamWriter(GameObjectsResourceList.FilePathServerLog, true) )
+                string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), GameObjectsResourceList.FilePathServerLog);
+                using ( StreamWriter serverLogFile = new StreamWriter(logPath, true) )
                 {
-                    string logLine = $"{DateTime.Now}: {message}";
                     serverLogFile.WriteLine(logLine);
-                    Console.WriteLine(logLine);
                 }
             }
             catch ( Exception )
