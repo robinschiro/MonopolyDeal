@@ -124,7 +124,7 @@
     <value>Profile.txt</value>
   </data>
   <data name="FilePathServerLog" xml:space="preserve">
-    <value>MonopolyDealServerLog.txt</value>
+    <value>MonopolyDeal\MonopolyDealServerLog.txt</value>
   </data>
   <data name="PercentChanceToDisplayBellRingerName" xml:space="preserve">
     <value>20</value>
