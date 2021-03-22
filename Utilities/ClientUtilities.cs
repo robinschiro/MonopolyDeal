@@ -246,14 +246,21 @@ namespace Utilities
             catch (IOException ex)
             {
                 Console.WriteLine($"Failed to find audio file for sound. Be sure to add the file to the 'GameObjects' project as a resource and rebuild the solution. " +
-                    $"Exception Details: {ex.Message}");
+                    $"Exception Details: {ex}");
             }
         }
 
         public static void SetClientVolume( int volume )
         {
             int currentProcessPid = Process.GetCurrentProcess().Id;
-            VolumeMixer.SetApplicationVolume(currentProcessPid, Convert.ToSingle(volume));
+            try
+            {
+                VolumeMixer.SetApplicationVolume(currentProcessPid, Convert.ToSingle(volume));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to set client volume. Exception Details: {ex}");
+            }
         }
 
         #endregion
