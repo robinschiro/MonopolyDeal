@@ -954,6 +954,19 @@ namespace GameClient
             }
         }
 
+        /// <summary>
+        /// Discard all the player's cards in hand and in play.
+        /// </summary>
+        private void DiscardAllCards()
+        {
+            var flattenedCardsInPlay = this.Player.CardsInPlay.SelectMany(c => c).ToList();
+            foreach ( Card card in this.Player.CardsInHand.Concat(flattenedCardsInPlay) )
+            {
+                // This won't work for cards in play; need new logic
+                this.DiscardCard(card);
+            }           
+        }
+
         // Wrap a Button around a Card.
         public Button ConvertCardToButton( Card card )
         {
