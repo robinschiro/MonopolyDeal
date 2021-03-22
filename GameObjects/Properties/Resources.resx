@@ -120,11 +120,14 @@
   <data name="EventLogItemLimit" xml:space="preserve">
     <value>20</value>
   </data>
+  <data name="FileNameServerLog" xml:space="preserve">
+    <value>MonopolyDealServerLog.txt</value>
+  </data>
   <data name="FilePathLocalServerSettings" xml:space="preserve">
     <value>Profile.txt</value>
   </data>
-  <data name="FilePathServerLog" xml:space="preserve">
-    <value>MonopolyDeal\MonopolyDealServerLog.txt</value>
+  <data name="FolderNameAppData" xml:space="preserve">
+    <value>MonopolyDeal</value>
   </data>
   <data name="PercentChanceToDisplayBellRingerName" xml:space="preserve">
     <value>20</value>
