@@ -43,7 +43,8 @@ namespace GameServer
 
             try
             {
-                string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), GameObjectsResourceList.FilePathServerLog);
+                DirectoryInfo logDirectory = Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), GameObjectsResourceList.FolderNameAppData));
+                string logPath = Path.Combine(logDirectory.FullName, GameObjectsResourceList.FileNameServerLog);
                 using ( StreamWriter serverLogFile = new StreamWriter(logPath, true) )
                 {
                     serverLogFile.WriteLine(logLine);
