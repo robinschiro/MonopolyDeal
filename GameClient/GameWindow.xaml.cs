@@ -959,12 +959,23 @@ namespace GameClient
         /// </summary>
         private void DiscardAllCards()
         {
-            var flattenedCardsInPlay = this.Player.CardsInPlay.SelectMany(c => c).ToList();
-            foreach ( Card card in this.Player.CardsInHand.Concat(flattenedCardsInPlay) )
+            foreach ( Card card in this.Player.CardsInHand )
             {
-                // This won't work for cards in play; need new logic
-                this.DiscardCard(card);
-            }           
+                RemoveCardFromHand(card, shouldUpdateServer: false);
+                this.DiscardPile.Add(card);
+            }
+
+            var flattenedCardsInPlay = this.Player.CardsInPlay.SelectMany(c => c).ToList();
+            foreach ( Card card in flattenedCardsInPlay )
+            {
+                RemoveCardFromCardsInPlay(card, this.Player);
+                this.DiscardPile.Add(card);
+            }
+
+            DisplayCardsInPlay(this.Player, this.PlayerOneField);
+
+            ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, this.DiscardPile);
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
         }
 
         // Wrap a Button around a Card.
@@ -1724,7 +1735,7 @@ namespace GameClient
 
         // Remove a card from the player's hand.
         // This should only be called on the player associated with this client.
-        public void RemoveCardFromHand( Card cardtoRemove )
+        public void RemoveCardFromHand( Card cardtoRemove, bool shouldUpdateServer = true )
         {
             // Remove the card from the grid displaying the player's hand.
             // This must be done before removing the card from the list.
@@ -1734,7 +1745,10 @@ namespace GameClient
             this.Player.CardsInHand = new List<Card>(this.Player.CardsInHand.Where(card => card.CardID != cardtoRemove.CardID));
 
             // Update the server's information regarding this player.
-            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+            if ( shouldUpdateServer )
+            {
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+            }
         }
 
         // Remove a card (given its Button wrapper) from the player's hand.
@@ -2597,5 +2611,15 @@ namespace GameClient
         }
         #endregion
 
+        private void ConcedeButton_Click( object sender, RoutedEventArgs e )
+        {
+            if (MessageBoxResult.OK == MessageBox.Show("Are you sure you want to concede? All of your cards will be discarded and you will no longer be able to participate in the game.", 
+                                        "Quitting the game", 
+                                        MessageBoxButton.OKCancel))
+            {
+                this.DiscardAllCards();
+            }
+
+        }
     }
 }
