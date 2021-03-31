@@ -31,7 +31,7 @@ namespace AdditionalWindows
             }
             else
             {
-                MessageBox.Show("No other players!");
+                MessageBox.Show("There are no other eligible players!");
                 this.enoughPlayers = false;
             }
         }

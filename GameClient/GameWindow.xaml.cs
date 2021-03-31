@@ -511,6 +511,14 @@ namespace GameClient
                         {
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
+                            if ( this.PlayerList[this.Turn.CurrentTurnOwner].Name == this.PlayerName
+                                && this.Player.HasConceded
+                                && this.PlayerList.Count > 1 )
+                            {
+                                CreateNewThread(new Action<object>(EndTurn), null);
+                                break;
+                            }
+
                             // Update the turn display.
                             CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
 
@@ -617,7 +625,7 @@ namespace GameClient
                                         (PropertyType.None != card.AltColor) ||
                                         (PropertyType.Wild == card.Color))) )
                             {
-                                this.EndTurnButton_Click(this.EndTurnButton, new RoutedEventArgs());
+                                this.EndTurn();
                             }
                             else
                             {
@@ -656,17 +664,28 @@ namespace GameClient
             CreateNewThread(new Action<Object>(ResizeUIElements));
         }
 
-        // End the player's turn.
-        private void EndTurnButton_Click( object sender, RoutedEventArgs e )
+        /// <summary>
+        /// Announce the winner and end the game
+        /// </summary>
+        private void EndGame()
         {
-            // Check if player has won. If so, show message box and disable End Turn button.
+            this.EndTurnButton.IsEnabled = false;
+            this.ConcedeButton.IsEnabled = false;
+            this.GameEventLog.PublishPlayerWonEvent(this.Player);
+            ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, new PlaySoundRequest(ClientResourceList.UriPathWinningMusic));
+
+            new MessageDialog(this, "Congratulations!", "You won!", MessageBoxButton.OK).ShowDialog();
+        }
+
+        /// <summary>
+        /// End the player's turn
+        /// </summary>
+        private void EndTurn(object filler = null)
+        {
+            // Check if player has won. If so, end the game.
             if ( ClientUtilities.DetermineIfPlayerHasWon(this.Player) )
             {
-                this.EndTurnButton.IsEnabled = false;
-                this.GameEventLog.PublishPlayerWonEvent(this.Player);
-                ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, new PlaySoundRequest(ClientResourceList.UriPathWinningMusic));
-
-                MessageBox.Show("You won!", "Congratulations!", MessageBoxButton.OK, MessageBoxImage.None);
+                this.EndGame();
                 return;
             }
 
@@ -694,6 +713,33 @@ namespace GameClient
             ServerUtilities.SendMessage(Client, Datatype.EndTurn, this.Turn);
 
             this.EndTurnButton.ClearValue(Button.BackgroundProperty);
+        }
+
+        // End the player's turn.
+        private void EndTurnButton_Click( object sender, RoutedEventArgs e )
+        {
+            this.EndTurn();
+        }
+
+        /// <summary>
+        /// Removes the conceding player from the game.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ConcedeButton_Click( object sender, RoutedEventArgs e )
+        {
+            if ( MessageBoxResult.OK == MessageBox.Show("Are you sure you want to concede? All of your cards will be discarded and you will no longer be able to participate in the game.",
+                                        "Quitting the game",
+                                        MessageBoxButton.OKCancel) )
+            {
+                this.DiscardAllCards();
+                
+                this.Player.HasConceded = true;
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+
+                this.EndTurn();
+            }
+
         }
 
         // When a user clicks and holds onto a card, trigger a drag event.
@@ -1128,6 +1174,13 @@ namespace GameClient
             if ( isNewTurn && currentPlayerName == this.PlayerName )
             {
                 this.GameEventLog.PublishNewTurnEvent(this.PlayerList[this.Turn.CurrentTurnOwner]);
+
+                // If all other players have conceded, you have won!
+                if (this.PlayerList.Count > 1 
+                    && this.PlayerList.Count(p => p.HasConceded) == this.PlayerList.Count - 1 )
+                {
+                    this.EndGame();
+                }
             }
         }
 
@@ -2089,7 +2142,8 @@ namespace GameClient
                 NumberOfRentees = 1;
 
                 // Display the list of players.
-                PlayerSelectionDialog dialog = new PlayerSelectionDialog(this, this.Player.Name, PlayerList);
+                List<Player> eligibleRentees = this.PlayerList.Where(p => p.SumOfAssets > 0).ToList();
+                PlayerSelectionDialog dialog = new PlayerSelectionDialog(this, this.Player.Name, eligibleRentees);
                 if ( dialog.enoughPlayers && true == dialog.ShowDialog() )
                 {
                     // Send the rent request to the selected player.
@@ -2155,7 +2209,7 @@ namespace GameClient
             bool acceptedDeal = true;
 
 
-            if ( Card.SumOfCardValues(this.Player.CardsInPlay.SelectMany(c => c).ToList()) > 0 )
+            if ( this.Player.SumOfAssets > 0 )
             {
                 ClientUtilities.PlaySound(ClientResourceList.UriPathActionDing);
                 RentWindow rentWindow = new RentWindow(this, this.Player, renterName, rentRequest.RentAmount);
@@ -2611,15 +2665,5 @@ namespace GameClient
         }
         #endregion
 
-        private void ConcedeButton_Click( object sender, RoutedEventArgs e )
-        {
-            if (MessageBoxResult.OK == MessageBox.Show("Are you sure you want to concede? All of your cards will be discarded and you will no longer be able to participate in the game.", 
-                                        "Quitting the game", 
-                                        MessageBoxButton.OKCancel))
-            {
-                this.DiscardAllCards();
-            }
-
-        }
     }
 }
