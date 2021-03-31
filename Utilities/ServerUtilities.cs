@@ -116,6 +116,9 @@ namespace GameServer
             // Read the name of the player.
             string name = inc.ReadString();
 
+            // Read whether the player has conceded.
+            bool hasConceded = inc.ReadBoolean();
+
             // Read the CardsInPlay list.
             List<List<Card>> cardsInPlay = new List<List<Card>>();
             int count = inc.ReadInt32();
@@ -130,7 +133,7 @@ namespace GameServer
             // This first string in the message is the player's name.
             // The first list of cards is the Player's CardsInPlay list.
             // The second list of cards is the Player's CardsInHand list.
-            return new Player(name, cardsInPlay, cardsInHand);
+            return new Player(name, hasConceded, cardsInPlay, cardsInHand);
         }
 
         public static List<Player> ReadPlayerList( NetIncomingMessage inc )
@@ -303,6 +306,9 @@ namespace GameServer
         {
             // Write the Player's name.
             outmsg.Write(player.Name);
+
+            // Write whether the player has conceded.
+            outmsg.Write(player.HasConceded);
             
             // Write the Player's CardsInPlay (which is a list of card lists).
             outmsg.Write(player.CardsInPlay.Count);
