@@ -200,6 +200,7 @@ namespace GameServer
                                         {
                                             player.CardsInHand = updatedPlayer.CardsInHand;
                                             player.CardsInPlay = updatedPlayer.CardsInPlay;
+                                            player.HasConceded = updatedPlayer.HasConceded;
                                             isPlayerInList = true;
                                             break;
                                         }

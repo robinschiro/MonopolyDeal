@@ -14,12 +14,22 @@ namespace GameObjects
 
         // This list represents the player's hand.
         public List<Card> CardsInHand { get; set; }
-        
+
         // This represents the player's name. Every player in a game must have different name.
         public string Name { get; set; }
 
+        /// <summary>
+        /// Has this player conceded the game?
+        /// </summary>
+        public bool HasConceded { get; set; }
+
         // Stores a breakdown of the quantity of each type of money value the player has.
-        public MoneyList MoneyList { get; set; }
+        public MoneyList MoneyList { get; }
+
+        /// <summary>
+        /// Sum of values of all the player's CardsInPlay.
+        /// </summary>
+        public int SumOfAssets => Card.SumOfCardValues(this.CardsInPlay.SelectMany(c => c).ToList());
 
         // Use this constructor when generating a player for the first time.
         public Player( Deck deck, string name )
@@ -41,9 +51,10 @@ namespace GameObjects
             this.MoneyList = new MoneyList();
         }
 
-        public Player( string name, List<List<Card>> cardsInPlay, List<Card> cardsInHand )
+        public Player( string name, bool hasConceded, List<List<Card>> cardsInPlay, List<Card> cardsInHand )
         {
             this.Name = name;
+            this.HasConceded = hasConceded;
             this.CardsInPlay = cardsInPlay;
             this.CardsInHand = cardsInHand;
             this.MoneyList = new MoneyList();
@@ -56,7 +67,5 @@ namespace GameObjects
             this.CardsInHand = new List<Card>();
             this.MoneyList = new MoneyList();
         }
-
-
     }
 }
