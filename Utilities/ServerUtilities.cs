@@ -105,8 +105,14 @@ namespace GameServer
         {
             int currentTurnOwner = inc.ReadInt32();
             int numberOfActions = inc.ReadInt32();
+            bool isGameOver = inc.ReadBoolean();
 
-            Turn turn = new Turn(currentTurnOwner, numberOfActions);
+            Turn turn = new Turn()
+            {
+                CurrentTurnOwner = currentTurnOwner,
+                ActionsRemaining = numberOfActions,
+                IsGameOver = isGameOver
+            };
 
             return turn;
         }
@@ -339,6 +345,7 @@ namespace GameServer
             // Write the data related to the current turn.
             outmsg.Write(turn.CurrentTurnOwner);
             outmsg.Write(turn.ActionsRemaining);
+            outmsg.Write(turn.IsGameOver);
         }
 
         public static void WritePlaySoundRequest( NetOutgoingMessage outmsg, PlaySoundRequest request )

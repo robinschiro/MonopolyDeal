@@ -674,6 +674,10 @@ namespace GameClient
             this.GameEventLog.PublishPlayerWonEvent(this.Player);
             ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, new PlaySoundRequest(ClientResourceList.UriPathWinningMusic));
 
+            // Update game state for all clients
+            this.Turn.IsGameOver = true;
+            ServerUtilities.SendMessage(Client, Datatype.EndTurn, this.Turn);
+
             new MessageDialog(this, "Congratulations!", "You won!", MessageBoxButton.OK).ShowDialog();
         }
 
@@ -692,7 +696,7 @@ namespace GameClient
             // Do not let player end turn if have more than 7 cards in hand.
             if ( this.Player.CardsInHand.Count > 7 )
             {
-                MessageBox.Show("You cannot have more than 7 cards at the end of your turn. Please discard some cards.", "Too Many Cards", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("You cannot have more than 7 cards at the end of your turn. Please discard some cards.", "Too Many Cards", MessageBoxButton.OK);
                 return;
             }
 
@@ -715,6 +719,19 @@ namespace GameClient
             this.EndTurnButton.ClearValue(Button.BackgroundProperty);
         }
 
+        private void Concede()
+        {
+            this.DiscardAllCards();
+
+            this.Player.HasConceded = true;
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+
+            if (this.isCurrentTurnOwner)
+            {
+                this.EndTurn();
+            }
+        }
+
         // End the player's turn.
         private void EndTurnButton_Click( object sender, RoutedEventArgs e )
         {
@@ -728,16 +745,13 @@ namespace GameClient
         /// <param name="e"></param>
         private void ConcedeButton_Click( object sender, RoutedEventArgs e )
         {
-            if ( MessageBoxResult.OK == MessageBox.Show("Are you sure you want to concede? All of your cards will be discarded and you will no longer be able to participate in the game.",
-                                        "Quitting the game",
-                                        MessageBoxButton.OKCancel) )
+            var result = MessageBox.Show(
+                "Are you sure you want to concede? All of your cards will be discarded and you will no longer be able to participate in the game.",
+                "Quitting the game",
+                MessageBoxButton.OKCancel);
+            if ( MessageBoxResult.OK == result )
             {
-                this.DiscardAllCards();
-                
-                this.Player.HasConceded = true;
-                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
-
-                this.EndTurn();
+                this.Concede();
             }
 
         }
@@ -884,6 +898,27 @@ namespace GameClient
         private void RulesButton_Click( object sender, RoutedEventArgs e )
         {
             Process.Start(ClientResourceList.RulesUrl);
+        }
+
+        protected override void OnClosing( CancelEventArgs e )
+        {
+            if ( this.Turn.IsGameOver )
+            {
+                return;
+            }
+
+            if (!this.Player.HasConceded &&
+                MessageBoxResult.OK != MessageBox.Show("Are you sure you want to exit the ongoing game? You will not be able to return to it.", "Are you sure?"))
+            {                
+                e.Cancel = true;
+            }
+            else
+            {
+                // TODO: Cannot allow any player to close the window, even if they have conceded. This breaks the game.
+                e.Cancel = true;
+
+                this.Concede();
+            }
         }
 
         #endregion
