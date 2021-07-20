@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GameClientDummy": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Dropbox\\Programs\\CSharp\\GitHub\\MonopolyDeal\\GameClient\\bin\\Debug\\MonopolyDeal.exe"
+    }
+  }
+}

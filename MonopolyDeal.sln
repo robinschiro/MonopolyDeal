@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameClient", "GameClient\GameClient.csproj", "{6199831C-E516-41B7-83BF-E82EEBCAA33C}"
 EndProject
@@ -23,6 +23,8 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "MonopolyDealInstaller", "Mo
 		{6AB015B0-4FF5-43E9-B5BC-48883A62F7B8} = {6AB015B0-4FF5-43E9-B5BC-48883A62F7B8}
 		{F91299E4-DDEF-4FE7-9ADF-0D731A7D99CB} = {F91299E4-DDEF-4FE7-9ADF-0D731A7D99CB}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameClientDummy", "GameClientDummy\GameClientDummy.csproj", "{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,8 +112,23 @@ Global
 		{6DBE8259-9558-4840-A996-251B672640D0}.Release|Mixed Platforms.Build.0 = Release|x86
 		{6DBE8259-9558-4840-A996-251B672640D0}.Release|x86.ActiveCfg = Release|x86
 		{6DBE8259-9558-4840-A996-251B672640D0}.Release|x86.Build.0 = Release|x86
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Debug|x86.Build.0 = Debug|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Release|x86.ActiveCfg = Release|Any CPU
+		{FB17EAC8-BC70-4E43-8451-9720F69F9ED8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {08416DCD-D1A5-43D0-A9F9-0C1A2096CD43}
 	EndGlobalSection
 EndGlobal
