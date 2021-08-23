@@ -511,13 +511,6 @@ namespace GameClient
                         {
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
-                            if ( this.PlayerList[this.Turn.CurrentTurnOwner].Name == this.PlayerName
-                                && this.Player.HasConceded
-                                && this.PlayerList.Count > 1 )
-                            {
-                                CreateNewThread(new Action<object>(EndTurn), null);
-                                break;
-                            }
 
                             // Update the turn display.
                             CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
@@ -676,7 +669,7 @@ namespace GameClient
 
             // Update game state for all clients
             this.Turn.IsGameOver = true;
-            ServerUtilities.SendMessage(Client, Datatype.EndTurn, this.Turn);
+            ServerUtilities.SendMessage(Client, Datatype.UpdateTurn, this.Turn);
 
             new MessageDialog(this, "Congratulations!", "You won!", MessageBoxButton.OK).ShowDialog();
         }
@@ -687,7 +680,9 @@ namespace GameClient
         private void EndTurn(object filler = null)
         {
             // Check if player has won. If so, end the game.
-            if ( ClientUtilities.DetermineIfPlayerHasWon(this.Player) )
+            // Also end the game if all other players have condeded.
+            if ( ClientUtilities.DetermineIfPlayerHasWon(this.Player) ||
+                 this.PlayerList.Where(p => p.Name != this.Player.Name).All(p => p.HasConceded) )
             {
                 this.EndGame();
                 return;
@@ -700,15 +695,12 @@ namespace GameClient
                 return;
             }
 
-            // Update the current turn owner by cycling through the player list.
-            if ( Turn.CurrentTurnOwner == PlayerList.Count - 1 )
+            // Update the current turn owner by cycling through the player list until a player that has not conceded is found.
+            do
             {
-                this.Turn.CurrentTurnOwner = 0;
+                this.Turn.CurrentTurnOwner = (this.Turn.CurrentTurnOwner + 1) % this.PlayerList.Count;
             }
-            else
-            {
-                this.Turn.CurrentTurnOwner++;
-            }
+            while ( this.PlayerList[this.Turn.CurrentTurnOwner].HasConceded );
 
             // Reset the number of actions.
             this.Turn.ActionsRemaining = Turn.INITIAL_ACTION_COUNT;
@@ -719,12 +711,16 @@ namespace GameClient
             this.EndTurnButton.ClearValue(Button.BackgroundProperty);
         }
 
+        /// <summary>
+        /// Condede the game, allowing the player to continue observing the game without needing to play.
+        /// </summary>
         private void Concede()
         {
             this.DiscardAllCards();
 
             this.Player.HasConceded = true;
             ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+            this.GameEventLog.PublishPlayerConcededEvent(Player);
 
             if (this.isCurrentTurnOwner)
             {
@@ -907,17 +903,18 @@ namespace GameClient
                 return;
             }
 
-            if (!this.Player.HasConceded &&
-                MessageBoxResult.OK != MessageBox.Show("Are you sure you want to exit the ongoing game? You will not be able to return to it.", "Are you sure?"))
-            {                
-                e.Cancel = true;
-            }
-            else
+            if (!this.Player.HasConceded)
             {
-                // TODO: Cannot allow any player to close the window, even if they have conceded. This breaks the game.
-                e.Cancel = true;
-
-                this.Concede();
+                // Do not exit the game if the player has not conceded and confirms that they do not want to exit.
+                var messageBoxResult = MessageBox.Show("Are you sure you want to exit the ongoing game? You will not be able to return to it.", "Are you sure?", MessageBoxButton.OKCancel);
+                if ( MessageBoxResult.OK != messageBoxResult )
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    this.Concede();
+                }
             }
         }
 
@@ -1210,12 +1207,6 @@ namespace GameClient
             {
                 this.GameEventLog.PublishNewTurnEvent(this.PlayerList[this.Turn.CurrentTurnOwner]);
 
-                // If all other players have conceded, you have won!
-                if (this.PlayerList.Count > 1 
-                    && this.PlayerList.Count(p => p.HasConceded) == this.PlayerList.Count - 1 )
-                {
-                    this.EndGame();
-                }
             }
         }
 

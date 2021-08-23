@@ -147,6 +147,13 @@ namespace GameClient
             this.PublishEvent(eventLine);
         }
 
+        public void PublishPlayerConcededEvent( Player loser )
+        {
+            string eventLine = $"{loser.Name} has conceded";
+
+            this.PublishEvent(eventLine);
+        }
+    
         public void PublishDeckEmptyEvent(bool discardPileReshuffled)
         {
             string eventLine = "The deck has run out of cards! " + (discardPileReshuffled 
