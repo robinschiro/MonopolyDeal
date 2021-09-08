@@ -2185,7 +2185,7 @@ namespace GameClient
             else
             {
                 // Prevent the renter from performing any action until all rentees have paid their rent.
-                NumberOfRentees = PlayerList.Count - 1;
+                NumberOfRentees = PlayerList.Where(p => !p.HasConceded).Count() - 1;
 
                 // Send a rent request to all players except for the renter.
                 rentees = new List<Player>(this.PlayerList.Where(player => player.Name != this.Player.Name));
