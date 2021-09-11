@@ -2181,11 +2181,10 @@ namespace GameClient
             }
             else
             {
+                // Send a rent request to all players except for the renter. 
                 // Prevent the renter from performing any action until all rentees have paid their rent.
-                NumberOfRentees = PlayerList.Where(p => !p.HasConceded).Count() - 1;
-
-                // Send a rent request to all players except for the renter.
-                rentees = new List<Player>(this.PlayerList.Where(player => player.Name != this.Player.Name));
+                rentees = new List<Player>(this.PlayerList.Where(player => player.Name != this.Player.Name && !player.HasConceded));
+                this.NumberOfRentees = rentees.Count;
 
                 this.GameEventLog.PublishPlayCardEvent(this.Player, rentCard);
             }
