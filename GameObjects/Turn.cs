@@ -10,18 +10,16 @@ namespace GameObjects
 
         public int ActionsRemaining { get; set; }
 
+        public bool IsGameOver { get; set; }
+
         public Turn( int numberOfPlayers )
         {
             Random randomNumber = new Random();
             CurrentTurnOwner = randomNumber.Next(numberOfPlayers);
-
             ActionsRemaining = INITIAL_ACTION_COUNT;
+            IsGameOver = false;
         }
 
-        public Turn( int currentTurnOwner, int numberOfActions )
-        {
-            CurrentTurnOwner = currentTurnOwner;
-            ActionsRemaining = numberOfActions;
-        }
+        public Turn() { }
     }
 }

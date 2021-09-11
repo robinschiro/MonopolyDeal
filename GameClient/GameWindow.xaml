@@ -76,10 +76,11 @@
                 <Grid Name="TopSideBar"
                       Grid.Row="0">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
                         <RowDefinition Height="2*"/>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="6*"/>
                         <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition Height="4*"/>
                     </Grid.RowDefinitions>
 
                     <Viewbox Grid.Row="0"
@@ -124,7 +125,16 @@
                                             Grid.Column="1" 
                                             DisplayImage="{StaticResource ResourceKey=cardbackDrawingImage}"/>
                     </Grid>
-                    
+
+                    <Viewbox Grid.Row="4"
+                             Margin="5">
+                        <Button Name="ConcedeButton"
+                                Content="Concede"
+                                Focusable="False"
+                                Click="ConcedeButton_Click"
+                                IsEnabled="{Binding IsCurrentTurnOwner, UpdateSourceTrigger=PropertyChanged}"/>
+                    </Viewbox>
+
                 </Grid>
 
                 <Border Name="GameEventLogBorder"

@@ -511,6 +511,7 @@ namespace GameClient
                         {
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
+
                             // Update the turn display.
                             CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
 
@@ -617,7 +618,7 @@ namespace GameClient
                                         (PropertyType.None != card.AltColor) ||
                                         (PropertyType.Wild == card.Color))) )
                             {
-                                this.EndTurnButton_Click(this.EndTurnButton, new RoutedEventArgs());
+                                this.EndTurn();
                             }
                             else
                             {
@@ -656,36 +657,50 @@ namespace GameClient
             CreateNewThread(new Action<Object>(ResizeUIElements));
         }
 
-        // End the player's turn.
-        private void EndTurnButton_Click( object sender, RoutedEventArgs e )
+        /// <summary>
+        /// Announce the winner and end the game
+        /// </summary>
+        private void EndGame()
         {
-            // Check if player has won. If so, show message box and disable End Turn button.
-            if ( ClientUtilities.DetermineIfPlayerHasWon(this.Player) )
-            {
-                this.EndTurnButton.IsEnabled = false;
-                this.GameEventLog.PublishPlayerWonEvent(this.Player);
-                ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, new PlaySoundRequest(ClientResourceList.UriPathWinningMusic));
+            this.EndTurnButton.IsEnabled = false;
+            this.ConcedeButton.IsEnabled = false;
+            this.GameEventLog.PublishPlayerWonEvent(this.Player);
+            ServerUtilities.SendMessage(this.Client, Datatype.PlaySound, new PlaySoundRequest(ClientResourceList.UriPathWinningMusic));
 
-                MessageBox.Show("You won!", "Congratulations!", MessageBoxButton.OK, MessageBoxImage.None);
+            // Update game state for all clients
+            this.Turn.IsGameOver = true;
+            ServerUtilities.SendMessage(Client, Datatype.UpdateTurn, this.Turn);
+
+            new MessageDialog(this, "Congratulations!", "You won!", MessageBoxButton.OK).ShowDialog();
+        }
+
+        /// <summary>
+        /// End the player's turn
+        /// </summary>
+        private void EndTurn(object filler = null)
+        {
+            // Check if player has won. If so, end the game.
+            // Also end the game if all other players have condeded.
+            if ( ClientUtilities.DetermineIfPlayerHasWon(this.Player) ||
+                 this.PlayerList.Where(p => p.Name != this.Player.Name).All(p => p.HasConceded) )
+            {
+                this.EndGame();
                 return;
             }
 
             // Do not let player end turn if have more than 7 cards in hand.
             if ( this.Player.CardsInHand.Count > 7 )
             {
-                MessageBox.Show("You cannot have more than 7 cards at the end of your turn. Please discard some cards.", "Too Many Cards", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("You cannot have more than 7 cards at the end of your turn. Please discard some cards.", "Too Many Cards", MessageBoxButton.OK);
                 return;
             }
 
-            // Update the current turn owner by cycling through the player list.
-            if ( Turn.CurrentTurnOwner == PlayerList.Count - 1 )
+            // Update the current turn owner by cycling through the player list until a player that has not conceded is found.
+            do
             {
-                this.Turn.CurrentTurnOwner = 0;
+                this.Turn.CurrentTurnOwner = (this.Turn.CurrentTurnOwner + 1) % this.PlayerList.Count;
             }
-            else
-            {
-                this.Turn.CurrentTurnOwner++;
-            }
+            while ( this.PlayerList[this.Turn.CurrentTurnOwner].HasConceded );
 
             // Reset the number of actions.
             this.Turn.ActionsRemaining = Turn.INITIAL_ACTION_COUNT;
@@ -694,6 +709,47 @@ namespace GameClient
             ServerUtilities.SendMessage(Client, Datatype.EndTurn, this.Turn);
 
             this.EndTurnButton.ClearValue(Button.BackgroundProperty);
+        }
+
+        /// <summary>
+        /// Condede the game, allowing the player to continue observing the game without needing to play.
+        /// </summary>
+        private void Concede()
+        {
+            this.DiscardAllCards();
+
+            this.Player.HasConceded = true;
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, Player);
+            this.GameEventLog.PublishPlayerConcededEvent(Player);
+
+            if (this.isCurrentTurnOwner)
+            {
+                this.EndTurn();
+            }
+        }
+
+        // End the player's turn.
+        private void EndTurnButton_Click( object sender, RoutedEventArgs e )
+        {
+            this.EndTurn();
+        }
+
+        /// <summary>
+        /// Removes the conceding player from the game.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ConcedeButton_Click( object sender, RoutedEventArgs e )
+        {
+            var result = MessageBox.Show(
+                "Are you sure you want to concede? All of your cards will be discarded and you will no longer be able to participate in the game.",
+                "Quitting the game",
+                MessageBoxButton.OKCancel);
+            if ( MessageBoxResult.OK == result )
+            {
+                this.Concede();
+            }
+
         }
 
         // When a user clicks and holds onto a card, trigger a drag event.
@@ -840,6 +896,28 @@ namespace GameClient
             Process.Start(ClientResourceList.RulesUrl);
         }
 
+        protected override void OnClosing( CancelEventArgs e )
+        {
+            if ( this.Turn.IsGameOver )
+            {
+                return;
+            }
+
+            if (!this.Player.HasConceded)
+            {
+                // Do not exit the game if the player has not conceded and confirms that they do not want to exit.
+                var messageBoxResult = MessageBox.Show("Are you sure you want to exit the ongoing game? You will not be able to return to it.", "Are you sure?", MessageBoxButton.OKCancel);
+                if ( MessageBoxResult.OK != messageBoxResult )
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    this.Concede();
+                }
+            }
+        }
+
         #endregion
 
         #region Hand and Field Manipulation
@@ -952,6 +1030,30 @@ namespace GameClient
                 // Update the server's discard pile.
                 ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, this.DiscardPile);
             }
+        }
+
+        /// <summary>
+        /// Discard all the player's cards in hand and in play.
+        /// </summary>
+        private void DiscardAllCards()
+        {
+            foreach ( Card card in this.Player.CardsInHand )
+            {
+                RemoveCardFromHand(card, shouldUpdateServer: false);
+                this.DiscardPile.Add(card);
+            }
+
+            var flattenedCardsInPlay = this.Player.CardsInPlay.SelectMany(c => c).ToList();
+            foreach ( Card card in flattenedCardsInPlay )
+            {
+                RemoveCardFromCardsInPlay(card, this.Player);
+                this.DiscardPile.Add(card);
+            }
+
+            DisplayCardsInPlay(this.Player, this.PlayerOneField);
+
+            ServerUtilities.SendMessage(Client, Datatype.UpdateDiscardPile, this.DiscardPile);
+            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
         }
 
         // Wrap a Button around a Card.
@@ -1104,6 +1206,7 @@ namespace GameClient
             if ( isNewTurn && currentPlayerName == this.PlayerName )
             {
                 this.GameEventLog.PublishNewTurnEvent(this.PlayerList[this.Turn.CurrentTurnOwner]);
+
             }
         }
 
@@ -1711,7 +1814,7 @@ namespace GameClient
 
         // Remove a card from the player's hand.
         // This should only be called on the player associated with this client.
-        public void RemoveCardFromHand( Card cardtoRemove )
+        public void RemoveCardFromHand( Card cardtoRemove, bool shouldUpdateServer = true )
         {
             // Remove the card from the grid displaying the player's hand.
             // This must be done before removing the card from the list.
@@ -1721,7 +1824,10 @@ namespace GameClient
             this.Player.CardsInHand = new List<Card>(this.Player.CardsInHand.Where(card => card.CardID != cardtoRemove.CardID));
 
             // Update the server's information regarding this player.
-            ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+            if ( shouldUpdateServer )
+            {
+                ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
+            }
         }
 
         // Remove a card (given its Button wrapper) from the player's hand.
@@ -2062,7 +2168,8 @@ namespace GameClient
                 NumberOfRentees = 1;
 
                 // Display the list of players.
-                PlayerSelectionDialog dialog = new PlayerSelectionDialog(this, this.Player.Name, PlayerList);
+                List<Player> eligibleRentees = this.PlayerList.Where(p => p.SumOfAssets > 0).ToList();
+                PlayerSelectionDialog dialog = new PlayerSelectionDialog(this, this.Player.Name, eligibleRentees);
                 if ( dialog.enoughPlayers && true == dialog.ShowDialog() )
                 {
                     // Send the rent request to the selected player.
@@ -2078,7 +2185,7 @@ namespace GameClient
             else
             {
                 // Prevent the renter from performing any action until all rentees have paid their rent.
-                NumberOfRentees = PlayerList.Count - 1;
+                NumberOfRentees = PlayerList.Where(p => !p.HasConceded).Count() - 1;
 
                 // Send a rent request to all players except for the renter.
                 rentees = new List<Player>(this.PlayerList.Where(player => player.Name != this.Player.Name));
@@ -2128,7 +2235,7 @@ namespace GameClient
             bool acceptedDeal = true;
 
 
-            if ( Card.SumOfCardValues(this.Player.CardsInPlay.SelectMany(c => c).ToList()) > 0 )
+            if ( this.Player.SumOfAssets > 0 )
             {
                 ClientUtilities.PlaySound(ClientResourceList.UriPathActionDing);
                 RentWindow rentWindow = new RentWindow(this, this.Player, renterName, rentRequest.RentAmount);

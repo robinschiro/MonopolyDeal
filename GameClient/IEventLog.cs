@@ -32,6 +32,8 @@ namespace GameClient
 
         void PublishPlayerWonEvent( Player winner );
 
+        void PublishPlayerConcededEvent( Player loser );
+
         void PublishDeckEmptyEvent(bool discardPileReshuffled);
 
         void PublishBellRungEvent( Player ringer, Player ringee );

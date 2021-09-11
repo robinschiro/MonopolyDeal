@@ -21,7 +21,10 @@ namespace AdditionalWindows
         {
             InitializeComponent();
 
-            List<Player> modifiedPlayerList = new List<Player>(playerList.Where(player => player.Name != selector));
+            List<Player> modifiedPlayerList = playerList
+                .Where(player => player.Name != selector)
+                .Where(player => !player.HasConceded)
+                .ToList();
 
             // Load the listbox with the players and select the first player on the list.
             if ( modifiedPlayerList.Count > 0 )
@@ -31,7 +34,7 @@ namespace AdditionalWindows
             }
             else
             {
-                MessageBox.Show("No other players!");
+                MessageBox.Show("There are no other eligible players!");
                 this.enoughPlayers = false;
             }
         }

@@ -105,8 +105,14 @@ namespace GameServer
         {
             int currentTurnOwner = inc.ReadInt32();
             int numberOfActions = inc.ReadInt32();
+            bool isGameOver = inc.ReadBoolean();
 
-            Turn turn = new Turn(currentTurnOwner, numberOfActions);
+            Turn turn = new Turn()
+            {
+                CurrentTurnOwner = currentTurnOwner,
+                ActionsRemaining = numberOfActions,
+                IsGameOver = isGameOver
+            };
 
             return turn;
         }
@@ -115,6 +121,9 @@ namespace GameServer
         {
             // Read the name of the player.
             string name = inc.ReadString();
+
+            // Read whether the player has conceded.
+            bool hasConceded = inc.ReadBoolean();
 
             // Read the CardsInPlay list.
             List<List<Card>> cardsInPlay = new List<List<Card>>();
@@ -130,7 +139,7 @@ namespace GameServer
             // This first string in the message is the player's name.
             // The first list of cards is the Player's CardsInPlay list.
             // The second list of cards is the Player's CardsInHand list.
-            return new Player(name, cardsInPlay, cardsInHand);
+            return new Player(name, hasConceded, cardsInPlay, cardsInHand);
         }
 
         public static List<Player> ReadPlayerList( NetIncomingMessage inc )
@@ -303,6 +312,9 @@ namespace GameServer
         {
             // Write the Player's name.
             outmsg.Write(player.Name);
+
+            // Write whether the player has conceded.
+            outmsg.Write(player.HasConceded);
             
             // Write the Player's CardsInPlay (which is a list of card lists).
             outmsg.Write(player.CardsInPlay.Count);
@@ -333,6 +345,7 @@ namespace GameServer
             // Write the data related to the current turn.
             outmsg.Write(turn.CurrentTurnOwner);
             outmsg.Write(turn.ActionsRemaining);
+            outmsg.Write(turn.IsGameOver);
         }
 
         public static void WritePlaySoundRequest( NetOutgoingMessage outmsg, PlaySoundRequest request )

@@ -70,6 +70,15 @@ namespace GameObjects.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MonopolyDealServerLog.txt.
+        /// </summary>
+        public static string FileNameServerLog {
+            get {
+                return ResourceManager.GetString("FileNameServerLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Profile.txt.
         /// </summary>
         public static string FilePathLocalServerSettings {
@@ -79,11 +88,11 @@ namespace GameObjects.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to MonopolyDeal\MonopolyDealServerLog.txt.
+        ///   Looks up a localized string similar to MonopolyDeal.
         /// </summary>
-        public static string FilePathServerLog {
+        public static string FolderNameAppData {
             get {
-                return ResourceManager.GetString("FilePathServerLog", resourceCulture);
+                return ResourceManager.GetString("FolderNameAppData", resourceCulture);
             }
         }
         

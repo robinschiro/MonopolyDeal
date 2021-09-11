@@ -109,8 +109,6 @@ namespace GameClient
                     // Verify that the value of 'playerName' does not exist in the list of Player names.
                     // If it does, modify the name so that it no longer matches one on the list.
                     this.PlayerName = VerifyPlayerName(this.PlayerName);
-
-                    // Instantiate the player.
                     this.Player = new Player(this.PlayerName);
 
                     // Send the player's information to the server.
