@@ -511,7 +511,6 @@ namespace GameClient
                         {
                             this.Turn = (Turn)ServerUtilities.ReceiveMessage(inc, messageType);
 
-
                             // Update the turn display.
                             CreateNewThread(new Action<Object>(UpdateTurnDisplay), true);
 
@@ -680,7 +679,7 @@ namespace GameClient
         private void EndTurn(object filler = null)
         {
             // Check if player has won. If so, end the game.
-            // Also end the game if all other players have condeded.
+            // Also end the game if all other players have conceded.
             if ( ClientUtilities.DetermineIfPlayerHasWon(this.Player) ||
                  this.PlayerList.Where(p => p.Name != this.Player.Name).All(p => p.HasConceded) )
             {
@@ -712,7 +711,7 @@ namespace GameClient
         }
 
         /// <summary>
-        /// Condede the game, allowing the player to continue observing the game without needing to play.
+        /// Concede the game, allowing the player to continue observing the game without needing to play.
         /// </summary>
         private void Concede()
         {
@@ -749,7 +748,6 @@ namespace GameClient
             {
                 this.Concede();
             }
-
         }
 
         // When a user clicks and holds onto a card, trigger a drag event.
@@ -1206,7 +1204,6 @@ namespace GameClient
             if ( isNewTurn && currentPlayerName == this.PlayerName )
             {
                 this.GameEventLog.PublishNewTurnEvent(this.PlayerList[this.Turn.CurrentTurnOwner]);
-
             }
         }
 
@@ -2478,7 +2475,6 @@ namespace GameClient
                 {
                     AddCardToCardsInPlay(this.LastTheftRequest.PropertiesToTake[0], this.Player);
                 }
-
 
                 // Update the server with the current version of this player (the thief).
                 ServerUtilities.SendMessage(Client, Datatype.UpdatePlayer, this.Player);
