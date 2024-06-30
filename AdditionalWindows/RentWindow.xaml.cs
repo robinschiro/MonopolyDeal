@@ -99,7 +99,7 @@ namespace AdditionalWindows
         private void GiveAllButton_Click( object sender, RoutedEventArgs e )
         {
             AssetsListView.SelectAll();
-            TransferSelectedItems(AssetsListView, PaymentListView);
+            TransferSelectedItems(AssetsListView, PaymentListView, isGiveAll: true);
         }
 
         private void RemoveAllButton_Click( object sender, RoutedEventArgs e )
@@ -109,7 +109,7 @@ namespace AdditionalWindows
         }
 
         // Transfer all selected items from one listview to another.
-        private void TransferSelectedItems(ListView listview1, ListView listview2)
+        private void TransferSelectedItems(ListView listview1, ListView listview2, bool isGiveAll = false)
         {
             List<Card> selectedCards = new List<Card>();
 
@@ -121,6 +121,13 @@ namespace AdditionalWindows
             // which modifies the value of the SelectedItems collection.
             foreach ( Card card in listview1.SelectedItems )
             {
+                // Do not include 0-value card in selection for GiveAll operation since player likely does not want to give this.
+                // This really only applies to the Property Wild Card.
+                if ( isGiveAll && card.Value == 0 )
+                {
+                    continue;
+                }
+
                 selectedCards.Add(card);
             }
 
