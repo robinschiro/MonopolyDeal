@@ -2342,7 +2342,7 @@ namespace GameClient
                     Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
                     // If the renter has his own Just Say No, ask the renter if he wants to use it.
                     // If yes, send the rent request again.
-                    bool playerWantsToUseJustSayNo = this.AskPlayerAboutJustSayNo("Rest Request Rejected", message, playerHasJustSayNo: null != justSayNo);
+                    bool playerWantsToUseJustSayNo = this.AskPlayerAboutJustSayNo("Rent Request Rejected", message, playerHasJustSayNo: null != justSayNo);
                     if ( playerWantsToUseJustSayNo )
                     {
                         // By the time the renter presses "Yes", he may have already used all of his Just Say No cards. Verify that he still have one before moving on.
