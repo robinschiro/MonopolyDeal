@@ -240,8 +240,10 @@ namespace AdditionalWindows
                         }
                         else
                         {
+                            var cardImage = this.TryFindResource(property.CardImageUriPath) as DrawingImage;
+                            cardImage = ClientUtilities.AddCardCountToCardImage(cardImage, property.TotalCount);
                             Image tooltip = new Image();
-                            tooltip.Source = this.TryFindResource(property.CardImageUriPath) as DrawingImage;
+                            tooltip.Source = cardImage;
                             tooltip.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
                             propertyItem.ToolTip = tooltip;
                         }

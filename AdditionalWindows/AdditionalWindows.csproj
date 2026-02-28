@@ -64,6 +64,7 @@
     <Compile Include="RentWindow.xaml.cs">
       <DependentUpon>RentWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CardImageConverter.cs" />
     <Compile Include="StaticResourceConverter.cs" />
   </ItemGroup>
   <ItemGroup>

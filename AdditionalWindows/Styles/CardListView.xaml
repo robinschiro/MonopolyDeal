@@ -20,7 +20,7 @@
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="ToolTip">
                         <Setter.Value>
-                            <Image Source="{Binding CardImageUriPath, Converter={local:StaticResourceConverter} }"
+                            <Image Source="{Binding Converter={local:CardImageConverter}}"
                                    MaxWidth="200"/>
                         </Setter.Value>
                     </Setter>
