@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using GameObjects;
-using Lidgren.Network;
 using System.Windows;
 using System.Media;
 using System.IO;
@@ -234,7 +232,18 @@ namespace Utilities
 
         #region Card Rendering
 
-        public static DrawingImage AddCardCountToCardImage( DrawingImage originalImage, int cardCount )
+        public static DrawingImage ConvertCardToImage( FrameworkElement element, Card card )
+        {
+            DrawingImage cardImage = element?.TryFindResource(card.CardImageUriPath) as DrawingImage
+                ?? Application.Current.TryFindResource(card.CardImageUriPath) as DrawingImage;
+
+            if ( cardImage == null )
+                return null;
+
+            return AddCardCountToCardImage(cardImage, card.TotalCount);
+        }
+
+        private static DrawingImage AddCardCountToCardImage( DrawingImage originalImage, int cardCount )
         {
             DrawingGroup drawingGroup = new DrawingGroup();
 

@@ -1,10 +1,8 @@
 using System;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Markup;
-using System.Windows.Media;
 using System.Xaml;
 using GameObjects;
 using Utilities;
@@ -21,19 +19,7 @@ namespace AdditionalWindows
             if ( card == null )
                 return null;
 
-            DrawingImage cardImage = null;
-            if ( _target != null )
-            {
-                cardImage = _target.TryFindResource(card.CardImageUriPath) as DrawingImage;
-            }
-            if ( cardImage == null )
-            {
-                cardImage = Application.Current.TryFindResource(card.CardImageUriPath) as DrawingImage;
-            }
-            if ( cardImage == null )
-                return null;
-
-            return ClientUtilities.AddCardCountToCardImage(cardImage, card.TotalCount);
+            return ClientUtilities.ConvertCardToImage(_target, card);
         }
 
         public object ConvertBack( object value, Type targetType, object parameter, CultureInfo culture )

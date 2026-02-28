@@ -5,13 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using GameObjects;
 using GameServer;
 using Lidgren.Network;
@@ -208,8 +203,7 @@ namespace GameClient
                              this.allCards.ContainsKey(cardId))
                         {
                             Card card = this.allCards[cardId];
-                            DrawingImage cardImageSource = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
-                            cardImageSource = ClientUtilities.AddCardCountToCardImage(cardImageSource, card.TotalCount);
+                            DrawingImage cardImageSource = ClientUtilities.ConvertCardToImage(this, card);
                             var cardGraphic = new TextBlock()
                             {
                                 TextWrapping = TextWrapping.Wrap,

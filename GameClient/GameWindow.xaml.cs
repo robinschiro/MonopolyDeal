@@ -1010,9 +1010,7 @@ namespace GameClient
                 Card discardedCard = this.DiscardPile[this.DiscardPile.Count - 1];                
                 this.DiscardPileDisplay.CardCount = this.DiscardPile.Count;
 
-                var cardImage = this.TryFindResource(discardedCard.CardImageUriPath) as DrawingImage;
-                cardImage = ClientUtilities.AddCardCountToCardImage(cardImage, this.DiscardPile.Count);
-                this.DiscardPileDisplay.DisplayImage = cardImage;
+                this.DiscardPileDisplay.DisplayImage = ClientUtilities.ConvertCardToImage(this, discardedCard);
             }
         }
 
@@ -1066,15 +1064,7 @@ namespace GameClient
             cardContentImage.Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
             cardButton.Content = cardContentImage;
 
-            /* TODO: Apply this to other areas of the app that have card tooltips.
-             * As of now, this only applies to cards on your hand or field
-             * Consider the following:
-             *    - (done) Discard pile
-             *    - (done) Event log
-             *    - Rent/Theft dialogs
-             */
-            var cardImage = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
-            cardImage = ClientUtilities.AddCardCountToCardImage(cardImage, card.TotalCount);
+            var cardImage = ClientUtilities.ConvertCardToImage(this, card);
 
             var cardTooltipImage = new Image();
             cardTooltipImage.Source = cardImage;

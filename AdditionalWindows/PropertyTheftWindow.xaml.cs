@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Collections;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using GameObjects;
@@ -240,10 +232,8 @@ namespace AdditionalWindows
                         }
                         else
                         {
-                            var cardImage = this.TryFindResource(property.CardImageUriPath) as DrawingImage;
-                            cardImage = ClientUtilities.AddCardCountToCardImage(cardImage, property.TotalCount);
                             Image tooltip = new Image();
-                            tooltip.Source = cardImage;
+                            tooltip.Source = ClientUtilities.ConvertCardToImage(this, property);
                             tooltip.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
                             propertyItem.ToolTip = tooltip;
                         }
