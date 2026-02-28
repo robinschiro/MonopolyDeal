@@ -1007,9 +1007,12 @@ namespace GameClient
             // Otherwise, display only the last card in the discard pile.
             else
             {
-                Card discardedCard = this.DiscardPile[this.DiscardPile.Count - 1];
-                this.DiscardPileDisplay.DisplayImage = this.TryFindResource(discardedCard.CardImageUriPath) as DrawingImage;
+                Card discardedCard = this.DiscardPile[this.DiscardPile.Count - 1];                
                 this.DiscardPileDisplay.CardCount = this.DiscardPile.Count;
+
+                var cardImage = this.TryFindResource(discardedCard.CardImageUriPath) as DrawingImage;
+                cardImage = ClientUtilities.AddCardCountToCardImage(cardImage, this.DiscardPile.Count);
+                this.DiscardPileDisplay.DisplayImage = cardImage;
             }
         }
 
@@ -1063,8 +1066,18 @@ namespace GameClient
             cardContentImage.Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
             cardButton.Content = cardContentImage;
 
+            /* TODO: Apply this to other areas of the app that have card tooltips.
+             * As of now, this only applies to cards on your hand or field
+             * Consider the following:
+             *    - (done) Discard pile
+             *    - (done) Event log
+             *    - Rent/Theft dialogs
+             */
+            var cardImage = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
+            cardImage = ClientUtilities.AddCardCountToCardImage(cardImage, card.TotalCount);
+
             var cardTooltipImage = new Image();
-            cardTooltipImage.Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
+            cardTooltipImage.Source = cardImage;
             cardTooltipImage.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
             cardTooltipImage.RenderTransform = new TransformGroup();
             cardTooltipImage.RenderTransformOrigin = new Point(0.5, 0.5);
@@ -1860,13 +1873,6 @@ namespace GameClient
         // Draw a given amount of cards from the Deck (the cards are placed in the Player's hand).
         private void DrawCards( int numberOfCards )
         {
-            //// Reset the Deck.
-            //Deck = null;
-            //ServerUtilities.SendMessage(Client, Datatype.RequestDeck);
-
-            //// Do not continue until the updated Deck is received from the server.
-            //while ( Deck == null ) ;
-
             if ( null != this.Deck )
             {
                 // Remove the given number of cards from the top of the Deck and add them to the Player's hand.
@@ -2684,6 +2690,7 @@ namespace GameClient
 
             return bellButton;
         }
+
         #endregion
 
     }

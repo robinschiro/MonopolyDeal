@@ -209,6 +209,7 @@ namespace GameClient
                         {
                             Card card = this.allCards[cardId];
                             DrawingImage cardImageSource = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
+                            cardImageSource = ClientUtilities.AddCardCountToCardImage(cardImageSource, card.TotalCount);
                             var cardGraphic = new TextBlock()
                             {
                                 TextWrapping = TextWrapping.Wrap,
