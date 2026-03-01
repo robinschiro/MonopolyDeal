@@ -235,10 +235,11 @@ namespace Utilities
         public static DrawingImage ConvertCardToImage( FrameworkElement element, Card card )
         {
             DrawingImage cardImage = element?.TryFindResource(card.CardImageUriPath) as DrawingImage
-                ?? Application.Current.TryFindResource(card.CardImageUriPath) as DrawingImage;
-
+                ?? Application.Current?.TryFindResource(card.CardImageUriPath) as DrawingImage;
             if ( cardImage == null )
+            {
                 return null;
+            }
 
             // If the card is flipped, bake the rotation into the image before adding the count text,
             // so the text remains at the visual bottom after the flip.
