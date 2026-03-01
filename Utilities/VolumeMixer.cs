@@ -63,6 +63,10 @@ namespace Utilities
             IMMDeviceEnumerator deviceEnumerator = (IMMDeviceEnumerator)(new MMDeviceEnumerator());
             IMMDevice speakers;
             deviceEnumerator.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia, out speakers);
+            if ( speakers == null )
+            {
+                return null;
+            }
 
             // activate the session manager. we need the enumerator
             Guid IID_IAudioSessionManager2 = typeof(IAudioSessionManager2).GUID;

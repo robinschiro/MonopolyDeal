@@ -178,8 +178,21 @@ namespace GameServer
                 string soundUriPath = inc.ReadString();
                 string actionID = inc.ReadString();
                 string cardID = inc.ReadString();
+                string totalCount = inc.ReadString();
                 bool isFlipped = inc.ReadBoolean();
-                cards.Add(new Card(name, type, Convert.ToInt32(value), color, altColor, uriPath, soundUriPath, Convert.ToInt32(actionID), Convert.ToInt32(cardID), isFlipped));
+
+                cards.Add(new Card(
+                    name,
+                    type,
+                    Convert.ToInt32(value),
+                    color,
+                    altColor,
+                    uriPath,
+                    soundUriPath,
+                    Convert.ToInt32(actionID),
+                    Convert.ToInt32(cardID),
+                    Convert.ToInt32(totalCount),
+                    isFlipped));
             }
 
             return cards;
@@ -268,6 +281,7 @@ namespace GameServer
                     outmsg.Write(card.CardSoundUriPath);
                     outmsg.Write(card.ActionID.ToString());
                     outmsg.Write(card.CardID.ToString());
+                    outmsg.Write(card.TotalCount.ToString());
                     outmsg.Write(card.IsFlipped);
                 }
             }

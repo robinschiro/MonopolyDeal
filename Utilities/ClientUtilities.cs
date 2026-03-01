@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using GameObjects;
-using Lidgren.Network;
 using System.Windows;
 using System.Media;
 using System.IO;
 using System.Diagnostics;
 using tvToolbox;
+using System.Windows.Media;
 
 namespace Utilities
 {
@@ -231,6 +230,69 @@ namespace Utilities
         }
         #endregion
 
+        #region Card Rendering
+
+        public static DrawingImage ConvertCardToImage( FrameworkElement element, Card card )
+        {
+            DrawingImage cardImage = element?.TryFindResource(card.CardImageUriPath) as DrawingImage
+                ?? Application.Current?.TryFindResource(card.CardImageUriPath) as DrawingImage;
+            if ( cardImage == null )
+            {
+                return null;
+            }
+
+            // If the card is flipped, bake the rotation into the image before adding the count text,
+            // so the text remains at the visual bottom after the flip.
+            if ( card.IsFlipped )
+            {
+                DrawingGroup flippedGroup = new DrawingGroup();
+                flippedGroup.Children.Add(new ImageDrawing(cardImage, new Rect(0, 0, cardImage.Width, cardImage.Height)));
+                flippedGroup.Transform = new RotateTransform(180, cardImage.Width / 2, cardImage.Height / 2);
+                cardImage = new DrawingImage(flippedGroup);
+            }
+
+            return AddCardCountToCardImage(cardImage, card.TotalCount);
+        }
+
+        // Add a label that displays the total count of this card on the bottom of the card
+        private static DrawingImage AddCardCountToCardImage( DrawingImage originalImage, int cardCount )
+        {
+            DrawingGroup drawingGroup = new DrawingGroup();
+
+            // Add the original image to the group
+            drawingGroup.Children.Add(new ImageDrawing(originalImage, new Rect(0, 0, originalImage.Width, originalImage.Height)));
+
+            // Convert the number to string
+            string text = $"Total: {cardCount}";
+
+            // Create formatted text
+            FormattedText formattedText = new FormattedText(
+                text,
+                System.Globalization.CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                new Typeface("Arial"),
+                36,
+                Brushes.Black);
+
+            // Calculate position to be centered along the bottom of the image
+            double xPosition = (originalImage.Width / 2) - (formattedText.Width / 2);
+            double yPosition = originalImage.Height - formattedText.Height - 6; // Add buffer from bottom edge
+
+            // Create a geometry for the text
+            Geometry textGeometry = formattedText.BuildGeometry(new Point(xPosition, yPosition));
+
+            // Create a GeometryDrawing for the text
+            GeometryDrawing textDrawing = new GeometryDrawing(Brushes.Black, null, textGeometry);
+
+            // Add the text drawing to the group
+            drawingGroup.Children.Add(textDrawing);
+
+            // Create and return a new DrawingImage
+            return new DrawingImage(drawingGroup);
+        }
+
+        #endregion
+        
         #region Sound
 
         public static void PlaySound( string uriPath )

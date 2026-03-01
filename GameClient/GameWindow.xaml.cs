@@ -1007,9 +1007,10 @@ namespace GameClient
             // Otherwise, display only the last card in the discard pile.
             else
             {
-                Card discardedCard = this.DiscardPile[this.DiscardPile.Count - 1];
-                this.DiscardPileDisplay.DisplayImage = this.TryFindResource(discardedCard.CardImageUriPath) as DrawingImage;
+                Card discardedCard = this.DiscardPile[this.DiscardPile.Count - 1];                
                 this.DiscardPileDisplay.CardCount = this.DiscardPile.Count;
+
+                this.DiscardPileDisplay.DisplayImage = ClientUtilities.ConvertCardToImage(this, discardedCard);
             }
         }
 
@@ -1063,8 +1064,10 @@ namespace GameClient
             cardContentImage.Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
             cardButton.Content = cardContentImage;
 
+            var cardImage = ClientUtilities.ConvertCardToImage(this, card);
+
             var cardTooltipImage = new Image();
-            cardTooltipImage.Source = this.TryFindResource(card.CardImageUriPath) as DrawingImage;
+            cardTooltipImage.Source = cardImage;
             cardTooltipImage.MaxWidth = Convert.ToInt32(GameObjectsResourceList.TooltipMaxWidth);
             cardTooltipImage.RenderTransform = new TransformGroup();
             cardTooltipImage.RenderTransformOrigin = new Point(0.5, 0.5);
@@ -1762,7 +1765,6 @@ namespace GameClient
                 case CardType.Property:
                 {
                     TransformGroup cardButtonTransformGroup = (cardButton.RenderTransform as TransformGroup);
-                    TransformGroup cardTooltipTransformGroup = (cardButton.ToolTip as Image).RenderTransform as TransformGroup;
 
                     // Flip or unflip a two-color property.
                     if ( HasAltColor(cardButton.Tag as Card) )
@@ -1771,14 +1773,12 @@ namespace GameClient
 
                         // First remove any rotate transform that may have been applied.
                         RemoveTransformTypeFromGroup(horizontalTransform.GetType(), cardButtonTransformGroup);
-                        RemoveTransformTypeFromGroup(horizontalTransform.GetType(), cardTooltipTransformGroup);
 
                         // Flip properties that are supposed to be flipped.
                         if ( card.IsFlipped )
                         {
                             horizontalTransform.Angle = 180;
                             cardButtonTransformGroup.Children.Add(horizontalTransform);
-                            cardTooltipTransformGroup.Children.Add(horizontalTransform);
                         }
                     }
 
@@ -1860,13 +1860,6 @@ namespace GameClient
         // Draw a given amount of cards from the Deck (the cards are placed in the Player's hand).
         private void DrawCards( int numberOfCards )
         {
-            //// Reset the Deck.
-            //Deck = null;
-            //ServerUtilities.SendMessage(Client, Datatype.RequestDeck);
-
-            //// Do not continue until the updated Deck is received from the server.
-            //while ( Deck == null ) ;
-
             if ( null != this.Deck )
             {
                 // Remove the given number of cards from the top of the Deck and add them to the Player's hand.
@@ -2342,7 +2335,7 @@ namespace GameClient
                     Card justSayNo = this.Player.CardsInHand.FirstOrDefault(card => 2 == card.ActionID);
                     // If the renter has his own Just Say No, ask the renter if he wants to use it.
                     // If yes, send the rent request again.
-                    bool playerWantsToUseJustSayNo = this.AskPlayerAboutJustSayNo("Rest Request Rejected", message, playerHasJustSayNo: null != justSayNo);
+                    bool playerWantsToUseJustSayNo = this.AskPlayerAboutJustSayNo("Rent Request Rejected", message, playerHasJustSayNo: null != justSayNo);
                     if ( playerWantsToUseJustSayNo )
                     {
                         // By the time the renter presses "Yes", he may have already used all of his Just Say No cards. Verify that he still have one before moving on.
@@ -2684,6 +2677,7 @@ namespace GameClient
 
             return bellButton;
         }
+
         #endregion
 
     }

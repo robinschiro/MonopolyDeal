@@ -56,6 +56,11 @@ namespace GameObjects
         public int ActionID { get; set; }
         public int CardID { get; set; }
         public bool IsFlipped { get; set; }
+        
+        /// <summary>
+        /// The total count of this card in the game
+        /// </summary>
+        public int TotalCount { get; set; }
 
         // Constants
         public const int BIRTHDAY_AMOUNT = 2;
@@ -67,7 +72,18 @@ namespace GameObjects
             this.CardImageUriPath = String.Empty;
         }
 
-        public Card( string name, CardType type, int value, PropertyType color, PropertyType altColor, string uriPath, string soundUriPath, int actionID, int cardID, bool isFlipped = false ) // Create a card given a type, name, and value
+        public Card(
+            string name,
+            CardType type,
+            int value,
+            PropertyType color,
+            PropertyType altColor,
+            string uriPath,
+            string soundUriPath,
+            int actionID,
+            int cardID,
+            int totalCount,
+            bool isFlipped = false)
         {
             this.Name = name;
             this.Type = type;
@@ -78,6 +94,7 @@ namespace GameObjects
             this.CardSoundUriPath = soundUriPath;
             this.ActionID = actionID;
             this.CardID = cardID;
+            this.TotalCount = totalCount;
             this.IsFlipped = isFlipped;
         }
 
