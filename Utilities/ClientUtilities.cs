@@ -240,9 +240,20 @@ namespace Utilities
             if ( cardImage == null )
                 return null;
 
+            // If the card is flipped, bake the rotation into the image before adding the count text,
+            // so the text remains at the visual bottom after the flip.
+            if ( card.IsFlipped )
+            {
+                DrawingGroup flippedGroup = new DrawingGroup();
+                flippedGroup.Children.Add(new ImageDrawing(cardImage, new Rect(0, 0, cardImage.Width, cardImage.Height)));
+                flippedGroup.Transform = new RotateTransform(180, cardImage.Width / 2, cardImage.Height / 2);
+                cardImage = new DrawingImage(flippedGroup);
+            }
+
             return AddCardCountToCardImage(cardImage, card.TotalCount);
         }
 
+        // Add a label that displays the total count of this card on the bottom of the card
         private static DrawingImage AddCardCountToCardImage( DrawingImage originalImage, int cardCount )
         {
             DrawingGroup drawingGroup = new DrawingGroup();

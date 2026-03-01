@@ -1765,7 +1765,6 @@ namespace GameClient
                 case CardType.Property:
                 {
                     TransformGroup cardButtonTransformGroup = (cardButton.RenderTransform as TransformGroup);
-                    TransformGroup cardTooltipTransformGroup = (cardButton.ToolTip as Image).RenderTransform as TransformGroup;
 
                     // Flip or unflip a two-color property.
                     if ( HasAltColor(cardButton.Tag as Card) )
@@ -1774,14 +1773,12 @@ namespace GameClient
 
                         // First remove any rotate transform that may have been applied.
                         RemoveTransformTypeFromGroup(horizontalTransform.GetType(), cardButtonTransformGroup);
-                        RemoveTransformTypeFromGroup(horizontalTransform.GetType(), cardTooltipTransformGroup);
 
                         // Flip properties that are supposed to be flipped.
                         if ( card.IsFlipped )
                         {
                             horizontalTransform.Angle = 180;
                             cardButtonTransformGroup.Children.Add(horizontalTransform);
-                            cardTooltipTransformGroup.Children.Add(horizontalTransform);
                         }
                     }
 
